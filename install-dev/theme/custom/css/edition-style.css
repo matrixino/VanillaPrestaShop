@@ -1,0 +1,267 @@
+/* ----------------
+      Variables
+ ----------------- */
+:root {
+    /* Brand */
+    --edition-blue: #78c4d8;
+    --edition-yellow: #f3cb5f;
+
+    /* Global */
+    --edition-white: #ffffff;
+    --edition-black: #000000;
+
+    /* Primary */
+    --edition-primary-200: #F7F7F7;
+    --edition-primary-300: #EEEEEE;
+    --edition-primary-400: #DDDDDD;
+    --edition-primary-500: #BBBBBB;
+    --edition-primary-600: #5E5E5E;
+    --edition-primary-700: #3F3F3D;
+    --edition-primary-800: #1D1D1B;
+    --edition-primary-default: var(--edition-primary-500);
+    --edition-primary-hover: var(--edition-primary-400);
+
+    /* Info */
+    --edition-info-100: #f7fcfd;
+    --edition-info-200: #e4f4f8;
+    --edition-info-500: #174EEF;
+    --edition-info-default: var(--edition-info-500);
+}
+
+@font-face {
+    font-family: Prestafont;
+    src: url(../fonts/Prestafont-Regular.woff);
+}
+
+body {
+    font-family: 'IBM Plex Sans';
+    color: var(--edition-primary-800);
+}
+
+/* ----------------
+      Buttons
+ ----------------- */
+.button-with-icon {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.button-with-icon span.material-icons {
+    position: absolute;
+    pointer-events: none;
+    color: var(--edition-white);
+}
+
+.button-with-icon.right-icon span.material-icons {
+    right: 10px;
+}
+
+.button-with-icon.left-icon span.material-icons {
+    left: 10px;
+}
+
+.button-with-icon.right-icon .button {
+    padding: 10px 40px 10px 16px;
+}
+
+.button-with-icon.left-icon .button {
+    padding: 10px 16px 10px 40px;
+}
+
+.button {
+    padding: 10px 16px;
+    border-radius: 0;
+    transition: all 0.15s;
+    height: auto;
+
+    background: var(--edition-primary-800);
+    color: var(--edition-white);
+    border-color: var(--edition-primary-800);
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.button:hover {
+    background: var(--edition-primary-700);
+    border-color: var(--edition-primary-700);
+}
+
+.button:focus {
+    box-shadow: 0 0 0 2px var(--edition-white), 0 0 0 4px var(--edition-info-default);
+}
+
+.button.disabled,
+input.button.disabled,
+.button.disabled:hover,
+.button.disabled:focus,
+input.button.disabled:hover,
+input.button.disabled:focus
+{
+    background: var(--edition-primary-default);
+    border-color: var(--edition-primary-default);
+    cursor: not-allowed;
+    color: var(--edition-white);
+}
+
+#btBack {
+    border-color: var(--edition-primary-800);
+    background: none;
+    color: var(--edition-primary-800);
+}
+
+.button-secondary span.material-icons {
+    color: var(--edition-primary-800);
+}
+
+#btBack:hover {
+    background: var(--edition-primary-200);
+    color: var(--edition-primary-800);
+}
+
+/* ----------------
+        Select
+ ---------------- */
+select {
+    background: var(--edition-white);
+    border: 1px solid var(--edition-primary-400);
+    padding: 8px 12px;
+
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */
+    appearance:none;
+
+    background-image: url(../img/unfold_more_24px.svg);
+    background-size: 18px;
+    background-repeat: no-repeat;
+    background-position-x: 98%;
+    background-position-y: 7px;
+}
+
+select:hover {
+    border-color: var(--edition-primary-800);
+}
+
+select:focus,
+select:focus-visible {
+    border: 2px solid var(--edition-info-default);
+    outline: none;
+}
+
+/* ----------------
+      Checkbox
+ ----------------- */
+input[type="checkbox"] {
+    background: var(--edition-primary-800);
+    accent-color: var(--edition-info-default);
+}
+
+input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 1px var(--edition-white), 0 0 0 3px var(--edition-info-default);
+}
+
+/* ----------------
+      Input
+ ----------------- */
+input[type="text"],
+input[type="password"]{
+    background: var(--edition-white);
+    border: 1px solid var(--edition-primary-400);
+    padding: 8px 12px;
+    box-sizing: border-box;
+    height: 36px;
+    border-radius: 0;
+}
+
+input[type="text"]:focus,
+input[type="text"]:focus-visible,
+input[type="password"]:focus,
+input[type="password"]:focus-visible{
+    border: 1px solid var(--edition-primary-default);
+}
+
+/* ----------------
+        Menu
+ ----------------- */
+ol#tabs li {
+    color: var(--edition-primary-800);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    padding: 0 0 16px 20px;
+}
+
+ol#tabs li.configuring a {
+    color: var(--edition-primary-800);
+}
+
+ol#tabs li.selected {
+    color: var(--edition-info-default);
+    background: url(../../img/bg-li-tabs.png) no-repeat 1px 8px;
+}
+
+ol#tabs li.finished {
+    background: url(../../img/bg-li-tabs-finished.png) no-repeat 0 5px;
+}
+/* ----------------
+        Steps
+ ----------------- */
+.stepList {
+    display: none;
+}
+
+/* ----------------
+        Layout
+ ----------------- */
+#mainForm {
+    padding: 48px;
+}
+
+#mainForm .mainForm__content {
+    display: flex;
+    padding: 24px 0;
+
+    color: var(--edition-primary-700);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+#mainForm .mainForm__content #leftpannel {
+    /*flex: 1;*/
+    margin: 0 48px 0 0;
+    width: unset;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+#sheets div.sheet {
+    padding: 0;
+}
+
+
+#mainForm .mainForm__header h1 {
+    font-family: 'Prestafont';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 42px;
+
+    letter-spacing: -0.69px;
+    font-feature-settings: 'liga' off;
+}
+
+div#buttons {
+    margin: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    height: auto;
+    width: 100%;
+}

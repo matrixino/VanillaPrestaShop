@@ -39,4 +39,5 @@ return [
         'http://prestashop-project.org/' => 'PrestaShop Project',
         $documentationLink => $this->translator->trans('Documentation', array(), 'Install'),
     ],
+    'footer.lang' => explode('-', $this->translator->getLocale())[0],
 ];

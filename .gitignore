@@ -129,8 +129,8 @@ themes/*-chunk.js
 themes/*-chunk.js.map
 
 # Install folder
-/install-dev/theme/custom/*
-!/install-dev/theme/custom/.gitkeep
+# /install-dev/theme/custom/*
+# !/install-dev/theme/custom/.gitkeep
 
 # Config
 

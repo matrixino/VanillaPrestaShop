@@ -1,0 +1,37 @@
+#header {
+    display: flex;
+    padding: 16px 24px;
+    height: auto;
+    align-items: center;
+    background-color: #1D1D1B;
+}
+
+#header #headerLinks {
+    height: fit-content;
+    flex: 2;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#header #headerLinks li {
+    background: none;
+    padding: 0 0 0 16px;
+
+    /* Body/Large/Default */
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+
+    /* White/Main */
+    color: #FFFFFF;
+}
+
+#header #PrestaShopLogo {
+    padding: 0;
+    margin: 0;
+    background: none;
+    height: unset;
+    width: unset;
+}
