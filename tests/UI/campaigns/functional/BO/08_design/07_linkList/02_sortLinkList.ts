@@ -12,7 +12,7 @@ import {
   utilsPlaywright,
 } from '@prestashop-core/ui-testing';
 
-const baseContext: string = 'functional_BO_design_linkWidget_sortLinkList';
+const baseContext: string = 'functional_BO_design_linkList_sortLinkList';
 
 describe('BO - Design - Link Widget : Sort Link List', async () => {
   let browserContext: BrowserContext;
