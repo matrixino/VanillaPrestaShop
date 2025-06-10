@@ -17,21 +17,21 @@ jobs:
       matrix:
         BRANCH:
           - 9.0.x
-          - 8.2.x
-          - 8.1.x
-          - 8.0.x
-          - 1.7.8.x
+#          - 8.2.x
+#          - 8.1.x
+#          - 8.0.x
+#          - 1.7.8.x
         include:
           - BRANCH: 9.0.x
             node: 20
-          - BRANCH: 8.2.x
-            node: 16
-          - BRANCH: 8.1.x
-            node: 16
-          - BRANCH: 8.0.x
-            node: 14
-          - BRANCH: 1.7.8.x
-            node: 14
+#          - BRANCH: 8.2.x
+#            node: 16
+#          - BRANCH: 8.1.x
+#            node: 16
+#          - BRANCH: 8.0.x
+#            node: 14
+#          - BRANCH: 1.7.8.x
+#            node: 14
 
     env:
       PHP_VERSION: '7.4'
@@ -77,6 +77,25 @@ jobs:
           today=`date +%Y-%m-%d`
           cp $today-$GH_BRANCH*.zip ${{ env.ZIP_FILE }}
           cp $today-$GH_BRANCH*.xml ${{ env.XML_FILE }}
-          gh release upload $today-$GH_BRANCH ${{ env.ZIP_FILE }}
-          gh release upload $today-$GH_BRANCH ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
+        
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: $today-$GH_BRANCH
+          tag_name: $today-$GH_BRANCH
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.RELEASE_DIR }}/${{ env.ZIP_FILE }}
+          asset_name: ${{ env.ZIP_FILE }}
+          asset_content_type: application/zip
