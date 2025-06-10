@@ -71,6 +71,8 @@ jobs:
         working-directory: ${{ env.RELEASE_DIR }}
 
       - name: Create zip & xml for each branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           today=`date +%Y-%m-%d`
           cp $today-$GH_BRANCH*.zip ${{ env.ZIP_FILE }}
