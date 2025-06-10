@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -75,4 +75,6 @@ jobs:
           today=`date +%Y-%m-%d`
           cp $today-$GH_BRANCH*.zip ${{ env.ZIP_FILE }}
           cp $today-$GH_BRANCH*.xml ${{ env.XML_FILE }}
+          gh release upload $today-$GH_BRANCH ${{ env.ZIP_FILE }}
+          gh release upload $today-$GH_BRANCH ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
