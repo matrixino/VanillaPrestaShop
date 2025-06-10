@@ -17,29 +17,28 @@ jobs:
       matrix:
         BRANCH:
           - 9.0.x
-#          - 8.2.x
-#          - 8.1.x
-#          - 8.0.x
-#          - 1.7.8.x
+          - 8.2.x
+          - 8.1.x
+          - 8.0.x
+          - 1.7.8.x
         include:
           - BRANCH: 9.0.x
             node: 20
-#          - BRANCH: 8.2.x
-#            node: 16
-#          - BRANCH: 8.1.x
-#            node: 16
-#          - BRANCH: 8.0.x
-#            node: 14
-#          - BRANCH: 1.7.8.x
-#            node: 14
+          - BRANCH: 8.2.x
+            node: 16
+          - BRANCH: 8.1.x
+            node: 16
+          - BRANCH: 8.0.x
+            node: 14
+          - BRANCH: 1.7.8.x
+            node: 14
 
     env:
       PHP_VERSION: '7.4'
       NODE_VERSION: ${{ matrix.node }}
       RELEASE_DIR: '/tmp/ps-release'
       GH_BRANCH: ${{ matrix.BRANCH }}
-      XML_FILE: ${{ matrix.BRANCH == 'develop' && 'nightly.xml' || format('nightly_{0}.xml', matrix.BRANCH)}}
-      ZIP_FILE: ${{ matrix.BRANCH == 'develop' && 'nightly.zip' || format('nightly_{0}.zip', matrix.BRANCH)}}
+      ZIP_FILE: ${{ format('prestashop_clean_{0}.zip', matrix.BRANCH) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -70,13 +69,12 @@ jobs:
         run: today=`date +%Y-%m-%d`; for i in *; do mv $i $today-$GH_BRANCH-$i; done
         working-directory: ${{ env.RELEASE_DIR }}
 
-      - name: Create zip & xml for each branch
+      - name: Create zip for each branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           today=`date +%Y-%m-%d`
           cp $today-$GH_BRANCH*.zip ${{ env.ZIP_FILE }}
-          cp $today-$GH_BRANCH*.xml ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
         
       - name: release
@@ -85,8 +83,8 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: $today-$GH_BRANCH
-          tag_name: $today-$GH_BRANCH
+          release_name: ${{ env.GH_BRANCH }}
+          tag_name: ${{ env.GH_BRANCH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
