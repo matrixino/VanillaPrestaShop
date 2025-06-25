@@ -365,7 +365,8 @@ table {
         }
       }
 
-      td, th {
+      td,
+      th {
         padding: var(--#{$cdk}size-4);
       }
 
