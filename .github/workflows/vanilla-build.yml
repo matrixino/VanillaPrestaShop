@@ -17,14 +17,14 @@ jobs:
       matrix:
         TAG:
           - 9.0.0
-          - 8.2.1
+          - 8.2.2
           - 8.1.7
           - 8.0.5
           - 1.7.8.11
         include:
           - TAG: 9.0.0
             node: 20
-          - TAG: 8.2.1
+          - TAG: 8.2.2
             node: 16
           - TAG: 8.1.7
             node: 16
