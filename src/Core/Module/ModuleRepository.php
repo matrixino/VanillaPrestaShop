@@ -270,8 +270,7 @@ class ModuleRepository implements ModuleRepositoryInterface
     {
         $path = $this->modulePath . $moduleName;
         if ($isValid) {
-            $moduleConfig = ModuleLegacy::loadModuleXMLConfig($moduleName);
-            $version = $moduleConfig['version'] ?? null;
+            $version = ModuleLegacy::getModuleVersion($moduleName) ?: null;
         } else {
             $version = null;
         }
