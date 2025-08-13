@@ -13,6 +13,7 @@ $finder = PhpCsFixer\Finder::create()->in([
     __DIR__.'/app/parameters.php',
     'Unit/Resources/config/params.php',
     'Unit/Resources/config/params_modified.php',
+    'Unit/Resources/parsed-modules/fqcn-const.php',
     'Resources/modules_tests/testtrickyconflict/override/classes/Cart.php',
     'Resources/modules_tests/override_for_unit_test/classes/Cart.php',
 ]);

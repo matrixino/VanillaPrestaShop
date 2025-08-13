@@ -28,6 +28,7 @@ namespace Core\Module\Parser;
 
 use PHPUnit\Framework\TestCase;
 use PrestaShop\PrestaShop\Core\Module\Parser\ModuleParser;
+use PrestaShop\PrestaShop\Core\Version;
 
 class ModuleParserTest extends TestCase
 {
@@ -47,6 +48,153 @@ class ModuleParserTest extends TestCase
 
         yield 'all hard-coded in constructor' => [
             $parsedModulesFolder . 'all-hard-coded.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => '8.2.0',
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'core version from _PS_VERSION_ defined const' => [
+            $parsedModulesFolder . 'defined-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => _PS_VERSION_,
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'core version from FQCN \PrestaShop\PrestaShop\Core\Version::VERSION' => [
+            $parsedModulesFolder . 'fqcn-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => Version::VERSION,
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'core version from FQCN PrestaShop\PrestaShop\Core\Version::VERSION, no initial backslash' => [
+            $parsedModulesFolder . 'cs-fixed-fqcn-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => Version::VERSION,
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'core version from Version object with use statement' => [
+            $parsedModulesFolder . 'use-statement-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => Version::VERSION,
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'module values from module const accessed via self' => [
+            $parsedModulesFolder . 'module-self-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.1.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => '8.2.0',
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'module values from module const accessed via static' => [
+            $parsedModulesFolder . 'module-static-const.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.1.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => '8.2.0',
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
+
+        yield 'translated values' => [
+            $parsedModulesFolder . 'translated-values.php',
             [
                 'name' => 'bankwire',
                 'tab' => 'payments_gateways',

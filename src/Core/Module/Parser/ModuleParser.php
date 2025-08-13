@@ -28,18 +28,6 @@ namespace PrestaShop\PrestaShop\Core\Module\Parser;
 
 use PhpParser\Node;
 use PhpParser\Node\Expr;
-use PhpParser\Node\Expr\Array_;
-use PhpParser\Node\Expr\Assign;
-use PhpParser\Node\Expr\ConstFetch;
-use PhpParser\Node\Expr\PropertyFetch;
-use PhpParser\Node\Expr\Variable;
-use PhpParser\Node\Identifier;
-use PhpParser\Node\Scalar\DNumber;
-use PhpParser\Node\Scalar\LNumber;
-use PhpParser\Node\Scalar\String_;
-use PhpParser\Node\Stmt;
-use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\Stmt\Expression;
 use PhpParser\NodeDumper;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
@@ -85,7 +73,10 @@ class ModuleParser
             throw new InvalidArgumentException('Module constructor not found');
         }
 
-        $moduleInfos = $this->getModulePropertiesAssignments($classMethods['__construct']);
+        $classAliases = $this->getClassAliases($statements);
+        $classConstants = $this->getModuleConstants($statements, $classAliases);
+
+        $moduleInfos = $this->getModulePropertiesAssignments($classMethods['__construct'], $classAliases, $classConstants);
         $moduleInfos['hooks'] = $this->extractHooks($classMethods);
 
         return $moduleInfos;
@@ -104,30 +95,18 @@ class ModuleParser
         return $nodeDumper->dump($statements);
     }
 
-    private function getModulePropertiesAssignments(ClassMethod $classMethod): array
+    protected function getModulePropertiesAssignments(Node\Stmt\ClassMethod $constructorMethod, array $classAliases, array $classConstants): array
     {
         $assignedProperties = [];
-        /** @var Stmt $stmt */
-        foreach ($classMethod->stmts as $stmt) {
-            // We only look for expressions like: "$this = something;"
-            if ($stmt instanceof Expression) {
-                if ($stmt->expr instanceof Assign) {
-                    if ($stmt->expr->var instanceof PropertyFetch) {
-                        if ($stmt->expr->var->var instanceof Variable) {
-                            $assignHolder = $stmt->expr->var->var->name;
-                        }
-                    }
-                }
-            }
-            if (!$stmt instanceof Expression
-                || !$stmt->expr instanceof Assign
-                || !$stmt->expr->var instanceof PropertyFetch
-                || !$stmt->expr->var->var instanceof Variable
-                || $stmt->expr->var->var->name !== 'this') {
-                continue;
-            }
-
-            if (!$stmt->expr->var->name instanceof Identifier) {
+        /** @var Node\Stmt $stmt */
+        foreach ($constructorMethod->stmts as $stmt) {
+            // We only look for assignment expressions on the class properties, like "$this = something;"
+            if (!$stmt instanceof Node\Stmt\Expression
+                || !$stmt->expr instanceof Expr\Assign
+                || !$stmt->expr->var instanceof Expr\PropertyFetch
+                || !$stmt->expr->var->var instanceof Expr\Variable
+                || $stmt->expr->var->var->name !== 'this'
+                || !$stmt->expr->var->name instanceof Node\Identifier) {
                 continue;
             }
 
@@ -137,7 +116,7 @@ class ModuleParser
                 continue;
             }
 
-            $propertyValue = $this->getExpressionValue($stmt->expr->expr);
+            $propertyValue = $this->getExpressionValue($stmt->expr->expr, $classAliases, $classConstants);
             if (null !== $propertyValue) {
                 $assignedProperties[$propertyName] = $propertyValue;
             }
@@ -146,34 +125,85 @@ class ModuleParser
         return $assignedProperties;
     }
 
-    private function getExpressionValue(Expr $expr): mixed
+    protected function getExpressionValue(Expr $expr, array $classAliases, array $classConstants): mixed
     {
-        if ($expr instanceof String_) {
+        if ($expr instanceof Node\Scalar\String_) {
             return $expr->value;
         }
-        if ($expr instanceof DNumber) {
+        if ($expr instanceof Node\Scalar\DNumber) {
             return $expr->value;
         }
-        if ($expr instanceof LNumber) {
+        if ($expr instanceof Node\Scalar\LNumber) {
             return $expr->value;
         }
-        if ($expr instanceof ConstFetch) {
-            return $expr->name;
+        if ($expr instanceof Expr\ConstFetch) {
+            return $this->getConstValue($expr);
         }
-        if ($expr instanceof Array_) {
-            return $this->getArrayValue($expr);
+        if ($expr instanceof Expr\ClassConstFetch) {
+            return $this->getClassConstValue($expr, $classAliases, $classConstants);
+        }
+        if ($expr instanceof Expr\Array_) {
+            return $this->getArrayValue($expr, $classAliases, $classConstants);
+        }
+        if ($expr instanceof Expr\MethodCall) {
+            return $this->getMethodCallValue($expr, $classAliases, $classConstants);
         }
 
         return null;
     }
 
-    private function getArrayValue(Array_ $array): ?array
+    protected function getMethodCallValue(Expr\MethodCall $methodCall, array $classAliases, array $classConstants): mixed
+    {
+        if ($methodCall->name->name === 'trans' || $methodCall->name->name === 'l') {
+            if (!empty($methodCall->args)) {
+                /** @var Node\Arg $firstArg */
+                $firstArg = $methodCall->args[0];
+
+                return $this->getExpressionValue($firstArg->value, $classAliases, $classConstants);
+            }
+        }
+
+        return null;
+    }
+
+    protected function getClassConstValue(Expr\ClassConstFetch $constFetch, array $classAliases, array $classConstants): mixed
+    {
+        $className = $constFetch->class->toString();
+        if (!empty($classAliases[$className])) {
+            $className = $classAliases[$className];
+        }
+
+        if (class_exists($className)) {
+            $constantName = $className . '::' . $constFetch->name->toString();
+
+            return defined($constantName) ? constant($constantName) : null;
+        }
+
+        if ($className === 'self' || $className === 'static') {
+            return $classConstants[$constFetch->name->toString()] ?? null;
+        }
+
+        return null;
+    }
+
+    protected function getConstValue(Expr\ConstFetch $constFetch): mixed
+    {
+        $constName = $constFetch->name->toString();
+        // Basic const defined by the define function (like global legacy PrestaShop consts: _PS_VERSION_, _DB_PREFIX_, ...)
+        if (defined($constName)) {
+            return constant($constName);
+        }
+
+        return null;
+    }
+
+    protected function getArrayValue(Expr\Array_ $array, array $classAliases, array $classConstants): ?array
     {
         $arrayValue = [];
         foreach ($array->items as $item) {
-            $keyValue = $this->getExpressionValue($item->key);
+            $keyValue = $this->getExpressionValue($item->key, $classAliases, $classConstants);
             if (is_scalar($keyValue)) {
-                $arrayValue[$keyValue] = $this->getExpressionValue($item->value);
+                $arrayValue[$keyValue] = $this->getExpressionValue($item->value, $classAliases, $classConstants);
             }
         }
 
@@ -181,15 +211,15 @@ class ModuleParser
     }
 
     /**
-     * @param Stmt[] $statements
+     * @param Node\Stmt[] $statements
      *
-     * @return array<string, ClassMethod>
+     * @return array<string, Node\Stmt\ClassMethod>
      */
-    private function getModuleMethods(array $statements): array
+    protected function getModuleMethods(array $statements): array
     {
-        /** @var ClassMethod[] $classMethods */
+        /** @var Node\Stmt\ClassMethod[] $classMethods */
         $classMethods = $this->nodeFinder->find($statements, static function (Node $node) {
-            return $node instanceof ClassMethod;
+            return $node instanceof Node\Stmt\ClassMethod;
         });
 
         $mappedMethods = [];
@@ -203,11 +233,11 @@ class ModuleParser
     /**
      * @param string $moduleClassPath
      *
-     * @return Stmt[]
+     * @return Node\Stmt[]
      *
      * @throws InvalidArgumentException
      */
-    private function parseModuleStatements(string $moduleClassPath): array
+    protected function parseModuleStatements(string $moduleClassPath): array
     {
         if (!file_exists($moduleClassPath)) {
             throw new InvalidArgumentException('Module file not found: ' . $moduleClassPath);
@@ -224,11 +254,11 @@ class ModuleParser
     }
 
     /**
-     * @param ClassMethod[] $classMethods
+     * @param Node\Stmt\ClassMethod[] $classMethods
      *
      * @return string[]
      */
-    private function extractHooks(array $classMethods): array
+    protected function extractHooks(array $classMethods): array
     {
         $hooks = [];
         foreach ($classMethods as $classMethod) {
@@ -240,5 +270,78 @@ class ModuleParser
         }
 
         return $hooks;
+    }
+
+    /**
+     * @param Node\Stmt[] $statements
+     *
+     * @return array<string, string>
+     */
+    protected function getClassAliases(array $statements): array
+    {
+        $classAliases = [];
+
+        // Get aliases based on use statements
+        $useNodes = $this->nodeFinder->find($statements, static function (Node $node) {
+            return $node instanceof Node\Stmt\UseUse;
+        });
+        /** @var Node\Stmt\UseUse $useStatement */
+        foreach ($useNodes as $useStatement) {
+            $className = $useStatement->name->toString();
+            if (!class_exists($className)) {
+                continue;
+            }
+
+            if (!empty($useStatement->alias)) {
+                $classAliases[$useStatement->alias->toString()] = $className;
+            } else {
+                $classAliases[$useStatement->name->getLast()] = $className;
+            }
+        }
+
+        return $classAliases;
+    }
+
+    /**
+     * @param Node\Stmt[] $statements
+     * @param array<string, string> $classAliases
+     *
+     * @return array<string, mixed>
+     */
+    protected function getModuleConstants(array $statements, array $classAliases): array
+    {
+        // Get aliases based on module class name
+        $classConstNodes = $this->nodeFinder->find($statements, static function (Node $node) {
+            return $node instanceof Node\Stmt\ClassConst;
+        });
+        if (empty($classConstNodes)) {
+            return [];
+        }
+
+        /** @var Node\Const_[] $constNodes */
+        $constNodes = $this->nodeFinder->find($statements, static function (Node $node) {
+            return $node instanceof Node\Const_;
+        });
+        if (empty($constNodes)) {
+            return [];
+        }
+
+        $constants = [];
+        foreach ($constNodes as $constNode) {
+            $constValue = $this->getExpressionValue($constNode->value, $classAliases, []);
+            if (!empty($constValue)) {
+                $constants[$constNode->name->toString()] = $constValue;
+            }
+        }
+
+        // Second for const that target self class
+        foreach ($constNodes as $constNode) {
+            $constValue = $this->getExpressionValue($constNode->value, $classAliases, $constants);
+            if (!empty($constValue)) {
+                $constants[$constNode->name->toString()] = $constValue;
+            }
+        }
+
+        return $constants;
     }
 }
