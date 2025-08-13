@@ -199,8 +199,8 @@ class ModuleParser
     protected function getArrayValue(Expr\Array_ $array, array $classAliases, array $classConstants): ?array
     {
         $arrayValue = [];
-        foreach ($array->items as $item) {
-            $keyValue = $this->getExpressionValue($item->key, $classAliases, $classConstants);
+        foreach ($array->items as $index => $item) {
+            $keyValue = $item->key instanceof Expr ? $this->getExpressionValue($item->key, $classAliases, $classConstants) : $index;
             if (is_scalar($keyValue)) {
                 $arrayValue[$keyValue] = $this->getExpressionValue($item->value, $classAliases, $classConstants);
             }

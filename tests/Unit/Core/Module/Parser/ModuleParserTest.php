@@ -213,5 +213,26 @@ class ModuleParserTest extends TestCase
                 ],
             ],
         ];
+
+        yield 'module with const arrays' => [
+            $parsedModulesFolder . 'module-const-array.php',
+            [
+                'name' => 'bankwire',
+                'tab' => 'payments_gateways',
+                'version' => '2.0.0',
+                'ps_versions_compliancy' => [
+                    'min' => '1.7',
+                    'max' => '8.2.0',
+                ],
+                'author' => 'PrestaShop',
+                'displayName' => 'Bank wire',
+                'description' => 'Accept payments for your products via bank wire transfer.',
+                'hooks' => [
+                    'paymentReturn',
+                    'paymentOptions',
+                    'displayHome',
+                ],
+            ],
+        ];
     }
 }
