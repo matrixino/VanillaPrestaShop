@@ -32,7 +32,6 @@ use PhpParser\NodeDumper;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
-use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
 
 /**
  * This parser scan the PHP code of a module main class and extracts information from
@@ -62,7 +61,7 @@ class ModuleParser
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws ModuleParserException
      */
     public function parseModule(string $moduleClassPath): array
     {
@@ -70,7 +69,7 @@ class ModuleParser
         $classMethods = $this->getModuleMethods($statements);
 
         if (empty($classMethods['__construct'])) {
-            throw new InvalidArgumentException('Module constructor not found');
+            throw new ModuleParserException('Module constructor not found');
         }
 
         $classAliases = $this->getClassAliases($statements);
@@ -85,7 +84,7 @@ class ModuleParser
     /**
      * Parse the whole module and dump it, very convenient for debugging.
      *
-     * @throws InvalidArgumentException
+     * @throws ModuleParserException
      */
     public function dumpModuleNodes(string $moduleClassPath): string
     {
@@ -235,19 +234,19 @@ class ModuleParser
      *
      * @return Node\Stmt[]
      *
-     * @throws InvalidArgumentException
+     * @throws ModuleParserException
      */
     protected function parseModuleStatements(string $moduleClassPath): array
     {
         if (!file_exists($moduleClassPath)) {
-            throw new InvalidArgumentException('Module file not found: ' . $moduleClassPath);
+            throw new ModuleParserException('Module file not found: ' . $moduleClassPath);
         }
 
         $fileContent = file_get_contents($moduleClassPath);
 
         $statements = $this->phpParser->parse($fileContent);
         if (empty($statements)) {
-            throw new InvalidArgumentException('Could not parse module file: ' . $moduleClassPath);
+            throw new ModuleParserException('Could not parse module file: ' . $moduleClassPath);
         }
 
         return $statements;
