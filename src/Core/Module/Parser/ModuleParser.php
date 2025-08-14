@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Core\Module\Parser;
 
+use PhpParser\Error;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\NodeDumper;
@@ -35,7 +36,13 @@ use PhpParser\ParserFactory;
 
 /**
  * This parser scan the PHP code of a module main class and extracts information from
- * static PHP analysis.
+ * static PHP analysis, so it is always up-to-date with the raw PHP content.
+ *
+ * It was done previously by using include($moduleFile) and accessing data via $module->version,
+ * the problem is that ones the class has been included it remains in the same state during the
+ * whole process, providing it from being updated even if the file has been changed, which can lead
+ * to unexpected values during an upgrade process. This method ensure we always get the most
+ * up-to-date value from the PHP files.
  */
 class ModuleParser
 {
@@ -43,7 +50,7 @@ class ModuleParser
 
     private NodeFinder $nodeFinder;
 
-    private const DEFAULT_MODULE_PROPERTIES = [
+    private const DEFAULT_EXTRACTED_PROPERTIES = [
         'name',
         'tab',
         'version',
@@ -51,11 +58,39 @@ class ModuleParser
         'author',
         'displayName',
         'description',
+        'author_uri',
+        'dependencies',
+        'description_full',
+        'is_configurable',
+        'need_instance',
+        'limited_countries',
+        'hooks',
     ];
 
+    private const DEFAULT_MODULE_VALUES = [
+        'author' => '',
+        'displayName' => '',
+        'description' => '',
+        'author_uri' => '',
+        'dependencies' => [],
+        'description_full' => '',
+        'is_configurable' => false,
+        'need_instance' => true,
+        'limited_countries' => [],
+        'hooks' => [],
+    ];
+
+    /**
+     * @param string[] $extractedModuleProperties List of properties to extract (if left empty all properties initialized in constructor are extracted)
+     */
     public function __construct(
-        private readonly array $extractedModuleProperties = self::DEFAULT_MODULE_PROPERTIES,
+        private readonly array $extractedModuleProperties = self::DEFAULT_EXTRACTED_PROPERTIES,
     ) {
+        array_map(static function ($propertyName) {
+            if (!is_string($propertyName)) {
+                throw new ModuleParserException('List of extracted properties is expected to be an array of string');
+            }
+        }, $extractedModuleProperties);
         $this->phpParser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
         $this->nodeFinder = new NodeFinder();
     }
@@ -75,8 +110,23 @@ class ModuleParser
         $classAliases = $this->getClassAliases($statements);
         $classConstants = $this->getModuleConstants($statements, $classAliases);
 
-        $moduleInfos = $this->getModulePropertiesAssignments($classMethods['__construct'], $classAliases, $classConstants);
-        $moduleInfos['hooks'] = $this->extractHooks($classMethods);
+        // First initialize default values based on which properties need to be extracted (when empty array is passed,
+        // all the default properties are set)
+        $modulesInfos = array_filter(
+            self::DEFAULT_MODULE_VALUES,
+            fn ($propertyName) => $this->shouldPropertyBeExtracted($propertyName),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        // Merge extracted values with default ones
+        $moduleInfos = array_merge(
+            $modulesInfos,
+            $this->getModulePropertiesAssignments($classMethods['__construct'], $classAliases, $classConstants)
+        );
+
+        if ($this->shouldPropertyBeExtracted('hooks')) {
+            $moduleInfos['hooks'] = $this->extractHooks($classMethods);
+        }
 
         return $moduleInfos;
     }
@@ -110,11 +160,11 @@ class ModuleParser
             }
 
             $propertyName = $stmt->expr->var->name->name;
-            // We only extract properties defined for this parser, unless it is empty then all properties are parsed
-            if (!empty($this->extractedModuleProperties) && !in_array($propertyName, $this->extractedModuleProperties)) {
+            if (!$this->shouldPropertyBeExtracted($propertyName)) {
                 continue;
             }
 
+            // The returned array is only filled with non-null values
             $propertyValue = $this->getExpressionValue($stmt->expr->expr, $classAliases, $classConstants);
             if (null !== $propertyValue) {
                 $assignedProperties[$propertyName] = $propertyValue;
@@ -244,8 +294,12 @@ class ModuleParser
 
         $fileContent = file_get_contents($moduleClassPath);
 
-        $statements = $this->phpParser->parse($fileContent);
-        if (empty($statements)) {
+        try {
+            $statements = $this->phpParser->parse($fileContent);
+            if (empty($statements)) {
+                throw new ModuleParserException('Could not parse module file: ' . $moduleClassPath);
+            }
+        } catch (Error) {
             throw new ModuleParserException('Could not parse module file: ' . $moduleClassPath);
         }
 
@@ -292,8 +346,10 @@ class ModuleParser
             }
 
             if (!empty($useStatement->alias)) {
+                // Use alias as the key when specified (ex: use PrestaShop/Core/Version as PrestashopVersion)
                 $classAliases[$useStatement->alias->toString()] = $className;
             } else {
+                // Use the last part of the FQCN when no alias is specified
                 $classAliases[$useStatement->name->getLast()] = $className;
             }
         }
@@ -342,5 +398,18 @@ class ModuleParser
         }
 
         return $constants;
+    }
+
+    /**
+     * We only extract properties defined for this parser in $this->extractedModuleProperties,
+     * unless it is empty then all properties are extracted
+     *
+     * @param string $propertyName
+     *
+     * @return bool
+     */
+    protected function shouldPropertyBeExtracted(string $propertyName): bool
+    {
+        return empty($this->extractedModuleProperties) || in_array($propertyName, $this->extractedModuleProperties);
     }
 }
