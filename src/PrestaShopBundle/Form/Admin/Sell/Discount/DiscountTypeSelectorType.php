@@ -47,7 +47,8 @@ class DiscountTypeSelectorType extends TranslatorAwareType
                     $this->trans('On catalog products', 'Admin.Catalog.Feature') => DiscountType::PRODUCT_LEVEL,
                     $this->trans('Free gift', 'Admin.Catalog.Feature') => DiscountType::FREE_GIFT,
                     $this->trans('On free shipping', 'Admin.Catalog.Feature') => DiscountType::FREE_SHIPPING,
-                    $this->trans('On total order', 'Admin.Catalog.Feature') => DiscountType::ORDER_LEVEL,
+                    // $this->trans('On total order', 'Admin.Catalog.Feature') => DiscountType::ORDER_LEVEL,
+                    // (Disabled temporarily, because of infinite loop issue with this kind of discount. See issue #39419)
                 ],
                 'choice_attr' => [
                     $this->trans('On cart amount', 'Admin.Catalog.Feature') => [
@@ -66,10 +67,12 @@ class DiscountTypeSelectorType extends TranslatorAwareType
                         'icon' => 'local_shipping',
                         'help' => $this->trans('Apply on shipping fees', 'Admin.Catalog.Feature'),
                     ],
+                    /*
                     $this->trans('On total order', 'Admin.Catalog.Feature') => [
                         'icon' => 'article',
                         'help' => $this->trans('Apply on cart and shipping fees', 'Admin.Catalog.Feature'),
                     ],
+                    */
                 ],
             ])
         ;

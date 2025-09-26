@@ -29,6 +29,7 @@ namespace PrestaShopBundle\Controller\Admin\Sell\Catalog;
 use Exception;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Command\BulkDeleteAttributeGroupCommand;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Command\DeleteAttributeGroupCommand;
+use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Command\DeleteAttributeTextureImageCommand;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Exception\AttributeGroupConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Exception\AttributeGroupNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Exception\CannotAddAttributeGroupException;
@@ -253,6 +254,34 @@ class AttributeGroupController extends PrestaShopAdminController
         }
 
         return $this->redirectToRoute('admin_attribute_groups_index');
+    }
+
+    /**
+     * Deletes attribute texture image.
+     *
+     * @param int $attributeGroupId
+     * @param int $attributeId
+     *
+     * @return RedirectResponse
+     */
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.', redirectRoute: 'admin_attributes_edit', redirectQueryParamsToKeep: ['attributeGroupId', 'attributeId'])]
+    public function deleteTextureImageAction($attributeGroupId, $attributeId)
+    {
+        try {
+            $this->dispatchCommand(new DeleteAttributeTextureImageCommand((int) $attributeId));
+
+            $this->addFlash(
+                'success',
+                $this->trans('Image successfully deleted.', [], 'Admin.Notifications.Success')
+            );
+        } catch (Exception $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
+        }
+
+        return $this->redirectToRoute('admin_attributes_edit', [
+            'attributeGroupId' => $attributeGroupId,
+            'attributeId' => $attributeId,
+        ]);
     }
 
     /**

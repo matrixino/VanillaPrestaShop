@@ -32,6 +32,7 @@ use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountConditionsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRule;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroupType;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleType;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Query\GetDiscountForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Discount\QueryResult\DiscountForEditing;
@@ -90,6 +91,12 @@ class DiscountConditionsFeatureContext extends AbstractDomainFeatureContext
         $command = new UpdateDiscountConditionsCommand($this->referenceToId($discountReference));
 
         $conditions = $tableNode->getColumnsHash();
+
+        // This matches the current business rule for the new form, a discount can have multiple criterias that are more and more
+        // restrictive, each different rule adds more restriction and the quantity is the same To implement this behaviour we use
+        // the new type or ProductRuleGroup, when type is ProductRuleGroupType::ALL_PRODUCT_RULES all the product rules must be valid
+        // for the whole product rule group to be valid
+
         $productRules = [];
         foreach ($conditions as $condition) {
             $productRules[] = new ProductRule(
@@ -98,17 +105,48 @@ class DiscountConditionsFeatureContext extends AbstractDomainFeatureContext
             );
         }
 
-        // This matches the current business rule for the new form, a discount can only have ONE product rule group
-        // (which represent an AND condition), however they can have multiple product rules (which represent and
-        // OR condition)
-        // If we decide to increase the number of groups later this behat step will need to be refactored but so far
-        // it matches our needs.
-        $command->setProductConditions([
+        // So far we only handle one product rule group (or one product segment) to match the form behaviour
+        $productRulesGroup = [
             new ProductRuleGroup(
                 $quantity,
                 $productRules,
+                ProductRuleGroupType::ALL_PRODUCT_RULES,
             ),
-        ]);
+        ];
+
+        // Note: The command is voluntarily loose for now and allows building the groups and rules however we want, depending
+        // on future development it may need to evolve into a stricter interface to reflect the business logic more
+        $command->setProductConditions($productRulesGroup);
+        $this->getCommandBus()->handle($command);
+    }
+
+    /**
+     * @When I update discount :discountReference with conditions based on carriers :carrierReferences
+     *
+     * @param string $discountReference
+     * @param string $carrierReferences
+     *
+     * @return void
+     */
+    public function updateDiscountCarrierConditions(string $discountReference, string $carrierReferences): void
+    {
+        $command = new UpdateDiscountConditionsCommand($this->referenceToId($discountReference));
+        $command->setCarrierIds($this->referencesToIds($carrierReferences));
+        $this->getCommandBus()->handle($command);
+    }
+
+    /**
+     * @When I update discount :discountReference with conditions based on countries :countryReferences
+     *
+     * @param string $discountReference
+     * @param string $countryReferences
+     *
+     * @return void
+     */
+    public function updateDiscountCountryConditions(string $discountReference, string $countryReferences): void
+    {
+        $command = new UpdateDiscountConditionsCommand($this->referenceToId($discountReference));
+        $command->setCountryIds($this->referencesToIds($countryReferences));
         $this->getCommandBus()->handle($command);
     }
 
@@ -129,13 +167,14 @@ class DiscountConditionsFeatureContext extends AbstractDomainFeatureContext
 
         $conditionsData = $tableNode->getColumnsHash();
         $productConditions = $discountForEditing->getProductConditions();
-        Assert::assertEquals(1, count($productConditions), sprintf('We only handle ONE condition group for now, %d groups were found', count($productConditions)));
 
+        Assert::assertEquals(1, count($productConditions), sprintf('Expected only one product rule group but got %d instead', count($productConditions)));
         $productRuleGroup = $productConditions[0];
         Assert::assertEquals($quantity, $productRuleGroup->getQuantity(), sprintf('Expected at least %d product quantity but got %d instead', $quantity, $productRuleGroup->getQuantity()));
+        Assert::assertEquals(ProductRuleGroupType::ALL_PRODUCT_RULES, $productRuleGroup->getType());
 
         $productRules = $productRuleGroup->getRules();
-        Assert::assertEquals(count($conditionsData), count($productRules), sprintf('Expected %d rules but got %d instead', count($conditionsData), count($productRules)));
+        Assert::assertEquals(count($conditionsData), count($productRules), sprintf('Expected %d product rules, %d product rules were found', count($conditionsData), count($productRules)));
 
         foreach ($conditionsData as $index => $conditionData) {
             $productRule = $productRules[$index];

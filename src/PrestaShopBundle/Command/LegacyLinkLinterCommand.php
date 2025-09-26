@@ -172,6 +172,7 @@ class LegacyLinkLinterCommand extends Command
         'admin_servers',
         'admin_shipping_preferences_carrier_options_save',
         'admin_stock_movements_overview',
+        'admin_employees_get_password_generated',
     ];
 
     /**

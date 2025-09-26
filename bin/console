@@ -16,8 +16,20 @@ set_time_limit(0);
 
 try {
     require_once __DIR__ . '/../config/config.inc.php';
-} catch (PrestaShopException) {
-    // Prevent breaking all CLI command when the shop is not installed
+} catch (PrestaShopException $e) {
+    // Prevent breaking all CLI command when the shop is not installed, define fallback values
+    if (!defined('__PS_BASE_URI__')) {
+      define('__PS_BASE_URI__', '/');
+    }
+    if (!defined('_THEME_NAME_')) {
+      define('_THEME_NAME_', 'classic');
+    }
+    if (!defined('_PARENT_THEME_NAME_')) {
+      define('_PARENT_THEME_NAME_', '');
+    }
+
+    // Define all the URI base constants
+    require_once __DIR__ . '/../config/defines_uri.inc.php';
 }
 
 $input = new ArgvInput();

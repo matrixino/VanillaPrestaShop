@@ -46,8 +46,10 @@ use PrestaShop\PrestaShop\Core\Search\Filters\FeatureFilters;
 use PrestaShopBundle\Component\CsvResponse;
 use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
 use PrestaShopBundle\Controller\BulkActionsTrait;
+use PrestaShopBundle\Entity\Repository\FeatureAttributeRepository;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -59,7 +61,8 @@ class FeatureController extends PrestaShopAdminController
     use BulkActionsTrait;
 
     public function __construct(
-        private readonly FeatureFeature $featureFeature
+        private readonly FeatureFeature $featureFeature,
+        private readonly FeatureAttributeRepository $featureAttributeRepository
     ) {
     }
 
@@ -273,7 +276,7 @@ class FeatureController extends PrestaShopAdminController
     }
 
     /**
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      *
      * @return Response
      */
@@ -289,6 +292,42 @@ class FeatureController extends PrestaShopAdminController
                 'Admin.Navigation.Menu'
             ),
         ]);
+    }
+
+    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
+    public function getAllFeatureGroupsAction(?int $shopId): JsonResponse
+    {
+        $features = $this->featureAttributeRepository->getFeatures();
+
+        return $this->json($this->formatFeatureGroupsForPresentation($features));
+    }
+
+    /**
+     * @param array<int, array{feature_id: int, name: string, values: array<int, array{item_id: int, name: string}>}> $features
+     *
+     * @return array<int, array{id: int, name: string, feature_values: array<int, array{id: int, name: string}>}>
+     */
+    private function formatFeatureGroupsForPresentation(array $features): array
+    {
+        $formattedGroups = [];
+        foreach ($features as $feature) {
+            $featureValues = [];
+
+            foreach ($feature['values'] as $featureValue) {
+                $featureValues[] = [
+                    'id' => $featureValue['item_id'],
+                    'name' => $featureValue['name'],
+                ];
+            }
+
+            $formattedGroups[] = [
+                'id' => $feature['feature_id'],
+                'name' => $feature['name'],
+                'feature_values' => $featureValues,
+            ];
+        }
+
+        return $formattedGroups;
     }
 
     /**

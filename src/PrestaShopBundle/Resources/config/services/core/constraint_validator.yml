@@ -12,7 +12,7 @@ services:
   prestashop.core.constraint_validator.default_language_validator:
     class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\DefaultLanguageValidator'
     arguments:
-      - '@=service("prestashop.adapter.legacy.configuration").get("PS_LANG_DEFAULT")'
+      $defaultLanguageContext: '@prestashop.default.language.context'
     tags:
       - { name: validator.constraint_validator }
 
@@ -40,6 +40,12 @@ services:
     arguments:
       - '@translator'
       - '@prestashop.adapter.country.country_zip_code_requirements_provider'
+    tags:
+      - { name: validator.constraint_validator }
+
+  PrestaShop\PrestaShop\Core\ConstraintValidator\DiscountProductSegmentValidator:
+    arguments:
+      - '@translator'
     tags:
       - { name: validator.constraint_validator }
 
@@ -74,5 +80,9 @@ services:
     autoconfigure: true
 
   PrestaShop\PrestaShop\Core\ConstraintValidator\UniqueDiscountCodeValidator:
+    autowire: true
+    autoconfigure: true
+
+  PrestaShop\PrestaShop\Core\ConstraintValidator\NotCustomizableProductValidator:
     autowire: true
     autoconfigure: true

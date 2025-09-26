@@ -2691,7 +2691,12 @@ class AdminControllerCore extends Controller
                 $this->addJS(__PS_BASE_URI__ . $this->admin_webpath . '/themes/' . $this->bo_theme . '/js/help.js?v=' . _PS_VERSION_);
             }
 
-            if (!Tools::getValue('submitFormAjax')) {
+            if (!Tools::getValue('submitFormAjax')
+                && ((bool) Configuration::get('PS_SHOW_NEW_ORDERS') == true
+                    || (bool) Configuration::get('PS_SHOW_NEW_CUSTOMERS') == true
+                    || (bool) Configuration::get('PS_SHOW_NEW_MESSAGES') == true
+                )
+            ) {
                 $this->addJS(_PS_JS_DIR_ . 'admin/notifications.js?v=' . _PS_VERSION_);
             }
 

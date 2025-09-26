@@ -33,8 +33,11 @@ use PrestaShop\PrestaShop\Adapter\ImageThumbnailsRegenerator;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Command\RegenerateThumbnailsCommand;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\ImageTypeException;
+use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\RegenerateThumbnailsException;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\RegenerateThumbnailsTimeoutException;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\RegenerateThumbnailsWriteException;
+use PrestaShop\PrestaShop\Core\Domain\ImageSettings\ImageDomain;
+use PrestaShop\PrestaShop\Core\Domain\ImageSettings\ValueObject\ImageTypeId;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShopBundle\Entity\Repository\ImageTypeRepository;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -54,59 +57,90 @@ final class RegenerateThumbnailsHandler extends AbstractObjectModelHandler imple
      * {@inheritdoc}
      *
      * @throws ImageTypeException
+     * @throws RegenerateThumbnailsException
      */
     public function handle(RegenerateThumbnailsCommand $command): void
     {
         // Get all languages
         $languages = $this->langRepository->findAll();
 
-        // Set images to regenerate with all theirs specific directories
-        $process = [
-            ['type' => 'categories', 'dir' => _PS_CAT_IMG_DIR_],
-            ['type' => 'manufacturers', 'dir' => _PS_MANU_IMG_DIR_],
-            ['type' => 'suppliers', 'dir' => _PS_SUPP_IMG_DIR_],
-            ['type' => 'products', 'dir' => _PS_PRODUCT_IMG_DIR_],
-            ['type' => 'stores', 'dir' => _PS_STORE_IMG_DIR_],
-        ];
+        $commandImageDomain = ImageDomain::from($command->getImage());
+        $imageTypeId = null;
+        if ($command->getImageTypeId() > 0) {
+            $imageTypeId = new ImageTypeId($command->getImageTypeId());
+        }
 
-        // Launching generation process
-        foreach ($process as $proc) {
+        // Iterate all images categories with thumbnails
+        foreach (ImageDomain::getDomainsWithThumbnails() as $imageDomain) {
             // Check if this kind of image is selected, if not, skip
-            if ($command->getImage() !== 'all' && $command->getImage() !== $proc['type']) {
+            if ($commandImageDomain !== ImageDomain::ALL && $commandImageDomain !== $imageDomain) {
                 continue;
             }
 
             // Getting formats generation (all if 'all' selected)
-            if ($command->getImageTypeId() === 0) {
-                $formats = $this->imageTypeRepository->findBy([$proc['type'] => 1]);
+            if (!$imageTypeId instanceof ImageTypeId) {
+                $criteria = [$imageDomain->value => 1];
             } else {
-                $formats = $this->imageTypeRepository->findBy(['id' => $command->getImageTypeId(), $proc['type'] => 1]);
+                $criteria = ['id' => $imageTypeId->getValue(), $imageDomain->value => 1];
             }
+            $imageTypes = $this->imageTypeRepository->findBy($criteria);
 
             // If user asked to erase images, let's do it first
             if ($command->erasePreviousImages()) {
-                $this->imageThumbnailsRegenerator->deletePreviousImages($proc['dir'], $formats, $proc['type'] === 'products');
+                $this->imageThumbnailsRegenerator->deletePreviousImages(
+                    $imageDomain->getDirectory(),
+                    $imageTypes,
+                    $imageDomain->isProduct()
+                );
             }
 
             // Regenerate images
-            $errors = $this->imageThumbnailsRegenerator->regenerateNewImages($proc['dir'], $formats, $proc['type'] == 'products');
+            $errors = $this->imageThumbnailsRegenerator->regenerateNewImages(
+                $imageDomain->getDirectory(),
+                $imageTypes,
+                $imageDomain->isProduct()
+            );
+            if (false === $errors) {
+                throw new RegenerateThumbnailsWriteException(
+                    $this->translator->trans(
+                        'Cannot write images for this type: %1$s. Please check the %2$s folder\'s writing permissions.',
+                        [$imageDomain->value, $imageDomain->getDirectory()],
+                        'Admin.Design.Notification'
+                    )
+                );
+            }
             if (is_array($errors) && count($errors) > 0) {
-                if (in_array('timeout', $errors)) {
+                if (in_array('timeout', $errors, true)) {
                     throw new RegenerateThumbnailsTimeoutException($this->translator->trans('Only part of the images have been regenerated. The server timed out before finishing.', [], 'Admin.Design.Notification'));
-                } else {
-                    throw new RegenerateThumbnailsWriteException($this->translator->trans('Cannot write images for this type: %1$s. Please check the %2$s folder\'s writing permissions.', [$proc['type'], $proc['dir']], 'Admin.Design.Notification'));
                 }
-            } else {
-                if ($proc['type'] == 'products') {
-                    if ($this->imageThumbnailsRegenerator->regenerateWatermark($proc['dir'], $formats) === 'timeout') {
-                        throw new RegenerateThumbnailsTimeoutException($this->translator->trans('Server timed out. The watermark may not have been applied to all images.', [], 'Admin.Design.Notification'));
-                    }
-                }
-                if (count($errors) === 0) {
-                    if ($this->imageThumbnailsRegenerator->regenerateNoPictureImages($proc['dir'], $formats, $languages)) {
-                        throw new RegenerateThumbnailsTimeoutException($this->translator->trans('Cannot write images for this type: %1$s. Please check the %2$s folder\'s writing permissions.', [$proc['type'], $proc['dir']], 'Admin.Design.Notification'));
-                    }
-                }
+                throw new RegenerateThumbnailsWriteException(
+                    $this->translator->trans(
+                        'Cannot write images for this type: %1$s. Please check the %2$s folder\'s writing permissions.',
+                        [$imageDomain->value, $imageDomain->getDirectory()],
+                        'Admin.Design.Notification'
+                    )
+                );
+            }
+
+            if (
+                $imageDomain->isProduct()
+                && $this->imageThumbnailsRegenerator->regenerateWatermark($imageDomain->getDirectory(), $imageTypes) === 'timeout'
+            ) {
+                throw new RegenerateThumbnailsTimeoutException($this->translator->trans('Server timed out. The watermark may not have been applied to all images.', [], 'Admin.Design.Notification'));
+            }
+
+            if ($this->imageThumbnailsRegenerator->regenerateNoPictureImages(
+                $imageDomain->getDirectory(),
+                $imageTypes,
+                $languages
+            )) {
+                throw new RegenerateThumbnailsWriteException(
+                    $this->translator->trans(
+                        'Cannot write images for this type: %1$s. Please check the %2$s folder\'s writing permissions.',
+                        [$imageDomain->value, $imageDomain->getDirectory()],
+                        'Admin.Design.Notification'
+                    )
+                );
             }
         }
     }

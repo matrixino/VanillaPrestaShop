@@ -35,6 +35,7 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\CannotUpdateDiscountExc
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRule;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroupType;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleType;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountId;
 use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
@@ -96,6 +97,11 @@ class DiscountRepository extends AbstractObjectModelRepository
 
         $productRulesGroups = [];
         foreach ($groupsResult as $groupData) {
+            $ruleGroupType = ProductRuleGroupType::tryFrom((string) $groupData['type']);
+            if (empty($ruleGroupType)) {
+                throw new InvalidArgumentException(sprintf('Unknow product rule group type %s', (string) $groupData['type']));
+            }
+
             $qb = $this->connection->createQueryBuilder();
             $qb
                 ->select('*')
@@ -132,10 +138,41 @@ class DiscountRepository extends AbstractObjectModelRepository
                 }
             }
 
-            $productRulesGroups[] = new ProductRuleGroup((int) $groupData['quantity'], $productRules);
+            $productRulesGroups[] = new ProductRuleGroup((int) $groupData['quantity'], $productRules, $ruleGroupType);
         }
 
         return $productRulesGroups;
+    }
+
+    /**
+     * @param DiscountId $discountId
+     *
+     * @return int[]
+     */
+    public function getCarriers(DiscountId $discountId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('*')
+            ->from($this->dbPrefix . 'cart_rule_carrier', 'crc')
+            ->where('crc.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_carrier'], $qb->executeQuery()->fetchAllAssociative());
+    }
+
+    public function getCountries(DiscountId $discountId)
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('*')
+            ->from($this->dbPrefix . 'cart_rule_country', 'crc')
+            ->where('crc.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_country'], $qb->executeQuery()->fetchAllAssociative());
     }
 
     /**

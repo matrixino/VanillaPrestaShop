@@ -426,7 +426,7 @@ class CQRSApiSerializerTest extends KernelTestCase
         ];
 
         $hook = new Hook();
-        $hook->id = 1;
+        $hook->hookId = 1;
         $hook->active = true;
         $hook->name = 'testHook';
         $hook->title = 'testHookTitle';
@@ -440,7 +440,7 @@ class CQRSApiSerializerTest extends KernelTestCase
                 'description' => '',
             ],
             $hook,
-            ['[id_hook]' => '[id]'],
+            ['[id_hook]' => '[hookId]'],
         ];
 
         $command = new AddProductCommand(

@@ -27,7 +27,10 @@
 namespace PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler;
 
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Adapter\Carrier\Repository\CarrierRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\QueryResult\CarrierSummary;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryHandler\GetOrderShipmentsHandlerInterface;
@@ -39,7 +42,8 @@ use Throwable;
 class GetOrderShipmentsHandler implements GetOrderShipmentsHandlerInterface
 {
     public function __construct(
-        private readonly ShipmentRepository $repository,
+        private readonly ShipmentRepository $shipmentRepository,
+        private readonly CarrierRepository $carrierRepository,
     ) {
     }
 
@@ -54,16 +58,24 @@ class GetOrderShipmentsHandler implements GetOrderShipmentsHandlerInterface
         $orderId = $query->getOrderId()->getValue();
 
         try {
-            $result = $this->repository->findByOrderId($orderId);
+            $result = $this->shipmentRepository->findByOrderId($orderId);
         } catch (Throwable $e) {
             throw new ShipmentNotFoundException(sprintf('Could not find shipment for order with id "%s"', $orderId), 0, $e);
         }
 
         foreach ($result as $shipment) {
+            try {
+                $carrier = $this->carrierRepository->get(new CarrierId($shipment->getCarrierId()));
+            } catch (Throwable $e) {
+                throw new ShipmentNotFoundException(sprintf('Could not find carrier with id "%s"', $shipment->getCarrierId()), 0, $e);
+            }
+
+            $carrierSummary = new CarrierSummary($carrier->id, $carrier->name);
+
             $shipments[] = new OrderShipment(
                 $shipment->getId(),
                 $shipment->getOrderId(),
-                $shipment->getCarrierId(),
+                $carrierSummary,
                 $shipment->getAddressId(),
                 new DecimalNumber((string) $shipment->getShippingCostTaxExcluded()),
                 new DecimalNumber((string) $shipment->getShippingCostTaxIncluded()),

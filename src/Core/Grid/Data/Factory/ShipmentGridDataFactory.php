@@ -49,7 +49,7 @@ class ShipmentGridDataFactory implements GridDataFactoryInterface
     public function getData(SearchCriteriaInterface $searchCriteria): GridData
     {
         $data = $this->shipmentDataFactory->getData($searchCriteria);
-        $modifiedRecords = $this->applyModifications($data->getRecords());
+        $modifiedRecords = $this->applyModifications($data->getRecords(), $data->getRecordsTotal());
 
         return new GridData(
             $modifiedRecords,
@@ -58,14 +58,14 @@ class ShipmentGridDataFactory implements GridDataFactoryInterface
         );
     }
 
-    private function applyModifications(RecordCollectionInterface $records): RecordCollectionInterface
+    private function applyModifications(RecordCollectionInterface $records, int $totalRecord): RecordCollectionInterface
     {
         $updated = [];
 
         foreach ($records as $record) {
-            $record['price'] = $this->locale->formatPrice((float) $record['price'], $this->currencyContext->getIsoCode());
+            $record['shipping_cost'] = $this->locale->formatPrice((float) $record['shipping_cost'], $this->currencyContext->getIsoCode());
             $record['weight'] = sprintf('%.3f %s', $record['weight'], $this->configuration->get('PS_WEIGHT_UNIT'));
-
+            $record['total_shipments'] = $totalRecord;
             $updated[] = $record;
         }
 

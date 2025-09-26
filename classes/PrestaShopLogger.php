@@ -34,6 +34,7 @@ class PrestaShopLoggerCore extends ObjectModel
     /**
      * List of log level types.
      */
+    public const LOG_SEVERITY_LEVEL_DEBUG = 0;
     public const LOG_SEVERITY_LEVEL_INFORMATIVE = 1;
     public const LOG_SEVERITY_LEVEL_WARNING = 2;
     public const LOG_SEVERITY_LEVEL_ERROR = 3;
@@ -80,6 +81,8 @@ class PrestaShopLoggerCore extends ObjectModel
 
     /** @var string|null */
     public $hash;
+
+    protected static int $minLevelInDb;
 
     /**
      * @see ObjectModel::$definition
@@ -145,6 +148,11 @@ class PrestaShopLoggerCore extends ObjectModel
      */
     public static function addLog($message, $severity = 1, $errorCode = null, $objectType = null, $objectId = null, $allowDuplicate = false, $idEmployee = null)
     {
+        // Not all logs are relevant in DB so we filter them based on the configuration PS_MIN_LOGGER_LEVEL_IN_DB
+        if ($severity < self::getMinimumLevelInDB()) {
+            return false;
+        }
+
         $log = new PrestaShopLogger();
         $log->severity = (int) $severity;
         $log->error_code = (int) $errorCode;
@@ -242,5 +250,18 @@ class PrestaShopLoggerCore extends ObjectModel
         }
 
         return self::$is_present[$this->getHash()];
+    }
+
+    protected static function getMinimumLevelInDB(): int
+    {
+        if (!isset(self::$minLevelInDb)) {
+            try {
+                self::$minLevelInDb = (int) Configuration::get('PS_MIN_LOGGER_LEVEL_IN_DB', null, null, null, self::LOG_SEVERITY_LEVEL_INFORMATIVE);
+            } catch (Throwable) {
+                self::$minLevelInDb = self::LOG_SEVERITY_LEVEL_INFORMATIVE;
+            }
+        }
+
+        return self::$minLevelInDb;
     }
 }

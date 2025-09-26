@@ -26,6 +26,7 @@
 
 namespace PrestaShopBundle\Form\Admin\Sell\Discount;
 
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DiscountProductSegment;
 use PrestaShopBundle\Form\Admin\Type\EntitySearchInputType;
 use PrestaShopBundle\Form\Admin\Type\ProductSearchType;
 use PrestaShopBundle\Form\Admin\Type\ToggleChildrenChoiceType;
@@ -109,6 +110,18 @@ class CartConditionsType extends TranslatorAwareType
             ])
             ->add(self::PRODUCT_SEGMENT, DiscountProductSegmentType::class, [
                 'label' => $this->trans('Product segment', 'Admin.Catalog.Feature'),
+                'constraints' => [
+                    new When(
+                        expression: sprintf(
+                            'this.getParent().getParent().get("children_selector").getData() === "%s" && this.getParent().get("children_selector").getData() === "%s"',
+                            DiscountConditionsType::CART_CONDITIONS,
+                            self::PRODUCT_SEGMENT
+                        ),
+                        constraints: [
+                            new DiscountProductSegment(),
+                        ]
+                    ),
+                ],
             ])
         ;
     }

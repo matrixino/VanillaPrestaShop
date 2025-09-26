@@ -35,6 +35,8 @@ use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
 use PrestaShop\PrestaShop\Core\Module\ModuleOverrideChecker;
+use PrestaShop\PrestaShop\Core\Module\Parser\ModuleParser;
+use PrestaShop\PrestaShop\Core\Module\Parser\ModuleParserException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use PrestaShop\PrestaShop\Core\Security\Permission;
 use PrestaShop\TranslationToolsBundle\Translation\Helper\DomainHelper;
@@ -197,6 +199,9 @@ abstract class ModuleCore implements ModuleInterface
 
     /** @var array Array filled with cache permissions (modules / employee profiles) */
     protected static $cache_lgc_access = [];
+
+    /** @var ModuleParser */
+    protected static ModuleParser $moduleParser;
 
     /** @var Context|null */
     protected $context;
@@ -758,11 +763,35 @@ abstract class ModuleCore implements ModuleInterface
         return null;
     }
 
-    public static function getModuleVersion(ModuleCore|stdClass $module): string
+    public static function getModuleVersion(ModuleCore|stdClass|string $module): string
     {
-        $moduleConfig = self::loadModuleXMLConfig($module->name);
+        $moduleName = is_string($module) ? $module : $module->name;
+        $moduleFilePath = _PS_MODULE_DIR_ . $moduleName . '/' . $moduleName . '.php';
+        $parser = static::getModuleParser();
+        try {
+            $parsedModuleInfos = $parser->parseModule($moduleFilePath);
+            if (!empty($parsedModuleInfos['version'])) {
+                return $parsedModuleInfos['version'];
+            }
+        } catch (ModuleParserException) {
+            // Do nothing, fallback XML config file
+        }
 
-        return $moduleConfig['version'] ?? $module->version;
+        $moduleConfig = self::loadModuleXMLConfig($moduleName);
+        if (!empty($moduleConfig['version'])) {
+            return $moduleConfig['version'];
+        }
+
+        return is_object($module) && property_exists($module, 'version') ? $module->version : '';
+    }
+
+    protected static function getModuleParser(): ModuleParser
+    {
+        if (!isset(static::$moduleParser)) {
+            static::$moduleParser = new ModuleParser();
+        }
+
+        return static::$moduleParser;
     }
 
     /**

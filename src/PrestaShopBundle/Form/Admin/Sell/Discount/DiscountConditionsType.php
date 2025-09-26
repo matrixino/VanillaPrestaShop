@@ -26,6 +26,7 @@
 
 namespace PrestaShopBundle\Form\Admin\Sell\Discount;
 
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 use PrestaShopBundle\Form\Admin\Type\EnrichedChoiceType;
 use PrestaShopBundle\Form\Admin\Type\ToggleChildrenChoiceType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
@@ -35,9 +36,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class DiscountConditionsType extends TranslatorAwareType
 {
     public const CART_CONDITIONS = 'cart_conditions';
+    public const DELIVERY_CONDITIONS = 'delivery_conditions';
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $discountType = $options['discount_type'];
         $builder
             ->add(self::CART_CONDITIONS, CartConditionsType::class, [
                 'label' => $this->trans('Cart conditions', 'Admin.Catalog.Feature'),
@@ -45,6 +48,14 @@ class DiscountConditionsType extends TranslatorAwareType
                 'required' => false,
             ])
         ;
+
+        if (in_array($discountType, [DiscountType::FREE_SHIPPING, DiscountType::ORDER_LEVEL, DiscountType::FREE_GIFT])) {
+            $builder->add(self::DELIVERY_CONDITIONS, DeliveryConditionsType::class, [
+                'label' => $this->trans('On delivery', 'Admin.Catalog.Feature'),
+                'label_tag_name' => 'h3',
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -61,6 +72,9 @@ class DiscountConditionsType extends TranslatorAwareType
                     $this->trans('Cart conditions', 'Admin.Catalog.Feature') => [
                         'help' => $this->trans('Based on specific product(s) or product segment', 'Admin.Catalog.Feature'),
                     ],
+                    $this->trans('On delivery', 'Admin.Catalog.Feature') => [
+                        'help' => $this->trans('Based on specific carrier(s) or product segment', 'Admin.Catalog.Feature'),
+                    ],
                 ],
                 'placeholder' => $this->trans('None', 'Admin.Catalog.Feature'),
                 'placeholder_attr' => [
@@ -68,6 +82,10 @@ class DiscountConditionsType extends TranslatorAwareType
                 ],
             ],
         ]);
+        $resolver->setRequired([
+            'discount_type',
+        ]);
+        $resolver->setAllowedTypes('discount_type', ['string']);
     }
 
     public function getParent()

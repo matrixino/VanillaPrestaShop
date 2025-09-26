@@ -378,6 +378,7 @@ class OrderCore extends ObjectModel
     public function getCartProducts()
     {
         $product_id_list = [];
+        $cart_base_product_quantity = [];
         $products = $this->getProducts();
         foreach ($products as &$product) {
             $product['id_product_attribute'] = $product['product_attribute_id'];
@@ -386,6 +387,12 @@ class OrderCore extends ObjectModel
                 . $product['product_id'] . '_'
                 . $product['product_attribute_id'] . '_'
                 . (isset($product['id_customization']) ? $product['id_customization'] : '0');
+
+            if (!isset($cart_base_product_quantity[$product['id_product']])) {
+                $cart_base_product_quantity[$product['id_product']] = $product['cart_quantity'];
+            } else {
+                $cart_base_product_quantity[$product['id_product']] += $product['cart_quantity'];
+            }
         }
         unset($product);
 
@@ -395,6 +402,8 @@ class OrderCore extends ObjectModel
                 . $product['id_product'] . '_'
                 . (isset($product['id_product_attribute']) ? $product['id_product_attribute'] : '0') . '_'
                 . (isset($product['id_customization']) ? $product['id_customization'] : '0');
+
+            $product['cart_base_product_quantity'] = isset($cart_base_product_quantity[$product['id_product']]) ? $cart_base_product_quantity[$product['id_product']] : 0;
 
             if (in_array($key, $product_id_list)) {
                 $product_list[] = $product;
@@ -906,6 +915,21 @@ class OrderCore extends ObjectModel
 
     public function hasBeenDelivered()
     {
+        $hasBeenDelivered = Hook::exec(
+            'actionOrderHasBeenDelivered',
+            ['order' => $this],
+            null,
+            false,
+            true,
+            false,
+            null,
+            true
+        );
+
+        if (is_bool($hasBeenDelivered)) {
+            return $hasBeenDelivered;
+        }
+
         return count($this->getHistory((int) $this->id_lang, false, false, OrderState::FLAG_DELIVERY));
     }
 
@@ -931,6 +955,21 @@ class OrderCore extends ObjectModel
 
     public function hasBeenShipped()
     {
+        $hasBeenShipped = Hook::exec(
+            'actionOrderHasBeenShipped',
+            ['order' => $this],
+            null,
+            false,
+            true,
+            false,
+            null,
+            true
+        );
+
+        if (is_bool($hasBeenShipped)) {
+            return $hasBeenShipped;
+        }
+
         return count($this->getHistory((int) $this->id_lang, false, false, OrderState::FLAG_SHIPPED));
     }
 

@@ -27,4 +27,5 @@ export default {
   generateSecretLink: 'a.generate-client-secret',
   generateSecretModalId: 'generate-secret-modal',
   copySecret: '.copy-secret-to-clipboard',
+  copySecretIcon: '.copy-secret-to-clipboard i',
 };

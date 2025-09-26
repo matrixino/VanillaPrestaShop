@@ -62,4 +62,12 @@ class GetCarriersResult
     {
         return $this->filteredCarrier;
     }
+
+    /**
+     * @return array<int, array{id: int, name: string}>
+     */
+    public function getAvailableCarriersToArray(): array
+    {
+        return array_map(function (CarrierSummary $carrier) { return $carrier->toArray(); }, $this->availableCarriers);
+    }
 }

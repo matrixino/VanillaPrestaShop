@@ -138,3 +138,8 @@ services:
 
   PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ImageTypeChoiceProvider:
     autowire: true
+
+  PrestaShop\PrestaShop\Core\Form\ChoiceProvider\CountryByIdChoiceProvider:
+    arguments:
+      $psImageDir: !php/const _PS_IMG_DIR_
+      $psImageBaseUrl: !php/const _PS_IMG_

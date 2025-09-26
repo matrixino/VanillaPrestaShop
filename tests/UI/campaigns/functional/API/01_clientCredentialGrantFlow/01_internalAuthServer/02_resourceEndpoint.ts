@@ -27,7 +27,7 @@ describe('API : Internal Auth Server - Resource Endpoint', async () => {
   let accessTokenExpired: string;
   let clientSecret: string;
 
-  const clientClient: FakerAPIClient = new FakerAPIClient({
+  const apiClient: FakerAPIClient = new FakerAPIClient({
     enabled: true,
     scopes: [
       'hook_read',
@@ -69,11 +69,11 @@ describe('API : Internal Auth Server - Resource Endpoint', async () => {
       expect(pageTitle).to.eq(boApiClientsPage.pageTitle);
     });
 
-    it('should check that no records found', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkThatNoRecordFound', baseContext);
+    it('should check that at least one API client is present', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkThatOneAPIClientExists', baseContext);
 
-      const noRecordsFoundText = await boApiClientsPage.getTextForEmptyTable(page);
-      expect(noRecordsFoundText).to.contains('warning No records found');
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      expect(apiClientsNumber).to.be.greaterThanOrEqual(1);
     });
 
     it('should go to add New API Client page', async function () {
@@ -88,7 +88,7 @@ describe('API : Internal Auth Server - Resource Endpoint', async () => {
     it('should create API Client', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createAPIClient', baseContext);
 
-      const textResult = await boApiClientsCreatePage.addAPIClient(page, clientClient);
+      const textResult = await boApiClientsCreatePage.addAPIClient(page, apiClient);
       expect(textResult).to.contains(boApiClientsCreatePage.successfulCreationMessage);
 
       const textMessage = await boApiClientsCreatePage.getAlertInfoBlockParagraphContent(page);
@@ -111,7 +111,7 @@ describe('API : Internal Auth Server - Resource Endpoint', async () => {
 
       const apiResponse = await apiContext.post('access_token', {
         form: {
-          client_id: clientClient.clientId,
+          client_id: apiClient.clientId,
           client_secret: clientSecret,
           grant_type: 'client_credentials',
           scope: 'hook_read',
@@ -174,12 +174,12 @@ describe('API : Internal Auth Server - Resource Endpoint', async () => {
       expect(utilsAPI.getResponseHeader(apiResponse, 'Content-Type')).to.contains('application/json');
 
       const jsonResponse = await apiResponse.json();
-      expect(jsonResponse).to.have.property('id');
-      expect(jsonResponse.id).to.be.a('number');
+      expect(jsonResponse).to.have.property('hookId');
+      expect(jsonResponse.hookId).to.be.a('number');
       expect(jsonResponse).to.have.property('active');
       expect(jsonResponse.active).to.be.a('boolean');
     });
   });
 
-  deleteAPIClientTest(`${baseContext}_postTest_0`);
+  deleteAPIClientTest(`${baseContext}_postTest_0`, apiClient.clientId);
 });

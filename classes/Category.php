@@ -27,6 +27,7 @@
 use PrestaShop\PrestaShop\Core\Domain\Category\CategorySettings;
 use PrestaShop\PrestaShop\Core\Domain\Category\SeoSettings;
 use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\RedirectType;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\RedirectType as ProductRedirectType;
 
 /**
  * Class CategoryCore.
@@ -411,6 +412,7 @@ class CategoryCore extends ObjectModel
         $allCat[] = $this;
         foreach ($allCat as $cat) {
             $cat->deleteLite();
+            $cat->deleteRedirections();
             if (!$cat->hasMultishopEntries()) {
                 $cat->deleteImage();
                 $cat->cleanGroups();
@@ -433,6 +435,34 @@ class CategoryCore extends ObjectModel
         Hook::exec('actionCategoryDelete', ['category' => $this, 'deleted_children' => $deletedChildren]);
 
         return true;
+    }
+
+    /**
+     * Resets all entries where this category was used as a redirection target
+     *
+     * @return bool
+     */
+    public function deleteRedirections(): bool
+    {
+        $productTableUpdateResult = Db::getInstance()->update(
+            'product',
+            ['redirect_type' => ProductRedirectType::TYPE_DEFAULT, 'id_type_redirected' => 0],
+            '(redirect_type = \'' . ProductRedirectType::TYPE_CATEGORY_TEMPORARY . '\' OR redirect_type = \'' . ProductRedirectType::TYPE_CATEGORY_PERMANENT . '\') AND id_type_redirected = ' . (int) $this->id
+        );
+
+        $productShopTableUpdateResult = Db::getInstance()->update(
+            'product_shop',
+            ['redirect_type' => ProductRedirectType::TYPE_DEFAULT, 'id_type_redirected' => 0],
+            '(redirect_type = \'' . ProductRedirectType::TYPE_CATEGORY_TEMPORARY . '\' OR redirect_type = \'' . ProductRedirectType::TYPE_CATEGORY_PERMANENT . '\') AND id_type_redirected = ' . (int) $this->id
+        );
+
+        $categoryTableUpdateResult = Db::getInstance()->update(
+            'category',
+            ['redirect_type' => RedirectType::TYPE_PERMANENT, 'id_type_redirected' => 0],
+            '(redirect_type = \'' . RedirectType::TYPE_TEMPORARY . '\' OR redirect_type = \'' . RedirectType::TYPE_PERMANENT . '\') AND id_type_redirected = ' . (int) $this->id
+        );
+
+        return $productTableUpdateResult && $productShopTableUpdateResult && $categoryTableUpdateResult;
     }
 
     /**
@@ -1893,26 +1923,32 @@ class CategoryCore extends ObjectModel
     }
 
     /**
-     * Returns the number of categories + 1 having $idCategoryParent as parent.
+     * Returns the next position to assign to a new category.
+     * Category positions start at 0.
      *
-     * @param int $idCategoryParent The parent category
+     * Since this method is called *after* the category has already been created
+     * (with position 0 by default), using MAX(position) alone would always return 1,
+     * even for the very first category.
+     *
+     * Therefore, we check how many categories already exist under the same parent.
+     * - If there's only one (i.e., the newly created one), we return 0.
+     * - If there are two or more, we return MAX(position) + 1.
+     *
+     * @param int $idCategoryParent ID of the parent category
      * @param int $idShop Shop ID
      *
-     * @return int Number of categories + 1 having $idCategoryParent as parent
-     *
-     * @todo     rename that function to make it understandable (getNextPosition for example)
+     * @return int Position to use
      */
     public static function getLastPosition($idCategoryParent, $idShop)
     {
-        // @TODO, if we remove this query, the position will begin at 1 instead of 0, but is this really a problem?
-        $results = Db::getInstance()->executeS('
+        $childrenCount = Db::getInstance()->executeS('
 				SELECT 1
 				FROM `' . _DB_PREFIX_ . 'category` c
 				 JOIN `' . _DB_PREFIX_ . 'category_shop` cs
 				ON (c.`id_category` = cs.`id_category` AND cs.`id_shop` = ' . (int) $idShop . ')
 				WHERE c.`id_parent` = ' . (int) $idCategoryParent . ' LIMIT 2');
 
-        if (count($results) === 1) {
+        if (count($childrenCount) === 1) {
             return 0;
         } else {
             $maxPosition = (int) Db::getInstance()->getValue('

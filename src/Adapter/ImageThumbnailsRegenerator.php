@@ -29,12 +29,14 @@ namespace PrestaShop\PrestaShop\Adapter;
 use Db;
 use ImageManager as LegacyImageManager;
 use Module as LegacyModule;
+use PrestaShop\PrestaShop\Adapter\Product\Image\ProductImagePathFactory;
 use PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\ImageNotDeletedException;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\ImageTypeException;
 use PrestaShop\PrestaShop\Core\Image\ImageFormatConfiguration;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -51,6 +53,8 @@ class ImageThumbnailsRegenerator
         private readonly LanguageRepositoryInterface $langRepository,
         private readonly ConfigurationInterface $configuration,
         private readonly TranslatorInterface $translator,
+        #[Autowire('@prestashop.adapter.product.image.product_image_filesystem_path_factory')]
+        private readonly ProductImagePathFactory $productImagePathFactory,
     ) {
         // Save start time to calculate remaining time and to avoid timeout on long running processes
         $this->startTime = time();
@@ -96,16 +100,17 @@ class ImageThumbnailsRegenerator
         // Delete product images
         if ($isProduct) {
             // Get all product images in the shop
-            $productsImages = $this->productImageRepository->getAllImages();
+            $productsImages = $this->productImageRepository->iterateImagesForThumbnailGeneration();
             foreach ($productsImages as $image) {
                 // Get path to current image folder, example: /img/p/1/2/3
-                $pathToImageFolder = $dir . $image->getImgFolder();
+                $pathToImageFolder = $this->productImagePathFactory->getImageFolder($image->getImageId());
                 if (file_exists($pathToImageFolder)) {
                     // Scan all files in the given folder
                     $filesToDelete = scandir($pathToImageFolder, SCANDIR_SORT_NONE);
                     foreach ($filesToDelete as $d) {
-                        if (preg_match($regexProducts, $d) && file_exists($pathToImageFolder . $d)) {
-                            unlink($pathToImageFolder . $d);
+                        $pathToThumbnail = $pathToImageFolder . '/' . $d;
+                        if (preg_match($regexProducts, $d) && file_exists($pathToThumbnail)) {
+                            unlink($pathToThumbnail);
                         }
                     }
                 }
@@ -182,17 +187,23 @@ class ImageThumbnailsRegenerator
                 }
             }
         } else {
-            foreach ($this->productImageRepository->getAllImages() as $imageObj) {
-                $originalImageName = $dir . $imageObj->getExistingImgPath() . '.jpg';
-                if (file_exists($originalImageName) && filesize($originalImageName)) {
+            foreach ($this->productImageRepository->iterateImagesForThumbnailGeneration() as $imageForThumbnailGeneration) {
+                $originalImagePath = $this->productImagePathFactory->getPath(
+                    $imageForThumbnailGeneration->getImageId()
+                );
+                if (file_exists($originalImagePath) && filesize($originalImagePath)) {
                     foreach ($type as $imageType) {
                         foreach ($configuredImageFormats as $imageFormat) {
-                            $thumbnailName = $imageObj->getExistingImgPath() . '-' . stripslashes($imageType->getName()) . '.' . $imageFormat;
+                            $thumbnailPath = $this->productImagePathFactory->getPathByType(
+                                $imageForThumbnailGeneration->getImageId(),
+                                $imageType->getName(),
+                                $imageFormat
+                            );
 
-                            if (!file_exists($dir . $thumbnailName)) {
+                            if (!file_exists($thumbnailPath)) {
                                 if (!LegacyImageManager::resize(
-                                    $originalImageName,
-                                    $dir . $thumbnailName,
+                                    $originalImagePath,
+                                    $thumbnailPath,
                                     (int) $imageType->getWidth(),
                                     (int) $imageType->getHeight(),
                                     $imageFormat
@@ -200,8 +211,8 @@ class ImageThumbnailsRegenerator
                                     $errors[] = $this->translator->trans(
                                         'Original image is corrupt (%filename%) for product ID %id% or bad permission on folder.',
                                         [
-                                            '%filename%' => $originalImageName,
-                                            '%id%' => (int) $imageObj->id_product,
+                                            '%filename%' => $originalImagePath,
+                                            '%id%' => $imageForThumbnailGeneration->getProductId()->getValue(),
                                         ],
                                         'Admin.Design.Notification'
                                     );
@@ -213,8 +224,8 @@ class ImageThumbnailsRegenerator
                     $errors[] = $this->translator->trans(
                         'Original image is missing or empty (%filename%) for product ID %id%',
                         [
-                            '%filename%' => $originalImageName,
-                            '%id%' => (int) $imageObj->id_product,
+                            '%filename%' => $originalImagePath,
+                            '%id%' => $imageForThumbnailGeneration->getProductId()->getValue(),
                         ],
                         'Admin.Design.Notification'
                     );
@@ -238,13 +249,20 @@ class ImageThumbnailsRegenerator
 		WHERE h.`name` = \'actionWatermark\' AND m.`active` = 1');
 
         if ($result && count($result)) {
-            $productsImages = $this->productImageRepository->getAllImages();
-            foreach ($productsImages as $imageObj) {
-                if (file_exists($dir . $imageObj->getExistingImgPath() . '.jpg')) {
+            $productsImages = $this->productImageRepository->iterateImagesForThumbnailGeneration();
+            foreach ($productsImages as $imageForThumbnailGeneration) {
+                if (file_exists($this->productImagePathFactory->getPath($imageForThumbnailGeneration->getImageId()))) {
                     foreach ($result as $module) {
                         $moduleInstance = LegacyModule::getInstanceByName($module['name']);
                         if ($moduleInstance && is_callable([$moduleInstance, 'hookActionWatermark'])) {
-                            call_user_func([$moduleInstance, 'hookActionWatermark'], ['id_image' => $imageObj->id, 'id_product' => $imageObj->id_product, 'image_type' => $formats]);
+                            call_user_func(
+                                [$moduleInstance, 'hookActionWatermark'],
+                                [
+                                    'id_image' => $imageForThumbnailGeneration->getImageId()->getValue(),
+                                    'id_product' => $imageForThumbnailGeneration->getProductId()->getValue(),
+                                    'image_type' => $formats,
+                                ]
+                            );
                         }
 
                         if (time() - $this->startTime > $this->maxExecutionTime - 4) { // stop 4 seconds before the tiemout, just enough time to process the end of the page on a slow server

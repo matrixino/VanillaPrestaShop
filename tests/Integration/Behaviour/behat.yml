@@ -303,7 +303,11 @@ default:
         - Tests\Integration\Behaviour\Features\Context\CountryFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CurrencyFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CustomerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierRangesFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CartFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\CategoryFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\CustomerFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Discount\DiscountConditionsFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Discount\DiscountFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ProductFeatureContext
@@ -315,16 +319,25 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\Combination\UpdateCombinationFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\Combination\UpdateCombinationStockFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\CommonProductFeatureContext
-        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateStatusFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateCategoriesFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateProductFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateStatusFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateStockFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\TaxRulesGroupFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\ZoneFeatureContext
         - Tests\Integration\Behaviour\Features\Context\FeatureFlagFeatureContext
         - Tests\Integration\Behaviour\Features\Context\LanguageFeatureContext
         - Tests\Integration\Behaviour\Features\Context\LegacyProductFeatureContext
         - Tests\Integration\Behaviour\Features\Context\ShopFeatureContext
         - Tests\Integration\Behaviour\Features\Transform\CurrencyTransformContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ManufacturerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\SupplierFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateProductSuppliersFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\CountryFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\AddressFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\FeatureValueFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\FeatureFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateProductFeatureValuesFeatureContext
 
     catalog_price_rule:
       paths:
@@ -667,6 +680,7 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Configuration\EmailConfigurationFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CountryFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CustomerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\CarrierFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierRangesFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierTaxRuleGroupFeatureContext
@@ -676,6 +690,7 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Domain\OrderFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\OrderShippingFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\AddProductFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateProductFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateShippingFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\TaxRulesGroupFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ZoneFeatureContext

@@ -26,12 +26,14 @@
 
 namespace PrestaShopBundle\Form\Admin\Sell\Discount;
 
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\NotCustomizableProduct;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType as DiscountTypeVo;
 use PrestaShopBundle\Form\Admin\Type\EntitySearchInputType;
 use PrestaShopBundle\Form\Admin\Type\ProductSearchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * This is the form root element for discount form.
@@ -53,6 +55,7 @@ class DiscountType extends TranslatorAwareType
             ])
             ->add('conditions', DiscountConditionsType::class, [
                 'label' => $this->trans('Product conditions', 'Admin.Catalog.Feature'),
+                'discount_type' => $discountType,
             ])
         ;
 
@@ -77,6 +80,10 @@ class DiscountType extends TranslatorAwareType
                     'empty_state' => $this->trans('No product selected', 'Admin.Catalog.Feature'),
                     'identifier_field' => 'gift_product',
                     'required' => true,
+                    'constraints' => [
+                        new NotBlank(),
+                        new NotCustomizableProduct(['message' => $this->trans('Product with required customization fields cannot be used as a gift.', 'Admin.Catalog.Notification')]),
+                    ],
                 ])
             ;
         }

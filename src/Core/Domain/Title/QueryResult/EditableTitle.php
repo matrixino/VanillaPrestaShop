@@ -47,6 +47,10 @@ class EditableTitle
      */
     protected $gender;
 
+    protected int $width;
+
+    protected int $height;
+
     /**
      * @param int $titleId
      * @param array<string> $localizedNames
@@ -55,11 +59,15 @@ class EditableTitle
     public function __construct(
         int $titleId,
         array $localizedNames,
-        int $gender
+        int $gender,
+        int $width,
+        int $height
     ) {
         $this->titleId = $titleId;
         $this->localizedNames = $localizedNames;
         $this->gender = $gender;
+        $this->width = $width;
+        $this->height = $height;
     }
 
     /**
@@ -84,5 +92,15 @@ class EditableTitle
     public function getGender(): int
     {
         return $this->gender;
+    }
+
+    public function getHeight(): int
+    {
+        return $this->height;
+    }
+
+    public function getWidth(): int
+    {
+        return $this->width;
     }
 }

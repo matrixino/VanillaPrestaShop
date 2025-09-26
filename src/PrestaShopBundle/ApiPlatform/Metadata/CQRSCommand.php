@@ -129,6 +129,7 @@ class CQRSCommand extends AbstractCQRSOperation
         ?array $ApiResourceMapping = null,
         ?array $CQRSCommandMapping = null,
         ?bool $experimentalOperation = null,
+        ?bool $allowEmptyBody = null,
     ) {
         $passedArguments = \get_defined_vars();
 
@@ -144,9 +145,15 @@ class CQRSCommand extends AbstractCQRSOperation
             $passedArguments['extraProperties']['CQRSCommandMapping'] = $CQRSCommandMapping;
         }
 
+        if ($allowEmptyBody !== null) {
+            $this->checkArgumentAndExtraParameterValidity('allowEmptyBody', $allowEmptyBody, $passedArguments['extraProperties']);
+            $passedArguments['extraProperties']['allowEmptyBody'] = $allowEmptyBody;
+        }
+
         // Remove custom arguments
         unset($passedArguments['CQRSCommand']);
         unset($passedArguments['CQRSCommandMapping']);
+        unset($passedArguments['allowEmptyBody']);
 
         // By default, the CQRS command is used as the input base class as it contains the exact available parameters for this operation
         // Exception in case the class doesn't exist we don't force the input because InputOutputResourceMetadataCollectionFactory will raise an exception when the resources are parsed
@@ -166,7 +173,8 @@ class CQRSCommand extends AbstractCQRSOperation
     {
         $self = clone $this;
         $self->extraProperties['CQRSCommand'] = $CQRSCommand;
-        if ($this->input === $this->extraProperties['CQRSCommand']) {
+        // Test if the input was a copy of the CQRSCommand extra property, set in the constructor (if none was set then we can copy it as well)
+        if (empty($this->input) || empty($this->extraProperties['CQRSCommand']) || $this->input === $this->extraProperties['CQRSCommand']) {
             $self->input = $CQRSCommand;
         }
 
@@ -186,10 +194,23 @@ class CQRSCommand extends AbstractCQRSOperation
         return $this->extraProperties['CQRSCommandMapping'] ?? null;
     }
 
-    public function withCQRSCommandMapping(array $CQRSQuery): static
+    public function withCQRSCommandMapping(array $CQRSCommandMapping): static
     {
         $self = clone $this;
-        $self->extraProperties['CQRSCommandMapping'] = $CQRSQuery;
+        $self->extraProperties['CQRSCommandMapping'] = $CQRSCommandMapping;
+
+        return $self;
+    }
+
+    public function getAllowEmptyBody(): ?bool
+    {
+        return $this->extraProperties['allowEmptyBody'] ?? null;
+    }
+
+    public function withAllowEmptyBody(bool $allowEmptyBody): static
+    {
+        $self = clone $this;
+        $self->extraProperties['allowEmptyBody'] = $allowEmptyBody;
 
         return $self;
     }

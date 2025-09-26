@@ -299,7 +299,7 @@ class OrderLazyArray extends AbstractLazyArray
                 $historyId = 'current';
             }
             $orderHistory[$historyId] = $history;
-            $orderHistory[$historyId]['history_date'] = Tools::displayDate($history['date_add'], false);
+            $orderHistory[$historyId]['history_date'] = Tools::displayDate($history['date_add'], true);
             $orderHistory[$historyId]['contrast'] = (new ColorBrightnessCalculator())->isBright($history['color']) ? 'dark' : 'bright';
         }
 

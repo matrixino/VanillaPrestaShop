@@ -28,7 +28,6 @@ namespace PrestaShop\PrestaShop\Adapter\Image;
 
 use Category;
 use Configuration;
-use Context;
 use Image;
 use ImageManager;
 use ImageType;
@@ -212,9 +211,7 @@ class ImageRetriever
         }
 
         // Check and generate each thumbnail size
-        $currentTheme = Context::getContext()->shop->theme_name;
-        $image_types = ImageType::getImagesTypes($type, true, $currentTheme);
-
+        $image_types = ImageType::getImagesTypes($type, true);
         foreach ($image_types as $image_type) {
             $sources = [];
             $formattedName = ImageType::getFormattedName('small');
@@ -367,12 +364,9 @@ class ImageRetriever
             ['type' => 'stores', 'dir' => _PS_STORE_IMG_DIR_],
         ];
 
-        // Get current theme
-        $currentTheme = Context::getContext()->shop->theme_name;
-
         foreach ($objectsToRegenerate as $object) {
             // Get all image types present on shops for this object
-            $imageTypes = ImageType::getImagesTypes($object['type'], true, $currentTheme);
+            $imageTypes = ImageType::getImagesTypes($object['type'], true);
 
             // We get the "no image available" in the folder of the object
             $originalImagePath = implode(DIRECTORY_SEPARATOR, [

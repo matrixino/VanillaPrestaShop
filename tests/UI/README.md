@@ -78,6 +78,22 @@ npm run test:functional:BO:orders
 | SMTP_SERVER | The smtp server address for maildev (default to **`172.20.0.4`**) |
 | SMTP_PORT   | The smtp port for maildev (default to **`1026`**)                 |
 
+### Admin API parameters
+
+| Parameter         | Description                                                   |
+|-------------------|---------------------------------------------------------------|
+| URL_API           | The Admin API base URL (default to **`URL_FO + admin-api/`**) |
+| CLIENT_ID_API     | The API Client client ID                                      |
+| CLIENT_SECRET_API | The API Client client secret                                  |
+
+To run the API tests you need to create an API Client before you run the related tests, and the env variables should be adpted to use the appropriate Client ID and secret.
+
+You can create an API Client with this command at the root of your project (where `{clientId}` and `{secret}` are placeholders to fill):
+
+```bash
+php ./bin/console prestashop:api-client create {clientId} --all-scopes --name='Test client' --description='Test client with all scopes' --timeout=3600 --secret={secret}
+```
+
 ### Keycloak parameters
 
 | Parameter               | Description                                                                                              |

@@ -60,11 +60,7 @@ $(() => {
     form.submit();
   }
 
-  // Copy secret to clipboard
-  document.querySelector<HTMLLinkElement>(ApiClientMap.copySecret)?.addEventListener('click', (event) => {
-    event.preventDefault();
-    const copyLink = event.target as HTMLLinkElement;
-
+  function copyClientSecret(copyLink: HTMLLinkElement): void {
     // Fallback to navigator.clipboard.writeText because it only works with https
     const input = document.createElement('input');
     input.value = copyLink.dataset.secret ?? '';
@@ -76,5 +72,21 @@ $(() => {
     } finally {
       input.remove();
     }
+  }
+
+  // Copy secret to clipboard
+  document.querySelector<HTMLLinkElement>(ApiClientMap.copySecret)?.addEventListener('click', (event: Event) => {
+    event.preventDefault();
+    const copyLink = event.target as HTMLLinkElement;
+
+    copyClientSecret(copyLink);
+  });
+  document.querySelector<HTMLElement>(ApiClientMap.copySecretIcon)?.addEventListener('click', (event: Event) => {
+    event.preventDefault();
+
+    const copyLinkIcon = event.target as HTMLElement;
+    const copyLink = copyLinkIcon.parentElement as HTMLLinkElement;
+
+    copyClientSecret(copyLink);
   });
 });

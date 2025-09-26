@@ -31,7 +31,6 @@
         "bjeavons/zxcvbn-php": "^1.4",
         "composer/ca-bundle": "^1.0",
         "composer/installers": "^2.2.0",
-        "cssjanus/cssjanus": "^2.0",
         "curl/curl": "^2.3.2",
         "defuse/php-encryption": "^2.3.1",
         "doctrine/cache": "^2.0",
@@ -72,7 +71,7 @@
         "prestashop/hummingbird": "^1.0.1",
         "prestashop/pagesnotfound": "^2",
         "prestashop/productcomments": "^7.0",
-        "prestashop/ps_apiresources": "^0.1",
+        "prestashop/ps_apiresources": "dev-dev",
         "prestashop/ps_banner": "^2",
         "prestashop/ps_bestsellers": "^1.0",
         "prestashop/ps_brandlist": "^1.0",
@@ -87,7 +86,7 @@
         "prestashop/ps_customersignin": "^2",
         "prestashop/ps_customtext": "^4",
         "prestashop/ps_dataprivacy": "^2.0",
-        "prestashop/ps_distributionapiclient": "^2",
+        "prestashop/ps_distributionapiclient": "^2.1",
         "prestashop/ps_emailalerts": "^3",
         "prestashop/ps_emailsubscription": "^2.7",
         "prestashop/ps_facetedsearch": "^4.0.0",
@@ -186,7 +185,8 @@
         "tijsverkoyen/css-to-inline-styles": "^2.2",
         "twig/extra-bundle": "^3.6",
         "twig/string-extra": "^3.6",
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "wikimedia/cssjanus": "^2.0"
     },
     "require-dev": {
         "behat/behat": "^3.15",
@@ -209,6 +209,10 @@
         "php-sql-parser": {
             "type": "vcs",
             "url": "https://github.com/PrestaShop/PHP-SQL-Parser"
+        },
+        "ps_apiresources": {
+            "type": "vcs",
+            "url": "https://github.com/PrestaShop/ps_apiresources"
         }
     },
     "minimum-stability": "dev",

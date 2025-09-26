@@ -30,7 +30,12 @@
   </h3>
   <div class="card-body">
     <p>{{ 'Meaning of severity levels:'|trans }}</p>
-    <ol>
+    <ol start="0">
+      <li>
+        <span class="badge badge-pill bg-secondary">
+          {{ 'Debug'|trans({}, 'Admin.Advparameters.Help') }}
+        </span>
+      </li>
       <li>
         <span class="badge badge-pill badge-success">
           {{ 'Informative only'|trans({}, 'Admin.Advparameters.Help') }}

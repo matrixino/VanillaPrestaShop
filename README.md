@@ -6,7 +6,8 @@ About PrestaShop
 [![UI tests](https://github.com/PrestaShop/PrestaShop/actions/workflows/sanity.yml/badge.svg)](https://github.com/PrestaShop/PrestaShop/actions/workflows/sanity.yml)
 [![Nightly Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi-nightly.prestashop-project.org%2Fdata%2Fbadge&label=Nightly%20Status&cacheSeconds=3600)](https://nightly.prestashop-project.org/)
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg?style=flat-square)](https://php.net/)
-[![GitHub release](https://img.shields.io/github/v/release/prestashop/prestashop)](https://github.com/PrestaShop/PrestaShop)
+[![GitHub release](https://img.shields.io/github/v/release/prestashop/prestashop?sort=semver)](https://github.com/PrestaShop/PrestaShop)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=prestashop)](https://insights.linuxfoundation.org/project/prestashop)
 [![Slack chat](https://img.shields.io/badge/Chat-on%20Slack-red)](https://www.prestashop-project.org/slack/)
 [![GitHub forks](https://img.shields.io/github/forks/PrestaShop/PrestaShop)](https://github.com/PrestaShop/PrestaShop/network)
 [![GitHub stars](https://img.shields.io/github/stars/PrestaShop/PrestaShop)](https://github.com/PrestaShop/PrestaShop/stargazers)
@@ -14,12 +15,12 @@ About PrestaShop
 PrestaShop is an Open Source e-commerce web application, committed to providing the best shopping cart experience for both merchants and customers. It is written in PHP, is highly customizable, supports all the major payment services, is translated in many languages and localized for many countries, has a fully responsive design (both front and back office), etc. [See all the available features][available-features].
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/2137763/201319765-9157f702-4970-4258-8390-1187de2ad587.png" alt="PrestaShop 8.0 back office"/>
+  <img src="https://github.com/user-attachments/assets/e6342778-e528-4ae7-acf2-f0d097a1e932" alt="PrestaShop 9.0 back office"/>
 </p>
 
 This repository contains the source code of PrestaShop, which is intended for development and preview only. To download the latest stable public version of PrestaShop (currently, version 9.0), please go to [the releases page][download].
 
-The first stable version of PrestaShop 9.0 was released on June 10th, 2025.  
+The first stable version of PrestaShop 9.0 was released on June 10th, 2025. Learn more about it on [the Build devblog](https://build.prestashop-project.org/tag/9.0/).
 
 About the `develop` branch
 --------
@@ -174,7 +175,7 @@ You can discuss about e-commerce, help other merchants and get help, and contrib
 Thank you for downloading and using the PrestaShop Open Source e-commerce solution!
 
 [available-features]: https://prestashop.com/create-online-store/
-[download]: https://github.com/PrestaShop/PrestaShop/releases
+[download]: https://www.prestashop-project.org/releases/prestashop90/
 [forums]: https://www.prestashop.com/forums/
 [ghdiscussions]: https://github.com/PrestaShop/PrestaShop/discussions
 [support]: https://www.prestashop-project.org/support/

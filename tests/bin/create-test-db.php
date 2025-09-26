@@ -50,7 +50,7 @@ const _PS_ALL_THEMES_DIR_ = _PS_ROOT_DIR_ . '/tests/Resources/themes/';
 require_once _PS_ROOT_DIR_ . '/install-dev/init.php';
 
 $output = new ConsoleOutput();
-$logger = new SymfonyConsoleLogger($output, PrestaShopLoggerInterface::DEBUG);
+$logger = new SymfonyConsoleLogger($output, SymfonyConsoleLogger::INFO);
 
 $translator = Context::getContext()->getTranslatorFromLocale('en');
 $install = new Install(null, null, $logger);

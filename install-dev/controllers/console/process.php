@@ -49,7 +49,7 @@ class InstallControllerConsoleProcess extends InstallControllerConsole implement
     public function init()
     {
         $output = new ConsoleOutput();
-        $logger = new SymfonyConsoleLogger($output, PrestaShopLoggerInterface::DEBUG);
+        $logger = new SymfonyConsoleLogger($output, SymfonyConsoleLogger::INFO);
 
         $this->model_install = new Install(null, null, $logger);
         $this->model_install->setTranslator($this->translator);
@@ -338,11 +338,6 @@ class InstallControllerConsoleProcess extends InstallControllerConsole implement
     public function processFinalize(): bool
     {
         $this->initializeContext();
-
-        // if admin folder doesn't exist, then there's nothing to do here
-        if (!file_exists(_PS_ROOT_DIR_ . '/admin/')) {
-            return true;
-        }
 
         $result = $this->model_install->finalize();
 

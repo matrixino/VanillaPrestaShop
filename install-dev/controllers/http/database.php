@@ -226,6 +226,11 @@ class InstallControllerHttpDatabase extends InstallControllerHttp implements Htt
             $this->smtp_port = $this->session->smtp_port;
         }
 
+        $staticPrefix = defined('_PS_INSTALLER_STATIC_DB_PREFIX_') ? _PS_INSTALLER_STATIC_DB_PREFIX_ : null;
+        if (is_string($staticPrefix) && $staticPrefix !== '') {
+            $this->database_prefix = rtrim($staticPrefix, '_') . '_';
+        }
+
         $this->displayContent('database');
     }
 }

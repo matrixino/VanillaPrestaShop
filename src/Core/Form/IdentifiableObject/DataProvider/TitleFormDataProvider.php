@@ -64,8 +64,8 @@ class TitleFormDataProvider implements FormDataProviderInterface
             'id' => $id,
             'name' => $result->getLocalizedNames(),
             'gender_type' => $result->getGender(),
-            'img_height' => TitleSettings::DEFAULT_IMAGE_HEIGHT,
-            'img_width' => TitleSettings::DEFAULT_IMAGE_WIDTH,
+            'img_height' => $result->getHeight(),
+            'img_width' => $result->getWidth(),
         ];
     }
 

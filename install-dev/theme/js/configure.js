@@ -80,6 +80,7 @@ function in_array(needle, haystack) {
  */
 function watchPasswordStrength(element) {
   element.on('keyup', function checkPasswordStrength() {
+    $('.field-password .errorTxt').hide();
     const passwordValue = $(this).val();
     const popoverElement = $('.field-password .popover');
     let $feedbackContainer = $(this).parent().find('.password-strength-feedback');

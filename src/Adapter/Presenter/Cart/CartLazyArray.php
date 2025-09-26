@@ -463,7 +463,7 @@ class CartLazyArray extends AbstractLazyArray
                 $cartVoucher['reduction_formatted'] = $this->translator->trans(
                     'Free shipping',
                     [],
-                    'Admin.Shipping.Feature'
+                    'Shop.Theme.Checkout'
                 );
             } else {
                 $cartVoucher['reduction_formatted'] = '-' . $this->priceFormatter->format($totalCartVoucherReduction);

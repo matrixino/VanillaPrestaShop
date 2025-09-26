@@ -8,7 +8,7 @@ services:
       # Symfony will throw an error when an argument is no more used in all services definitions so we can safely remove them.
       # Before adding your own, please check it does not already exist in the list.
       # There could be some duplicates.
-      $locales: "@=service('prestashop.adapter.legacy.context').getLanguages()"
+      $locales: "@=service('prestashop.adapter.legacy.context').getLanguages(false)"
       $isMultiShopEnabled: '@=service("prestashop.adapter.multistore_feature").isUsed()'
       $isShopFeatureEnabled: '@=service("prestashop.adapter.multistore_feature").isUsed()'
       $isMultistoreEnabled: '@=service("prestashop.adapter.multistore_feature").isActive()'
@@ -89,6 +89,7 @@ services:
 
   PrestaShopBundle\Form\Admin\Sell\Order\Invoices\GenerateByStatusType:
     arguments:
+      $translator: '@translator'
       $orderStateChoiceProvider: '@prestashop.core.form.choice_provider.order_state_by_id'
       $orderCountsByState: '@=service("prestashop.core.api.order_invoice.repository").countByOrderState(service("prestashop.adapter.shop.context").getContextListShopID())'
 
@@ -429,6 +430,15 @@ services:
     arguments:
       $manufacturerChoiceProvider: '@prestashop.adapter.form.choice_provider.manufacturer_name_by_id'
 
+  PrestaShopBundle\Form\Admin\Sell\Discount\DiscountSupplierType:
+    class: 'PrestaShopBundle\Form\Admin\Sell\Discount\DiscountSupplierType'
+    arguments:
+      $supplierNameByIdChoiceProvider: '@prestashop.adapter.form.choice_provider.supplier_name_by_id_choice_provider'
+  PrestaShopBundle\Form\Admin\Sell\Discount\DiscountFeaturesType:
+    class: 'PrestaShopBundle\Form\Admin\Sell\Discount\DiscountFeaturesType'
+    arguments:
+      $featuresChoiceProvider: '@prestashop.adapter.form.choice_provider.features_choice_provider'
+
   PrestaShopBundle\Form\Admin\Sell\Product\Category\CategoriesType:
     arguments:
       $defaultCategoryChoiceProvider: '@prestashop.adapter.form.choice_provider.product_default_category_choice_provider'
@@ -557,6 +567,11 @@ services:
 
   PrestaShopBundle\Form\Admin\Sell\CustomerService\MerchandiseReturn\MerchandiseReturnOptionsType:
 
+  PrestaShopBundle\Form\Admin\Type\CarrierChoiceType:
+    arguments:
+      $carrierChoiceProvider: '@prestashop.core.form.choice_provider.carrier_by_reference_id'
+      $carrierLogoProvider: '@prestashop.adapter.carrier.carrier_thumbnail_logo_provider'
+
   PrestaShopBundle\Form\Admin\Type\ZoneChoiceType:
     arguments:
       $zonesChoiceProvider: '@prestashop.core.form.choice_provider.zone_by_id'
@@ -602,10 +617,6 @@ services:
   PrestaShopBundle\Form\Admin\Type\FeatureChoiceType:
     arguments:
       $featureChoiceProvider: '@PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\FeaturesChoiceProvider'
-
-  PrestaShopBundle\Form\Admin\Type\ThemeChoiceType:
-    arguments:
-      $themesChoiceProvider: '@PrestaShop\PrestaShop\Core\Form\ChoiceProvider\ThemeByNameChoiceProvider'
 
   form.type.sell.product.event_listener.categories_listener:
     alias: 'PrestaShopBundle\Form\Admin\Sell\Product\EventListener\CategoriesListener'
@@ -683,3 +694,11 @@ services:
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\DeleteImageTypeType: ~
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\ImageSettingsType: ~
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\RegenerateThumbnailsType: ~
+
+  PrestaShopBundle\Form\Admin\Sell\Order\Shipment\MergeShipmentType:
+    arguments:
+      $translator: '@translator'
+
+  PrestaShopBundle\Form\Admin\Sell\Order\Shipment\SplitShipmentType: ~
+
+  PrestaShopBundle\Form\Admin\Sell\Order\Shipment\EditShipmentType: ~

@@ -200,7 +200,7 @@ class MailThemeController extends PrestaShopAdminController
      *
      * @throws Exception
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_mail_theme_index')]
     public function saveConfigurationAction(
         Request $request,
         #[Autowire(service: 'prestashop.admin.mail_theme.form_handler')]

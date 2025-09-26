@@ -72,3 +72,29 @@ services:
       - '%kernel.project_dir%/install-dev/data/xml/hook.xml'
     tags:
       - 'console.command'
+
+  PrestaShopBundle\Command\AboutCommand:
+    arguments:
+      - '@prestashop.adapter.legacy.configuration'
+    tags:
+      - 'console.command'
+
+  PrestaShopBundle\Command\ExportModuleTranslationsCommand:
+    arguments:
+      $translationCatalogueExporter: '@prestashop.translation.export.translation_catalogue'
+      $filesystem: '@filesystem'
+      $moduleDir: '%prestashop.module_dir%'
+    tags:
+      - 'console.command'
+
+  PrestaShopBundle\Command\SearchIndexationCommand:
+    arguments:
+      - '@prestashop.core.command_bus'
+    tags:
+      - 'console.command'
+
+  PrestaShopBundle\Command\RegenerateThumbnailsCommand:
+    arguments:
+      - '@prestashop.core.command_bus'
+    tags:
+      - 'console.command'

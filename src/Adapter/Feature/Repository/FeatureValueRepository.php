@@ -266,6 +266,44 @@ class FeatureValueRepository extends AbstractObjectModelRepository
     }
 
     /**
+     * Get features information by feature value IDs
+     *
+     * @param int[] $featureValueIds
+     * @param int $langId
+     *
+     * @return array<int, array{id_feature: int, feature_name: string|null, feature_value_name: string|null}>
+     */
+    public function getFeaturesInfoByFeatureValueIds(array $featureValueIds, int $langId): array
+    {
+        if (empty($featureValueIds)) {
+            return [];
+        }
+
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('fv.id_feature_value, fv.id_feature, fl.name as feature_name, fvl.value as feature_value_name')
+            ->from($this->dbPrefix . 'feature_value', 'fv')
+            ->leftJoin('fv', $this->dbPrefix . 'feature', 'f', 'f.id_feature = fv.id_feature')
+            ->leftJoin('f', $this->dbPrefix . 'feature_lang', 'fl', 'fl.id_feature = f.id_feature AND fl.id_lang = :langId')
+            ->leftJoin('fv', $this->dbPrefix . 'feature_value_lang', 'fvl', 'fvl.id_feature_value = fv.id_feature_value AND fvl.id_lang = :langId')
+            ->where('fv.id_feature_value IN (:featureValueIds)')
+            ->setParameter('langId', $langId)
+            ->setParameter('featureValueIds', $featureValueIds, Connection::PARAM_INT_ARRAY);
+
+        $result = $qb->executeQuery()->fetchAllAssociative();
+        $featuresInfo = [];
+        foreach ($result as $row) {
+            $featuresInfo[(int) $row['id_feature_value']] = [
+                'id_feature' => (int) $row['id_feature'],
+                'feature_name' => $row['feature_name'],
+                'feature_value_name' => $row['feature_value_name'],
+            ];
+        }
+
+        return $featuresInfo;
+    }
+
+    /**
      * @param array $featureValuesIds
      * @param array $filters
      *

@@ -114,6 +114,10 @@ class TemplateVariablesBuilder
             /** @var Tab|null $tab */
             $tab = $this->tabRepository->findOneBy(['id' => $this->employeeContext->getEmployee()->getDefaultTabId()]);
 
+            if (!$tab) {
+                $tab = $this->tabRepository->findOneByClassName('AdminDashboard');
+            }
+
             return $this->context->getAdminLink($tab->getClassName());
         }
 

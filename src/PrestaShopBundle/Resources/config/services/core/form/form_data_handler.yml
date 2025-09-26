@@ -89,6 +89,8 @@ services:
       - '@=service("prestashop.adapter.legacy.configuration").getInt(constant("PrestaShop\\PrestaShop\\Core\\Security\\PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_LENGTH"))'
       - '@=service("prestashop.adapter.legacy.configuration").getInt(constant("PrestaShop\\PrestaShop\\Core\\Security\\PasswordPolicyConfiguration::CONFIGURATION_MAXIMUM_LENGTH"))'
       - '@=service("prestashop.adapter.legacy.configuration").getInt(constant("PrestaShop\\PrestaShop\\Core\\Security\\PasswordPolicyConfiguration::CONFIGURATION_MINIMUM_SCORE"))'
+      - '@=service("prestashop.adapter.legacy.configuration").getBoolean("PS_BO_ALLOW_EMPLOYEE_FORM_LANG")'
+      - '@=service("prestashop.adapter.legacy.context").getContext().cookie'
 
   prestashop.core.form.identifiable_object.data_handler.profile_form_data_handler:
     class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler\ProfileFormDataHandler'

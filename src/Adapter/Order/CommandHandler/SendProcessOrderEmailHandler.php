@@ -174,7 +174,7 @@ class SendProcessOrderEmailHandler implements SendProcessOrderEmailHandlerInterf
     {
         $orderLink = $this->contextLink->getPageLink(
             'order',
-            false,
+            null,
             $cartLanguage->id,
             http_build_query([
                 'step' => 3,

@@ -27,6 +27,8 @@
 namespace PrestaShop\PrestaShop\Core\Domain\Discount\Command;
 
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
+use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\CurrencyId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
@@ -44,6 +46,13 @@ class UpdateDiscountConditionsCommand
     private ?Money $minimumAmount = null;
 
     private ?bool $minimumAmountShippingIncluded = null;
+
+    /**
+     * @var CarrierId[]|null
+     */
+    private ?array $carrierIds = null;
+
+    private ?array $countryIds = null;
 
     public function __construct(int $discountId)
     {
@@ -139,6 +148,38 @@ class UpdateDiscountConditionsCommand
         }
 
         $this->productConditions = $productConditions;
+
+        return $this;
+    }
+
+    /**
+     * @return CarrierId[]|null
+     */
+    public function getCarrierIds(): ?array
+    {
+        return $this->carrierIds;
+    }
+
+    /**
+     * @param int[]|null $carrierIds
+     *
+     * @return $this
+     */
+    public function setCarrierIds(?array $carrierIds): self
+    {
+        $this->carrierIds = array_map(fn (int $carrierId) => new CarrierId($carrierId), $carrierIds);
+
+        return $this;
+    }
+
+    public function getCountryIds(): ?array
+    {
+        return $this->countryIds;
+    }
+
+    public function setCountryIds(?array $countryIds): self
+    {
+        $this->countryIds = array_map(fn (int $countryId) => new CountryId($countryId), $countryIds);
 
         return $this;
     }

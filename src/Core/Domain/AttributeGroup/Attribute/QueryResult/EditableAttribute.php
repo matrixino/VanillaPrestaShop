@@ -38,7 +38,8 @@ class EditableAttribute
         private readonly int $attributeGroupId,
         private readonly array $localizedNames,
         private readonly string $color,
-        private readonly array $shopAssociationIds
+        private readonly array $shopAssociationIds,
+        private readonly ?array $textureImage
     ) {
     }
 
@@ -68,5 +69,13 @@ class EditableAttribute
     public function getAssociatedShopIds(): array
     {
         return $this->shopAssociationIds;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTextureImage()
+    {
+        return $this->textureImage;
     }
 }

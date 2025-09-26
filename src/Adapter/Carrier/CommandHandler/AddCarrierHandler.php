@@ -72,7 +72,8 @@ class AddCarrierHandler implements AddCarrierHandlerInterface
         if (null !== $command->getPosition()) {
             $carrier->position = $command->getPosition();
         } else {
-            $this->carrierRepository->getLastPosition() + 1;
+            $lastPosition = $this->carrierRepository->getLastPosition();
+            $carrier->position = $lastPosition !== null ? $lastPosition + 1 : 0;
         }
 
         // Shipping information

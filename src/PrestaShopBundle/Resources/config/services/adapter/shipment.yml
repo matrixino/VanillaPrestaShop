@@ -19,3 +19,7 @@ services:
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\SplitShipmentHandler:
 
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\DeleteProductFromShipmentHandler:
+
+  PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\EditShipmentHandler:
+
+  PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler\GetShipmentForEditingHandler:

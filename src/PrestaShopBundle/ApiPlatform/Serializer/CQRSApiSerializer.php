@@ -26,6 +26,7 @@
 
 namespace PrestaShopBundle\ApiPlatform\Serializer;
 
+use ApiPlatform\Metadata\HttpOperation;
 use PrestaShopBundle\ApiPlatform\ContextParametersProvider;
 use PrestaShopBundle\ApiPlatform\LocalizedValueUpdater;
 use PrestaShopBundle\ApiPlatform\Metadata\LocalizedValue;
@@ -80,6 +81,11 @@ class CQRSApiSerializer implements SerializerInterface, ContextAwareNormalizerIn
 
     public function decode(string $data, string $format, array $context = [])
     {
+        // Usually empty body would trigger an exception, unless we allowed it via the custom extra property
+        if ($this->isEmptyBodyAllowed($data, $context)) {
+            return [];
+        }
+
         return $this->decorated->decode($data, $format, $context);
     }
 
@@ -203,5 +209,26 @@ class CQRSApiSerializer implements SerializerInterface, ContextAwareNormalizerIn
                 $context[AbstractNormalizer::CALLBACKS][$attributeMetadata->getName()] = fn (mixed $value): bool => filter_var($value, FILTER_VALIDATE_BOOLEAN);
             }
         }
+    }
+
+    /**
+     * Empty body is not allowed with JSON format as empty string is considered invalid JSON, but in some cases we
+     * want to send an empty body (delete an operation, enable an entity via dedicated endpoint, ...) if the ID is
+     * already in the URI, and we don't need any other data.
+     */
+    protected function isEmptyBodyAllowed(string $data, array $context): bool
+    {
+        if (!empty($data)) {
+            return false;
+        }
+
+        if ($context['operation'] instanceof HttpOperation) {
+            $extraProperties = $context['operation']->getExtraProperties();
+            if ($extraProperties['allowEmptyBody'] ?? false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

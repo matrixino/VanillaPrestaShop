@@ -43,12 +43,24 @@ class DiscountConditionsUpdater
     ) {
     }
 
+    /**
+     * @param DiscountId $discountId
+     * @param int|null $minimumProductsQuantity
+     * @param array|null $productConditions
+     * @param Money|null $minimumAmount
+     * @param bool|null $minimumShippingIncluded
+     * @param int[]|null $carrierIds
+     *
+     * @return void
+     */
     public function update(
         DiscountId $discountId,
         ?int $minimumProductsQuantity = null,
         ?array $productConditions = null,
         ?Money $minimumAmount = null,
         ?bool $minimumShippingIncluded = null,
+        ?array $carrierIds = null,
+        ?array $countryIds = null,
     ): void {
         // todo: when other conditions are added we check that only one is provided
         $discount = $this->discountRepository->get($discountId);
@@ -64,6 +76,14 @@ class DiscountConditionsUpdater
         // Product conditions can define product segments or a list of products (which is equivalent to a segment based on a product criteria)
         if (null !== $productConditions) {
             $updatableProperties = array_merge($updatableProperties, $this->applyProductConditions($discount, $productConditions));
+        }
+
+        if (null !== $carrierIds) {
+            $updatableProperties = array_merge($updatableProperties, $this->applyCarrierConditions($discount, $carrierIds));
+        }
+
+        if (null !== $countryIds) {
+            $updatableProperties = array_merge($updatableProperties, $this->applyCountryConditions($discount, $countryIds));
         }
 
         $updatableProperties = array_unique($updatableProperties);
@@ -111,8 +131,14 @@ class DiscountConditionsUpdater
             $this->connection->createQueryBuilder()
                 ->insert($this->dbPrefix . 'cart_rule_product_rule_group')
                 ->values([
-                    'id_cart_rule' => (int) $discount->id,
+                    'id_cart_rule' => ':discountId',
+                    'quantity' => ':quantity',
+                    'type' => ':type',
+                ])
+                ->setParameters([
+                    'discountId' => (int) $discount->id,
                     'quantity' => $productRuleGroup->getQuantity(),
+                    'type' => $productRuleGroup->getType()->value,
                 ])
                 ->executeStatement()
             ;
@@ -157,6 +183,48 @@ class DiscountConditionsUpdater
         return ['product_restriction'];
     }
 
+    private function applyCarrierConditions(CartRule $discount, array $carrierIds): array
+    {
+        if (empty($carrierIds)) {
+            return [];
+        }
+
+        $discount->carrier_restriction = true;
+        foreach ($carrierIds as $carrierId) {
+            $this->connection->createQueryBuilder()
+                ->insert($this->dbPrefix . 'cart_rule_carrier')
+                ->values([
+                    'id_cart_rule' => (int) $discount->id,
+                    'id_carrier' => $carrierId,
+                ])
+                ->executeStatement()
+            ;
+        }
+
+        return ['carrier_restriction'];
+    }
+
+    private function applyCountryConditions(CartRule $discount, array $countryIds): array
+    {
+        if (empty($countryIds)) {
+            return [];
+        }
+
+        $discount->country_restriction = true;
+        foreach ($countryIds as $countryId) {
+            $this->connection->createQueryBuilder()
+                ->insert($this->dbPrefix . 'cart_rule_country')
+                ->values([
+                    'id_cart_rule' => (int) $discount->id,
+                    'id_country' => $countryId,
+                ])
+                ->executeStatement()
+            ;
+        }
+
+        return ['country_restriction'];
+    }
+
     private function cleanAllConditions(CartRule $discount): array
     {
         $discount->minimum_product_quantity = 0;
@@ -165,13 +233,18 @@ class DiscountConditionsUpdater
         $discount->minimum_amount_tax = false;
         $discount->minimum_amount_shipping = false;
 
-        return array_merge($this->cleanDiscountProductRules($discount), [
-            'minimum_product_quantity',
-            'minimum_amount',
-            'minimum_amount_currency',
-            'minimum_amount_tax',
-            'minimum_amount_shipping',
-        ]);
+        return array_merge(
+            $this->cleanDiscountProductRules($discount),
+            $this->cleanDiscountCarriers($discount),
+            $this->cleanDiscountCountries($discount),
+            [
+                'minimum_product_quantity',
+                'minimum_amount',
+                'minimum_amount_currency',
+                'minimum_amount_tax',
+                'minimum_amount_shipping',
+            ],
+        );
     }
 
     private function cleanDiscountProductRules(CartRule $discount): array
@@ -201,5 +274,35 @@ class DiscountConditionsUpdater
         ');
 
         return ['product_restriction'];
+    }
+
+    private function cleanDiscountCarriers(CartRule $discount): array
+    {
+        // Disable carrier restriction
+        $discount->carrier_restriction = false;
+
+        $this->connection->createQueryBuilder()
+            ->delete($this->dbPrefix . 'cart_rule_carrier', 'crc')
+            ->where('crc.id_cart_rule = :discountId')
+            ->setParameter('discountId', (int) $discount->id)
+            ->executeStatement()
+        ;
+
+        return ['carrier_restriction'];
+    }
+
+    private function cleanDiscountCountries(CartRule $discount): array
+    {
+        // Disable country restriction
+        $discount->country_restriction = false;
+
+        $this->connection->createQueryBuilder()
+            ->delete($this->dbPrefix . 'cart_rule_country', 'crc')
+            ->where('crc.id_cart_rule = :discountId')
+            ->setParameter('discountId', (int) $discount->id)
+            ->executeStatement()
+        ;
+
+        return ['country_restriction'];
     }
 }

@@ -59,6 +59,11 @@ class AdminSecurity
      */
     protected ?string $redirectRoute = null;
 
+    /**
+     * Define if a JSON or HTTP Response is expected
+     */
+    protected bool $hasJsonResponse = false;
+
     // The translation domain for the message.
     protected string $domain = 'Admin.Notifications.Error';
 
@@ -85,6 +90,7 @@ class AdminSecurity
         ?int $statusCode = null,
         ?int $exceptionCode = null,
         ?string $redirectRoute = null,
+        ?bool $jsonResponse = false
     ) {
         $values = [];
         if (is_string($data)) {
@@ -101,6 +107,7 @@ class AdminSecurity
         $values['statusCode'] = $values['statusCode'] ?? $statusCode;
         $values['exceptionCode'] = $values['exceptionCode'] ?? $exceptionCode;
         $values['redirectRoute'] = $values['redirectRoute'] ?? $redirectRoute;
+        $values['jsonResponse'] = $values['jsonResponse'] ?? $jsonResponse ?? false;
 
         foreach ($values as $k => $v) {
             if (!method_exists($this, $name = 'set' . $k)) {
@@ -174,6 +181,16 @@ class AdminSecurity
     public function setRedirectRoute(?string $redirectRoute): void
     {
         $this->redirectRoute = $redirectRoute;
+    }
+
+    public function hasJsonResponse(): bool
+    {
+        return $this->hasJsonResponse;
+    }
+
+    public function setJsonResponse(bool $hasJsonResponse): void
+    {
+        $this->hasJsonResponse = $hasJsonResponse;
     }
 
     public function getUrl(): string

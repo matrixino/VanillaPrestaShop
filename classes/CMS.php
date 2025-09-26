@@ -256,17 +256,20 @@ class CMSCore extends ObjectModel
     }
 
     /**
-     * @param int $idCategory
+     * Returns the next position to use for a new CMS page.
+     * CMS page positions start with 0.
+     * Returns position of the last CMS page within that category + 1,
+     * 0 if no CMS pages exist in the category.
      *
-     * @return false|string|null
+     * @param int $idCmsCategory ID of the CMS category the page will belong to
+     *
+     * @return int Position to use
      */
-    public static function getLastPosition($idCategory)
+    public static function getLastPosition($idCmsCategory)
     {
-        $sql = 'SELECT MAX(position) + 1
-		FROM `' . _DB_PREFIX_ . 'cms`
-		WHERE `id_cms_category` = ' . (int) $idCategory;
-
-        return Db::getInstance()->getValue($sql);
+        return (int) Db::getInstance()->getValue('SELECT MAX(position) + 1
+            FROM `' . _DB_PREFIX_ . 'cms`
+            WHERE `id_cms_category` = ' . (int) $idCmsCategory);
     }
 
     /**

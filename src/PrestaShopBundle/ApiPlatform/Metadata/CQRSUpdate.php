@@ -128,6 +128,7 @@ class CQRSUpdate extends CQRSCommand
         ?array $ApiResourceMapping = null,
         ?array $CQRSCommandMapping = null,
         ?bool $experimentalOperation = null,
+        ?bool $allowEmptyBody = null,
     ) {
         $passedArguments = \get_defined_vars();
         // Disable read listener because it is forced when using PUT method, but we don't need it since we rely on CQRS commands/queries

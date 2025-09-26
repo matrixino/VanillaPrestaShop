@@ -35,20 +35,25 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\PathItem;
 use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
 use DateTimeInterface;
+use Exception;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Adapter\Feature\MultistoreFeature;
 use PrestaShopBundle\ApiPlatform\DomainObjectDetector;
 use PrestaShopBundle\ApiPlatform\Metadata\LocalizedValue;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 
 /**
@@ -61,6 +66,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
  *   - it adapts some custom types like DecimalNumber and document them as numbers
  *   - it handles multi parameters setters and split the parameters into a sub object like the Admin API expects
  *   - it detects LocalizedValue fields and adapt their format and example
+ *   - it synchronizes the documentation with actual resource properties (removes undocumented fields)
  */
 class CQRSOpenApiFactory implements OpenApiFactoryInterface
 {
@@ -74,6 +80,8 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
         protected readonly DefinitionNameFactoryInterface $definitionNameFactory,
         protected readonly ClassMetadataFactoryInterface $classMetadataFactory,
         protected readonly DomainObjectDetector $domainObjectDetector,
+        protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
+        protected readonly MultistoreFeature $multistoreFeature,
         // No property promotion for this one since it's already defined in the ResourceMetadataTrait
         ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
     ) {
@@ -88,19 +96,21 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
     public function __invoke(array $context = []): OpenApi
     {
         $parentOpenApi = $this->decorated->__invoke($context);
-
         $domainsByUri = [];
         $scopesByUri = [];
+
         foreach ($this->resourceNameCollectionFactory->create() as $resourceClass) {
             $resourceMetadataCollection = $this->resourceMetadataFactory->create($resourceClass);
-
             foreach ($resourceMetadataCollection as $resourceMetadata) {
                 $resourceDefinitionName = $this->definitionNameFactory->create($resourceMetadata->getClass());
 
                 // Adapt localized value schema for API resource schema (mostly for read schema)
                 if ($parentOpenApi->getComponents()->getSchemas()->offsetExists($resourceDefinitionName)) {
-                    $this->adaptLocalizedValues($resourceMetadata->getClass(), $parentOpenApi->getComponents()->getSchemas()->offsetGet($resourceDefinitionName));
-                    $this->adaptDecimalNumbers($resourceMetadata->getClass(), $parentOpenApi->getComponents()->getSchemas()->offsetGet($resourceDefinitionName));
+                    $resourceSchema = $parentOpenApi->getComponents()->getSchemas()->offsetGet($resourceDefinitionName);
+                    $this->adaptLocalizedValues($resourceMetadata->getClass(), $resourceSchema);
+                    $this->adaptDecimalNumbers($resourceMetadata->getClass(), $resourceSchema);
+                    // NEW: Synchronize schema with actual resource properties
+                    $this->synchronizeSchemaWithResource($resourceMetadata->getClass(), $resourceSchema);
                 }
 
                 /** @var Operation $operation */
@@ -112,7 +122,6 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
                             $domainsByUri[$operation->getUriTemplate()] = $this->getOperationDomain($operation);
                         }
                     }
-
                     if ($operation instanceof HttpOperation && !empty($operation->getExtraProperties()['scopes'])) {
                         $scopesByUri[$operation->getUriTemplate()][strtolower($operation->getMethod())] = $operation->getExtraProperties()['scopes'];
                     }
@@ -124,10 +133,10 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
 
                     $this->adaptMultiParametersSetters($operation, $definition);
                     $this->applyCommandMapping($operation, $definition);
-
                     // Adapt localized value schema for operation definition (for valid input example)
                     $this->adaptLocalizedValues($operation->getClass(), $definition);
                     $this->adaptDecimalNumbers($operation->getClass(), $definition);
+                    $this->synchronizeSchemaWithResource($operation->getClass(), $definition);
                 }
             }
         }
@@ -151,15 +160,19 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
                 /** @var OpenApiOperation $operation */
                 foreach ($operations as $httpMethod => $operation) {
                     $updatedOperation = $operation;
-
                     // Update tag to group by domain
                     if (!empty($domainsByUri[$path])) {
                         $updatedOperation = $operation->withTags([$domainsByUri[$path]]);
                     }
-
                     // Add security scopes
                     if (!empty($scopesByUri[$path][$httpMethod])) {
                         $updatedOperation = $updatedOperation->withSecurity([['oauth' => $scopesByUri[$path][$httpMethod]]]);
+                    }
+
+                    // Add multishop context parameters if needed
+                    if ($this->multistoreFeature->isActive()) {
+                        $existingParameters = $updatedOperation->getParameters() ?? [];
+                        $updatedOperation = $updatedOperation->withParameters(array_merge($existingParameters, $this->getMultiShopParameters()));
                     }
 
                     $setterMethod = 'with' . ucfirst($httpMethod);
@@ -169,7 +182,7 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
             $updatedPaths->addPath($path, $updatedPathItem);
         }
 
-        $updatedOpenApi = new OpenApi(
+        return new OpenApi(
             $parentOpenApi->getInfo(),
             [
                 new Server('/admin-api'),
@@ -182,8 +195,116 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
             $parentOpenApi->getJsonSchemaDialect(),
             $parentOpenApi->getWebhooks(),
         );
+    }
 
-        return $updatedOpenApi;
+    /**
+     * Synchronizes the OpenAPI schema with the actual properties available in the resource
+     * This removes fields that are documented but don't exist in the actual resource
+     */
+    protected function synchronizeSchemaWithResource(string $resourceClass, ArrayObject $definition): void
+    {
+        if (empty($definition['properties']) || !class_exists($resourceClass)) {
+            return;
+        }
+
+        $actualProperties = $this->getResourceProperties($resourceClass);
+        if (empty($actualProperties)) {
+            return;
+        }
+
+        $currentProperties = $definition['properties'];
+        $synchronizedProperties = [];
+
+        foreach ($currentProperties as $propertyName => $propertySchema) {
+            if (in_array($propertyName, $actualProperties)) {
+                $synchronizedProperties[$propertyName] = $propertySchema;
+            }
+        }
+
+        $definition['properties'] = $synchronizedProperties;
+
+        if (!empty($definition['required'])) {
+            $definition['required'] = array_values(array_intersect($definition['required'], $actualProperties));
+        }
+    }
+
+    protected function getResourceProperties(string $resourceClass): array
+    {
+        try {
+            $properties = $this->propertyInfoExtractor->getProperties($resourceClass) ?? [];
+
+            if (!empty($properties)) {
+                return array_filter($properties, function ($property) {
+                    return !in_array($property, ['@context', '@id', '@type']);
+                });
+            }
+        } catch (Exception $e) {
+            // Fallback to reflection if PropertyInfoExtractor fails
+        }
+
+        return $this->getPropertiesUsingReflection($resourceClass);
+    }
+
+    protected function getPropertiesUsingReflection(string $resourceClass): array
+    {
+        try {
+            $reflection = new ReflectionClass($resourceClass);
+            $properties = [];
+
+            foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+                if (!$property->isStatic()) {
+                    $properties[] = $property->getName();
+                }
+            }
+
+            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                $methodName = $method->getName();
+
+                if ($method->isStatic() || $method->isConstructor() || $method->getNumberOfParameters() > 0) {
+                    continue;
+                }
+
+                if (str_starts_with($methodName, 'get') && strlen($methodName) > 3) {
+                    $propertyName = lcfirst(substr($methodName, 3));
+                    if (!in_array($propertyName, $properties)) {
+                        $properties[] = $propertyName;
+                    }
+                }
+
+                if (str_starts_with($methodName, 'is') && strlen($methodName) > 2) {
+                    $propertyName = lcfirst(substr($methodName, 2));
+                    if (!in_array($propertyName, $properties)) {
+                        $properties[] = $propertyName;
+                    }
+                }
+
+                if (str_starts_with($methodName, 'has') && strlen($methodName) > 3) {
+                    $propertyName = lcfirst(substr($methodName, 3));
+                    if (!in_array($propertyName, $properties)) {
+                        $properties[] = $propertyName;
+                    }
+                }
+            }
+
+            return array_unique($properties);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Returns the list of multishop context parameters added to each operation.
+     *
+     * @return Parameter[]
+     */
+    protected function getMultiShopParameters(): array
+    {
+        return [
+            new Parameter('shopId', 'query', 'Shop identifier for multistore context', false, false, false, ['type' => 'integer']),
+            new Parameter('shopGroupId', 'query', 'Shop group identifier for multistore context', false, false, false, ['type' => 'integer']),
+            new Parameter('shopIds', 'query', 'Comma separated list of shop identifiers for multistore context', false, false, false, ['type' => 'string']),
+            new Parameter('allShops', 'query', 'Use all shops context', false, false, false, ['type' => 'integer', 'enum' => ['1']]),
+        ];
     }
 
     protected function getSchemaDefinition(OpenApi $openApi, Operation $operation): ?ArrayObject
@@ -468,7 +589,6 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
                 if (!str_starts_with($apiPath, '[_context]') && $this->propertyAccessor->isWritable($definition['properties'], $apiPath)) {
                     $this->propertyAccessor->setValue($definition['properties'], $apiPath, $this->propertyAccessor->getValue($definition['properties'], $cqrsPath));
                 }
-
                 // Use property path to set null, the null values will then be cleaned in a second loop (because unset cannot use property path as an input)
                 if ($this->propertyAccessor->isWritable($definition['properties'], $cqrsPath)) {
                     $this->propertyAccessor->setValue($definition['properties'], $cqrsPath, null);

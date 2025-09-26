@@ -24,6 +24,7 @@
  */
 
 import AttributeFormMap from '@pages/attribute/form/attribute-form-map';
+import FormSubmitButton from '@components/form-submit-button';
 
 const {$} = window;
 
@@ -36,6 +37,8 @@ $(() => {
   );
 
   new window.prestashop.component.ChoiceTree(AttributeFormMap.attributeShopAssociationInput).enableAutoCheckChildren();
+
+  new FormSubmitButton();
 });
 
 document.addEventListener('DOMContentLoaded', () => {

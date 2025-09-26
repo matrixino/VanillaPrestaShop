@@ -276,3 +276,7 @@
 .form-check-radio.has-error {
   color: var(--#{$cdk}red-300);
 }
+
+.pstaggerClosingCross  {
+  cursor: pointer;
+}

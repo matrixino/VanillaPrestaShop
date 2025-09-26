@@ -55,4 +55,13 @@ class PrestaShopApplication extends Application
 
         return $definition;
     }
+
+    public function getLongVersion(): string
+    {
+        return sprintf(
+            'PrestaShop %s with %s',
+            _PS_VERSION_,
+            parent::getLongVersion()
+        );
+    }
 }

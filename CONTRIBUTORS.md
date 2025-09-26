@@ -12,7 +12,7 @@ GitHub contributors:
 - Adam
 - Adib Aroui
 - Adonis Karavokyros
-- adrianllopis
+- Adrianllopis
 - Adrien
 - Adrien Astier
 - Adrien Foulon
@@ -128,6 +128,7 @@ GitHub contributors:
 - BigZ
 - BluTiGeS
 - BMS-fenaille
+- Boki
 - Boris Hermans
 - Boubker Bribri
 - Brais Pato

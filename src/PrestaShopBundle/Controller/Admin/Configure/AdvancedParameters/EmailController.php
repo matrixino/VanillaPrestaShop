@@ -94,7 +94,7 @@ class EmailController extends PrestaShopAdminController
      * @return RedirectResponse
      */
     #[DemoRestricted(redirectRoute: 'admin_emails_index')]
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", message: 'Access denied.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", message: 'Access denied.', redirectRoute: 'admin_emails_index')]
     public function saveOptionsAction(
         Request $request,
         #[Autowire(service: 'prestashop.admin.email_configuration.form_handler')]
@@ -120,7 +120,7 @@ class EmailController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_emails_index')]
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'Access denied.')]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'Access denied.', redirectRoute: 'admin_emails_index')]
     public function deleteBulkAction(
         Request $request,
         EmailLogEraserInterface $emailLogEraser,

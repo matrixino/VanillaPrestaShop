@@ -36,11 +36,13 @@ use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Attribute\Exception\Attribu
 use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CannotAddCarrierException;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CannotUpdateCarrierException;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CarrierNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierConstraints;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopGroupId;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 use PrestaShop\PrestaShop\Core\Domain\TaxRulesGroup\ValueObject\TaxRulesGroupId;
+use PrestaShop\PrestaShop\Core\Domain\Zone\ValueObject\ZoneId;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShop\PrestaShop\Core\Repository\AbstractMultiShopObjectModelRepository;
 use RuntimeException;
@@ -341,17 +343,73 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
         return $count;
     }
 
-    public function getLastPosition(): int
+    /**
+     * Returns the position of the last carrier in the list.
+     * The caller is responsible for incrementing this value by 1 to get the next position.
+     *
+     * @return int Position of the last carrier
+     */
+    public function getLastPosition(): ?int
     {
         $qb = $this->connection->createQueryBuilder();
 
-        return $qb->select('c.position')
+        $lastPosition = $qb->select('c.position')
             ->from($this->prefix . 'carrier', 'c')
             ->orderBy('c.position', 'DESC')
             ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne()
         ;
+
+        return $lastPosition !== false ? (int) $lastPosition : null;
+    }
+
+    public function getCarrierConstraints(CarrierId $carrierId): CarrierConstraints
+    {
+        $qb = $this->connection->createQueryBuilder();
+
+        $qb
+            ->select('c.max_width', 'c.max_height', 'c.max_depth', 'c.max_weight')
+            ->from($this->prefix . 'carrier', 'c')
+            ->where('c.id_carrier = :carrierId')
+            ->setParameter('carrierId', $carrierId->getValue());
+
+        $result = $qb->executeQuery()->fetchAssociative();
+
+        if (!$result) {
+            throw new RuntimeException("Carrier with ID {$carrierId->getValue()} not found.");
+        }
+
+        return new CarrierConstraints(
+            (float) $result['max_weight'],
+            (float) $result['max_width'],
+            (float) $result['max_height'],
+            (float) $result['max_depth']
+        );
+    }
+
+    /**
+     * Checks if a given carrier is available for a specific zone.
+     *
+     * @return bool True if carrier is available for the zone, false otherwise
+     */
+    public function checkCarrierZone(CarrierId $carrierId, ZoneId $zoneId): bool
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('c.id_carrier')
+            ->from($this->prefix . 'carrier', 'c')
+            ->innerJoin('c', $this->prefix . 'carrier_zone', 'cz', 'cz.id_carrier = c.id_carrier')
+            ->innerJoin('cz', $this->prefix . 'zone', 'z', 'z.id_zone = cz.id_zone')
+            ->where('c.id_carrier = :carrierId')
+            ->andWhere('c.deleted = 0')
+            ->andWhere('c.active = 1')
+            ->andWhere('cz.id_zone = :zoneId')
+            ->andWhere('z.active = 1')
+            ->setParameter('carrierId', $carrierId->getValue())
+            ->setParameter('zoneId', $zoneId->getValue());
+
+        return (bool) $qb->executeQuery()->fetchOne();
     }
 
     /**
@@ -368,19 +426,63 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
      */
     public function findCarriersByProductIds(array $productIds, ShopId $shopId): array
     {
+        // Step 1: Get all active carriers once
+        $allCarriers = $this->getAllActiveCarriers();
+
+        // Step 2: Initialize mapping with all carriers for each product
+        $mapping = [];
+        foreach ($productIds as $productId) {
+            $mapping[$productId] = $allCarriers;
+        }
+
+        // Step 3: Get restricted carriers for certain products
+        $productCarriers = $this->getProductCarriers($productIds, $shopId);
+        $restricted = $this->mapProductCarriers($productCarriers);
+
+        // Step 4: Override default mapping with restricted carriers where applicable
+        foreach ($restricted as $productId => $carriers) {
+            $mapping[$productId] = $carriers;
+        }
+
+        return $mapping;
+    }
+
+    private function getProductCarriers(array $productIds, ShopId $shopId): array
+    {
         $qb = $this->connection->createQueryBuilder();
-        $qb->select('pc.id_product as product_id, c.id_carrier AS id_carrier, c.name')
+
+        return $qb->select('pc.id_product as product_id', 'c.id_carrier', 'c.name')
             ->from($this->prefix . 'product_carrier', 'pc')
-            ->innerJoin('pc', $this->prefix . 'carrier', 'c', 'c.id_reference = pc.id_carrier_reference AND c.deleted = 0')
+            ->innerJoin(
+                'pc',
+                $this->prefix . 'carrier',
+                'c',
+                'c.id_reference = pc.id_carrier_reference AND c.deleted = 0'
+            )
             ->where($qb->expr()->in('pc.id_product', ':product_ids'))
             ->andWhere('pc.id_shop = :shop_id')
             ->setParameter('product_ids', $productIds, ArrayParameterType::INTEGER)
-            ->setParameter('shop_id', $shopId->getValue());
+            ->setParameter('shop_id', $shopId->getValue())
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
 
-        $results = $qb->executeQuery()->fetchAllAssociative();
+    private function getAllActiveCarriers(): array
+    {
+        return $this->connection->createQueryBuilder()
+            ->select('id_carrier', 'name')
+            ->from($this->prefix . 'carrier')
+            ->where('deleted = 0')
+            ->andWhere('active = 1')
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
 
+    private function mapProductCarriers(array $rows): array
+    {
         $mapping = [];
-        foreach ($results as $row) {
+
+        foreach ($rows as $row) {
             $mapping[$row['product_id']][] = [
                 'id_carrier' => $row['id_carrier'],
                 'name' => $row['name'],

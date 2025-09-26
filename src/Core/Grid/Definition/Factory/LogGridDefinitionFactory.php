@@ -101,7 +101,7 @@ final class LogGridDefinitionFactory extends AbstractGridDefinitionFactory
             )
             ->add(
                 (new SeverityLevelColumn('severity'))
-                    ->setName($this->trans('Severity (1-4)', [], 'Admin.Advparameters.Feature'))
+                    ->setName($this->trans('Severity (0-4)', [], 'Admin.Advparameters.Feature'))
                     ->setOptions([
                         'with_message' => true,
                         'field' => 'severity',

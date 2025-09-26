@@ -63,6 +63,7 @@ export default class EmployeeForm {
       employeeFormMap.confirmNewPasswordInput,
       employeeFormMap.generatedPasswordDisplayInput,
       employeeFormMap.passwordStrengthFeedbackContainer,
+      employeeFormMap.generatedPasswordButton,
     );
 
     const passwordHandler = new ChangePasswordHandler(

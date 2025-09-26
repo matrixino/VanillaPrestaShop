@@ -107,7 +107,7 @@ class InvoicesController extends PrestaShopAdminController
      *
      * @return RedirectResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'Access denied.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'Access denied.', redirectRoute: 'admin_order_invoices')]
     public function processAction(
         Request $request,
         #[Autowire(service: 'prestashop.admin.order.invoices.options.form_handler')] FormHandlerInterface $formHandler,

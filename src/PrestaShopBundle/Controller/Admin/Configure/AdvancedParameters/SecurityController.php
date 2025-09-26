@@ -104,7 +104,7 @@ class SecurityController extends PrestaShopAdminController
      *
      * @return RedirectResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_security')]
     public function processGeneralFormAction(
         Request $request,
         #[Autowire(service: 'prestashop.adapter.security.general.form_handler')]
@@ -124,7 +124,7 @@ class SecurityController extends PrestaShopAdminController
      *
      * @return RedirectResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_security')]
     public function processPasswordPolicyFormAction(
         Request $request,
         #[Autowire(service: 'prestashop.adapter.security.password_policy.form_handler')]
@@ -279,7 +279,7 @@ class SecurityController extends PrestaShopAdminController
      *
      * @return RedirectResponse
      */
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_security_sessions_employee_list')]
     public function deleteEmployeeSessionAction(int $sessionId): RedirectResponse
     {
         try {
@@ -302,7 +302,7 @@ class SecurityController extends PrestaShopAdminController
      *
      * @return RedirectResponse
      */
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_security_sessions_customer_list')]
     public function deleteCustomerSessionAction(int $sessionId): RedirectResponse
     {
         try {

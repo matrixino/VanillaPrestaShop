@@ -52,7 +52,7 @@
           {% set level1Name = level1.class_name %}
         {% endif %}
 
-        {% if level1.icon is not same as '' %}
+        {% if level1.icon is not empty %}
 
           <li class="link-levelone{% if level1.current %} link-levelone-active{% endif %}" data-submenu="{{ level1.id_tab }}" id="tab-{{ level1.class_name }}">
             <a href="{{ level1Href }}" class="link" >

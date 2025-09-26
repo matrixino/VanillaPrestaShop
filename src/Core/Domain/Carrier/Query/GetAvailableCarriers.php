@@ -23,23 +23,59 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Carrier\Query;
 
+use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductQuantity;
+
 /**
  * Get available carriers for a product list.
  */
 class GetAvailableCarriers
 {
     /**
-     * @var array
+     * @var AddressId
      */
-    private $productsIds;
+    private $addressId;
 
-    public function __construct(array $productsIds)
+    /**
+     * @var ProductQuantity[]
+     */
+    private $productQuantities;
+
+    /**
+     * @param ProductQuantity[] $productQuantities
+     */
+    public function __construct(array $productQuantities, AddressId $addressId)
     {
-        $this->productsIds = $productsIds;
+        $this->productQuantities = $productQuantities;
+        $this->addressId = $addressId;
     }
 
-    public function getProductsIds(): array
+    /**
+     * @return ProductQuantity[]
+     */
+    public function getProductQuantities(): array
     {
-        return $this->productsIds;
+        return $this->productQuantities;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getProductIds(): array
+    {
+        return array_map(
+            fn (ProductQuantity $pq) => $pq->getProductId()->getValue(),
+            $this->productQuantities
+        );
+    }
+
+    public function getAddressId(): AddressId
+    {
+        return $this->addressId;
+    }
+
+    public function setAddressId(AddressId $addressId): void
+    {
+        $this->addressId = $addressId;
     }
 }

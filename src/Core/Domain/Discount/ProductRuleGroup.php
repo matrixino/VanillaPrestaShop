@@ -39,10 +39,12 @@ class ProductRuleGroup
     /**
      * @param int $quantity
      * @param ProductRule[] $rules
+     * @param ProductRuleGroupType $type
      */
     public function __construct(
         private readonly int $quantity,
         private readonly array $rules,
+        private readonly ProductRuleGroupType $type = ProductRuleGroupType::AT_LEAST_ONE_PRODUCT_RULE,
     ) {
     }
 
@@ -57,5 +59,10 @@ class ProductRuleGroup
     public function getRules(): array
     {
         return $this->rules;
+    }
+
+    public function getType(): ProductRuleGroupType
+    {
+        return $this->type;
     }
 }

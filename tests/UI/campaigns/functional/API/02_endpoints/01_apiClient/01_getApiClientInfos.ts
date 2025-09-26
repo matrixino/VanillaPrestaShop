@@ -72,11 +72,11 @@ describe('API : GET /api-client/infos', async () => {
       expect(pageTitle).to.eq(boApiClientsPage.pageTitle);
     });
 
-    it('should check that no records found', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkThatNoRecordFound', baseContext);
+    it('should check that at least one API client is present', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkThatOneAPIClientExists', baseContext);
 
-      const noRecordsFoundText = await boApiClientsPage.getTextForEmptyTable(page);
-      expect(noRecordsFoundText).to.contains('warning No records found');
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      expect(apiClientsNumber).to.be.greaterThanOrEqual(1);
     });
 
     it('should go to add New API Client page', async function () {
@@ -147,16 +147,18 @@ describe('API : GET /api-client/infos', async () => {
     it('should get informations', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'getInformations', baseContext);
 
-      idApiClient = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', 1), 10);
+      // Get ID from last created API Client
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      idApiClient = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', apiClientsNumber), 10);
       expect(idApiClient).to.be.gt(0);
     });
   });
 
   describe('API : Check Data', async () => {
-    it('should request the endpoint /api-client/{apiClientId}', async function () {
+    it('should request the endpoint /api-client/infos', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestEndpoint', baseContext);
 
-      const apiResponse = await apiContext.get(`api-client/${idApiClient}`, {
+      const apiResponse = await apiContext.get('api-client/infos', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -241,5 +243,5 @@ describe('API : GET /api-client/infos', async () => {
   });
 
   // Pre-condition: Create an API Client
-  deleteAPIClientTest(`${baseContext}_postTest`);
+  deleteAPIClientTest(`${baseContext}_postTest`, clientData.clientId);
 });

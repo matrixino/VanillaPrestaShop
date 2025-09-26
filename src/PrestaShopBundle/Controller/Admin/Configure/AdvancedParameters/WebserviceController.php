@@ -129,7 +129,7 @@ class WebserviceController extends PrestaShopAdminController
      *
      * @return Response|RedirectResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_webservice_keys_index')]
     public function editAction(
         int $webserviceKeyId,
         Request $request,

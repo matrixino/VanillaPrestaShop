@@ -40,4 +40,7 @@ export default {
   specificProductId: '.specific-product-id',
   specificProductType: '.specific-product-type',
   specificCombinationId: '.specific-combination-choice',
+  carriersSelect: '#discount_conditions_delivery_conditions_carriers',
+  countriesSelect: '#discount_conditions_delivery_conditions_country',
+  categoryTree: '#discount_conditions_cart_conditions_product_segment_category',
 };

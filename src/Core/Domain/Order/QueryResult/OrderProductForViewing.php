@@ -165,6 +165,11 @@ class OrderProductForViewing implements JsonSerializable
     private $mpn;
 
     /**
+     * @var int[]
+     */
+    private $shipmentIds;
+
+    /**
      * @param int $orderDetailId
      * @param int $id
      * @param int $combinationId
@@ -191,6 +196,7 @@ class OrderProductForViewing implements JsonSerializable
      * @param array $packItems
      * @param OrderProductCustomizationsForViewing|null $customizations
      * @param string $mpn
+     * @param int[] $shipmentIds
      */
     public function __construct(
         ?int $orderDetailId,
@@ -218,7 +224,8 @@ class OrderProductForViewing implements JsonSerializable
         bool $availableOutOfStock,
         array $packItems = [],
         ?OrderProductCustomizationsForViewing $customizations = null,
-        string $mpn = ''
+        string $mpn = '',
+        array $shipmentIds = []
     ) {
         $this->id = $id;
         $this->combinationId = $combinationId;
@@ -246,6 +253,7 @@ class OrderProductForViewing implements JsonSerializable
         $this->packItems = $packItems;
         $this->customizations = $customizations;
         $this->mpn = $mpn;
+        $this->shipmentIds = $shipmentIds;
     }
 
     /**
@@ -266,6 +274,14 @@ class OrderProductForViewing implements JsonSerializable
     public function getId(): int
     {
         return $this->id;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getShipmentIds(): array
+    {
+        return $this->shipmentIds;
     }
 
     /**

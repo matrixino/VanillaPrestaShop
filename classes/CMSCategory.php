@@ -658,8 +658,20 @@ class CMSCategoryCore extends ObjectModel
         return true;
     }
 
-    public static function getLastPosition($id_category_parent)
+    /**
+     * Returns the next position to use for a new CMS category.
+     * CMS category positions start with 0.
+     * Returns position of the last CMS category within that category + 1,
+     * 0 if there are no CMS categories.
+     *
+     * @param int $idParentCmsCategory ID of the parent CMS category
+     *
+     * @return int Position to use
+     */
+    public static function getLastPosition($idParentCmsCategory)
     {
-        return Db::getInstance()->getValue('SELECT MAX(position)+1 FROM `' . _DB_PREFIX_ . 'cms_category` WHERE `id_parent` = ' . (int) $id_category_parent);
+        return (int) Db::getInstance()->getValue('SELECT MAX(position) + 1
+            FROM `' . _DB_PREFIX_ . 'cms_category`
+            WHERE `id_parent` = ' . (int) $idParentCmsCategory);
     }
 }

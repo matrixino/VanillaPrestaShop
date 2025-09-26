@@ -57,6 +57,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
     {
         $errorCode = match ($field) {
             'name' => DiscountConstraintException::INVALID_NAME,
+            'gift_product' => DiscountConstraintException::INVALID_GIFT_PRODUCT,
             default => null,
         };
 
@@ -406,6 +407,12 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         }
         if (isset($expectedData['minimum_amount_shipping_included'])) {
             Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_shipping_included']), $discountForEditing->getMinimumAmountShippingIncluded(), 'Unexpected minimum amount shipping included');
+        }
+        if (isset($expectedData['carriers'])) {
+            Assert::assertSame($this->referencesToIds($expectedData['carriers']), $discountForEditing->getCarrierIds(), 'Unexpected carriers');
+        }
+        if (isset($expectedData['countries'])) {
+            Assert::assertSame($this->referencesToIds($expectedData['countries']), $discountForEditing->getCountryIds(), 'Unexpected countries');
         }
     }
 

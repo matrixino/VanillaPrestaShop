@@ -141,21 +141,21 @@ class LegacyLogger implements LoggerInterface
             case Logger::EMERGENCY:
             case Logger::ALERT:
             case Logger::CRITICAL:
-                $pslevel = 4;
+                $pslevel = PrestaShopLogger::LOG_SEVERITY_LEVEL_MAJOR;
                 break;
             case Logger::ERROR:
-                $pslevel = 3;
+                $pslevel = PrestaShopLogger::LOG_SEVERITY_LEVEL_ERROR;
                 break;
             case Logger::WARNING:
-                $pslevel = 2;
+                $pslevel = PrestaShopLogger::LOG_SEVERITY_LEVEL_WARNING;
                 break;
             case Logger::NOTICE:
             case Logger::INFO:
-            case Logger::DEBUG:
-                $pslevel = 1;
+                $pslevel = PrestaShopLogger::LOG_SEVERITY_LEVEL_INFORMATIVE;
                 break;
+            case Logger::DEBUG:
             default:
-                $pslevel = 0;
+                $pslevel = PrestaShopLogger::LOG_SEVERITY_LEVEL_DEBUG;
         }
 
         $error_code = !empty($context['error_code']) ? $context['error_code'] : null;

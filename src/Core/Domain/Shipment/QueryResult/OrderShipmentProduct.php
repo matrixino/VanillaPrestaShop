@@ -31,7 +31,9 @@ class OrderShipmentProduct
     public function __construct(
         private int $orderDetailId,
         private int $quantity,
-        private string $productName
+        private string $productName,
+        private string $productReference,
+        private string $productImagePath,
     ) {
     }
 
@@ -57,5 +59,32 @@ class OrderShipmentProduct
     public function getQuantity(): int
     {
         return $this->quantity;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductReference(): string
+    {
+        return $this->productReference;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductImagePath(): string
+    {
+        return $this->productImagePath;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'order_detail_id' => $this->getOrderDetailId(),
+            'quantity' => $this->getQuantity(),
+            'product_name' => $this->getProductName(),
+            'product_reference' => $this->getProductReference(),
+            'product_image_path' => $this->getProductImagePath(),
+        ];
     }
 }

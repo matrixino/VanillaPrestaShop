@@ -87,9 +87,13 @@ class MailTemplateGenerator
             throw new FileNotFoundException(sprintf('Invalid modules output folder "%s"', $modulesOutputFolder));
         }
 
-        $this->logger->info(sprintf('Exporting mail with theme %s for language %s', $theme->getName(), $language->getName()));
-        $this->logger->info(sprintf('Core output folder: %s', $coreOutputFolder));
-        $this->logger->info(sprintf('Modules output folder: %s', $modulesOutputFolder));
+        $this->logger->info(sprintf(
+            'Exporting mail with theme %s for language %s, Core output folder: %s, Modules output folder: %s',
+            $theme->getName(),
+            $language->getName(),
+            $coreOutputFolder,
+            $modulesOutputFolder,
+        ));
 
         /** @var LayoutCollectionInterface $layouts */
         $layouts = $theme->getLayouts();
@@ -106,7 +110,7 @@ class MailTemplateGenerator
             if (!$this->fileSystem->exists($htmlTemplatePath) || $overwriteTemplates) {
                 $generatedTemplate = $this->renderer->renderHtml($layout, $language);
                 $this->fileSystem->dumpFile($htmlTemplatePath, $generatedTemplate);
-                $this->logger->info(sprintf('Generate html template %s at %s', $layout->getName(), $htmlTemplatePath));
+                $this->logger->debug(sprintf('Generate html template %s at %s', $layout->getName(), $htmlTemplatePath));
             }
 
             // Generate TXT template
@@ -114,7 +118,7 @@ class MailTemplateGenerator
             if (!$this->fileSystem->exists($txtTemplatePath) || $overwriteTemplates) {
                 $generatedTemplate = $this->renderer->renderTxt($layout, $language);
                 $this->fileSystem->dumpFile($txtTemplatePath, $generatedTemplate);
-                $this->logger->info(sprintf('Generate txt template %s at %s', $layout->getName(), $txtTemplatePath));
+                $this->logger->debug(sprintf('Generate txt template %s at %s', $layout->getName(), $txtTemplatePath));
             }
         }
     }

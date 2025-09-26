@@ -264,6 +264,9 @@ CREATE TABLE `PREFIX_cart_rule_product_rule_group` (
   `id_product_rule_group` int(10) unsigned NOT NULL auto_increment,
   `id_cart_rule` int(10) unsigned NOT NULL,
   `quantity` int(10) unsigned NOT NULL DEFAULT 1,
+  `type` ENUM(
+    'at_least_one_product_rule', 'all_product_rules'
+  ) NOT NULL DEFAULT 'at_least_one_product_rule',
   PRIMARY KEY (`id_product_rule_group`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
@@ -273,7 +276,7 @@ CREATE TABLE `PREFIX_cart_rule_product_rule` (
   `id_product_rule_group` int(10) unsigned NOT NULL,
   `type` ENUM(
     'products', 'categories', 'attributes',
-    'manufacturers', 'suppliers', 'combinations'
+    'manufacturers', 'suppliers', 'combinations', 'features'
   ) NOT NULL,
   PRIMARY KEY (`id_product_rule`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
@@ -2837,8 +2840,7 @@ CREATE TABLE `PREFIX_image_type` (
   `manufacturers` TINYINT(1) DEFAULT 1 NOT NULL,
   `suppliers`     TINYINT(1) DEFAULT 1 NOT NULL,
   `stores`        TINYINT(1) DEFAULT 1 NOT NULL,
-  `theme_name`    VARCHAR(255) DEFAULT NULL,
-  UNIQUE KEY `UNIQ_907C95215E237E0614E48A3B` (`name`, `theme_name`),
+  UNIQUE KEY `UNIQ_907C95215E237E06` (`name`),
   PRIMARY KEY (`id_image_type`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 

@@ -191,6 +191,26 @@ admin_orders_update_invoice_note:
     orderId: \d+
     orderInvoiceId: \d+
 
+admin_orders_split_shipment:
+  path: /{orderId}/shipment/{shipmentId}/split
+  methods: [ POST ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::splitShipmentAction
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
+
+admin_orders_shipment_get_split_form:
+  path: /{orderId}/shipment/split-form
+  methods: [ GET ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getSplitShipmentForm
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
+  options:
+    expose: true
+
 admin_orders_generate_invoice:
   path: /{orderId}/invoice
   methods: [ POST ]
@@ -199,6 +219,46 @@ admin_orders_generate_invoice:
     _legacy_controller: AdminOrders
   requirements:
     orderId: \d+
+
+admin_orders_shipment_get_merge_form:
+  path: /{orderId}/shipment/merge-form
+  methods: [ GET ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getMergeShipmentForm
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
+  options:
+    expose: true
+
+admin_orders_shipment_get_edit_form:
+  path: /{orderId}/shipment/edit-form
+  methods: [ GET ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getEditShipmentForm
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
+  options:
+    expose: true
+
+admin_orders_merge_shipment:
+  path: /{orderId}/shipment/merge
+  methods: [ POST ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::mergeShipmentAction
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
+
+admin_orders_edit_shipment:
+  path: /{orderId}/shipment/edit
+  methods: [ POST ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::editShipmentAction
+  requirements:
+    orderId: \d+
+    shipmentId: \d+
 
 admin_orders_change_customer_address:
   path: /change-customer-address

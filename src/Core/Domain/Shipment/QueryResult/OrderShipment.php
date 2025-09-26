@@ -28,6 +28,7 @@ namespace PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult;
 
 use DateTime;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\QueryResult\CarrierSummary;
 
 class OrderShipment
 {
@@ -42,9 +43,9 @@ class OrderShipment
     private int $orderId;
 
     /**
-     * @var int
+     * @var CarrierSummary
      */
-    private int $carrierId;
+    private CarrierSummary $carrierSummary;
 
     /**
      * @var int
@@ -89,7 +90,7 @@ class OrderShipment
     public function __construct(
         int $id,
         int $orderId,
-        int $carrierId,
+        CarrierSummary $carrierSummary,
         int $addressId,
         DecimalNumber $shippingCostTaxExcluded,
         DecimalNumber $shippingCostTaxIncluded,
@@ -101,7 +102,7 @@ class OrderShipment
     ) {
         $this->id = $id;
         $this->orderId = $orderId;
-        $this->carrierId = $carrierId;
+        $this->carrierSummary = $carrierSummary;
         $this->addressId = $addressId;
         $this->shippingCostTaxExcluded = $shippingCostTaxExcluded;
         $this->shippingCostTaxIncluded = $shippingCostTaxIncluded;
@@ -129,11 +130,11 @@ class OrderShipment
     }
 
     /**
-     * @return int
+     * @return CarrierSummary
      */
-    public function getCarrierId(): int
+    public function getCarrierSummary(): CarrierSummary
     {
-        return $this->carrierId;
+        return $this->carrierSummary;
     }
 
     /**

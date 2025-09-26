@@ -29,6 +29,7 @@ namespace Tests\Integration\Behaviour\Features\Context;
 use Configuration;
 use Language;
 use PHPUnit\Framework\Assert;
+use PrestaShop\PrestaShop\Core\Context\LanguageContextBuilder;
 use RuntimeException;
 use Tests\Resources\Resetter\LanguageResetter;
 
@@ -77,6 +78,10 @@ class LanguageFeatureContext extends AbstractPrestaShopFeatureContext
         Configuration::updateValue('PS_LANG_DEFAULT', (string) $languageId);
 
         SharedStorage::getStorage()->set('default_language_id', $languageId);
+
+        /** @var LanguageContextBuilder $languageBuilder */
+        $languageBuilder = CommonFeatureContext::getContainer()->get('test_language_context_builder');
+        $languageBuilder->setDefaultLanguageId($languageId);
     }
 
     /**

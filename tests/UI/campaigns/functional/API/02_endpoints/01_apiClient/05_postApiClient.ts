@@ -2,7 +2,7 @@
 import testContext from '@utils/testContext';
 
 // Import commonTests
-import {deleteAPIClientTest} from '@commonTests/BO/advancedParameters/authServer';
+import {requestAccessToken} from '@commonTests/BO/advancedParameters/authServer';
 
 import {expect} from 'chai';
 import {
@@ -25,16 +25,9 @@ describe('API : POST /api-client', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let accessToken: string;
-  let clientSecret: string;
   let jsonResponse: any;
 
   const clientScope: string = 'api_client_write';
-  const clientData: FakerAPIClient = new FakerAPIClient({
-    enabled: true,
-    scopes: [
-      clientScope,
-    ],
-  });
   const createClient: FakerAPIClient = new FakerAPIClient({
     scopes: [
       'api_client_read',
@@ -54,84 +47,9 @@ describe('API : POST /api-client', async () => {
   });
 
   describe('BackOffice : Fetch the access token', async () => {
-    it('should login in BO', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'loginBO', baseContext);
-
-      await boLoginPage.goTo(page, global.BO.URL);
-      await boLoginPage.successLogin(page, global.BO.EMAIL, global.BO.PASSWD);
-
-      const pageTitle = await boDashboardPage.getPageTitle(page);
-      expect(pageTitle).to.contains(boDashboardPage.pageTitle);
-    });
-
-    it('should go to \'Advanced Parameters > API Client\' page', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goToAdminAPIPage', baseContext);
-
-      await boDashboardPage.goToSubMenu(
-        page,
-        boDashboardPage.advancedParametersLink,
-        boDashboardPage.adminAPILink,
-      );
-
-      const pageTitle = await boApiClientsPage.getPageTitle(page);
-      expect(pageTitle).to.eq(boApiClientsPage.pageTitle);
-    });
-
-    it('should check that no records found', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkThatNoRecordFound', baseContext);
-
-      const noRecordsFoundText = await boApiClientsPage.getTextForEmptyTable(page);
-      expect(noRecordsFoundText).to.contains('warning No records found');
-    });
-
-    it('should go to add New API Client page', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goToNewAPIClientPage', baseContext);
-
-      await boApiClientsPage.goToNewAPIClientPage(page);
-
-      const pageTitle = await boApiClientsCreatePage.getPageTitle(page);
-      expect(pageTitle).to.eq(boApiClientsCreatePage.pageTitleCreate);
-    });
-
-    it('should create API Client', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'createAPIClient', baseContext);
-
-      const textResult = await boApiClientsCreatePage.addAPIClient(page, clientData);
-      expect(textResult).to.contains(boApiClientsCreatePage.successfulCreationMessage);
-
-      const textMessage = await boApiClientsCreatePage.getAlertInfoBlockParagraphContent(page);
-      expect(textMessage).to.contains(boApiClientsCreatePage.apiClientGeneratedMessage);
-    });
-
-    it('should copy client secret', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'copyClientSecret', baseContext);
-
-      await boApiClientsCreatePage.copyClientSecret(page);
-
-      clientSecret = await boApiClientsCreatePage.getClipboardText(page);
-      expect(clientSecret.length).to.be.gt(0);
-    });
-
-    it('should request the endpoint /access_token', async function () {
+    it(`should request the endpoint /access_token with scope ${clientScope}`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestOauth2Token', baseContext);
-
-      const apiResponse = await apiContext.post('access_token', {
-        form: {
-          client_id: clientData.clientId,
-          client_secret: clientSecret,
-          grant_type: 'client_credentials',
-          scope: clientScope,
-        },
-      });
-      expect(apiResponse.status()).to.eq(200);
-      expect(utilsAPI.hasResponseHeader(apiResponse, 'Content-Type')).to.eq(true);
-      expect(utilsAPI.getResponseHeader(apiResponse, 'Content-Type')).to.contains('application/json');
-
-      const jsonResponse = await apiResponse.json();
-      expect(jsonResponse).to.have.property('access_token');
-      expect(jsonResponse.token_type).to.be.a('string');
-
-      accessToken = jsonResponse.access_token;
+      accessToken = await requestAccessToken(clientScope);
     });
   });
 
@@ -177,6 +95,16 @@ describe('API : POST /api-client', async () => {
   });
 
   describe('BackOffice : Check the API Access is created', async () => {
+    it('should login in BO', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'loginBO', baseContext);
+
+      await boLoginPage.goTo(page, global.BO.URL);
+      await boLoginPage.successLogin(page, global.BO.EMAIL, global.BO.PASSWD);
+
+      const pageTitle = await boDashboardPage.getPageTitle(page);
+      expect(pageTitle).to.contains(boDashboardPage.pageTitle);
+    });
+
     it('should go to \'Advanced Parameters > API Client\' page', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'returnToAdminAPIPage', baseContext);
 
@@ -200,21 +128,27 @@ describe('API : POST /api-client', async () => {
     it('should check the JSON Response : `apiClientId`', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkResponseApiClientId', baseContext);
 
-      const value = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', 2), 10);
+      // Get ID from last created API Client
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      const value = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', apiClientsNumber), 10);
       expect(value).to.equal(jsonResponse.apiClientId);
     });
 
     it('should check the JSON Response : `clientId`', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkResponseClientId', baseContext);
 
-      const value = await boApiClientsPage.getTextColumn(page, 'client_id', 2);
+      // Get ID from last created API Client
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      const value = await boApiClientsPage.getTextColumn(page, 'client_id', apiClientsNumber);
       expect(value).to.equal(createClient.clientId);
     });
 
     it('should check the JSON Response : `clientName`', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkResponseClientName', baseContext);
 
-      const value = await boApiClientsPage.getTextColumn(page, 'client_name', 2);
+      // Get ID from last created API Client
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      const value = await boApiClientsPage.getTextColumn(page, 'client_name', apiClientsNumber);
       expect(value).to.equal(createClient.clientName);
     });
 
@@ -282,7 +216,4 @@ describe('API : POST /api-client', async () => {
       expect(numElements).to.equal(1);
     });
   });
-
-  // Pre-condition: Create an API Client
-  deleteAPIClientTest(`${baseContext}_postTest`);
 });

@@ -33,6 +33,7 @@ use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 use PrestaShop\PrestaShop\Core\Domain\Title\Query\GetTitleForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Title\QueryHandler\GetTitleForEditingHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Title\QueryResult\EditableTitle;
+use PrestaShop\PrestaShop\Core\Domain\Title\TitleSettings;
 
 /**
  * Handles command that gets title for editing
@@ -49,10 +50,18 @@ class GetTitleForEditingHandler extends AbstractTitleHandler implements GetTitle
     {
         $title = $this->titleRepository->get($query->getTitleId());
 
+        $titleImage = _PS_GENDERS_DIR_ . $query->getTitleId()->getValue() . '.jpg';
+        $titleWidth = $titleHeight = null;
+        if (file_exists($titleImage)) {
+            list($titleWidth, $titleHeight) = getimagesize($titleImage);
+        }
+
         return new EditableTitle(
             $query->getTitleId()->getValue(),
             $title->name,
-            (int) $title->type
+            (int) $title->type,
+            $titleWidth ?: TitleSettings::DEFAULT_IMAGE_WIDTH,
+            $titleHeight ?: TitleSettings::DEFAULT_IMAGE_HEIGHT
         );
     }
 }

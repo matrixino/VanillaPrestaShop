@@ -131,13 +131,18 @@ class CarrierController extends PrestaShopAdminController
         FormHandlerInterface $formHandler,
     ): Response {
         $form = $formBuilder->getForm();
-        $form->handleRequest($request);
-        $result = $formHandler->handle($form);
 
-        if ($result->isSubmitted() && $result->isValid()) {
-            $this->addFlash('success', $this->trans('Successful creation', [], 'Admin.Notifications.Success'));
+        try {
+            $form->handleRequest($request);
+            $result = $formHandler->handle($form);
 
-            return $this->redirectToRoute('admin_carriers_edit', ['carrierId' => $result->getIdentifiableObjectId()]);
+            if ($result->isSubmitted() && $result->isValid()) {
+                $this->addFlash('success', $this->trans('Successful creation', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_carriers_edit', ['carrierId' => $result->getIdentifiableObjectId()]);
+            }
+        } catch (CarrierException $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
         }
 
         return $this->render('@PrestaShop/Admin/Improve/Shipping/Carriers/form.html.twig', [
@@ -156,13 +161,18 @@ class CarrierController extends PrestaShopAdminController
         FormHandlerInterface $formHandler,
     ): Response {
         $form = $formBuilder->getFormFor($carrierId);
-        $form->handleRequest($request);
-        $result = $formHandler->handleFor($carrierId, $form);
 
-        if ($result->isSubmitted() && $result->isValid()) {
-            $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
+        try {
+            $form->handleRequest($request);
+            $result = $formHandler->handleFor($carrierId, $form);
 
-            return $this->redirectToRoute('admin_carriers_edit', ['carrierId' => $result->getIdentifiableObjectId()]);
+            if ($result->isSubmitted() && $result->isValid()) {
+                $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_carriers_edit', ['carrierId' => $result->getIdentifiableObjectId()]);
+            }
+        } catch (CarrierException $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
         }
 
         try {

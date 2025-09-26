@@ -76,6 +76,8 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     'field' => 'date',
                     'format' => $this->languageContext->getDateTimeFormat(),
                     'clickable' => true,
+                    'sortable' => false,
+                    'alignment' => 'left',
                 ])
             )
             ->add(
@@ -85,6 +87,7 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                         'identifier_field' => 'shipment_number',
                         'bulk_field' => 'shipment_number',
                         'with_bulk_field' => false,
+                        'sortable' => false,
                         'clickable' => false,
                     ])
             )
@@ -93,7 +96,7 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     ->setName($this->trans('Carrier', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'carrier',
-                        'sortable' => true,
+                        'sortable' => false,
                         'alignment' => 'left',
                     ])
             )
@@ -102,17 +105,17 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     ->setName($this->trans('Items', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'items',
-                        'sortable' => true,
-                        'alignment' => 'left',
+                        'sortable' => false,
+                        'alignment' => 'right',
                     ])
             )
             ->add(
-                (new DataColumn('price'))
-                    ->setName($this->trans('Price', [], 'Admin.Global'))
+                (new DataColumn('shipping_cost'))
+                    ->setName($this->trans('Shipping cost', [], 'Admin.Global'))
                     ->setOptions([
-                        'field' => 'price',
-                        'sortable' => true,
-                        'alignment' => 'left',
+                        'field' => 'shipping_cost',
+                        'sortable' => false,
+                        'alignment' => 'right',
                     ])
             )
             ->add(
@@ -120,7 +123,7 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     ->setName($this->trans('Weight', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'weight',
-                        'sortable' => true,
+                        'sortable' => false,
                         'alignment' => 'left',
                     ])
             )
@@ -129,7 +132,7 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
                     ->setName($this->trans('Tracking number', [], 'Admin.Global'))
                     ->setOptions([
                         'field' => 'tracking_number',
-                        'sortable' => true,
+                        'sortable' => false,
                         'alignment' => 'left',
                     ])
             )->add(
@@ -148,13 +151,22 @@ final class ShipmentGridDefinitionFactory extends AbstractFilterableGridDefiniti
      */
     private function getRowActions()
     {
-        return (new RowActionCollection())
+        $rowActions = new RowActionCollection();
+        $rowActions
             ->add(
                 (new AdditionalShipmentRowAction('More'))
                     ->setName($this->trans('More', [], 'Admin.Actions'))
                     ->setIcon('more_vert')
                     ->setOptions([
                         'shipment_id_field' => 'shipment_number',
-                    ]));
+                        'order_id_field' => 'order_id',
+                        'items' => 'items',
+                        'total_shipments' => 'total_shipments',
+                        'tracking_number' => 'tracking_number',
+                        'carrier' => 'carrier',
+                    ])
+            );
+
+        return $rowActions;
     }
 }

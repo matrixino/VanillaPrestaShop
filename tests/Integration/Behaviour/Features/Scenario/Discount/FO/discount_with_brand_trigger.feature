@@ -10,7 +10,6 @@ Feature: Add discount with brand trigger on FO
     And language "french" with locale "fr-FR" exists
     Given shop "shop1" with name "test_shop" exists
     And there is a currency named "usd" with iso code "USD" and exchange rate of 0.92
-    And shop configuration for "PS_CART_RULE_FEATURE_ACTIVE" is set to 1
 
   Scenario: First create products and the discount that will be used in following scenarios
     Given I add new manufacturer "rocket" with following properties:

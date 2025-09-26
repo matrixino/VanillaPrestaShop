@@ -50,7 +50,8 @@ class AddDiscountHandler implements AddDiscountHandlerInterface
      */
     public function handle(AddDiscountCommand $command): DiscountId
     {
-        $this->discountValidator->validateDiscountPropertiesForType($command);
+        $discountType = $command->getDiscountType()->getValue();
+        $this->discountValidator->validateDiscountPropertiesForType($discountType, $command);
         $BuiltCartRule = $this->cartRuleBuilder->build($command);
         $discount = $this->discountRepository->add($BuiltCartRule);
 

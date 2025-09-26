@@ -180,7 +180,7 @@ class ThemeManager implements AddonManagerInterface
                 ->doDisableModules($theme->get('global_settings.modules.to_disable', []))
                 ->doEnableModules($theme->getModulesToEnable())
                 ->doResetModules($theme->get('global_settings.modules.to_reset', []))
-                ->doApplyImageTypes($theme->get('global_settings.image_types', []), $name)
+                ->doApplyImageTypes($theme->get('global_settings.image_types', []))
                 ->doHookModules($theme->get('global_settings.hooks.modules_to_hook', []));
 
             $theme->onEnable();
@@ -369,9 +369,9 @@ class ThemeManager implements AddonManagerInterface
      *
      * @return self
      */
-    private function doApplyImageTypes(array $types, ?string $theme_name): self
+    private function doApplyImageTypes(array $types): self
     {
-        $this->imageTypeRepository->setTypes($types, $theme_name);
+        $this->imageTypeRepository->setTypes($types);
 
         return $this;
     }

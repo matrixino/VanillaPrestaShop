@@ -133,7 +133,7 @@ final class SendCartToCustomerHandler implements SendCartToCustomerHanlderInterf
     {
         return Context::getContext()->link->getPageLink(
             'order',
-            false,
+            null,
             (int) $cart->getAssociatedLanguage()->getId(),
             [
                 'step' => 3,

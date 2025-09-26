@@ -26,6 +26,7 @@
 
 namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler;
 
+use Cookie;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Context\EmployeeContext;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
@@ -98,6 +99,10 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
      */
     private $maxLength;
 
+    private bool $boAllowEmployeeFormLang;
+
+    private Cookie $legacyContextCookie;
+
     public function __construct(
         CommandBusInterface $bus,
         array $defaultShopAssociation,
@@ -109,6 +114,8 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
         int $minLength,
         int $maxLength,
         int $minScore,
+        bool $boAllowEmployeeFormLang,
+        Cookie $legacyContextCookie,
         private readonly EmployeeContext $employeeContext,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EmployeeRepository $employeeRepository,
@@ -125,6 +132,8 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
         $this->minLength = $minLength;
         $this->maxLength = $maxLength;
         $this->minScore = $minScore;
+        $this->boAllowEmployeeFormLang = $boAllowEmployeeFormLang;
+        $this->legacyContextCookie = $legacyContextCookie;
     }
 
     /**
@@ -217,6 +226,12 @@ final class EmployeeFormDataHandler implements FormDataHandlerInterface
                 $this->csrfTokenManager->refreshToken($command->getEmail()->getValue());
                 $this->userTokenManager->clear();
             }
+        }
+
+        // If Config, Save in cookie the language for Employee
+        if ($this->boAllowEmployeeFormLang) {
+            $this->legacyContextCookie->employee_form_lang = $command->getLanguageId();
+            $this->legacyContextCookie->write();
         }
 
         /**

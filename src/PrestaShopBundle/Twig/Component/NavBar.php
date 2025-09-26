@@ -50,7 +50,13 @@ class NavBar
 
     public function getDefaultTab(): string
     {
-        return Tab::getClassNameById((int) $this->context->getContext()->employee->default_tab);
+        $className = Tab::getClassNameById((int) $this->context->getContext()->employee->default_tab);
+
+        if (!$className) {
+            $className = 'AdminDashboard';
+        }
+
+        return $className;
     }
 
     public function getPsVersion(): string

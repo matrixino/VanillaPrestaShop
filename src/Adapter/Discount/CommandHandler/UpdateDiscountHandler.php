@@ -28,6 +28,7 @@ namespace PrestaShop\PrestaShop\Adapter\Discount\CommandHandler;
 
 use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository;
 use PrestaShop\PrestaShop\Adapter\Discount\Update\Filler\DiscountFiller;
+use PrestaShop\PrestaShop\Adapter\Discount\Validate\DiscountValidator;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\CommandHandler\UpdateDiscountCommandHandlerInterface;
@@ -39,12 +40,14 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
     public function __construct(
         private readonly DiscountRepository $discountRepository,
         private readonly DiscountFiller $discountFiller,
+        private readonly DiscountValidator $discountValidator,
     ) {
     }
 
     public function handle(UpdateDiscountCommand $command): void
     {
         $cartRule = $this->discountRepository->get($command->getDiscountId());
+        $this->discountValidator->validateDiscountPropertiesForType($cartRule->type, $command);
 
         $updatableProperties = $this->discountFiller->fillUpdatableProperties($cartRule, $command);
 

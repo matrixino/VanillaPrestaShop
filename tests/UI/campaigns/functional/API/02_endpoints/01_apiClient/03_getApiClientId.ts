@@ -72,11 +72,11 @@ describe('API : GET /api-client/{apiClientId}', async () => {
       expect(pageTitle).to.eq(boApiClientsPage.pageTitle);
     });
 
-    it('should check that no records found', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkThatNoRecordFound', baseContext);
+    it('should check that at least one API client is present', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkThatOneAPIClientExists', baseContext);
 
-      const noRecordsFoundText = await boApiClientsPage.getTextForEmptyTable(page);
-      expect(noRecordsFoundText).to.contains('warning No records found');
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      expect(apiClientsNumber).to.be.greaterThanOrEqual(1);
     });
 
     it('should go to add New API Client page', async function () {
@@ -147,7 +147,9 @@ describe('API : GET /api-client/{apiClientId}', async () => {
     it('should get informations', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'getInformations', baseContext);
 
-      idApiClient = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', 1), 10);
+      // Get ID from last created API Client
+      const apiClientsNumber = await boApiClientsPage.getNumberOfElementInGrid(page);
+      idApiClient = parseInt(await boApiClientsPage.getTextColumn(page, 'id_api_client', apiClientsNumber), 10);
       expect(idApiClient).to.be.gt(0);
     });
   });
@@ -248,5 +250,5 @@ describe('API : GET /api-client/{apiClientId}', async () => {
   });
 
   // Post-condition: Create an API Client
-  deleteAPIClientTest(`${baseContext}_postTest`);
+  deleteAPIClientTest(`${baseContext}_postTest`, clientData.clientId);
 });

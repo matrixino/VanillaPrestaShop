@@ -57,9 +57,12 @@ class LogsController extends PrestaShopAdminController
         GridFactoryInterface $gridLogFactory,
         #[Autowire(service: 'prestashop.adapter.logs.form_handler')]
         FormHandlerInterface $formHandler,
+        #[Autowire(service: 'prestashop.adapter.logs_database.form_handler')]
+        FormHandlerInterface $databaseFormHandler,
     ): Response {
         $grid = $gridLogFactory->getGrid($filters);
         $logsByEmailForm = $formHandler->getForm();
+        $databaseForm = $databaseFormHandler->getForm();
 
         return $this->render('@PrestaShop/Admin/Configure/AdvancedParameters/LogsPage/index.html.twig', [
             'layoutHeaderToolbarBtn' => [],
@@ -69,6 +72,7 @@ class LogsController extends PrestaShopAdminController
             'enableSidebar' => true,
             'help_link' => $this->generateSidebarLink('AdminLogs'),
             'logsByEmailForm' => $logsByEmailForm->createView(),
+            'databaseForm' => $databaseForm->createView(),
             'grid' => $this->presentGrid($grid),
         ]);
     }
@@ -114,6 +118,38 @@ class LogsController extends PrestaShopAdminController
 
         if ($logsByEmailForm->isSubmitted()) {
             $data = $logsByEmailForm->getData();
+
+            $saveErrors = $formHandler->save($data);
+
+            if (0 === count($saveErrors)) {
+                $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_logs_index');
+            }
+
+            $this->addFlashErrors($saveErrors);
+        }
+
+        return $this->redirectToRoute('admin_logs_index');
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return RedirectResponse
+     */
+    #[DemoRestricted(redirectRoute: 'admin_logs_index')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to update this.', redirectRoute: 'admin_logs_index')]
+    public function saveDatabaseSettingsAction(
+        Request $request,
+        #[Autowire(service: 'prestashop.adapter.logs_database.form_handler')]
+        FormHandlerInterface $formHandler,
+    ) {
+        $databaseForm = $formHandler->getForm();
+        $databaseForm->handleRequest($request);
+
+        if ($databaseForm->isSubmitted()) {
+            $data = $databaseForm->getData();
 
             $saveErrors = $formHandler->save($data);
 

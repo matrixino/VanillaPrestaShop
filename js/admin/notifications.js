@@ -129,16 +129,26 @@ function getPush() {
         return;
       }
 
-      // Add orders notifications to the list
-      renderNotifications('orders-notifications', json.order, renderOrderNotification);
+      var notifCount = 0;
 
-      // Add customers notifications to the list
-      renderNotifications('customers-notifications', json.customer, renderCustomerNotification);
+      if (json.hasOwnProperty('order')) {
+        // Add orders notifications to the list
+        renderNotifications('orders-notifications', json.order, renderOrderNotification);
+        notifCount += parseInt(json.order.total)
+      }
 
-      // Add messages notifications to the list
-      renderNotifications('messages-notifications', json.customer_message, renderMessageNotification);
+      if (json.hasOwnProperty('customer')) {
+        // Add customers notifications to the list
+        renderNotifications('customers-notifications', json.customer, renderCustomerNotification);
+        notifCount += parseInt(json.customer.total)
+      }
 
-      var notifCount = parseInt(json.order.total) + parseInt(json.customer.total) + parseInt(json.customer_message.total);
+      if (json.hasOwnProperty('customer_message')) {
+        // Add messages notifications to the list
+        renderNotifications('messages-notifications', json.customer_message, renderMessageNotification);
+        notifCount += parseInt(json.customer_message.total)
+      }
+
       if (notifCount > 0) {
         $("#total_notif_number_wrapper").removeClass('hide');
         $('#total_notif_value').text(notifCount);

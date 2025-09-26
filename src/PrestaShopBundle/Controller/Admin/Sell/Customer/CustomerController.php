@@ -212,7 +212,7 @@ class CustomerController extends PrestaShopAdminController
      *
      * @return Response
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_customers_index')]
     public function editAction(
         int $customerId,
         Request $request,

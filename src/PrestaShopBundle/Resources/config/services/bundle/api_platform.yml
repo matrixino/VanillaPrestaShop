@@ -64,6 +64,12 @@ services:
     arguments:
       $validatorMetadataFactory: '@validator.mapping.class_metadata_factory'
 
+
+  # Decorator of api_platform.state_provider.deserialize DeserializeProvider
+  PrestaShopBundle\ApiPlatform\Provider\EmptyBodyDeserializerProvider:
+    autowire: true
+    public: false
+
   # Customer provider for CQRS queries
   PrestaShopBundle\ApiPlatform\Provider\QueryProvider:
     tags: [ 'api_platform.state_provider' ]

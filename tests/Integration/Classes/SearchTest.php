@@ -52,6 +52,16 @@ class SearchTest extends TestCase
                 'langId' => 1,
                 'expected' => ['test'],
             ],
+            'with special characters' => [
+                'input' => '&&',
+                'langId' => 1,
+                'expected' => [''],
+            ],
+            'with special characters (allowed)' => [
+                'input' => 'test t&t',
+                'langId' => 1,
+                'expected' => ['test', 't&t'],
+            ],
             'with hyphen' => [
                 'input' => 'test1-test2',
                 'langId' => 1,

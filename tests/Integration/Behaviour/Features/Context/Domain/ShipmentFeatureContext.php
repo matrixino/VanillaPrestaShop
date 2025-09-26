@@ -96,7 +96,7 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
             }
 
             Assert::assertEquals($shipment->getTrackingNumber(), $shipmentData['tracking_number']);
-            Assert::assertEquals($shipment->getCarrierId(), $carrierId, 'Wrong carrier ID for ' . $carrierReference);
+            Assert::assertEquals($shipment->getCarrierSummary()->getId(), $carrierId, 'Wrong carrier ID for ' . $carrierReference);
             Assert::assertEquals($shipment->getAddressId(), $addressId);
             Assert::assertEquals($shipment->getShippingCostTaxExcluded(), $shipmentData['shipping_cost_tax_excl'], 'Wrong shipping cast tax excluded for ' . $carrierReference);
             Assert::assertEquals($shipment->getShippingCostTaxIncluded(), $shipmentData['shipping_cost_tax_incl'], 'Wrong shipping cast tax included for ' . $carrierReference);

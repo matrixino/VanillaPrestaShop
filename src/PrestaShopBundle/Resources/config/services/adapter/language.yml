@@ -66,6 +66,7 @@ services:
     autoconfigure: true
     arguments:
       - '@prestashop.adapter.file.robots_text_file_generator'
+      - '@prestashop.adapter.employee_language_updater'
 
   PrestaShop\PrestaShop\Adapter\Language\ContextLanguageProvider:
     autowire: true

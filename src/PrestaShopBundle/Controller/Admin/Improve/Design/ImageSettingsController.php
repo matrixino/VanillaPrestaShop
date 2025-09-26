@@ -34,8 +34,10 @@ use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Command\DeleteImagesFromType
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Command\DeleteImageTypeCommand;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Command\RegenerateThumbnailsCommand;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Exception\ImageTypeNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\ImageSettings\ImageDomain;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\Query\GetImageTypeForEditing;
 use PrestaShop\PrestaShop\Core\Domain\ImageSettings\QueryResult\EditableImageType;
+use PrestaShop\PrestaShop\Core\Domain\ImageSettings\ValueObject\ImageTypeId;
 use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface as ConfigurationFormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface;
@@ -294,10 +296,12 @@ class ImageSettingsController extends PrestaShopAdminController
         try {
             $regenThumbnailsForm = $this->createForm(RegenerateThumbnailsType::class);
             $regenThumbnailsForm->handleRequest($request);
-
+            $rawImageTypeId = (int) $regenThumbnailsForm->get('image-type')->getData();
+            $imageTypeId = 0 !== $rawImageTypeId ? (new ImageTypeId($rawImageTypeId))->getValue() : 0;
+            $imageDomain = ImageDomain::from((string) $regenThumbnailsForm->get('image')->getData());
             $this->dispatchCommand(new RegenerateThumbnailsCommand(
-                $regenThumbnailsForm->get('image')->getData(),
-                $regenThumbnailsForm->get('image-type')->getData(),
+                $imageDomain->value,
+                $imageTypeId,
                 $regenThumbnailsForm->get('erase-previous-images')->getData()
             ));
             $this->addFlash('success', $this->trans('The thumbnails were successfully regenerated.', [], 'Admin.Notifications.Success'));

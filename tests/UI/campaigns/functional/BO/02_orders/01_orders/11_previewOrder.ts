@@ -248,7 +248,7 @@ describe('BO - Orders : Preview order', async () => {
         {args: {product: dataProducts.demo_8, productPrice: dataProducts.demo_8.price}},
         {args: {product: dataProducts.demo_11, productPrice: dataProducts.demo_11.finalPrice}},
         {args: {product: dataProducts.demo_12, productPrice: dataProducts.demo_12.price}},
-        {args: {product: dataProducts.demo_13, productPrice: dataProducts.demo_13.price}},
+        {args: {product: dataProducts.demo_13, productPrice: dataProducts.demo_13.finalPrice}},
         {args: {product: dataProducts.demo_14, productPrice: dataProducts.demo_14.price}},
       ].forEach((test, index: number) => {
         it(`should check the product '${test.args.product.name}'`, async function () {
@@ -405,7 +405,7 @@ describe('BO - Orders : Preview order', async () => {
           {args: {product: dataProducts.demo_8, productPrice: dataProducts.demo_8.price}},
           {args: {product: dataProducts.demo_11, productPrice: dataProducts.demo_11.finalPrice}},
           {args: {product: dataProducts.demo_12, productPrice: dataProducts.demo_12.price}},
-          {args: {product: dataProducts.demo_13, productPrice: dataProducts.demo_13.price}},
+          {args: {product: dataProducts.demo_13, productPrice: dataProducts.demo_13.finalPrice}},
           {args: {product: dataProducts.demo_14, productPrice: dataProducts.demo_14.price}},
         ].forEach((test, index: number) => {
           it(`should check the product '${test.args.product.name}'`, async function () {

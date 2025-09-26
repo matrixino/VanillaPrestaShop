@@ -54,7 +54,7 @@ class OrderDetailId
     /**
      * @return int
      */
-    public function getValue()
+    public function getValue(): int
     {
         return $this->orderDetailId;
     }

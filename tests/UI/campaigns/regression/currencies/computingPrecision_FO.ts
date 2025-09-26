@@ -84,7 +84,7 @@ describe(
         },
       ],
       discountPercentValue: 20.678,
-      discountGiftValue: giftCartRule.freeGiftProduct?.price,
+      discountGiftValue: giftCartRule.freeGiftProduct?.finalPrice,
       totalPrice: 117.178,
     });
 

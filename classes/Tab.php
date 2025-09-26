@@ -344,7 +344,7 @@ class TabCore extends ObjectModel
      *
      * @param string $className
      *
-     * @return int Tab ID
+     * @return int|false Tab ID
      */
     public static function getIdFromClassName($className)
     {

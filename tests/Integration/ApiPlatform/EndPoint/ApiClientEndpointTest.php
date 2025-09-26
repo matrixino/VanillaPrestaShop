@@ -65,6 +65,7 @@ class ApiClientEndpointTest extends ApiTestCase
                 'clientId' => self::CLIENT_ID,
                 'clientName' => self::CLIENT_NAME,
                 'description' => '',
+                'externalIssuer' => null,
                 'enabled' => true,
                 'lifetime' => 10000,
                 'scopes' => [],

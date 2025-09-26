@@ -25,9 +25,10 @@
  */
 use PrestaShop\PrestaShop\Adapter\Presenter\Object\ObjectPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
+use PrestaShop\PrestaShop\Adapter\Shipment\DeliveryOptionsInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class DeliveryOptionsFinderCore
+class DeliveryOptionsFinderCore implements DeliveryOptionsInterface
 {
     private $context;
     private $objectPresenter;

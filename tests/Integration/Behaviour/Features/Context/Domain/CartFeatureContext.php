@@ -187,7 +187,7 @@ class CartFeatureContext extends AbstractDomainFeatureContext
             );
             $this->getSharedStorage()->set($productName, $productId);
 
-            // Clear cart static cache or it will have no products in next calls
+            // Clear cart static cache, or it will have no products in next calls
             Cart::resetStaticCache();
         } catch (MinimalQuantityException $e) {
             $this->setLastException($e);
@@ -214,7 +214,7 @@ class CartFeatureContext extends AbstractDomainFeatureContext
                 )
             );
 
-            // Clear cart static cache or it will have no products in next calls
+            // Clear cart static cache, or it will have no products in next calls
             Cart::resetStaticCache();
         } catch (MinimalQuantityException $e) {
             $this->setLastException($e);
@@ -674,6 +674,22 @@ class CartFeatureContext extends AbstractDomainFeatureContext
             $this->getCommandBus()->handle(new RemoveProductFromCartCommand(
                 $cartId,
                 $productId
+            ));
+        } catch (CartException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When I delete combination :combinationReference from product :productReference from cart :cartReference
+     */
+    public function deleteCombination(string $combinationReference, string $productReference, string $cartReference)
+    {
+        try {
+            $this->getCommandBus()->handle(new RemoveProductFromCartCommand(
+                $this->referenceToId($cartReference),
+                $this->referenceToId($productReference),
+                $this->referenceToId($combinationReference)
             ));
         } catch (CartException $e) {
             $this->setLastException($e);

@@ -317,8 +317,6 @@ class AdminShopControllerCore extends AdminController
      */
     protected function afterAdd($new_shop)
     {
-        $this->enableTheme($new_shop);
-
         $import_data = Tools::getValue('importData', []);
 
         // The root category should be at least imported
@@ -372,8 +370,6 @@ class AdminShopControllerCore extends AdminController
      */
     protected function afterUpdate($new_shop)
     {
-        $this->enableTheme($new_shop);
-
         $categories = Tools::getValue('categoryBox');
 
         if (!is_array($categories)) {
@@ -396,29 +392,6 @@ class AdminShopControllerCore extends AdminController
         }
 
         return parent::afterUpdate($new_shop);
-    }
-
-    /**
-     * @param Shop $shop
-     *
-     * @return void
-     */
-    protected function enableTheme($shop)
-    {
-        // We must avoid the fact that enable theme with Theme Manager will set theme into the shop too!
-
-        // Save initial shop context
-        $initialShop = $this->context->shop;
-        // Set new shop into the context, just for ThemeManagerBuilder
-        $this->context->shop = $shop;
-        (new ThemeManagerBuilder($this->context, Db::getInstance()))
-            ->build()
-            ->enable($shop->theme_name);
-        // Restore initial shop into the context
-        $this->context->shop = $initialShop;
-
-        // Clear cache!
-        Tools::clearCache();
     }
 
     public function getList($id_lang, $order_by = null, $order_way = null, $start = 0, $limit = null, $id_lang_shop = false)

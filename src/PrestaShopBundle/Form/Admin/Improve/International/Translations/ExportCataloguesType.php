@@ -119,6 +119,7 @@ class ExportCataloguesType extends TranslatorAwareType
                 'choices' => $this->moduleChoices,
                 'label' => false,
                 'multiple' => false,
+                'autocomplete' => true,
             ],
         ]);
     }

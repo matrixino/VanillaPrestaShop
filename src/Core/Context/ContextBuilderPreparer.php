@@ -51,11 +51,13 @@ class ContextBuilderPreparer
     {
         if ($context->language && $context->language->id) {
             $this->languageContextBuilder->setLanguageId($context->language->id);
+            $this->languageContextBuilder->setDefaultLanguageId($context->language->id);
         }
     }
 
     public function prepareLanguageId(int $languageId): void
     {
         $this->languageContextBuilder->setLanguageId($languageId);
+        $this->languageContextBuilder->setDefaultLanguageId($languageId);
     }
 }

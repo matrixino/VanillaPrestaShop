@@ -51,6 +51,13 @@
           {{ product.supplierReference }}
         </p>
       {% endif %}
+      {% if isImprovedShipmentFeatureFlagEnabled and product.shipmentIds is not empty %}
+        <p class="mb-0 productShipmentNumber">
+          {{ 'Shipment number: %shipment_id%'|trans({
+              '%shipment_id%': product.shipmentIds|join(', ')
+          }, 'Admin.Orderscustomers.Feature') }}
+        </p>
+      {% endif %}
     </a>
     {% if product.type == constant('PrestaShop\\PrestaShop\\Core\\Domain\\Order\\QueryResult\\OrderProductForViewing::TYPE_PACK') and product.customizations is null %}
       <span class="btn-product-pack-modal d-print-none" data-toggle="modal" data-target="#product-pack-modal" data-pack-items="{{ product.packItems|json_encode }}">

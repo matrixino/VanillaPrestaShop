@@ -27,6 +27,8 @@
 namespace PrestaShop\PrestaShop\Core\Grid\Data\Factory;
 
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\SqlFormatter\NullHighlighter;
+use Doctrine\SqlFormatter\SqlFormatter;
 use PrestaShop\PrestaShop\Core\Grid\Data\GridData;
 use PrestaShop\PrestaShop\Core\Grid\Query\DoctrineQueryBuilderInterface;
 use PrestaShop\PrestaShop\Core\Grid\Query\QueryParserInterface;
@@ -85,11 +87,20 @@ class DoctrineGridDataFactory implements GridDataFactoryInterface
      *
      * @return string
      */
-    private function getRawQuery(QueryBuilder $queryBuilder)
+    private function getRawQuery(QueryBuilder $queryBuilder): string
     {
         $query = $queryBuilder->getSQL();
         $parameters = $queryBuilder->getParameters();
 
-        return $this->queryParser->parse($query, $parameters);
+        $parsedQuery = $this->queryParser->parse($query, $parameters);
+
+        return $this->formatSQL($parsedQuery);
+    }
+
+    protected function formatSQL(string $query): string
+    {
+        $sqlFormatter = new SqlFormatter(new NullHighlighter());
+
+        return $sqlFormatter->format($query);
     }
 }

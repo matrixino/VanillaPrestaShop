@@ -44,6 +44,7 @@ use PrestaShopBundle\ApiPlatform\Metadata\CQRSGet;
             ],
         ),
     ],
+    normalizationContext: ['skip_null_values' => false],
 )]
 class ApiClient
 {
@@ -55,6 +56,8 @@ class ApiClient
     public string $clientName;
 
     public string $description;
+
+    public ?string $externalIssuer;
 
     public bool $enabled;
 

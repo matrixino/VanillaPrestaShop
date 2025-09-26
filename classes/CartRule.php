@@ -44,6 +44,9 @@ class CartRuleCore extends ObjectModel
     public const FILTER_ACTION_ALL_NOCAP = 5;
     public const BO_ORDER_CODE_PREFIX = 'BO_ORDER_';
 
+    public const AT_LEAST_ONE_PRODUCT_RULE = 'at_least_one_product_rule';
+    public const ALL_PRODUCT_RULES = 'all_product_rules';
+
     /**
      * This variable controls that a free gift is offered only once, even when multi-shippping is activated
      * and the same product is delivered in both addresses.
@@ -665,7 +668,7 @@ class CartRuleCore extends ObjectModel
         $result = Db::getInstance()->executeS('SELECT * FROM ' . _DB_PREFIX_ . 'cart_rule_product_rule_group WHERE id_cart_rule = ' . (int) $this->id);
         foreach ($result as $row) {
             if (!isset($productRuleGroups[$row['id_product_rule_group']])) {
-                $productRuleGroups[$row['id_product_rule_group']] = ['id_product_rule_group' => $row['id_product_rule_group'], 'quantity' => $row['quantity']];
+                $productRuleGroups[$row['id_product_rule_group']] = ['id_product_rule_group' => $row['id_product_rule_group'], 'quantity' => $row['quantity'], 'type' => $row['type']];
             }
             $productRuleGroups[$row['id_product_rule_group']]['product_rules'] = $this->getProductRules($row['id_product_rule_group']);
         }
@@ -1077,6 +1080,7 @@ class CartRuleCore extends ObjectModel
             // Now we load all RULE GROUP.
             $product_rule_groups = $this->getProductRuleGroups();
             foreach ($product_rule_groups as $id_product_rule_group => $product_rule_group) {
+                $product_rule_group_type = $product_rule_group['type'] ?? self::AT_LEAST_ONE_PRODUCT_RULE;
                 /*
                  * Rule group is a set of rules that the cart must meet for this cart rule to be applied.
                  * These groups have an AND relationship. If you create two groups for given cart rule,
@@ -1092,82 +1096,90 @@ class CartRuleCore extends ObjectModel
                 // Now, we load the RULES inside the RULE GROUP
                 $product_rules = $this->getProductRules($id_product_rule_group);
                 $countRulesProduct = count($product_rules);
-                $condition = 0;
+                $failedProductRules = 0;
                 foreach ($product_rules as $product_rule) {
                     /*
-                     * For the cart RULE GROUP to be validated, at least on of the RULES inside the RULE GROUP
-                     * must meet the conditions.
+                     * For the cart RULE GROUP to be validated, we have two behaviours depending on $product_rule_group_type:
+                     *  - AT_LEAST_ONE_PRODUCT_RULE: at least on of the RULES inside the RULE GROUP must meet the conditions
+                     *  - ALL_PRODUCT_RULES: all the RULES inside the RULE GROUP must meet the conditions
                      */
                     switch ($product_rule['type']) {
                         case 'attributes':
-                            $cart_attributes = Db::getInstance()->executeS('
-							SELECT cp.quantity, cp.`id_product`, pac.`id_attribute`, cp.`id_product_attribute`
-							FROM `' . _DB_PREFIX_ . 'cart_product` cp
-							LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON cp.id_product_attribute = pac.id_product_attribute
-							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')
-							AND cp.id_product_attribute > 0');
-                            $count_matching_products = 0;
-                            $matching_products_list = [];
-                            foreach ($cart_attributes as $cart_attribute) {
-                                if (in_array($cart_attribute['id_attribute'], $product_rule['values'])) {
-                                    $count_matching_products += $cart_attribute['quantity'];
-                                    if (
-                                        $alreadyInCart
-                                        && $this->gift_product == $cart_attribute['id_product']
-                                        && $this->gift_product_attribute == $cart_attribute['id_product_attribute']) {
-                                        --$count_matching_products;
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                // Build the matching list of "{productId}-{combinationId}" compatible with the IN mysql operator, this will result in  a string looking like:
+                                //   "23-45", "23-46", "42-0"
+                                $combinationInValue = implode(',', array_map(fn ($combinationIdentifier) => '"' . $combinationIdentifier . '"', $eligible_products_list));
+                                $cart_attributes = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`, pac.`id_attribute`, cp.`id_product_attribute`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON cp.id_product_attribute = pac.id_product_attribute
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND CONCAT(cp.`id_product`, "-", cp.`id_product_attribute`) IN (' . $combinationInValue . ')');
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_attributes as $cart_attribute) {
+                                    if (in_array($cart_attribute['id_attribute'], $product_rule['values'])) {
+                                        $count_matching_products += $cart_attribute['quantity'];
+                                        if (
+                                            $alreadyInCart
+                                            && $this->gift_product == $cart_attribute['id_product']
+                                            && $this->gift_product_attribute == $cart_attribute['id_product_attribute']) {
+                                            --$count_matching_products;
+                                        }
+                                        $matching_products_list[] = $cart_attribute['id_product'] . '-' . $cart_attribute['id_product_attribute'];
                                     }
-                                    $matching_products_list[] = $cart_attribute['id_product'] . '-' . $cart_attribute['id_product_attribute'];
                                 }
                             }
                             if ($count_matching_products < $product_rule_group['quantity']) {
-                                if ($countRulesProduct === 1) {
-                                    return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                                } else {
-                                    ++$condition;
-
-                                    break;
-                                }
+                                ++$failedProductRules;
+                                break;
                             }
                             $eligible_products_list = $this->filterProducts($eligible_products_list, $matching_products_list, $product_rule['type']);
 
                             break;
                         case 'products':
-                            $cart_products = Db::getInstance()->executeS('
-							SELECT cp.quantity, cp.`id_product`
-							FROM `' . _DB_PREFIX_ . 'cart_product` cp
-							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
-                            $count_matching_products = 0;
-                            $matching_products_list = [];
-                            foreach ($cart_products as $cart_product) {
-                                if (in_array($cart_product['id_product'], $product_rule['values'])) {
-                                    $count_matching_products += $cart_product['quantity'];
-                                    if ($alreadyInCart && $this->gift_product == $cart_product['id_product']) {
-                                        --$count_matching_products;
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                $cart_products = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_products as $cart_product) {
+                                    if (in_array($cart_product['id_product'], $product_rule['values'])) {
+                                        $count_matching_products += $cart_product['quantity'];
+                                        if ($alreadyInCart && $this->gift_product == $cart_product['id_product']) {
+                                            --$count_matching_products;
+                                        }
+                                        $matching_products_list[] = $cart_product['id_product'] . '-0';
                                     }
-                                    $matching_products_list[] = $cart_product['id_product'] . '-0';
                                 }
                             }
                             if ($count_matching_products < $product_rule_group['quantity']) {
-                                if ($countRulesProduct === 1) {
-                                    return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                                } else {
-                                    ++$condition;
-
-                                    break;
-                                }
+                                ++$failedProductRules;
+                                break;
                             }
                             $eligible_products_list = $this->filterProducts($eligible_products_list, $matching_products_list, $product_rule['type']);
 
                             break;
                         case 'combinations':
+                            // Build the matching list of "{productId}-{combinationId}" compatible with the IN mysql operator, this will result in  a string looking like:
+                            //   "23-45", "23-46", "42-0"
+                            $combinationInValue = implode(',', array_map(fn ($combinationIdentifier) => '"' . $combinationIdentifier . '"', $eligible_products_list));
                             $cart_combinations = Db::getInstance()->executeS('
 							SELECT cp.quantity, cp.`id_product`, cp.`id_product_attribute`
 							FROM `' . _DB_PREFIX_ . 'cart_product` cp
 							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND CONCAT(cp.`id_product`, "-", cp.`id_product_attribute`) IN (' . implode(',', array_map(fn ($combinationIdentifier) => '"' . $combinationIdentifier . '"', $eligible_products_list)) . ')');
+							AND CONCAT(cp.`id_product`, "-", cp.`id_product_attribute`) IN (' . $combinationInValue . ')');
                             $count_matching_combinations = 0;
                             $matching_combinations_list = [];
                             foreach ($cart_combinations as $cart_combination) {
@@ -1181,46 +1193,42 @@ class CartRuleCore extends ObjectModel
                                 }
                             }
                             if ($count_matching_combinations < $product_rule_group['quantity']) {
-                                if ($countRulesProduct === 1) {
-                                    return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                                } else {
-                                    ++$condition;
-
-                                    break;
-                                }
+                                ++$failedProductRules;
+                                break;
                             }
                             $eligible_products_list = $this->filterProducts($eligible_products_list, $matching_combinations_list, $product_rule['type']);
 
                             break;
                         case 'categories':
-                            $cart_categories = Db::getInstance()->executeS('
-							SELECT cp.quantity, cp.`id_product`, cp.`id_product_attribute`, catp.`id_category`
-							FROM `' . _DB_PREFIX_ . 'cart_product` cp
-							LEFT JOIN `' . _DB_PREFIX_ . 'category_product` catp ON cp.id_product = catp.id_product
-							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')
-							AND cp.`id_product` <> ' . (int) $this->gift_product);
-                            $count_matching_products = 0;
-                            $matching_products_list = [];
-                            foreach ($cart_categories as $cart_category) {
-                                if (in_array($cart_category['id_category'], $product_rule['values'])
-                                    /*
-                                     * We also check that the product is not already in the matching product list,
-                                     * because there are doubles in the query results (when the product is in multiple categories)
-                                     */
-                                    && !in_array($cart_category['id_product'] . '-' . $cart_category['id_product_attribute'], $matching_products_list)) {
-                                    $count_matching_products += $cart_category['quantity'];
-                                    $matching_products_list[] = $cart_category['id_product'] . '-' . $cart_category['id_product_attribute'];
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                $cart_categories = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`, cp.`id_product_attribute`, catp.`id_category`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								LEFT JOIN `' . _DB_PREFIX_ . 'category_product` catp ON cp.id_product = catp.id_product
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')
+								AND cp.`id_product` <> ' . (int) $this->gift_product);
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_categories as $cart_category) {
+                                    if (in_array($cart_category['id_category'], $product_rule['values'])
+                                        /*
+                                         * We also check that the product is not already in the matching product list,
+                                         * because there are doubles in the query results (when the product is in multiple categories)
+                                         */
+                                        && !in_array($cart_category['id_product'] . '-' . $cart_category['id_product_attribute'], $matching_products_list)) {
+                                        $count_matching_products += $cart_category['quantity'];
+                                        $matching_products_list[] = $cart_category['id_product'] . '-' . $cart_category['id_product_attribute'];
+                                    }
                                 }
                             }
                             if ($count_matching_products < $product_rule_group['quantity']) {
-                                if ($countRulesProduct === 1) {
-                                    return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                                } else {
-                                    ++$condition;
-
-                                    break;
-                                }
+                                ++$failedProductRules;
+                                break;
                             }
                             // Attribute id is not important for this filter in the global list, so the ids are replaced by 0
                             foreach ($matching_products_list as &$matching_product) {
@@ -1230,52 +1238,90 @@ class CartRuleCore extends ObjectModel
 
                             break;
                         case 'manufacturers':
-                            $cart_manufacturers = Db::getInstance()->executeS('
-							SELECT cp.quantity, cp.`id_product`, p.`id_manufacturer`
-							FROM `' . _DB_PREFIX_ . 'cart_product` cp
-							LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON cp.id_product = p.id_product
-							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
-                            $count_matching_products = 0;
-                            $matching_products_list = [];
-                            foreach ($cart_manufacturers as $cart_manufacturer) {
-                                if (in_array($cart_manufacturer['id_manufacturer'], $product_rule['values'])) {
-                                    $count_matching_products += $cart_manufacturer['quantity'];
-                                    $matching_products_list[] = $cart_manufacturer['id_product'] . '-0';
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                $cart_manufacturers = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`, p.`id_manufacturer`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON cp.id_product = p.id_product
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_manufacturers as $cart_manufacturer) {
+                                    if (in_array($cart_manufacturer['id_manufacturer'], $product_rule['values'])) {
+                                        $count_matching_products += $cart_manufacturer['quantity'];
+                                        $matching_products_list[] = $cart_manufacturer['id_product'] . '-0';
+                                    }
                                 }
                             }
                             if ($count_matching_products < $product_rule_group['quantity']) {
-                                if ($countRulesProduct === 1) {
-                                    return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                                } else {
-                                    ++$condition;
-
-                                    break;
-                                }
+                                ++$failedProductRules;
+                                break;
                             }
                             $eligible_products_list = $this->filterProducts($eligible_products_list, $matching_products_list, $product_rule['type']);
 
                             break;
                         case 'suppliers':
-                            $cart_suppliers = Db::getInstance()->executeS('
-							SELECT cp.quantity, cp.`id_product`, p.`id_supplier`
-							FROM `' . _DB_PREFIX_ . 'cart_product` cp
-							LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON cp.id_product = p.id_product
-							WHERE cp.`id_cart` = ' . (int) $cart->id . '
-							AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
-                            $count_matching_products = 0;
-                            $matching_products_list = [];
-                            foreach ($cart_suppliers as $cart_supplier) {
-                                if (in_array($cart_supplier['id_supplier'], $product_rule['values'])) {
-                                    $count_matching_products += $cart_supplier['quantity'];
-                                    $matching_products_list[] = $cart_supplier['id_product'] . '-0';
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                $cart_suppliers = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`, p.`id_supplier`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								LEFT JOIN `' . _DB_PREFIX_ . 'product` p ON cp.id_product = p.id_product
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND cp.`id_product` IN (' . implode(',', array_map('intval', $eligible_products_list)) . ')');
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_suppliers as $cart_supplier) {
+                                    if (in_array($cart_supplier['id_supplier'], $product_rule['values'])) {
+                                        $count_matching_products += $cart_supplier['quantity'];
+                                        $matching_products_list[] = $cart_supplier['id_product'] . '-0';
+                                    }
+                                }
+                            }
+                            if ($count_matching_products < $product_rule_group['quantity']) {
+                                ++$failedProductRules;
+                                break;
+                            }
+                            $eligible_products_list = $this->filterProducts($eligible_products_list, $matching_products_list, $product_rule['type']);
+
+                            break;
+                        case 'features':
+                            // Skip if no eligible products to avoid SQL syntax error
+                            if (empty($eligible_products_list)) {
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                            } else {
+                                // Build the matching list of "{productId}-{productFeatureValueId}" compatible with the IN mysql operator for features matching, this will result in  a string looking like:
+                                //   "23-45", "23-46", "42-0"
+                                $featureInValue = implode(',', array_map(fn ($featureIdentifier) => '"' . $featureIdentifier . '"', $eligible_products_list));
+                                $cart_features = Db::getInstance()->executeS('
+								SELECT cp.quantity, cp.`id_product`, f.`id_feature`, f.`id_feature_value`, cp.`id_product_attribute`
+								FROM `' . _DB_PREFIX_ . 'cart_product` cp
+								LEFT JOIN `' . _DB_PREFIX_ . 'feature_product` f ON cp.id_product = f.id_product
+								WHERE cp.`id_cart` = ' . (int) $cart->id . '
+								AND CONCAT(cp.`id_product`, "-", cp.`id_product_attribute`) IN (' . $featureInValue . ')');
+                                $count_matching_products = 0;
+                                $matching_products_list = [];
+                                foreach ($cart_features as $cart_feature) {
+                                    if (in_array($cart_feature['id_feature'], $product_rule['values']) || in_array($cart_feature['id_feature_value'], $product_rule['values'])) {
+                                        $count_matching_products += $cart_feature['quantity'];
+                                        $matching_products_list[] = $cart_feature['id_product'] . '-' . $cart_feature['id_product_attribute'];
+                                    }
                                 }
                             }
                             if ($count_matching_products < $product_rule_group['quantity']) {
                                 if ($countRulesProduct === 1) {
                                     return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
                                 } else {
-                                    ++$condition;
+                                    ++$failedProductRules;
 
                                     break;
                                 }
@@ -1286,15 +1332,20 @@ class CartRuleCore extends ObjectModel
                         default:
                             return (!$displayError) ? false : $this->trans('Unknown type of product restriction', [], 'Shop.Notifications.Error');
                     }
-                    if (!count($eligible_products_list)) {
-                        if ($countRulesProduct === 1) {
-                            return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
-                        }
+
+                    // If the product rule type was ALL_PRODUCT_RULES and at least one rule failed, then it means the condition was not fulfilled,
+                    // no need to check for remaining product rules
+                    if ($product_rule_group_type === self::ALL_PRODUCT_RULES && $failedProductRules) {
+                        return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
                     }
                 }
-                if ($countRulesProduct !== 1 && $condition == $countRulesProduct) {
+
+                // If all product rules have failed it means that none of them worked, so the condition is not fulfilled (it's true for ALL_PRODUCT_RULES and AT_LEAST_ONE_PRODUCT_RULE)
+                if ($failedProductRules == $countRulesProduct) {
                     return (!$displayError) ? false : $this->trans('You cannot use this voucher with these products', [], 'Shop.Notifications.Error');
                 }
+
+                // Merge all eligible products for each product rule group
                 $selected_products = array_merge($selected_products, $eligible_products_list);
             }
         }

@@ -48,6 +48,7 @@ use PrestaShop\PrestaShop\Core\Image\Parser\ImageTagSourceParserInterface;
 use PrestaShop\PrestaShop\Core\Localization\CLDR\ComputingPrecision;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
 use PrestaShop\PrestaShop\Core\Util\Sorter;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use Product;
 use Shop;
 use StockAvailable;
@@ -58,29 +59,12 @@ use StockAvailable;
 #[AsQueryHandler]
 final class GetOrderProductsForViewingHandler extends AbstractOrderHandler implements GetOrderProductsForViewingHandlerInterface
 {
-    /**
-     * @var ImageTagSourceParserInterface
-     */
-    private $imageTagSourceParser;
-
-    /**
-     * @var int
-     */
-    private $contextLanguageId;
-
-    /**
-     * @var Locale
-     */
-    private $locale;
-
     public function __construct(
-        ImageTagSourceParserInterface $imageTagSourceParser,
-        int $contextLanguageId,
-        Locale $locale
+        private readonly ImageTagSourceParserInterface $imageTagSourceParser,
+        private readonly int $contextLanguageId,
+        private readonly Locale $locale,
+        private readonly ShipmentRepository $shipmentRepository
     ) {
-        $this->imageTagSourceParser = $imageTagSourceParser;
-        $this->contextLanguageId = $contextLanguageId;
-        $this->locale = $locale;
     }
 
     public function handle(GetOrderProductsForViewing $query): OrderProductsForViewing
@@ -199,6 +183,19 @@ final class GetOrderProductsForViewingHandler extends AbstractOrderHandler imple
                 OrderProductForViewing::TYPE_PRODUCT_WITHOUT_COMBINATIONS;
 
             $orderInvoice = new OrderInvoice($product['id_order_invoice']);
+            $shipments = $this->shipmentRepository->findByOrderId($order->id);
+            $shipmentIds = [];
+
+            if ($shipments) {
+                foreach ($shipments as $shipment) {
+                    $shipmentProducts = $shipment->getProducts();
+                    foreach ($shipmentProducts as $shipmentProduct) {
+                        if ($shipmentProduct->getOrderDetailId() == $product['id_order_detail']) {
+                            $shipmentIds[] = $shipment->getId();
+                        }
+                    }
+                }
+            }
 
             $packItems = [];
             foreach ($product['pack_items'] as $pack_item) {
@@ -265,7 +262,8 @@ final class GetOrderProductsForViewingHandler extends AbstractOrderHandler imple
                 (bool) Product::isAvailableWhenOutOfStock(StockAvailable::outOfStock($product['product_id'])),
                 $packItems,
                 $product['customizations'],
-                $product['product_mpn']
+                $product['product_mpn'],
+                $shipmentIds
             );
         }
 

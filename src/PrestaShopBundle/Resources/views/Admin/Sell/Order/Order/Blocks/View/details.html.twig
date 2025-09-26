@@ -49,7 +49,7 @@
         {{ documentsTitle }}
       </a>
     </li>
-    {% if isImprovedShipmentFeatureFlagEnabled %}
+    {% if isImprovedShipmentFeatureFlagEnabled and orderHasShipment == true %}
       <li class="nav-item">
         <a class="nav-link" id="orderShipmentsTab" data-toggle="tab" href="#orderShipmentsTabContent" role="tab" aria-controls="orderShipmentsTabContent" aria-expanded="true" aria-selected="false">
           <i class="material-icons">local_shipping</i>
@@ -96,14 +96,14 @@
         {% endblock %}
       {% endembed %}
     </div>
-    {% if isImprovedShipmentFeatureFlagEnabled %}
+    {% if isImprovedShipmentFeatureFlagEnabled and orderHasShipment == true %}
       <div class="tab-pane d-print-block fade" id="orderShipmentsTabContent" role="tabpanel" aria-labelledby="orderShipmentsTab">
         {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}
           {% block header %}
             {{ shipmentsLabel|raw }}
           {% endblock %}
           {% block body %}
-            {{ include('@PrestaShop/Admin/Common/Grid/grid_panel.html.twig', {grid: shipmentsGrid}) }}
+            {{ include('@PrestaShop/Admin/Common/Grid/grid.html.twig', {grid: shipmentsGrid}) }}
           {% endblock %}
         {% endembed %}
       </div>

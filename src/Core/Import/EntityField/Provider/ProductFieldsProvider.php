@@ -94,6 +94,7 @@ final class ProductFieldsProvider implements EntityFieldsProviderInterface
                 'low_stock_alert',
                 $this->trans('Receive a low stock alert by email', 'Admin.Catalog.Feature')
             ),
+            new EntityField('location', $this->trans('Stock location', 'Admin.Catalog.Feature')),
             new EntityField('visibility', $this->trans('Visibility', 'Admin.Catalog.Feature')),
             new EntityField('additional_shipping_cost', $this->trans('Additional shipping cost', 'Admin.Advparameters.Feature')),
             new EntityField('unity', $this->trans('Unit for the price per unit', 'Admin.Advparameters.Feature')),

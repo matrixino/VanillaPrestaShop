@@ -93,3 +93,6 @@ trans('Enable / Disable the newly improved shipment system.', 'Admin.Advparamete
 
 trans('Discount', 'Admin.Advparameters.Feature');
 trans('Enable / Disable the new discount system.', 'Admin.Advparameters.Help');
+
+trans('Tag', 'Admin.Advparameters.Feature');
+trans('Enable / Disable the tag page.', 'Admin.Advparameters.Help');

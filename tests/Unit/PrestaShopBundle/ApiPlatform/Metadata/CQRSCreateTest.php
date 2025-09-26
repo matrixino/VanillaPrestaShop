@@ -417,4 +417,58 @@ class CQRSCreateTest extends TestCase
         $this->assertInstanceOf(InvalidArgumentException::class, $caughtException);
         $this->assertEquals('Specifying an extra property experimentalOperation and a experimentalOperation argument that are different is invalid', $caughtException->getMessage());
     }
+
+    public function testAllowEmptyBody(): void
+    {
+        // Default value is false (no extra property added)
+        $operation = new CQRSCreate();
+        $this->assertEquals([], $operation->getExtraProperties());
+        $this->assertEquals(false, $operation->getAllowEmptyBody());
+
+        // Scopes parameters in constructor
+        $operation = new CQRSCreate(
+            allowEmptyBody: true,
+        );
+        $this->assertEquals(['allowEmptyBody' => true], $operation->getExtraProperties());
+        $this->assertEquals(true, $operation->getAllowEmptyBody());
+
+        // Extra properties parameters in constructor
+        $operation = new CQRSCreate(
+            extraProperties: ['allowEmptyBody' => false]
+        );
+        $this->assertEquals(['allowEmptyBody' => false], $operation->getExtraProperties());
+        $this->assertEquals(false, $operation->getAllowEmptyBody());
+
+        // Extra properties AND scopes parameters in constructor, both values get merged but remain unique
+        $operation = new CQRSCreate(
+            extraProperties: ['allowEmptyBody' => true],
+            allowEmptyBody: true,
+        );
+        $this->assertEquals(['allowEmptyBody' => true], $operation->getExtraProperties());
+        $this->assertEquals(true, $operation->getAllowEmptyBody());
+
+        // Use with method, returned object is a clone All values are replaced
+        $operation2 = $operation->withallowEmptyBody(false);
+        $this->assertNotEquals($operation2, $operation);
+        $this->assertEquals(['allowEmptyBody' => false], $operation2->getExtraProperties());
+        $this->assertEquals(false, $operation2->getAllowEmptyBody());
+        // Initial operation not modified of course
+        $this->assertEquals(['allowEmptyBody' => true], $operation->getExtraProperties());
+        $this->assertEquals(true, $operation->getAllowEmptyBody());
+
+        // When both values are specified, but they are different trigger an exception
+        $caughtException = null;
+        try {
+            new CQRSCreate(
+                extraProperties: ['allowEmptyBody' => true],
+                allowEmptyBody: false,
+            );
+        } catch (InvalidArgumentException $e) {
+            $caughtException = $e;
+        }
+
+        $this->assertNotNull($caughtException);
+        $this->assertInstanceOf(InvalidArgumentException::class, $caughtException);
+        $this->assertEquals('Specifying an extra property allowEmptyBody and a allowEmptyBody argument that are different is invalid', $caughtException->getMessage());
+    }
 }

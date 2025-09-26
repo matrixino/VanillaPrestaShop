@@ -141,6 +141,40 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
         ];
     }
 
+    public function testMultishopParametersAreDocumentedWhenFeatureActive(): void
+    {
+        $configuration = $this->getContainer()->get('prestashop.adapter.legacy.configuration');
+        $configuration->set('PS_MULTISHOP_FEATURE_ACTIVE', 1);
+
+        /** @var OpenApiFactoryInterface $openApiFactory */
+        $openApiFactory = $this->getContainer()->get(OpenApiFactoryInterface::class);
+        /** @var OpenApi $openApi */
+        $openApi = $openApiFactory->__invoke();
+        $operation = $openApi->getPaths()->getPath('/products')->getGet();
+        $parameterNames = array_map(static fn ($parameter) => $parameter->getName(), $operation->getParameters());
+        $this->assertContains('shopId', $parameterNames);
+        $this->assertContains('shopGroupId', $parameterNames);
+        $this->assertContains('shopIds', $parameterNames);
+        $this->assertContains('allShops', $parameterNames);
+    }
+
+    public function testMultishopParametersAreNotDocumentedWhenFeatureInactive(): void
+    {
+        $configuration = $this->getContainer()->get('prestashop.adapter.legacy.configuration');
+        $configuration->set('PS_MULTISHOP_FEATURE_ACTIVE', 0);
+
+        /** @var OpenApiFactoryInterface $openApiFactory */
+        $openApiFactory = $this->getContainer()->get(OpenApiFactoryInterface::class);
+        /** @var OpenApi $openApi */
+        $openApi = $openApiFactory->__invoke();
+        $operation = $openApi->getPaths()->getPath('/products')->getGet();
+        $parameterNames = array_map(static fn ($parameter) => $parameter->getName(), $operation->getParameters());
+        $this->assertNotContains('shopId', $parameterNames);
+        $this->assertNotContains('shopGroupId', $parameterNames);
+        $this->assertNotContains('shopIds', $parameterNames);
+        $this->assertNotContains('allShops', $parameterNames);
+    }
+
     /**
      * @dataProvider provideJsonSchemaFactoryCases
      */
@@ -552,18 +586,6 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                         'type' => 'number',
                         'example' => 42.99,
                     ]),
-                    // Multi-parameters setter
-                    'redirectOption' => new ArrayObject([
-                        'type' => 'object',
-                        'properties' => [
-                            'redirectType' => new ArrayObject([
-                                'type' => 'string',
-                            ]),
-                            'redirectTarget' => new ArrayObject([
-                                'type' => 'integer',
-                            ]),
-                        ],
-                    ]),
                     'deliveryTimeNoteType' => new ArrayObject([
                         'type' => 'integer',
                     ]),
@@ -628,10 +650,6 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                     // Nullable DateTime
                     'availableDate' => new ArrayObject([
                         'format' => 'date-time',
-                        'type' => 'string',
-                    ]),
-                    // Deprecated setter still present for now
-                    'ean13' => new ArrayObject([
                         'type' => 'string',
                     ]),
                 ],

@@ -31,9 +31,12 @@ use CartRule;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\AbstractObjectModelValidator;
 use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository;
+use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
+use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShopException;
 
@@ -43,6 +46,11 @@ use PrestaShopException;
 class DiscountValidator extends AbstractObjectModelValidator
 {
     protected ?DiscountRepository $discountRepository = null;
+
+    public function __construct(
+        private ProductRepository $productRepository
+    ) {
+    }
 
     public function setDiscountRepository(DiscountRepository $discountRepository): void
     {
@@ -96,9 +104,9 @@ class DiscountValidator extends AbstractObjectModelValidator
     /**
      * @throws DiscountConstraintException
      */
-    public function validateDiscountPropertiesForType(AddDiscountCommand $command)
+    public function validateDiscountPropertiesForType(string $discountType, AddDiscountCommand|UpdateDiscountCommand $command)
     {
-        switch ($command->getDiscountType()->getValue()) {
+        switch ($discountType) {
             case DiscountType::FREE_SHIPPING:
                 break;
             case DiscountType::CART_LEVEL:
@@ -126,9 +134,13 @@ class DiscountValidator extends AbstractObjectModelValidator
                 if ($command->getProductId() === null) {
                     throw new DiscountConstraintException('Free gift discount must have his properties set.', DiscountConstraintException::INVALID_FREE_GIFT_DISCOUNT_PROPERTIES);
                 }
+                $product = $this->productRepository->getByShopConstraint($command->getProductId(), ShopConstraint::allShops());
+                if ($product->customizable) {
+                    throw new DiscountConstraintException('Product with required customization fields cannot be used as a gift.', DiscountConstraintException::INVALID_GIFT_PRODUCT);
+                }
                 break;
             default:
-                throw new DiscountConstraintException(sprintf("Invalid discount type '%s'.", $command->getDiscountType()->getValue()), DiscountConstraintException::INVALID_DISCOUNT_TYPE);
+                throw new DiscountConstraintException(sprintf("Invalid discount type '%s'.", $discountType), DiscountConstraintException::INVALID_DISCOUNT_TYPE);
         }
     }
 

@@ -89,11 +89,6 @@ class ImageType
      */
     private bool $stores;
 
-    /**
-     * @ORM\Column(name="theme_name", type="string", length=255)
-     */
-    private ?string $themeName;
-
     public function getId(): int
     {
         return $this->id;
@@ -191,18 +186,6 @@ class ImageType
     public function setStores(bool $stores): static
     {
         $this->stores = $stores;
-
-        return $this;
-    }
-
-    public function getThemeName(): ?string
-    {
-        return $this->themeName;
-    }
-
-    public function setThemeName(?string $themeName): static
-    {
-        $this->themeName = $themeName;
 
         return $this;
     }

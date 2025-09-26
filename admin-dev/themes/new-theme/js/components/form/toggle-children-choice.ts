@@ -65,6 +65,8 @@ export default class ToggleChildrenChoice {
               selectedChild.classList.remove('d-none');
             }
           }
+          const {eventEmitter} = window.prestashop.instance;
+          eventEmitter.emit('ToggleChildrenChoice:toggled', radio);
         });
       });
     });

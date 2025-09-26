@@ -213,6 +213,9 @@ class CartCore extends ObjectModel
      */
     public function __construct($id = null, $idLang = null)
     {
+        $this->configuration = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Core\\ConfigurationInterface');
+        $this->addressFactory = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Adapter\\AddressFactory');
+
         parent::__construct($id);
 
         if (null !== $idLang) {
@@ -235,9 +238,6 @@ class CartCore extends ObjectModel
         }
 
         $this->setTaxCalculationMethod();
-
-        $this->configuration = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Core\\ConfigurationInterface');
-        $this->addressFactory = ServiceLocator::get('\\PrestaShop\\PrestaShop\\Adapter\\AddressFactory');
     }
 
     public static function resetStaticCache()
@@ -767,6 +767,7 @@ class CartCore extends ObjectModel
         // Reset the cache before the following return, or else an empty cart will add dozens of queries
         $products_ids = [];
         $pa_ids = [];
+        $cart_base_product_quantity = [];
         if (is_iterable($products)) {
             foreach ($products as $key => $product) {
                 $products_ids[] = $product['id_product'];
@@ -792,8 +793,21 @@ class CartCore extends ObjectModel
                 }
 
                 $products[$key] = array_merge($product, $reduction_type_row);
+
+                if (!isset($cart_base_product_quantity[$product['id_product']])) {
+                    $cart_base_product_quantity[$product['id_product']] = $product['cart_quantity'];
+                } else {
+                    $cart_base_product_quantity[$product['id_product']] += $product['cart_quantity'];
+                }
+            }
+
+            foreach ($products as $key => $product) {
+                $products[$key]['cart_base_product_quantity'] = isset($cart_base_product_quantity[$product['id_product']])
+                    ? $cart_base_product_quantity[$product['id_product']]
+                    : 0;
             }
         }
+
         // Thus you can avoid one query per product, because there will be only one query for all the products of the cart
         Product::cacheProductsFeatures($products_ids);
         Cart::cacheSomeAttributesLists($pa_ids, (int) $this->getAssociatedLanguage()->getId());
@@ -3594,6 +3608,21 @@ class CartCore extends ObjectModel
         if ($orderTotalwithDiscounts >= (float) $free_fees_price && (float) $free_fees_price > 0) {
             // Allow module to override the shipping cost and return their custom value
             $shipping_cost = $this->getPackageShippingCostFromModule($carrier, $shipping_cost, $products);
+
+            if (Configuration::get('PS_ATCP_SHIPWRAP')) {
+                if (!$use_tax) {
+                    // With PS_ATCP_SHIPWRAP, we deduce the pre-tax price from the post-tax
+                    // price. This is on purpose and required in Germany.
+                    $shipping_cost /= (1 + $this->getAverageProductsTaxRate());
+                }
+            } else {
+                // Apply tax
+                if ($use_tax && isset($carrier_tax)) {
+                    $shipping_cost *= 1 + ($carrier_tax / 100);
+                }
+            }
+
+            $shipping_cost = (float) Tools::ps_round((float) $shipping_cost, Context::getContext()->getComputingPrecision());
             Cache::store($cache_id, $shipping_cost);
 
             return $shipping_cost;
@@ -3609,6 +3638,21 @@ class CartCore extends ObjectModel
             && (float) $configuration['PS_SHIPPING_FREE_WEIGHT'] > 0) {
             // Allow module to override the shipping cost and return their custom value
             $shipping_cost = $this->getPackageShippingCostFromModule($carrier, $shipping_cost, $products);
+
+            if (Configuration::get('PS_ATCP_SHIPWRAP')) {
+                if (!$use_tax) {
+                    // With PS_ATCP_SHIPWRAP, we deduce the pre-tax price from the post-tax
+                    // price. This is on purpose and required in Germany.
+                    $shipping_cost /= (1 + $this->getAverageProductsTaxRate());
+                }
+            } else {
+                // Apply tax
+                if ($use_tax && isset($carrier_tax)) {
+                    $shipping_cost *= 1 + ($carrier_tax / 100);
+                }
+            }
+
+            $shipping_cost = (float) Tools::ps_round((float) $shipping_cost, Context::getContext()->getComputingPrecision());
             Cache::store($cache_id, $shipping_cost);
 
             return $shipping_cost;
@@ -3840,6 +3884,9 @@ class CartCore extends ObjectModel
             'invoice' => AddressFormat::getFormattedLayoutData($invoice),
         ];
 
+        // Get products before the total, this way if refresh was asked the total will be up-to-date
+        $products = $this->getProducts($refresh);
+
         $base_total_tax_inc = $this->getOrderTotal(true);
         $base_total_tax_exc = $this->getOrderTotal(false);
 
@@ -3848,8 +3895,6 @@ class CartCore extends ObjectModel
         if ($total_tax < 0) {
             $total_tax = 0;
         }
-
-        $products = $this->getProducts($refresh);
 
         foreach ($products as $key => &$product) {
             $product['price_without_quantity_discount'] = Product::getPriceStatic(

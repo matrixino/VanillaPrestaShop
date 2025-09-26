@@ -26,24 +26,27 @@
 {% set severity = record.severity %}
 {% set withMessage = column.options.with_message %}
 
-{% if severity == 1 %}
-  {% set severityClass = 'success' %}
+{% if severity == 0 %}
+  {% set severityClass = 'bg-secondary' %}
+  {% set severityMessage = withMessage ? 'Debug'|trans({}, 'Admin.Advparameters.Help') : '' %}
+{% elseif severity == 1 %}
+  {% set severityClass = 'badge-success' %}
   {% set severityMessage = withMessage ? 'Informative only'|trans({}, 'Admin.Advparameters.Help') : '' %}
 {% elseif severity == 2 %}
-  {% set severityClass = 'warning' %}
+  {% set severityClass = 'badge-warning' %}
   {% set severityMessage = withMessage ? 'Warning'|trans({}, 'Admin.Advparameters.Help') : '' %}
 {% elseif severity == 3 %}
-  {% set severityClass = 'danger' %}
+  {% set severityClass = 'badge-danger' %}
   {% set severityMessage = withMessage ? 'Error'|trans({}, 'Admin.Advparameters.Help') : '' %}
 {% elseif severity == 4 %}
-  {% set severityClass = 'dark' %}
+  {% set severityClass = 'badge-dark' %}
   {% set severityMessage = withMessage ? 'Major issue (crash)!'|trans({}, 'Admin.Advparameters.Help') : '' %}
 {% else %}
   {% set severityClass = '' %}
   {% set severityMessage = '' %}
 {% endif %}
 
-<span class="badge badge-pill badge-{{ severityClass }}">
+<span class="badge badge-pill {{ severityClass }}">
   {% if withMessage %}
     {{ severityMessage }} ({{ severity }})
   {% else %}

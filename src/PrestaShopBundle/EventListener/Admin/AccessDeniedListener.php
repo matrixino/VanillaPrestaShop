@@ -109,7 +109,7 @@ class AccessDeniedListener
      */
     private function getAccessDeniedResponse(Request $request, AdminSecurityAttribute $adminSecurity)
     {
-        if ($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest() || $adminSecurity->hasJSONResponse()) {
             return new JsonResponse([
                 'status' => false,
                 'message' => $this->getErrorMessage($adminSecurity),
@@ -171,7 +171,7 @@ class AccessDeniedListener
         foreach ($attributes as $attribute) {
             /** @var AdminSecurityAttribute $adminSecurity */
             $adminSecurity = $attribute->newInstance();
-            if (null != $adminSecurity->getRedirectRoute()) {
+            if (null != $adminSecurity->getRedirectRoute() || $event->getRequest()->isXmlHttpRequest() || $adminSecurity->hasJSONResponse()) {
                 $event->allowCustomResponseCode();
 
                 $event->setResponse(

@@ -156,7 +156,7 @@ class MetaController extends PrestaShopAdminController
         ]);
     }
 
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.', redirectRoute: 'admin_metas_index')]
     public function editAction(
         int $metaId,
         Request $request,
@@ -236,7 +236,7 @@ class MetaController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_metas_index')]
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.', redirectRoute: 'admin_metas_index')]
     public function processSetUpUrlsFormAction(MetaFilters $filters, Request $request): Response|RedirectResponse
     {
         $formProcessResult = $this->processForm(
@@ -262,7 +262,7 @@ class MetaController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_metas_index')]
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.', redirectRoute: 'admin_metas_index')]
     public function processShopUrlsFormAction(MetaFilters $filters, Request $request): Response|RedirectResponse
     {
         $formProcessResult = $this->processForm(
@@ -288,7 +288,7 @@ class MetaController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_metas_index')]
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.', redirectRoute: 'admin_metas_index')]
     public function processUrlSchemaFormAction(MetaFilters $filters, Request $request): Response|RedirectResponse
     {
         $formProcessResult = $this->processForm(
@@ -309,7 +309,7 @@ class MetaController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_metas_index')]
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to edit this.', redirectRoute: 'admin_metas_index')]
     public function processSeoOptionsFormAction(MetaFilters $filters, Request $request): Response|RedirectResponse
     {
         $formProcessResult = $this->processForm(
@@ -335,7 +335,7 @@ class MetaController extends PrestaShopAdminController
     }
 
     #[DemoRestricted(redirectRoute: 'admin_metas_index')]
-    #[AdminSecurity("is_granted('create', request.get('_legacy_controller')) && is_granted('update', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('create', request.get('_legacy_controller')) && is_granted('update', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_metas_index')]
     public function generateRobotsFileAction(RobotsTextFileGenerator $robotsTextFileGenerator): RedirectResponse
     {
         $rootDir = $this->getConfiguration()->get('_PS_ROOT_DIR_');

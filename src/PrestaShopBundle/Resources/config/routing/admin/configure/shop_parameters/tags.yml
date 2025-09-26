@@ -1,0 +1,19 @@
+admin_tags_index:
+  path: /
+  methods: [ GET ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Configure\ShopParameters\TagController::indexAction
+    _legacy_controller: AdminTags
+    _legacy_link: AdminTags
+    _legacy_feature_flag: tag
+
+admin_tags_search:
+  path: /
+  methods: POST
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\CommonController::searchGridAction
+    gridDefinitionFactoryServiceId: PrestaShop\PrestaShop\Core\Grid\Definition\Factory\TagGridDefinitionFactory
+    redirectRoute: admin_tags_index
+    _legacy_controller: AdminTags
+    _legacy_link: AdminTags:submitFiltertags
+    _legacy_feature_flag: tag

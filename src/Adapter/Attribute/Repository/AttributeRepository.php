@@ -234,7 +234,7 @@ class AttributeRepository extends AbstractMultiShopObjectModelRepository
             return (int) $attributeByCombination['id_attribute'];
         }, $attributeCombinationAssociations));
 
-        $attributesInfoByAttributeId = $this->getAttributesInformation($attributeIds, $langId->getValue());
+        $attributesInfoByAttributeId = $this->getAttributesInfoByAttributeIds($attributeIds, $langId->getValue());
 
         return $this->buildCombinationAttributeInformationList(
             $attributeCombinationAssociations,
@@ -322,7 +322,7 @@ class AttributeRepository extends AbstractMultiShopObjectModelRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    private function getAttributesInformation(array $attributeIds, int $langId): array
+    public function getAttributesInfoByAttributeIds(array $attributeIds, int $langId): array
     {
         $qb = $this->connection->createQueryBuilder();
         $qb->select('a.id_attribute, a.position, a.color')

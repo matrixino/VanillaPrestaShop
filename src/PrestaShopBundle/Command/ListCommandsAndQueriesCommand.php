@@ -81,6 +81,12 @@ class ListCommandsAndQueriesCommand extends Command
                 'Outputs either a regular or simplified format.',
                 'regular'
             )
+            ->addOption(
+                'hasApiEndpoint',
+                '',
+                InputOption::VALUE_OPTIONAL,
+                'Filter CQRS with (1) or without (0) an endpoint'
+            )
         ;
     }
 
@@ -95,9 +101,17 @@ class ListCommandsAndQueriesCommand extends Command
         $outputStyle = new OutputFormatterStyle('blue', null);
         $output->getFormatter()->setStyle('blue', $outputStyle);
 
+        $optionHasApiEndpoint = $input->getOption('hasApiEndpoint') !== null ? (bool) $input->getOption('hasApiEndpoint') : null;
+
         foreach ($this->commandAndQueries as $key => $commandName) {
             $commandDefinition = $this->commandDefinitionParser->parseDefinition($commandName);
             $cqrsEndpointURI = $this->getCQRSEndpointURI($commandDefinition);
+
+            if ($optionHasApiEndpoint !== null) {
+                if (($optionHasApiEndpoint && empty($cqrsEndpointURI)) || (!$optionHasApiEndpoint && !empty($cqrsEndpointURI))) {
+                    continue;
+                }
+            }
 
             if ($this->isFormatSimple) {
                 $output->writeln('<info>' . $commandDefinition->getClassName() . (!empty($cqrsEndpointURI) ? ' OK' : ' NOT OK') . '</info>');

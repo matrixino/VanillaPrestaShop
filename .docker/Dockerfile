@@ -1,7 +1,11 @@
 # To run files with the same group as your primary user
-ARG VERSION
+ARG VERSION="8.1-apache"
 
 FROM prestashop/base:$VERSION
+
+# Declare a new time the ARG VERSION
+## Because "An ARG declared before a FROM is outside of a build stage, so it can't be used in any instruction after a FROM."
+ARG VERSION
 
 EXPOSE 443
 

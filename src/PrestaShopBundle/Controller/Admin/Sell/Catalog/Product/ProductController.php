@@ -30,6 +30,8 @@ namespace PrestaShopBundle\Controller\Admin\Sell\Catalog\Product;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use HelperTreeCategories;
+use PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
@@ -453,7 +455,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return Response
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to update this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", message: 'You do not have permission to update this.', redirectRoute: 'admin_products_index')]
     public function editAction(
         Request $request,
         int $productId,
@@ -627,7 +629,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return Response
      */
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.', jsonResponse: true)]
     public function bulkDeleteFromShopAction(Request $request, int $shopId): Response
     {
         $shopConstraint = ShopConstraint::shop($shopId);
@@ -643,7 +645,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return Response
      */
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.', jsonResponse: true)]
     public function bulkDeleteFromShopGroupAction(Request $request, int $shopGroupId): Response
     {
         $shopConstraint = ShopConstraint::shopGroup($shopGroupId);
@@ -930,7 +932,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkEnableAllShopsAction(Request $request): JsonResponse
     {
         $shopConstraint = ShopConstraint::allShops();
@@ -949,7 +951,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkEnableShopAction(Request $request, int $shopId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shop($shopId);
@@ -968,7 +970,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkEnableShopGroupAction(Request $request, int $shopGroupId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shopGroup($shopGroupId);
@@ -986,7 +988,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDisableAllShopsAction(Request $request): JsonResponse
     {
         $shopConstraint = ShopConstraint::allShops();
@@ -1005,7 +1007,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDisableShopAction(Request $request, int $shopId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shop($shopId);
@@ -1024,7 +1026,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDisableShopGroupAction(Request $request, int $shopGroupId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shopGroup($shopGroupId);
@@ -1042,7 +1044,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDuplicateAllShopsAction(Request $request): JsonResponse
     {
         $shopConstraint = ShopConstraint::allShops();
@@ -1061,7 +1063,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDuplicateShopAction(Request $request, int $shopId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shop($shopId);
@@ -1080,7 +1082,7 @@ class ProductController extends PrestaShopAdminController
      *
      * @return JsonResponse
      */
-    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.')]
+    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))", redirectRoute: 'admin_products_index', message: 'You do not have permission to edit this.', jsonResponse: true)]
     public function bulkDuplicateShopGroupAction(Request $request, int $shopGroupId): JsonResponse
     {
         $shopConstraint = ShopConstraint::shopGroup($shopGroupId);
@@ -1877,5 +1879,57 @@ class ProductController extends PrestaShopAdminController
         $shopId = $this->getShopContext()->getId();
 
         return !empty($shopId) ? (int) $shopId : null;
+    }
+
+    /**
+     * Displays a category tree (legacy).
+     *
+     * This action is kept for backward compatibility with pages
+     * that still rely on HelperTreeCategories.
+     *
+     * @todo Remove this method once all pages depending on
+     *       HelperTreeCategories have been migrated to Symfony.
+     *
+     * @param Request $request
+     *
+     * @return Response
+     */
+    #[AdminSecurity("is_granted('create', request.get('_legacy_controller')) || is_granted('update', request.get('_legacy_controller')) || is_granted('read', request.get('_legacy_controller'))")]
+    public function legacyCategoryTreeAction(
+        Request $request,
+    ): Response {
+        $contextAdapter = $this->container->get(LegacyContext::class);
+        $rootCategoryId = (new CategoryDataProvider($contextAdapter))->getRootCategory()->id;
+        $category = $request->query->get('category', $rootCategoryId);
+        $full_tree = $request->query->get('fullTree', 0);
+        $use_check_box = $request->query->get('useCheckBox', 1);
+        $selected = $request->query->all('selected');
+        if (is_array($selected) === false) {
+            $selected = [$selected];
+        }
+        $id_tree = $request->query->get('type');
+        $input_name = str_replace(['[', ']'], '', $request->query->get('inputName', ''));
+
+        $tree = new HelperTreeCategories('subtree_associated_categories');
+        $tree->setTemplate('subtree_associated_categories.tpl')
+            ->setUseCheckBox($use_check_box)
+            ->setUseSearch(true)
+            ->setIdTree($id_tree)
+            ->setSelectedCategories($selected)
+            ->setFullTree($full_tree)
+            ->setChildrenOnly(true)
+            ->setNoJS(true)
+            ->setRootCategory($category);
+
+        if ($input_name) {
+            $tree->setInputName($input_name);
+        }
+
+        $contextAdapter->getContext()->smarty->setTemplateDir([
+            _PS_BO_ALL_THEMES_DIR_ . 'default/template/',
+            _PS_OVERRIDE_DIR_ . 'controllers' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'templates',
+        ]);
+
+        return new Response($tree->render());
     }
 }
