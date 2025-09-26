@@ -73,11 +73,19 @@ jobs:
         run: php tools/build/CreateRelease.php --destination-dir=${{ env.RELEASE_DIR }}
 
       - name: Rename ZIP file
+        if: env.GH_TAG != '9.0.0-fixmoduleupdates'
         run: |
           cp prestashop_${{ env.GH_TAG }}.zip ${{ env.ZIP_FILE }}
           cp prestashop_${{ env.GH_TAG }}.xml ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
-        
+
+      - name: Rename ZIP file
+        if: env.GH_TAG == '9.0.0-fixmoduleupdates'
+        run: |
+          cp prestashop_9.0.0.zip ${{ env.ZIP_FILE }}
+          cp prestashop_9.0.0.xml ${{ env.XML_FILE }}
+        working-directory: ${{ env.RELEASE_DIR }}
+
       - name: release
         uses: ncipollo/release-action@v1
         with:
