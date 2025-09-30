@@ -6,6 +6,7 @@
 
 namespace PrestaShopBundle\DependencyInjection\Compiler;
 
+use PrestaShop\PrestaShop\Core\Version;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -46,14 +47,28 @@ class LoadServicesFromModulesPass implements CompilerPassInterface
         foreach ($installedModules as $moduleName) {
             $modulePath = $moduleDir . $moduleName;
             $moduleConfigPath = $modulePath . $this->configPath;
-            if (file_exists($moduleConfigPath . 'services.yml')) {
+
+            $servicesFilesList = [
+                sprintf('services-%d.%d.yml', Version::MAJOR_VERSION, Version::MINOR_VERSION),
+                sprintf('services-%d.yml', Version::MAJOR_VERSION),
+                'services.yml',
+            ];
+
+            foreach ($servicesFilesList as $servicesFile) {
+                if (!file_exists($moduleConfigPath . $servicesFile)) {
+                    continue;
+                }
+
                 $fileLocator = new FileLocator($moduleConfigPath);
                 $loader = new YamlFileLoader($container, $fileLocator);
                 $loader->setResolver(new LoaderResolver([
                     new PhpFileLoader($container, $fileLocator),
                     new XmlFileLoader($container, $fileLocator),
                 ]));
-                $loader->load('services.yml');
+
+                $loader->load($servicesFile);
+                // Prevent loading less specific services files if one was found
+                break;
             }
         }
     }
