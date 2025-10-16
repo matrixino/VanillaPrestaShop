@@ -30,7 +30,8 @@
   }),
   attr: {
     id: 'merge_shipment',
-    class: 'shipment-form'
+    class: 'shipment-form',
+    'data-is-valid': not isShipped,
   },
 }) }}
 
@@ -38,7 +39,6 @@
   {{ 'Select items to merge'|trans({}, 'Admin.Orderscustomers.Feature') }}
 
   <a
-    href="#"
     class="tooltip-link"
     data-toggle="pstooltip"
     title="{{ 'Choose the products you wish to combine into another shipment. These products will be moved from their current shipment to the selected destination shipment.'|trans({}, 'Admin.Orderscustomers.Notification') }}"
@@ -47,6 +47,12 @@
     <i class="material-icons">help_outline</i>
   </a>
 </p>
+
+  {% if isShipped is defined and isShipped == true %}
+    <div class="alert alert-warning" role="alert">
+      <p class="alert-text">{{ 'This shipment can\'t be merged because a tracking number has already been assigned, indicating that it has already been shipped.'|trans({}, 'Admin.Orderscustomers.Notification') }}</p>
+    </div>
+  {% endif %}
 
 <table class="table shipment-form__table">
   <thead>
@@ -94,10 +100,9 @@
     </label>
 
     <a
-      href="#"
       class="tooltip-link"
       data-toggle="pstooltip"
-      title="{{ 'Select an existing shipment to which the chosen products will be added. All selected products will become part of this shipment.'|trans({}, 'Admin.Orderscustomers.Notification') }}"
+      title="{{ 'Select an existing shipment to add the chosen products. Only shipments without a tracking number and not yet shipped are available.'|trans({}, 'Admin.Orderscustomers.Notification') }}"
       data-placement="top"
     >
       <i class="material-icons">help_outline</i>

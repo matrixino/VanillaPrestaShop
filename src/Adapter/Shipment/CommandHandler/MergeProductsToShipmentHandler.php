@@ -29,6 +29,7 @@ namespace PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\CommandHandler\MergeProductsToShipmentHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\CannotEditShipmentShippedException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\CannotMergeProductToShipmentException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
@@ -59,8 +60,16 @@ class MergeProductsToShipmentHandler implements MergeProductsToShipmentHandlerIn
             throw new ShipmentNotFoundException(sprintf('Shipment with id "%s" was not found', $sourceId));
         }
 
+        if (!empty($sourceShipment->getTrackingNumber())) {
+            throw new CannotEditShipmentShippedException(sprintf('Cannot merge shipment "%s" because it has already been shipped.', $sourceId));
+        }
+
         if (!$targetShipment) {
             throw new ShipmentNotFoundException(sprintf('Shipment with id "%s" was not found', $targetId));
+        }
+
+        if (!empty($targetShipment->getTrackingNumber())) {
+            throw new CannotEditShipmentShippedException(sprintf('Cannot merge into shipment "%s" because it has already been shipped.', $targetId));
         }
 
         $shipmentProducts = array_map(function ($product) {

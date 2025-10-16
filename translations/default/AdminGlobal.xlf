@@ -10,7 +10,7 @@
       <trans-unit id="2b9a3a8dc90da303d2cfe98c4c2474f7">
         <source>%count% file(s)</source>
         <target>%count% file(s)</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 995]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 993]</note>
       </trans-unit>
       <trans-unit id="c131c3e08e3f4780e204fcbd8d0eb6e6">
         <source>%firstname% %lastname%</source>
@@ -30,7 +30,7 @@
       <trans-unit id="be484dbfdde5d9e793211c14a1246aa5">
         <source>%inputId% input</source>
         <target>%inputId% input</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1216]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1214]</note>
       </trans-unit>
       <trans-unit id="7d341c08fd102f0b86285b5ff2e26ea7">
         <source>%s: %s</source>
@@ -750,7 +750,7 @@
       <trans-unit id="20db0bfeecd8fe60533206a2b5e9891a">
         <source>First name</source>
         <target>First name</target>
-        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 200]</note>
+        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 199]</note>
       </trans-unit>
       <trans-unit id="04176f095283bc729f1e3926967e7034">
         <source>Firstname</source>
@@ -810,7 +810,7 @@
       <trans-unit id="2e3f53a28681947e53da80b91be28075">
         <source>Guest account</source>
         <target>Guest account</target>
-        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 164]</note>
+        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 163]</note>
       </trans-unit>
       <trans-unit id="e6d0187b223d75f1a78bf6405da0c0cb">
         <source>Guest customer</source>
@@ -955,7 +955,7 @@
       <trans-unit id="8d3f5eff9c40ee315d452392bed5309b">
         <source>Last name</source>
         <target>Last name</target>
-        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 227]</note>
+        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php [Line: 226]</note>
       </trans-unit>
       <trans-unit id="dff4bf10409100d989495c6d5486035e">
         <source>Lastname</source>
@@ -1072,6 +1072,11 @@
         <target>Module</target>
         <note>File: admin-dev/themes/default/template/controllers/translations/helpers/view/translation_modules.tpl [Line: 179]</note>
       </trans-unit>
+      <trans-unit id="07403a8bc81d7865c8e040e718ec7828">
+        <source>Module name</source>
+        <target>Module name</target>
+        <note>File: src/Core/Grid/Definition/Factory/CarrierGridDefinitionFactory.php [Line: 190]</note>
+      </trans-unit>
       <trans-unit id="bf17ac149e2e7a530c677e9bd51d3fd2">
         <source>Modules</source>
         <target>Modules</target>
@@ -1140,12 +1145,12 @@
       <trans-unit id="7475ec0d41372a307c497acb7eeea8c4">
         <source>No Tax</source>
         <target>No Tax</target>
-        <note>File: controllers/admin/AdminCarriersController.php [Line: 277]</note>
+        <note>File: controllers/admin/AdminCarriersController.php [Line: 308]</note>
       </trans-unit>
       <trans-unit id="5180225574daa470582912c7d340c419">
         <source>No picture</source>
         <target>No picture</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1338]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1336]</note>
       </trans-unit>
       <trans-unit id="087fb8756d4add87f2d162304ccd486b">
         <source>No records found</source>
@@ -1255,7 +1260,7 @@
       <trans-unit id="dc647eb65e6711e155375218212b3964">
         <source>Password</source>
         <target>Password</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1591]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1589]</note>
       </trans-unit>
       <trans-unit id="c453a4b8e8d98e82f35b67f433e3b4da">
         <source>Payment</source>
@@ -1340,7 +1345,7 @@
       <trans-unit id="d274013ea65428454962a59b7b373a41">
         <source>Public name</source>
         <target>Public name</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/AttributeGroupController.php [Line: 330]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/AttributeGroupController.php [Line: 359]</note>
       </trans-unit>
       <trans-unit id="694e8d1f2ee056f98ee488bdc4982d73">
         <source>Quantity</source>
@@ -1485,7 +1490,7 @@
       <trans-unit id="9d55fc80bbb875322aa67fd22fc98469">
         <source>Shop association</source>
         <target>Shop association</target>
-        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Catalog/AttributeType.php [Line: 127]</note>
+        <note>File: src/PrestaShopBundle/Form/Admin/Sell/Catalog/AttributeType.php [Line: 129]</note>
       </trans-unit>
       <trans-unit id="9bbf46e755597079e0dddc00952516fe">
         <source>Shop context</source>
@@ -1625,7 +1630,6 @@
       <trans-unit id="d721757161f7f70c5b0949fdb6ec2c30">
         <source>Theme</source>
         <target>Theme</target>
-        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 95]</note>
       </trans-unit>
       <trans-unit id="b78a3223503896721cca1303f776159b">
         <source>Title</source>

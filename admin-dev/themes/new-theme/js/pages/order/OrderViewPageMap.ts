@@ -57,6 +57,7 @@ export default {
   mergeShipmentModal: '#mergeShipmentModal',
   showMergeShipmentModalBtn: '[data-show-modal="merge-shipment"]',
   mergeShipmentModalContainer: '#mergeShipmentFormContainer',
+  mergeShipmentFormName: 'merge_shipment',
   submitMergeShipment: '#submitMergeShipment',
   selectMergeShipment: 'select[name="merge_shipment[merge_to_shipment]"]',
   showSplitShipmentModalBtn: '[data-show-modal="split-shipment"]',

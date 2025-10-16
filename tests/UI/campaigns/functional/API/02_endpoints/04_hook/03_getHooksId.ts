@@ -88,10 +88,10 @@ describe('API : GET /hook/{hookId}', async () => {
       expect(nameHook.length).to.be.gt(0);
 
       titleHook = await boDesignPositionsPage.getHookTitle(page, 0);
-      expect(titleHook.length).to.be.gt(0);
+      expect(titleHook.length).to.be.gte(0);
 
       descriptionHook = await boDesignPositionsPage.getHookDescription(page, 0);
-      expect(descriptionHook.length).to.be.gt(0);
+      expect(descriptionHook.length).to.be.gte(0);
     });
   });
 

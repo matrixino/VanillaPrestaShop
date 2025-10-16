@@ -88,12 +88,14 @@ use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\FoundProduct;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\EditShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\CannotEditShipmentShippedException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentProducts;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentProduct;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\ShipmentForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\ValueObject\OrderDetailId;
 use PrestaShop\PrestaShop\Core\Domain\ValueObject\QuerySorting;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
@@ -133,6 +135,7 @@ use PrestaShopBundle\Form\Admin\Sell\Order\UpdateOrderShippingType;
 use PrestaShopBundle\Form\Admin\Sell\Order\UpdateOrderStatusType;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShopBundle\Security\Attribute\DemoRestricted;
+use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -641,14 +644,15 @@ class OrderController extends PrestaShopAdminController
     {
         $shipmentId = (int) $request->query->get('shipmentId');
         $formData = $this->getMergeFormData($orderId, $shipmentId);
-
         $form = $this->createForm(MergeShipmentType::class, null, $formData);
+        $isShipped = $this->isShipmentShipped($orderId, $shipmentId);
 
         return $this->render('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/merge_shipment_form.html.twig', [
             'mergeShipmentForm' => $form->createView(),
             'orderId' => $orderId,
             'shipmentId' => $shipmentId,
             'products' => $formData['products'],
+            'isShipped' => $isShipped,
         ]);
     }
 
@@ -677,43 +681,57 @@ class OrderController extends PrestaShopAdminController
     #[AdminSecurity("is_granted('update', 'AdminOrders')", redirectRoute: 'admin_orders_view', redirectQueryParamsToKeep: ['orderId'], message: 'You do not have permission to edit this.')]
     public function mergeShipmentAction(int $orderId, Request $request): RedirectResponse
     {
-        $shipmentId = (int) $request->query->get('shipmentId');
-        $formData = $this->getMergeFormData($orderId, $shipmentId);
+        try {
+            $shipmentId = (int) $request->query->get('shipmentId');
+            $formData = $this->getMergeFormData($orderId, $shipmentId);
 
-        $form = $this->createForm(MergeShipmentType::class, null, $formData);
-        $form->handleRequest($request);
+            $form = $this->createForm(MergeShipmentType::class, null, $formData);
+            $form->handleRequest($request);
 
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            $this->addFlash('error', 'Invalid merge shipment form.');
+            if (!$form->isSubmitted() || !$form->isValid()) {
+                $this->addFlash('error', 'Invalid merge shipment form.');
 
-            return $this->redirectToRoute('admin_orders_view', ['orderId' => $orderId]);
-        }
+                return $this->redirectToRoute('admin_orders_view', ['orderId' => $orderId]);
+            }
 
-        /** @var OrderShipment $targetShipment */
-        $targetShipment = $form->get('merge_to_shipment')->getData();
-        $targetShipmentId = $targetShipment->getId();
+            /** @var OrderShipment $targetShipment */
+            $targetShipment = $form->get('merge_to_shipment')->getData();
+            $targetShipmentId = $targetShipment->getId();
 
-        $submittedData = $request->request->all('merge_shipment');
-        $selectedProducts = [];
+            if ($this->isShipmentShipped($orderId, $targetShipmentId)) {
+                $this->addFlash('error', $this->trans('This shipment can\'t be merged because a tracking number has already been assigned, indicating that it has already been shipped.', [], 'Admin.Orderscustomers.Notification'));
 
-        foreach ($submittedData as $key => $value) {
-            if (str_starts_with($key, 'product_') && $value) {
-                $orderDetailId = (int) str_replace('product_', '', $key);
-                $quantityKey = 'quantity_' . $orderDetailId;
+                return $this->redirectToRoute('admin_orders_view', ['orderId' => $orderId]);
+            }
 
-                $selectedProducts[] = [
-                    'id_order_detail' => $orderDetailId,
-                    'quantity' => (int) $submittedData[$quantityKey],
-                ];
+            $submittedData = $request->request->all('merge_shipment');
+            $selectedProducts = [];
+
+            foreach ($submittedData as $key => $value) {
+                if (str_starts_with($key, 'product_') && $value) {
+                    $orderDetailId = (int) str_replace('product_', '', $key);
+                    $quantityKey = 'quantity_' . $orderDetailId;
+
+                    $selectedProducts[] = [
+                        'id_order_detail' => $orderDetailId,
+                        'quantity' => (int) $submittedData[$quantityKey],
+                    ];
+                }
+            }
+
+            $command = new MergeProductsToShipment(
+                $shipmentId,
+                $targetShipmentId,
+                $selectedProducts
+            );
+            $this->dispatchCommand($command);
+        } catch (Exception $e) {
+            if ((new ReflectionClass($e))->getName() === CannotEditShipmentShippedException::class) {
+                $this->addFlash('error', $this->trans('You cannot merge shipment when is already shipped.', [], 'Admin.Orderscustomers.Notification'));
+            } else {
+                throw $e;
             }
         }
-
-        $command = new MergeProductsToShipment(
-            $shipmentId,
-            $targetShipmentId,
-            $selectedProducts
-        );
-        $this->dispatchCommand($command);
 
         return $this->redirectToRoute('admin_orders_view', [
             'orderId' => $orderId,
@@ -778,22 +796,30 @@ class OrderController extends PrestaShopAdminController
     #[AdminSecurity("is_granted('update', 'AdminOrders')", redirectRoute: 'admin_orders_view', redirectQueryParamsToKeep: ['orderId'], message: 'You do not have permission to edit this.')]
     public function splitShipmentAction(int $orderId, int $shipmentId, Request $request): RedirectResponse
     {
-        $data = $request->get('split_shipment', []);
-        $carrier = isset($data['carrier']) ? (int) $data['carrier'] : null;
+        try {
+            $data = $request->get('split_shipment', []);
+            $carrier = isset($data['carrier']) ? (int) $data['carrier'] : null;
 
-        $productsRaw = $data['products'] ?? [];
-        $products = [];
+            $productsRaw = $data['products'] ?? [];
+            $products = [];
 
-        foreach ($productsRaw as $prod) {
-            if (isset($prod['selected']) && (int) $prod['selected'] === 1) {
-                $products[] = [
-                    'id_order_detail' => (int) $prod['order_detail_id'],
-                    'quantity' => (int) $prod['selected_quantity'],
-                ];
+            foreach ($productsRaw as $prod) {
+                if (isset($prod['selected']) && (int) $prod['selected'] === 1) {
+                    $products[] = [
+                        'id_order_detail' => (int) $prod['order_detail_id'],
+                        'quantity' => (int) $prod['selected_quantity'],
+                    ];
+                }
+            }
+
+            $this->dispatchQuery(new SplitShipment($shipmentId, $products, $carrier));
+        } catch (Exception $e) {
+            if ((new ReflectionClass($e))->getName() === CannotEditShipmentShippedException::class) {
+                $this->addFlash('error', $this->trans('You cannot split shipment when is already shipped.', [], 'Admin.Orderscustomers.Notification'));
+            } else {
+                throw $e;
             }
         }
-
-        $this->dispatchQuery(new SplitShipment($shipmentId, $products, $carrier));
 
         return $this->redirectToRoute('admin_orders_view', [
             'orderId' => $orderId,
@@ -815,6 +841,7 @@ class OrderController extends PrestaShopAdminController
         $productsFromQuery = $request->get('products', []);
         $selectedCarrier = $request->query->getInt('carrier');
         $orderShipmentProducts = $this->mergeProductsFromQueries($shipmentId, $productsFromQuery, $orderDetailRepository);
+        $canSplitShipment = $this->isShipmentShipped($orderId, $shipmentId);
 
         $formIsValid = $this->checkFormValidity($orderShipmentProducts);
 
@@ -830,6 +857,7 @@ class OrderController extends PrestaShopAdminController
             'orderId' => $orderId,
             'shipmentId' => $shipmentId,
             'formIsValid' => $formIsValid,
+            'isShipped' => $canSplitShipment,
         ]);
     }
 
@@ -852,6 +880,14 @@ class OrderController extends PrestaShopAdminController
         $allQuantitiesMatch = array_reduce($products, fn ($carry, $product) => $carry && (($product['selected_quantity'] ?? 0) === $product['quantity']), true);
 
         return !($allSelected && $allQuantitiesMatch);
+    }
+
+    private function isShipmentShipped(int $orderId, int $shipmentId): bool
+    {
+        /** @var ShipmentForEditing $shipment */
+        $shipment = $this->dispatchQuery(new GetShipmentForEditing($orderId, $shipmentId));
+
+        return !empty($shipment->getTrackingNumber());
     }
 
     /**

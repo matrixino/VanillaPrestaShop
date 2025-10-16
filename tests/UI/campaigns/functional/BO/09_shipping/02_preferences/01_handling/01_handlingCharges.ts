@@ -67,7 +67,6 @@ describe('BO - Shipping - Preferences : Test handling charges for carriers in FO
   const defaultHandlingChargesValue: number = 2.00;
   const updateHandlingChargesValue: number = 4.00;
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);
@@ -417,8 +416,15 @@ describe('BO - Shipping - Preferences : Test handling charges for carriers in FO
 
       const textResult = await boCarriersPage.deleteCarrier(page, 1);
       expect(textResult).to.contains(boCarriersPage.successfulDeleteMessage);
+    });
+
+    it('should reset all filters', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'resetFilter', baseContext);
 
       await boCarriersPage.resetFilter(page);
+
+      const numberOfCustomerGroups = await boCarriersPage.resetAndGetNumberOfLines(page);
+      expect(numberOfCustomerGroups).to.be.above(0);
     });
   });
 

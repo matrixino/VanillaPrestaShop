@@ -28,7 +28,7 @@
   attr: {
     id: 'split_shipment',
     class: 'shipment-form',
-    'data-is-valid': formIsValid,
+    'data-is-valid': formIsValid and not isShipped,
   }
 }) }}
   <div class="shipment-form__loader"></div>
@@ -36,7 +36,6 @@
     {{ 'Select the items to send separately'|trans({}, 'Admin.Orderscustomers.Feature') }}
 
     <a
-      href="#"
       class="tooltip-link"
       data-toggle="pstooltip"
       title="{{ 'Choose the products you wish to separate into new, distinct shipments. These products will be moved from their original shipment.'|trans({}, 'Admin.Orderscustomers.Notification') }}"
@@ -49,6 +48,11 @@
   {% if formIsValid is defined and formIsValid == false %}
     <div class="alert alert-warning" role="alert">
       <p class="alert-text">{{ 'You can’t select all items to split the shipment. At least one item must remain in the original package to proceed.'|trans({}, 'Admin.Orderscustomers.Notification') }}</p>
+    </div>
+  {% endif %}
+  {% if isShipped is defined and isShipped == true %}
+    <div class="alert alert-warning" role="alert">
+      <p class="alert-text">{{ 'This shipment can\'t be modified because a tracking number has already been assigned, indicating that it has already been shipped.'|trans({}, 'Admin.Orderscustomers.Notification') }}</p>
     </div>
   {% endif %}
 
@@ -99,7 +103,6 @@
       <label class="m-0" for="carrier-select">{{ 'Select the carrier in charge'|trans }}</label>
 
       <a
-        href="#"
         class="tooltip-link"
         data-toggle="pstooltip"
         title="{{ 'Select the carrier that will be responsible for shipping the newly created shipment(s) containing the selected products.'|trans({}, 'Admin.Orderscustomers.Notification') }}"

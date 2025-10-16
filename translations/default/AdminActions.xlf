@@ -65,7 +65,7 @@
       <trans-unit id="4a8ac56c46f30b6d2748ec6a98d3f0da">
         <source>Add new API Client</source>
         <target>Add new API Client</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/AdminAPIController.php [Line: 272]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/AdminAPIController.php [Line: 273]</note>
       </trans-unit>
       <trans-unit id="0164b35f3cbc5cbf9bf58abeb4bc14df">
         <source>Add new menu</source>
@@ -75,7 +75,7 @@
       <trans-unit id="3fa8c89ef63fbb7056fc1d8d1b67f97a">
         <source>Add new product</source>
         <target>Add new product</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 1381]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 1383]</note>
       </trans-unit>
       <trans-unit id="b1c94ca2fbc3e78fc30069c8d0f01680">
         <source>All</source>
@@ -110,7 +110,7 @@
       <trans-unit id="064d2e08f924478234959b67180290eb">
         <source>Back to previous page</source>
         <target>Back to previous page</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error404.html.twig [Line: 70]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error404.html.twig [Line: 67]</note>
       </trans-unit>
       <trans-unit id="9c69fa21979cbe7490c20c19537cf08f">
         <source>Back to processing</source>
@@ -120,7 +120,7 @@
       <trans-unit id="1b9abf135ccb7ed2f2cd9c155137c351">
         <source>Browse</source>
         <target>Browse</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 989]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 987]</note>
       </trans-unit>
       <trans-unit id="ea4788705e6873b424c65e91c2846b19">
         <source>Cancel</source>
@@ -165,7 +165,7 @@
       <trans-unit id="5f2c094de2848d0d36b59de2ff06e79f">
         <source>Choose file(s)</source>
         <target>Choose file(s)</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1008]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1006]</note>
       </trans-unit>
       <trans-unit id="cc3787ca78f445f481069a4c047f7e7a">
         <source>Choose language:</source>
@@ -395,7 +395,7 @@
       <trans-unit id="d5ef96e383d376beeec28da7acfea516">
         <source>Download file</source>
         <target>Download file</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1014]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1012]</note>
       </trans-unit>
       <trans-unit id="df43755e2392418b403a2e5dcb1c240a">
         <source>Download image</source>
@@ -490,7 +490,7 @@
       <trans-unit id="7f77e3d7178f0b1979d13c101a456450">
         <source>Enable debug mode</source>
         <target>Enable debug mode</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error404.html.twig [Line: 66]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error403.html.twig [Line: 65]</note>
       </trans-unit>
       <trans-unit id="6fea30723d77ed0ce44ab2a93ed64590">
         <source>Enable for group</source>
@@ -605,7 +605,7 @@
       <trans-unit id="49274687586eb8d893f65eac34a95fef">
         <source>Learn more about debug mode</source>
         <target>Learn more about debug mode</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error404.html.twig [Line: 76]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/Error/error403.html.twig [Line: 75]</note>
       </trans-unit>
       <trans-unit id="4ee29ca12c7d126654bd0e5275de6135">
         <source>List</source>
@@ -660,7 +660,7 @@
       <trans-unit id="43340e6cc4e88197d57f8d6d5ea50a46">
         <source>Read more</source>
         <target>Read more</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1277]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1275]</note>
       </trans-unit>
       <trans-unit id="aff98cd42460859e99447afb1831872a">
         <source>Rearrange</source>
@@ -730,7 +730,7 @@
       <trans-unit id="6292ce39a4afe11e8ecfaf95b27ac3fb">
         <source>Search Height</source>
         <target>Search Height</target>
-        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 248]</note>
+        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 236]</note>
       </trans-unit>
       <trans-unit id="14b65dabcecbbcb0724ed1efe27c6335">
         <source>Search ID</source>
@@ -745,12 +745,12 @@
       <trans-unit id="7c480b91e2c6ef389674bec0e31458e5">
         <source>Search Name</source>
         <target>Search Name</target>
-        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 228]</note>
+        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 216]</note>
       </trans-unit>
       <trans-unit id="1d85b1967f24e16f6517f005918c5f2c">
         <source>Search Width</source>
         <target>Search Width</target>
-        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 238]</note>
+        <note>File: src/Core/Grid/Definition/Factory/ImageTypeGridDefinitionFactory.php [Line: 226]</note>
       </trans-unit>
       <trans-unit id="e3ff649d2ad58aafa4adee523917e380">
         <source>Search address</source>

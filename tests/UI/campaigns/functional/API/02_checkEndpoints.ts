@@ -99,7 +99,7 @@ describe('API : Check endpoints', async () => {
         '/api-clients: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/02_attributesGroup/01_deleteAttributesGroupId.ts
         '/attributes/group/{attributeGroupId}: DELETE',
-        // @todo: add tests
+        // tests/UI/campaigns/functional/API/02_endpoints/02_attributesGroup/02_getAttributesGroupId.ts
         '/attributes/group/{attributeGroupId}: GET',
         // @todo: add tests
         '/attributes/group/{attributeGroupId}: PATCH',
@@ -109,6 +109,16 @@ describe('API : Check endpoints', async () => {
         '/attributes/groups/delete: PUT',
         // @todo: add tests
         '/attributes/groups: GET',
+        // @todo: add tests
+        '/categories: GET',
+        // @todo: add tests
+        '/category/{categoryId}: DELETE',
+        // @todo: add tests
+        '/category/{categoryId}: GET',
+        // @todo: add tests
+        '/category/{categoryId}: PATCH',
+        // @todo: add tests
+        '/category: POST',
         // tests/UI/campaigns/functional/API/02_endpoints/03_customerGroup/01_deleteCustomerGroupsId.ts
         '/customers/group/{customerGroupId}: DELETE',
         // tests/UI/campaigns/functional/API/02_endpoints/03_customerGroup/02_getCustomerGroupsId.ts
@@ -181,6 +191,8 @@ describe('API : Check endpoints', async () => {
         '/products/search/{phrase}/{resultsLimit}/{isoCode}: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/07_product/11_getProducts.ts
         '/products: GET',
+        // @todo: add tests
+        '/tab/{className}: PUT',
         // @todo: add tests
         '/webservice-key/{webserviceKeyId}: GET',
         // @todo: add tests

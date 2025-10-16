@@ -360,7 +360,7 @@
       <trans-unit id="b040fe53badd6b3784735f3d102df0bd">
         <source>Edit HTML version</source>
         <target>Edit HTML version</target>
-        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2281]</note>
+        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2275]</note>
       </trans-unit>
       <trans-unit id="f7b45c7bf4ddee5d2270a74866d3fb52">
         <source>Edit symbol / format</source>
@@ -380,7 +380,7 @@
       <trans-unit id="80ab38b942fb2da88ca496f8bbe237f7">
         <source>Email subject</source>
         <target>Email subject</target>
-        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2257]</note>
+        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2251]</note>
       </trans-unit>
       <trans-unit id="6df6a1378a5ddcdef978aadf494cef5d">
         <source>Email translations</source>
@@ -805,12 +805,12 @@
       <trans-unit id="673a349a39148b988e9aabf651d31a96">
         <source>View HTML version</source>
         <target>View HTML version</target>
-        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2280]</note>
+        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2274]</note>
       </trans-unit>
       <trans-unit id="5f986174fa9cf6c0ddd927e11b68254a">
         <source>View/Edit TXT version</source>
         <target>View/Edit TXT version</target>
-        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2282]</note>
+        <note>File: controllers/admin/AdminTranslationsController.php [Line: 2276]</note>
       </trans-unit>
       <trans-unit id="3850c8049741085bef77450dc5f0dc9a">
         <source>Visitors can see your catalog but cannot place an order.</source>

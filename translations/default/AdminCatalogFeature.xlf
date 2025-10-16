@@ -450,7 +450,7 @@
       <trans-unit id="1379a6b19242372c1f23cc9adedfcdd6">
         <source>Category root</source>
         <target>Category root</target>
-        <note>File: controllers/admin/AdminShopController.php [Line: 517]</note>
+        <note>File: controllers/admin/AdminShopController.php [Line: 518]</note>
       </trans-unit>
       <trans-unit id="4ae362f049719078c429941bed5dd440">
         <source>Category thumbnail</source>
@@ -570,7 +570,7 @@
       <trans-unit id="9e2941b3c81256fac10392aaca4ccfde">
         <source>Condition</source>
         <target>Condition</target>
-        <note>File: src/Core/Import/EntityField/Provider/ProductFieldsProvider.php [Line: 118]</note>
+        <note>File: src/Core/Import/EntityField/Provider/ProductFieldsProvider.php [Line: 119]</note>
       </trans-unit>
       <trans-unit id="e43e4f8aab3dbe1127082747a86a2120">
         <source>Condition group</source>
@@ -1560,7 +1560,7 @@
       <trans-unit id="23eb06d7a6e7b5ef43affd916a50ae6c">
         <source>Not available yet.</source>
         <target>Not available yet.</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1288]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1286]</note>
       </trans-unit>
       <trans-unit id="1e1cc9bdeb2f29f5480106aec7e9bc48">
         <source>Now</source>
@@ -1710,7 +1710,7 @@
       <trans-unit id="77eb276f5dcdf4fbca854e908216f7b2">
         <source>Price (tax incl.)</source>
         <target>Price (tax incl.)</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 841]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 843]</note>
       </trans-unit>
       <trans-unit id="9d20a93036ba910dd75ffbcec173798e">
         <source>Price per unit</source>
@@ -1985,7 +1985,7 @@
       <trans-unit id="a4838f49c5701e128d7695c3dc45083c">
         <source>Select a store</source>
         <target>Select a store</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 1615]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php [Line: 1851]</note>
       </trans-unit>
       <trans-unit id="ba7144e008dfcd7a273108647d7d5153">
         <source>Select all values ({valuesNb})</source>
@@ -2165,7 +2165,7 @@
       <trans-unit id="290612199861c31d1036b185b4e69b75">
         <source>Summary</source>
         <target>Summary</target>
-        <note>File: src/Core/Import/EntityField/Provider/ProductFieldsProvider.php [Line: 101]</note>
+        <note>File: src/Core/Import/EntityField/Provider/ProductFieldsProvider.php [Line: 102]</note>
       </trans-unit>
       <trans-unit id="8284ae5df53e6e7ffc1f2cc67ae68765">
         <source>Supplier reference</source>
@@ -2515,7 +2515,7 @@
       <trans-unit id="df211c3d69ca4c3564b6ac95d368dc2e">
         <source>[1][/1] of [2][/2] characters used (recommended)</source>
         <target>[1][/1] of [2][/2] characters used (recommended)</target>
-        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1072]</note>
+        <note>File: src/PrestaShopBundle/Resources/views/Admin/TwigTemplateForm/prestashop_ui_kit_base.html.twig [Line: 1070]</note>
       </trans-unit>
       <trans-unit id="ec585277d7ddd92f1ff3bfaa10b5ed3f">
         <source>[1]{filesNb}[/1] selected file(s)</source>

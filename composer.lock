@@ -5214,12 +5214,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_apiresources.git",
-                "reference": "1a4b4094ae3956b62ee59509aacce610fd68ef99"
+                "reference": "20fb2231e1d92a0736aaf8d68fd28136810fa251"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/1a4b4094ae3956b62ee59509aacce610fd68ef99",
-                "reference": "1a4b4094ae3956b62ee59509aacce610fd68ef99",
+                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/20fb2231e1d92a0736aaf8d68fd28136810fa251",
+                "reference": "20fb2231e1d92a0736aaf8d68fd28136810fa251",
                 "shasum": ""
             },
             "require": {
@@ -5275,7 +5275,7 @@
             "support": {
                 "source": "https://github.com/PrestaShop/ps_apiresources/tree/dev"
             },
-            "time": "2025-09-19T09:42:28+00:00"
+            "time": "2025-09-23T06:12:03+00:00"
         },
         {
             "name": "prestashop/ps_banner",
