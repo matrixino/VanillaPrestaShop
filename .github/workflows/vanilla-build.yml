@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         TAG:
-          - 9.0.0-fixmoduleupdates
+          - 9.0.1
           - 9.0.0
           - 8.2.3
           - 8.2.2
@@ -24,7 +24,7 @@ jobs:
           - 8.0.5
           - 1.7.8.11
         include:
-          - TAG: 9.0.0-fixmoduleupdates
+          - TAG: 9.0.1
             node: 20
           - TAG: 9.0.0
             node: 20
@@ -73,17 +73,9 @@ jobs:
         run: php tools/build/CreateRelease.php --destination-dir=${{ env.RELEASE_DIR }}
 
       - name: Rename ZIP file
-        if: env.GH_TAG != '9.0.0-fixmoduleupdates'
         run: |
           cp prestashop_${{ env.GH_TAG }}.zip ${{ env.ZIP_FILE }}
           cp prestashop_${{ env.GH_TAG }}.xml ${{ env.XML_FILE }}
-        working-directory: ${{ env.RELEASE_DIR }}
-
-      - name: Rename ZIP file
-        if: env.GH_TAG == '9.0.0-fixmoduleupdates'
-        run: |
-          cp prestashop_9.0.0.zip ${{ env.ZIP_FILE }}
-          cp prestashop_9.0.0.xml ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
 
       - name: release
