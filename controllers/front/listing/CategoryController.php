@@ -80,13 +80,18 @@ class CategoryControllerCore extends ProductListingFrontController
      */
     public function init(): void
     {
-        parent::init();
-
         // Get proper IDs
         $id_category = (int) Tools::getValue('id_category');
 
         // Try to load category object
         $this->category = new Category($id_category, $this->context->language->id);
+
+        /*
+         * Call of parent::init() must be here, after initializing the category. Inside FrontController class
+         * there is a call to canonical redirection logic, that needs proper category data for it to work.
+         * If you move this to the top of init() method, the redirection will stop working.
+         */
+        parent::init();
 
         // Otherwise immediately show 404
         if (!Validate::isLoadedObject($this->category)) {

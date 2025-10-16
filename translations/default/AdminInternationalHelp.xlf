@@ -75,7 +75,7 @@
       <trans-unit id="a2ddbdfb29a0708bd711601f9277435c">
         <source>Display this country to your customers (the selected country will always be displayed in the Back Office).</source>
         <target>Display this country to your customers (the selected country will always be displayed in the Back Office).</target>
-        <note>File: controllers/admin/AdminCountriesController.php [Line: 305]</note>
+        <note>File: controllers/admin/AdminCountriesController.php [Line: 303]</note>
       </trans-unit>
       <trans-unit id="6f570144d5f5ca1404b40cab00a9fa3f">
         <source>Enable if this language is read from right to left.</source>
@@ -86,6 +86,10 @@
         <source><![CDATA[Exchange rates are calculated from one unit of your store's default currency. For example, if the default currency is euros and your chosen currency is dollars, type "1.20" (1€ = $1.20).]]></source>
         <target><![CDATA[Exchange rates are calculated from one unit of your store's default currency. For example, if the default currency is euros and your chosen currency is dollars, type "1.20" (1€ = $1.20).]]></target>
         <note>File: src/PrestaShopBundle/Form/Admin/Improve/International/Currencies/CurrencyType.php [Line: 195]</note>
+      </trans-unit>
+      <trans-unit id="2a08dc363eacc877e145bd670893f942">
+        <source>Exchange rates are calculated from one unit of your store's default currency. For example, if the default currency is euros and your chosen currency is dollars, type "1.20" (1€ = $1.20).</source>
+        <target>Exchange rates are calculated from one unit of your store's default currency. For example, if the default currency is euros and your chosen currency is dollars, type "1.20" (1€ = $1.20).</target>
       </trans-unit>
       <trans-unit id="a577e13cac9ee85d6f298e0a8deffeee">
         <source>Export data from one language to a file (language pack).</source>
@@ -120,7 +124,7 @@
       <trans-unit id="92de0162cbdfa60f671ba3cad1d392a1">
         <source>Geographical region.</source>
         <target>Geographical region.</target>
-        <note>File: controllers/admin/AdminCountriesController.php [Line: 250]</note>
+        <note>File: controllers/admin/AdminCountriesController.php [Line: 249]</note>
       </trans-unit>
       <trans-unit id="b3f4e400fe40a25d1c2b0c59e63668cf">
         <source>Here you can modify translations for all installed module.</source>
@@ -175,7 +179,7 @@
       <trans-unit id="cd2f7b9409e0f1527766ad35aa8bd3c5">
         <source>International call prefix, (e.g. 1 for United States).</source>
         <target>International call prefix, (e.g. 1 for United States).</target>
-        <note>File: controllers/admin/AdminCountriesController.php [Line: 225]</note>
+        <note>File: controllers/admin/AdminCountriesController.php [Line: 224]</note>
       </trans-unit>
       <trans-unit id="cfe3ecf9fcc29ce36de15ee87cebd12b">
         <source>List of pages in [1]%replace%[/1]</source>

@@ -118,7 +118,7 @@ class CustomerCore extends ObjectModel
     /** @var bool Status */
     public $is_guest = false;
 
-    /** @var bool True if carrier has been deleted (staying in database as deleted) */
+    /** @var bool True if customer has been deleted (staying in database as deleted) */
     public $deleted = false;
 
     /** @var string|null Object creation date */
@@ -245,11 +245,23 @@ class CustomerCore extends ObjectModel
     {
         $this->id_shop = ($this->id_shop) ? $this->id_shop : Context::getContext()->shop->id;
         $this->id_shop_group = ($this->id_shop_group) ? $this->id_shop_group : Context::getContext()->shop->id_shop_group;
+
+        /*
+         * Customer language is stored in the database, so we can automatically switch
+         * the shop language according to the customer preference, if he logged in.
+         */
         $this->id_lang = ($this->id_lang) ? $this->id_lang : Context::getContext()->language->id;
+
+        /*
+         * Customer birthday is stored as a single date (YYYY-MM-DD) in the database,
+         * but the object model uses three different fields (years, months, days).
+         * If it's being updated, we must rebuild the date from these three fields.
+         */
         $this->birthday = (empty($this->years) ? $this->birthday : (int) $this->years . '-' . (int) $this->months . '-' . (int) $this->days);
         $this->secure_key = md5(uniqid((string) mt_rand(0, mt_getrandmax()), true));
         $this->last_passwd_gen = date('Y-m-d H:i:s', strtotime('-' . Configuration::get('PS_PASSWD_TIME_FRONT') . 'minutes'));
 
+        // If subscribed to the newsletter, set the date of subscription to now, if not set
         if ($this->newsletter && !Validate::isDate($this->newsletter_date_add)) {
             $this->newsletter_date_add = date('Y-m-d H:i:s');
         }
@@ -261,6 +273,11 @@ class CustomerCore extends ObjectModel
             } else {
                 $this->id_default_group = (int) Configuration::get('PS_CUSTOMER_GROUP');
             }
+        }
+
+        // Check if registered customer exists with the email we are trying to add
+        if (!$this->isGuest() && Customer::customerExists($this->email)) {
+            return false;
         }
 
         /* Can't create a guest customer, if this feature is disabled */
@@ -318,12 +335,26 @@ class CustomerCore extends ObjectModel
      */
     public function update($nullValues = false)
     {
+        /*
+         * Customer birthday is stored as a single date (YYYY-MM-DD) in the database,
+         * but the object model uses three different fields (years, months, days).
+         * If it's being updated, we must rebuild the date from these three fields.
+         */
         $this->birthday = (empty($this->years) ? $this->birthday : (int) $this->years . '-' . (int) $this->months . '-' . (int) $this->days);
 
+        // If subscribed to the newsletter, set the date of subscription to now, if not set
         if ($this->newsletter && !Validate::isDate($this->newsletter_date_add)) {
             $this->newsletter_date_add = date('Y-m-d H:i:s');
         }
 
+        // Check if registered customer exists with the email we are trying to add.
+        // Also check if the customer found is a different customer than our object.
+        $customerExists = (int) Customer::customerExists($this->email, true);
+        if (!$this->isGuest() && $customerExists > 0 && $customerExists !== (int) $this->id) {
+            return false;
+        }
+
+        // If the customer is being soft-deleted, we also soft-delete his addresses
         if ($this->deleted) {
             $addresses = $this->getAddresses((int) Configuration::get('PS_LANG_DEFAULT'));
             foreach ($addresses as $address) {

@@ -397,7 +397,7 @@ class Install extends AbstractInstall
             $cookie_lifetime = time() + (max($cookie_lifetime, 1) * 3600);
         }
 
-        $cookie = new Cookie('ps-s' . $context->shop->id, '', $cookie_lifetime, 'localhost', false, false);
+        $cookie = new Cookie('ps-s' . $context->shop->id, '', $cookie_lifetime, ['localhost'], false, false);
 
         $context->cookie = $cookie;
 

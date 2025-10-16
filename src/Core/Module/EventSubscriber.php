@@ -53,6 +53,7 @@ class EventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            ModuleManagementEvent::PRE_ACTION => 'onModuleStateChanged',
             ModuleManagementEvent::INSTALL => 'onModuleStateChanged',
             ModuleManagementEvent::POST_INSTALL => 'onModuleStateChanged',
             ModuleManagementEvent::UNINSTALL => 'onModuleStateChanged',

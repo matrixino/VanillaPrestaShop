@@ -64,12 +64,13 @@ export default class MergeShipmentManager {
 
     const submitBtn = submitBtnEl;
     const shipmentSelect = shipmentSelectEl;
+    const {isValid} = this.form.dataset;
 
     function toggleSubmit() {
       const atLeastOneChecked = Array.from(checkboxes).some((cb) => cb instanceof HTMLInputElement && cb.checked);
 
       const shipmentSelected = shipmentSelect.value !== '';
-      submitBtn.disabled = !(atLeastOneChecked && shipmentSelected);
+      submitBtn.disabled = !(atLeastOneChecked && shipmentSelected && !!isValid);
     }
 
     checkboxes.forEach((cb) => cb.addEventListener('change', toggleSubmit));
@@ -128,5 +129,14 @@ export default class MergeShipmentManager {
     } catch (error) {
       console.error('Error while loading merge shipment form:', error);
     }
+  }
+
+  private get form(): HTMLFormElement {
+    const form = document.forms.namedItem(OrderViewPageMap.mergeShipmentFormName) as HTMLFormElement;
+
+    if (!form) {
+      throw new Error('Merge shipment form not found');
+    }
+    return form;
   }
 }

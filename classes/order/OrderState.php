@@ -92,7 +92,7 @@ class OrderStateCore extends ObjectModel
     /** @var bool Attach PDF Delivery Slip */
     public $pdf_delivery;
 
-    /** @var bool True if carrier has been deleted (staying in database as deleted) */
+    /** @var bool True if order status has been deleted (staying in database as deleted) */
     public $deleted = false;
 
     /**

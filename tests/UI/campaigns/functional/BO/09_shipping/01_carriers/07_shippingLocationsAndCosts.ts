@@ -448,6 +448,7 @@ describe('BO - Shipping - Carriers : Shipping locations and costs', async () => 
   it('should go to \'Shipping > Carriers\' page', async function () {
     await testContext.addContextItem(this, 'testIdentifier', 'goToCarriersPage', baseContext);
 
+    await boDashboardPage.setSidebarCollapsed(page, false);
     await boDashboardPage.goToSubMenu(
       page,
       boDashboardPage.shippingLink,
@@ -780,10 +781,18 @@ describe('BO - Shipping - Carriers : Shipping locations and costs', async () => 
     ]);
   });
 
+  it('should go back to the tab "Carriers"', async function () {
+    await testContext.addContextItem(this, 'testIdentifier', 'returnToTabCarriers', baseContext);
+
+    page = await foClassicCheckoutPage.changePage(browserContext, 0);
+
+    const pageTitle = await boCarriersPage.getPageTitle(page);
+    expect(pageTitle).to.contains(boCarriersPage.pageTitle);
+  });
+
   it('should go to \'Catalog > Products\' page', async function () {
     await testContext.addContextItem(this, 'testIdentifier', 'goToProductsPage', baseContext);
 
-    page = await boCarriersPage.changePage(browserContext, 0);
     await boDashboardPage.goToSubMenu(
       page,
       boDashboardPage.catalogParentLink,
@@ -1123,22 +1132,32 @@ describe('BO - Shipping - Carriers : Shipping locations and costs', async () => 
     expect(carriers).to.deep.equal([dataCarriers.clickAndCollect.name, dataCarriers.myCarrier.name]);
   });
 
-  it('should delete carrier', async function () {
-    await testContext.addContextItem(this, 'testIdentifier', 'deleteCarrier', baseContext);
+  it('should go back to the tab "Carriers"', async function () {
+    await testContext.addContextItem(this, 'testIdentifier', 'returnToTabCarriers2', baseContext);
 
     page = await foClassicCheckoutPage.changePage(browserContext, 0);
 
+    const pageTitle = await boCarriersPage.getPageTitle(page);
+    expect(pageTitle).to.contains(boCarriersPage.pageTitle);
+  });
+
+  it('should delete carrier', async function () {
+    await testContext.addContextItem(this, 'testIdentifier', 'deleteCarrier', baseContext);
+
     const textResult = await boCarriersPage.deleteCarrier(page, 1);
     expect(textResult).to.contains(boCarriersPage.successfulDeleteMessage);
+  });
 
-    const numberOfCarriersAfterDelete = await boCarriersPage.resetAndGetNumberOfLines(page);
-    expect(numberOfCarriersAfterDelete).to.be.equal(numberOfCarriers);
+  it('should reset all filters and get number of carriers in BO', async function () {
+    await testContext.addContextItem(this, 'testIdentifier', 'resetFilterAfterDelete', baseContext);
+
+    numberOfCarriers = await boCarriersPage.resetAndGetNumberOfLines(page);
+    expect(numberOfCarriers).to.be.above(0);
   });
 
   it('should go to \'Catalog > Products\' page', async function () {
     await testContext.addContextItem(this, 'testIdentifier', 'goToProductsPageForReset', baseContext);
 
-    page = await boCarriersPage.changePage(browserContext, 0);
     await boDashboardPage.goToSubMenu(
       page,
       boDashboardPage.catalogParentLink,

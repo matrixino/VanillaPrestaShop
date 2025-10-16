@@ -29,6 +29,7 @@ namespace PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\CommandHandler\SplitShipmentHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\CannotEditShipmentShippedException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use PrestaShopBundle\Entity\ShipmentProduct;
@@ -54,6 +55,10 @@ class SplitShipmentHandler implements SplitShipmentHandlerInterface
 
         if (!$findShipment) {
             throw new ShipmentNotFoundException(sprintf('Could not find shipment with id "%s"', $shipmentToRemoveProductId));
+        }
+
+        if (!empty($findShipment->getTrackingNumber())) {
+            throw new CannotEditShipmentShippedException(sprintf('Cannot split the shipment "%s" because is already shipped', $shipmentToRemoveProductId));
         }
 
         $shipmentProducts = array_map(function ($product) {

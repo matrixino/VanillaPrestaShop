@@ -164,7 +164,6 @@ class CategoriesProviderTest extends TestCase
     public function testGetCategoriesMenuWithModulesAndThemes()
     {
         $gamification = $this->mockModule('gamification');
-        $cronjobs = $this->mockModule('cronjobs');
         $myCustomTheme = $this->mockModule('my_theme', null);
         $this->assertEquals(
             [
@@ -248,7 +247,7 @@ class CategoriesProviderTest extends TestCase
                             'tab' => 'other',
                             'name' => 'Other',
                             'refMenu' => 'other',
-                            'modules' => [$gamification, $cronjobs],
+                            'modules' => [$gamification],
                             'subMenu' => [],
                         ],
                         'theme_modules' => (object) [
@@ -264,7 +263,6 @@ class CategoriesProviderTest extends TestCase
             $this->provider->getCategoriesMenu(
                 [
                     $gamification,
-                    $cronjobs,
                     $myCustomTheme,
                 ]
             )
@@ -274,7 +272,6 @@ class CategoriesProviderTest extends TestCase
     public function testGetCategoriesMenuWithModulesWithCustomTab()
     {
         $gamification = $this->mockModule('gamification', 'administration');
-        $cronjobs = $this->mockModule('cronjobs', 'front_office_features');
         $this->assertEquals(
             [
                 'categories' => (object) [
@@ -294,7 +291,7 @@ class CategoriesProviderTest extends TestCase
                             'tab' => 'front_office_features',
                             'name' => 'Design & Navigation',
                             'refMenu' => '507',
-                            'modules' => [$cronjobs],
+                            'modules' => [],
                             'subMenu' => [],
                         ],
                         'Promotions & Marketing' => (object) [
@@ -373,7 +370,6 @@ class CategoriesProviderTest extends TestCase
             $this->provider->getCategoriesMenu(
                 [
                     $gamification,
-                    $cronjobs,
                 ]
             )
         );

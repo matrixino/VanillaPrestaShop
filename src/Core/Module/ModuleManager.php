@@ -115,6 +115,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeInstallModule', ['moduleName' => $name, 'source' => $source]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $installed = $module->onInstall();
         if ($installed) {
             // Only trigger install event if install has succeeded otherwise it could automatically add tabs linked to a
@@ -138,6 +140,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforePostInstallModule', ['moduleName' => $name]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $result = $module->onPostInstall();
 
         $this->dispatch(ModuleManagementEvent::POST_INSTALL, $module);
@@ -160,6 +164,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeUninstallModule', ['moduleName' => $name]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $uninstalled = $module->onUninstall();
 
         if ($deleteFiles && $path = $this->moduleRepository->getModulePath($name)) {
@@ -183,6 +189,7 @@ class ModuleManager implements ModuleManagerInterface
         }
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
 
         $path = $this->moduleRepository->getModulePath($name);
         $this->filesystem->remove($path);
@@ -214,6 +221,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeUpgradeModule', ['moduleName' => $name, 'source' => $source]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $upgraded = $this->upgradeMigration($name) && $module->onUpgrade($module->get('version'));
 
         $this->dispatch(ModuleManagementEvent::UPGRADE, $module);
@@ -236,6 +245,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeEnableModule', ['moduleName' => $name]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $enabled = $module->onEnable();
         $this->dispatch(ModuleManagementEvent::ENABLE, $module);
 
@@ -257,6 +268,8 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeDisableModule', ['moduleName' => $name]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
+
         $disabled = $module->onDisable();
         $this->dispatch(ModuleManagementEvent::DISABLE, $module);
 
@@ -281,6 +294,7 @@ class ModuleManager implements ModuleManagerInterface
         $this->hookManager->exec('actionBeforeResetModule', ['moduleName' => $name]);
 
         $module = $this->moduleRepository->getModule($name);
+        $this->dispatchPreAction($module);
 
         if ($keepData && method_exists($module->getInstance(), 'reset')) {
             $reset = $module->onReset();
@@ -431,5 +445,19 @@ class ModuleManager implements ModuleManagerInterface
     private function dispatch(string $event, ModuleInterface $module): void
     {
         $this->eventDispatcher->dispatch(new ModuleManagementEvent($module), $event);
+    }
+
+    /**
+     * Before any action we dispatch this event, it allows the event to know a module action is undergoing, this
+     * way even if it fails and the actual action event is not triggered (they are only triggered after success),
+     * we can still clear the cache which can prevent some failure after an installation failed for example.
+     *
+     * @param ModuleInterface $module
+     *
+     * @return void
+     */
+    private function dispatchPreAction(ModuleInterface $module): void
+    {
+        $this->eventDispatcher->dispatch(new ModuleManagementEvent($module), ModuleManagementEvent::PRE_ACTION);
     }
 }

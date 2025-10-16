@@ -31,6 +31,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ModuleManagementEvent extends Event
 {
+    public const PRE_ACTION = 'module.pre_action';
     public const INSTALL = 'module.install';
     public const POST_INSTALL = 'module.post.install';
     public const UNINSTALL = 'module.uninstall';

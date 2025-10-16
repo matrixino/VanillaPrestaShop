@@ -74,6 +74,13 @@ class MergeShipmentType extends AbstractType
                     'Admin.Orderscustomers.Feature'
                 );
             },
+            'choice_attr' => function ($shipment) {
+                if (!empty($shipment->getTrackingNumber())) {
+                    return ['disabled' => 'disabled'];
+                }
+
+                return [];
+            },
             'choice_value' => fn ($shipment) => $shipment ? (string) $shipment->getId() : '',
             'placeholder' => $this->translator->trans('Select shipment', [], 'Admin.Orderscustomers.Feature'),
             'required' => true,

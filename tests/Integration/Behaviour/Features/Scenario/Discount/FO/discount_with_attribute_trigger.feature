@@ -5,7 +5,7 @@ Feature: Add discount with attribute trigger on FO
   PrestaShop allows discounts with restricted products as the condition
 
   Background:
-    Given there is a customer named "testCustomer" whose email is "pub@prestashop.com"
+    Given there is a customer named "testCustomer" whose email is "pub2@prestashop.com"
     Given language with iso code "en" is the default one
     And language "french" with locale "fr-FR" exists
     Given shop "shop1" with name "test_shop" exists
