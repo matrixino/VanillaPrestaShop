@@ -524,13 +524,9 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
         ];
     }
 
-    private function mockRouter(): RouterInterface&RequestMatcherInterface|MockObject
+    private function mockRouter(): RequestMatcherInterface|MockObject
     {
-        $router = $this->getMockBuilder(RouterInterface::class)
-            ->addMethods(['matchRequest']) // Ajoute la méthode manquante
-            ->getMock()
-        ;
-    
+        $router = $this->createMock(RequestMatcherInterface::class);
         $router
             ->method('matchRequest')
             ->willThrowException(new NoConfigurationException())
