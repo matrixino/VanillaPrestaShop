@@ -351,7 +351,7 @@ class ShopContextSubscriber implements EventSubscriberInterface
     private function getShopConstraintFromRouteAttribute(Request $request): ?ShopConstraint
     {
         try {
-            $routeInfo = $this->router->match($request->getPathInfo());
+            $routeInfo = $this->router->matchRequest($request);
             $controller = $routeInfo['_controller'];
             [$className, $methodName] = explode('::', $controller);
 
