@@ -105,7 +105,7 @@
 }
 
 .info-block {
-  padding: 1rem;
+  padding: var(--#{$cdk}size-16);
   background-color: $info-block-background;
 
   & &-col {
