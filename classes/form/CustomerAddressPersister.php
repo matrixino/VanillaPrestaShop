@@ -150,15 +150,15 @@ class CustomerAddressPersisterCore
         // Save the new address and delete the old one
         if ($address->save() && $oldAddress->delete()) {
             /*
-             * If the address was successfully changed, we need to update the current cart. Old address ID 
+             * If the address was successfully changed, we need to update the current cart. Old address ID
              * was already unassigned from all non-ordered carts in the database in Address:delete() method,
              * but we can still have the deleted ID assigned in context->cart.
              *
-             * Please note that even if we assign a new address ID to the cart here, if the cart is not saved 
-             * later and the customer logs out and logs in again, the cart may receive Address::getFirstCustomerAddressId 
+             * Please note that even if we assign a new address ID to the cart here, if the cart is not saved
+             * later and the customer logs out and logs in again, the cart may receive Address::getFirstCustomerAddressId
              * instead of this $address->id.
              *
-             * In PrestaShop, we don't have any functionality to remember which address was last used in the cart, 
+             * In PrestaShop, we don't have any functionality to remember which address was last used in the cart,
              * if the cart is not saved.
              */
             $this->cart->updateAddressId($oldAddress->id, $address->id);
