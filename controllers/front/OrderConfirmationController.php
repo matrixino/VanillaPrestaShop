@@ -107,7 +107,7 @@ class OrderConfirmationControllerCore extends FrontController
         }
 
         // Last step, initialize some other data
-        $this->id_module = Module::getModuleIdByName($this->order->module);
+        $this->id_module = $this->order->module == 'free_order' ? -1 : Module::getModuleIdByName($this->order->module);
 
         // This data is kept only for backward compatibility purposes
         $this->reference = (string) $this->order->reference;
@@ -246,6 +246,7 @@ class OrderConfirmationControllerCore extends FrontController
      */
     public function displayPaymentReturn(Order $order)
     {
+        // Check if we have a sensible module ID. Free orders have -1 as module ID
         if (!Validate::isUnsignedId($this->id_module)) {
             return false;
         }
@@ -298,7 +299,7 @@ class OrderConfirmationControllerCore extends FrontController
 
         /*
          * Redirect back to this page to display the order confirmation.
-         * Note the id_module parameter with value -1, it's only kept for 
+         * Note the id_module parameter with value -1, it's only kept for
          * backward compatibility, but not used anymore.
          */
         Tools::redirect($this->context->link->getPageLink(
