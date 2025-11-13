@@ -7,8 +7,14 @@ on:
 jobs:
   update-prestashop-packages:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        BRANCH:
+          - develop
+          - 9.0.x
     env:
-      GH_BRANCH: ${{ github.ref_name }}
+      GH_BRANCH: ${{ matrix.BRANCH }}
       IGNORE_PRESTASHOP_PACKAGES: "prestashop/psgdpr"
 
     steps:
