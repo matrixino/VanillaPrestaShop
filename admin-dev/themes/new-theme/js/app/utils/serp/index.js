@@ -64,6 +64,8 @@ class SerpApp {
       description: '',
     };
 
+    this.appendTitle = selectors.appendTitle ? $(selectors.appendTitle).val() : '';
+
     this.initializeSelectors(selectors);
     this.attachInputEvents();
   }
@@ -152,7 +154,7 @@ class SerpApp {
     const title1 = watchedTitle.length ? watchedTitle.val() : '';
     const title2 = defaultTitle.length ? defaultTitle.val() : '';
 
-    this.setTitle(title1 === '' ? title2 : title1);
+    this.setTitle(`${title1 === '' ? title2 : title1}${this.appendTitle ? ` ${this.appendTitle}` : ''}`);
     // Always check for url if title change
     this.checkUrl();
     this.updateComponent();
