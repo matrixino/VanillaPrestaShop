@@ -60,7 +60,10 @@ class FeaturesChoiceProvider implements FormChoiceProviderInterface
 
         $contextLangId = (int) $this->legacyContext->getLanguage()->getId();
 
-        $features = $this->featureRepository->getFeaturesByLang($contextLangId);
+        $features = $this->featureRepository->getFeaturesByLang(
+            $contextLangId,
+            $this->legacyContext->getContext()->shop->id
+        );
         $this->cacheFeatureChoices = [];
         foreach ($features as $feature) {
             $this->cacheFeatureChoices[$feature['localized_names'][$contextLangId]] = $feature['id_feature'];
