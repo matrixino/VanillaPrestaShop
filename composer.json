@@ -247,6 +247,9 @@
             "phpunit/phpunit": true,
             "symfony/phpunit-bridge": true
         },
+        "audit": {
+            "block-insecure": false
+        },
         "platform": {
             "php": "8.1.0"
         },
