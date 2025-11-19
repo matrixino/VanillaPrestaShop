@@ -26,6 +26,7 @@ import {
   FakerProduct,
   type Page,
   utilsAPI,
+  utilsDate,
   utilsPlaywright,
 } from '@prestashop-core/ui-testing';
 
@@ -38,6 +39,7 @@ describe('API : PATCH /product/{productId}', async () => {
   let accessToken: string;
   let idProduct: number;
   let jsonResponse: any;
+  let hasAvailableDate: boolean = false;
 
   const clientScope: string = 'product_write';
   const createProduct: FakerProduct = new FakerProduct({
@@ -126,11 +128,10 @@ describe('API : PATCH /product/{productId}', async () => {
         propertyName: 'additionalShippingCost',
         propertyValue: faker.number.float({fractionDigits: 2}),
       },
-      // @todo : https://github.com/PrestaShop/PrestaShop/issues/38787
-      /*{
+      {
         propertyName: 'availableDate',
-        propertyValue: faker.date.future(),
-      },*/
+        propertyValue: utilsDate.getDateFormat('yyyy-mm-dd', 'future'),
+      },
       {
         propertyName: 'availableForOrder',
         propertyValue: false,
@@ -406,6 +407,12 @@ describe('API : PATCH /product/{productId}', async () => {
             'width',
           ];
 
+          if (data.propertyName === 'availableDate') {
+            hasAvailableDate = true;
+          }
+          if (hasAvailableDate) {
+            jsonResponseKeys.push('availableDate');
+          }
           if (jsonResponse.redirectType !== 'default') {
             jsonResponseKeys.push('redirectTarget');
           }
