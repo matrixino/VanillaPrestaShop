@@ -241,21 +241,21 @@ describe('BO - Catalog price Rules : CRUD - Reduction type', async () => {
       expect(pageTitle).to.contains(dataProducts.demo_6.name);
     });
 
-    // @todo : https://github.com/PrestaShop/PrestaShop/issues/39983
-    it.skip('should check the product price', async function () {
+    it('should check the product price', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkProductPrice1', baseContext);
 
       await foClassicProductPage.reloadPage(page);
 
-      // Price - (20% Price + 20% on 20% Price)
-      const calculatedPricePercent = utilsCore.percentage(
-        dataProducts.demo_6.combinations[0].price,
-        catalogPriceRuleData2.reduction,
+      // (Price Without Tax - 20% Catalog Price) + 20% Tax
+      const calculatedPriceWOTax = dataProducts.demo_6.combinations[0].price / (
+        (100 + parseInt(dataTaxes.DefaultFrTax.rate, 10)) / 100
       );
-      const calculatedPrice = dataProducts.demo_6.combinations[0].price
-        - (calculatedPricePercent
-          + utilsCore.percentage(calculatedPricePercent, parseInt(dataTaxes.DefaultFrTax.rate, 10))
-        );
+      const calculatedPriceWOTaxAndReduction = calculatedPriceWOTax
+        - utilsCore.percentage(calculatedPriceWOTax, catalogPriceRuleData2.reduction);
+      const calculatedPrice = calculatedPriceWOTaxAndReduction + utilsCore.percentage(
+        calculatedPriceWOTaxAndReduction,
+        parseInt(dataTaxes.DefaultFrTax.rate, 10),
+      );
 
       const productPrice = await foClassicProductPage.getProductPrice(page);
       expect(productPrice).to.eq(`€${calculatedPrice.toFixed(2)}`);
