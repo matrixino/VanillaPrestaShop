@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01030ac3c9fe67217e8b7682a6d3b099",
+    "content-hash": "c9e0c9e40adf5bae89118d1d10313c8d",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5261,16 +5261,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-dev",
+            "version": "dev-product-categories",
             "source": {
                 "type": "git",
-                "url": "https://github.com/PrestaShop/ps_apiresources.git",
-                "reference": "66f06b2442cb8af76a3fb34749c2d24b41dc9c24"
+                "url": "https://github.com/jolelievre/ps_apiresources.git",
+                "reference": "a5192780cc5cb98a7ac449144bb8f89a7d0e9e30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/66f06b2442cb8af76a3fb34749c2d24b41dc9c24",
-                "reference": "66f06b2442cb8af76a3fb34749c2d24b41dc9c24",
+                "url": "https://api.github.com/repos/jolelievre/ps_apiresources/zipball/a5192780cc5cb98a7ac449144bb8f89a7d0e9e30",
+                "reference": "a5192780cc5cb98a7ac449144bb8f89a7d0e9e30",
                 "shasum": ""
             },
             "require": {
@@ -5284,7 +5284,6 @@
                 "prestashop/php-dev-tools": "^4.3",
                 "rector/rector": "^2.0"
             },
-            "default-branch": true,
             "type": "prestashop-module",
             "autoload": {
                 "psr-4": {
@@ -5335,9 +5334,9 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_apiresources/tree/dev"
+                "source": "https://github.com/jolelievre/ps_apiresources/tree/product-categories"
             },
-            "time": "2025-11-21T15:46:55+00:00"
+            "time": "2025-11-25T11:38:01+00:00"
         },
         {
             "name": "prestashop/ps_banner",
