@@ -137,16 +137,15 @@ describe('API : Check endpoints', async () => {
         '/categories/batch/{mode}: DELETE',
         // @todo: add tests
         '/categories/toggle-status: PUT',
-        // tests/UI/campaigns/functional/API/02_endpoints/03_category/01_getCategories.ts
+        // tests/UI/campaigns/functional/API/02_endpoints/03_category/03_getCategories.ts
         '/categories: GET',
-        // tests/UI/campaigns/functional/API/02_endpoints/03_category/02_deleteCategoryIdCover.ts
+        // tests/UI/campaigns/functional/API/02_endpoints/03_category/04_deleteCategoryIdCover.ts
         '/category/{categoryId}/cover: DELETE',
         // @todo: add tests
         '/category/{categoryId}/status: PATCH',
         // @todo: add tests
         '/category/{categoryId}/thumbnail: DELETE',
-        // tests/UI/campaigns/functional/API/02_endpoints/03_category/05_deleteCategoryId.ts
-        // @todo: add tests for mode
+        // tests/UI/campaigns/functional/API/02_endpoints/03_category/07_deleteCategoryIdMode.ts
         '/category/{categoryId}/{mode}: DELETE',
         // @todo: add tests
         '/category/{categoryId}: GET',
