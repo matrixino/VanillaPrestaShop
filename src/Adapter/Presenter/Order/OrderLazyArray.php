@@ -360,7 +360,7 @@ class OrderLazyArray extends AbstractLazyArray
     #[LazyArrayAttribute(arrayAccess: true)]
     public function getDetails()
     {
-        return new OrderDetailLazyArray($this->order);
+        return new OrderDetailLazyArray($this->order, $this->shipmentRepository);
     }
 
     /**

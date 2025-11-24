@@ -36,7 +36,11 @@ use PrestaShop\PrestaShop\Adapter\Presenter\AbstractLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\LazyArrayAttribute;
 use PrestaShop\PrestaShop\Core\Localization\LocaleInterface;
 use PrestaShopBundle\Translation\TranslatorComponent;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use PrestaShopException;
+use PrestaShop\PrestaShop\Adapter\ContainerFinder;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use Tools;
 
 class OrderDetailLazyArray extends AbstractLazyArray
@@ -61,17 +65,20 @@ class OrderDetailLazyArray extends AbstractLazyArray
      */
     private $translator;
 
+    private $shipmentRepository;
+
     /**
      * OrderDetailLazyArray constructor.
      *
      * @param Order $order
      */
-    public function __construct(Order $order)
+    public function __construct(Order $order, ShipmentRepository $shipmentRepository)
     {
         $this->order = $order;
         $this->context = Context::getContext();
         $this->translator = Context::getContext()->getTranslator();
         $this->locale = $this->context->getCurrentLocale();
+        $this->shipmentRepository = $shipmentRepository;
         parent::__construct();
     }
 
@@ -202,9 +209,51 @@ class OrderDetailLazyArray extends AbstractLazyArray
     #[LazyArrayAttribute(arrayAccess: true)]
     public function getShipping()
     {
-        $order = $this->order;
+        $containerFinder = new ContainerFinder(Context::getContext());
+        /** @var FeatureFlagStateCheckerInterface $featureFlagManager */
+        $featureFlagManager = $containerFinder->getContainer()->get(FeatureFlagStateCheckerInterface::class);
 
-        $shippingList = $order->getShipping();
+        if ($featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT)) {
+            return $this->getShipments();
+        }
+
+        return $this->getCarrier();
+    }
+
+    /**
+     * Used when the feature flag FEATURE_FLAG_IMPROVED_SHIPMENT is enabled.
+     * Since the feature flag introduce a new "shipment" concept in PrestaShop, we now need to get
+     * all shipments for the given order.
+     */
+    private function getShipments()
+    {
+        $shipments = $this->shipmentRepository->getShipmentWithWeightByOrderId($this->order->id);
+
+        foreach ($shipments as &$shipment) {
+            if ($shipment['carrier_tracking_url']) {
+                $shipment['carrier_tracking_url'] = str_replace('@', $shipment['tracking_number'], $shipment['carrier_tracking_url']);
+            }
+
+            $shipment['date_add'] = Tools::displayDate($shipment['date_add'], false);
+
+            $shipment['package_weight'] = ($shipment['package_weight'] > 0) ? sprintf('%.3f', $shipment['package_weight']) . ' ' .
+                Configuration::get('PS_WEIGHT_UNIT') : '-';
+            $packageCost = ($this->order->getTaxCalculationMethod()) ? $shipment['shipping_cost_tax_excl'] : $shipment['shipping_cost_tax_incl'];
+            $shipment['package_cost'] = ($packageCost > 0) ? $this->locale->formatPrice($packageCost, Currency::getIsoCodeById((int) $this->order->id_currency))
+                : $this->translator->trans('Free', [], 'Shop.Theme.Checkout');
+        }
+
+        return $shipments;
+    }
+
+
+    /**
+     * Used when the feature flag FEATURE_FLAG_IMPROVED_SHIPMENT is disabled.
+     * Get carrier details used for the given order.
+     */
+    private function getCarrier()
+    {
+        $shippingList = $this->order->getShipping();
         $orderShipping = [];
 
         foreach ($shippingList as $shippingId => $shipping) {
@@ -214,13 +263,13 @@ class OrderDetailLazyArray extends AbstractLazyArray
                     Tools::displayDate($shipping['date_add'], false);
                 $orderShipping[$shippingId]['shipping_weight'] =
                     ($shipping['weight'] > 0) ? sprintf('%.3f', $shipping['weight']) . ' ' .
-                        Configuration::get('PS_WEIGHT_UNIT') : '-';
+                    Configuration::get('PS_WEIGHT_UNIT') : '-';
                 $shippingCost =
-                    ($order->getTaxCalculationMethod()) ? $shipping['shipping_cost_tax_excl']
-                        : $shipping['shipping_cost_tax_incl'];
+                    ($this->order->getTaxCalculationMethod()) ? $shipping['shipping_cost_tax_excl']
+                    : $shipping['shipping_cost_tax_incl'];
                 $orderShipping[$shippingId]['shipping_cost'] =
-                    ($shippingCost > 0) ? $this->locale->formatPrice($shippingCost, Currency::getIsoCodeById((int) $order->id_currency))
-                        : $this->translator->trans('Free', [], 'Shop.Theme.Checkout');
+                    ($shippingCost > 0) ? $this->locale->formatPrice($shippingCost, Currency::getIsoCodeById((int) $this->order->id_currency))
+                    : $this->translator->trans('Free', [], 'Shop.Theme.Checkout');
 
                 $tracking_line = '-';
                 if ($shipping['tracking_number']) {

@@ -110,6 +110,42 @@ class ShipmentRepository extends EntityRepository
         }
     }
 
+    /**
+     * @return array<int, array{
+     *     id_shipment: int,
+     *     id_order: int,
+     *     id_carrier: int,
+     *     id_delivery_address: int,
+     *     shipping_cost_tax_excl: string,
+     *     shipping_cost_tax_incl: string,
+     *     packed_at: string|null,
+     *     shipped_at: string|null,
+     *     delivered_at: string|null,
+     *     cancelled_at: string|null,
+     *     tracking_number: string|null,
+     *     date_add: string,
+     *     date_upd: string,
+     *     package_weight: string|null,
+     *     carrier_name: string|null
+     * } | []>
+     */
+    public function getShipmentWithWeightByOrderId(int $orderId): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $qb = $conn->createQueryBuilder();
+        $qb->select('s.*', 'SUM(od.product_weight * sp.quantity) as package_weight, c.name as carrier_name, c.url as carrier_tracking_url')
+            ->from(_DB_PREFIX_ . 'shipment', 's')
+            ->leftJoin('s', _DB_PREFIX_ . 'shipment_product', 'sp', 's.id_shipment = sp.id_shipment')
+            ->leftJoin('sp', _DB_PREFIX_ . 'order_detail', 'od', 'sp.id_order_detail = od.id_order_detail')
+            ->leftJoin('s', _DB_PREFIX_ . 'carrier', 'c', 's.id_carrier = c.id_carrier')
+            ->where('s.id_order = :orderId')
+            ->setParameter('orderId', $orderId)
+            ->groupBy('s.id_shipment');
+
+        return $qb->executeQuery()->fetchAllAssociative();
+    }
+
     private function getShipmentProductByOrderDetailId(Shipment $shipment): array
     {
         return array_reduce($shipment->getProducts()->toArray(), function ($carry, ShipmentProduct $product) {
