@@ -18,6 +18,9 @@ services:
   PrestaShop\PrestaShop\Adapter\Discount\CommandHandler\BulkUpdateDiscountsStatusHandler:
     autoconfigure: true
 
+  PrestaShop\PrestaShop\Adapter\Discount\CommandHandler\BulkDeleteDiscountsHandler:
+    autoconfigure: true
+
   PrestaShop\PrestaShop\Adapter\Discount\Update\Filler\DiscountFiller:
     autoconfigure: true
 
