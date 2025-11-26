@@ -172,19 +172,19 @@ describe('API : Check endpoints', async () => {
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/04_postCustomersGroup.ts
         '/customers/groups: POST',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/39682
-        '/discount/{discountId}/conditions: GET',
+        '/discounts/{discountId}/conditions: GET',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/39682
-        '/discount/{discountId}/conditions: PATCH',
+        '/discounts/{discountId}/conditions: PATCH',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/38784
-        '/discount/{discountId}: DELETE',
+        '/discounts/{discountId}: DELETE',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/38647
-        '/discount/{discountId}: GET',
+        '/discounts/{discountId}: GET',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/39682
-        '/discount/{discountId}: PATCH',
-        // @todo : https://github.com/PrestaShop/PrestaShop/issues/38784
-        '/discount: POST',
+        '/discounts/{discountId}: PATCH',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/38784
         '/discounts: GET',
+        // @todo : https://github.com/PrestaShop/PrestaShop/issues/38784
+        '/discounts: POST',
         // @todo: add tests
         '/features/bulk-delete: DELETE',
         // @todo: add tests
