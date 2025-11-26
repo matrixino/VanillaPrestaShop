@@ -432,14 +432,19 @@ class OrderAmountUpdater
         int $computingPrecision,
         ?int $orderInvoiceId
     ): void {
+        /*
+         * We need to run automatic cart rule actions.
+         * autoAddToCart is required to automatically assigning newly created cart rules with no code (automatic).
+         * autoRemoveFromCart is needed to verify, if the cart rules already in a cart are still valid.
+         * Note that we are calling both with a $useOrderPrice flag set to true.
+         */
         CartRule::autoAddToCart(null, true);
         CartRule::autoRemoveFromCart(null, true);
-        $carrierId = $order->id_carrier;
 
         $newCartRules = $cart->getCartRules(CartRule::FILTER_ACTION_ALL, false);
         // We need the calculator to compute the discount on the whole products because they can interact with each
         // other so they can't be computed independently, it needs to keep order prices
-        $calculator = $cart->newCalculator($cart->getProducts(), $newCartRules, $carrierId, $computingPrecision, $this->keepOrderPrices);
+        $calculator = $cart->newCalculator($cart->getProducts(), $newCartRules, $order->id_carrier, $computingPrecision, $this->keepOrderPrices);
         $calculator->processCalculation();
 
         foreach ($order->getCartRules() as $orderCartRuleData) {

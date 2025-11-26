@@ -745,57 +745,65 @@ class CartRuleCore extends ObjectModel
             return (!$display_error) ? true : null;
         }
 
-        // All these checks are necessary when you add the cart rule the first time, so when it's not in cart yet
-        // However when it's in the cart and you are checking if the cart rule is still valid (when performing auto remove)
-        // these rules are outdated For example:
-        //  - the cart rule can now be disabled but it was at the time it was applied, so it doesn't need to be removed
-        //  - the current date is not in the range any more but it was at the time
-        //  - the quantity is now zero but it was not when it was added
-        if (!$alreadyInCart) {
+        /*
+         * All these checks are relevant only for non-ordered carts. When an order has been already
+         * created from the cart, we do not check this. $useOrderPrices is a bit confusing as a name,
+         * but it indicates that we are validating a cart that has already been ordered.
+         */
+        if (!$useOrderPrices) {
+            // We verify that the cart rule is active
             if (!$this->active) {
                 return (!$display_error) ? false : $this->trans('This voucher is disabled', [], 'Shop.Notifications.Error');
             }
+
+            // We verify the total available quantity
             if (!$this->quantity) {
                 return (!$display_error) ? false : $this->trans('This voucher has already been used', [], 'Shop.Notifications.Error');
             }
+
+            // We verify the date range
             if (strtotime($this->date_from) > time()) {
                 return (!$display_error) ? false : $this->trans('This voucher is not valid yet', [], 'Shop.Notifications.Error');
             }
             if (strtotime($this->date_to) < time()) {
                 return (!$display_error) ? false : $this->trans('This voucher has expired', [], 'Shop.Notifications.Error');
             }
-        }
+        
+            // We verify the quantity per user, if customer is already assigned to the cart
+            if ($cart->id_customer) {
 
-        if ($cart->id_customer) {
-            $quantityUsed = Db::getInstance()->getValue('
-			SELECT count(*)
-			FROM `' . _DB_PREFIX_ . 'orders` o
-			LEFT JOIN `' . _DB_PREFIX_ . 'order_cart_rule` ocr ON o.`id_order` = ocr.`id_order`
-			WHERE o.`id_customer` = ' . $cart->id_customer . '
-			AND ocr.`deleted` = 0
-			AND ocr.`id_cart_rule` = ' . (int) $this->id . '
-			AND ' . (int) Configuration::get('PS_OS_ERROR') . ' != o.`current_state`
-			');
-
-            if ($alreadyInCart) {
-                // Sometimes a cart rule is already in a cart, but the cart is not yet attached to an order (when logging
-                // in for example), these cart rules are not taken into account by the query above:
-                // so we count cart rules that are already linked to the current cart but not attached to an order yet.
-
-                $quantityUsed += (int) Db::getInstance()->getValue('
-                    SELECT count(*)
-                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` ccr
-                    INNER JOIN `' . _DB_PREFIX_ . 'cart` c ON c.id_cart = ccr.id_cart
-                    LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = c.id_cart
-                    WHERE c.id_customer = ' . $cart->id_customer . ' AND c.id_cart = ' . $cart->id . ' AND ccr.id_cart_rule = ' . (int) $this->id . ' AND o.id_order IS NULL
+                // First, we check if the customer has already used this cart rule in past orders
+                $quantityUsed = Db::getInstance()->getValue('
+                SELECT count(*)
+                FROM `' . _DB_PREFIX_ . 'orders` o
+                LEFT JOIN `' . _DB_PREFIX_ . 'order_cart_rule` ocr ON o.`id_order` = ocr.`id_order`
+                WHERE o.`id_customer` = ' . $cart->id_customer . '
+                AND ocr.`deleted` = 0
+                AND ocr.`id_cart_rule` = ' . (int) $this->id . '
+                AND ' . (int) Configuration::get('PS_OS_ERROR') . ' != o.`current_state`
                 ');
-            } else {
-                // When checking the cart rules present in that cart the request result is accurate
-                // When we check if using the cart rule one more time is valid then we increment this value
-                ++$quantityUsed;
-            }
-            if ($quantityUsed > $this->quantity_per_user) {
-                return (!$display_error) ? false : $this->trans('You cannot use this voucher anymore (usage limit reached)', [], 'Shop.Notifications.Error');
+
+                if ($alreadyInCart) {
+                    // Sometimes a cart rule is already in a cart, but the cart is not yet attached to an order (when logging
+                    // in for example), these cart rules are not taken into account by the query above:
+                    // so we count cart rules that are already linked to the current cart but not attached to an order yet.
+
+                    $quantityUsed += (int) Db::getInstance()->getValue('
+                        SELECT count(*)
+                        FROM `' . _DB_PREFIX_ . 'cart_cart_rule` ccr
+                        INNER JOIN `' . _DB_PREFIX_ . 'cart` c ON c.id_cart = ccr.id_cart
+                        LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = c.id_cart
+                        WHERE c.id_customer = ' . $cart->id_customer . ' AND c.id_cart = ' . $cart->id . ' AND ccr.id_cart_rule = ' . (int) $this->id . ' AND o.id_order IS NULL
+                    ');
+                } else {
+                    // When checking the cart rules present in that cart the request result is accurate
+                    // When we check if using the cart rule one more time is valid then we increment this value
+                    ++$quantityUsed;
+                }
+
+                if ($quantityUsed > $this->quantity_per_user) {
+                    return (!$display_error) ? false : $this->trans('You cannot use this voucher anymore (usage limit reached)', [], 'Shop.Notifications.Error');
+                }
             }
         }
 
