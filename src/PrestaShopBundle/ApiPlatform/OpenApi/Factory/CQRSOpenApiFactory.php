@@ -41,21 +41,10 @@ use ApiPlatform\OpenApi\Model\Paths;
 use ApiPlatform\OpenApi\Model\Server;
 use ApiPlatform\OpenApi\OpenApi;
 use ArrayObject;
-use DateTimeInterface;
-use Exception;
-use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Feature\MultistoreFeature;
-use PrestaShop\PrestaShop\Core\Util\DateTime\DateImmutable;
-use PrestaShopBundle\ApiPlatform\DomainObjectDetector;
-use PrestaShopBundle\ApiPlatform\Metadata\LocalizedValue;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionNamedType;
-use ReflectionProperty;
+use PrestaShopBundle\ApiPlatform\OpenApi\Adapter\SchemaAdapterChain;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
-use Symfony\Component\PropertyInfo\PropertyInfoExtractorInterface;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 
 /**
  * This service decorates the main service that builds the Open API schema. It waits for the whole generation
@@ -79,10 +68,9 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
         protected readonly OpenApiFactoryInterface $decorated,
         protected readonly ResourceNameCollectionFactoryInterface $resourceNameCollectionFactory,
         protected readonly DefinitionNameFactoryInterface $definitionNameFactory,
-        protected readonly ClassMetadataFactoryInterface $classMetadataFactory,
-        protected readonly DomainObjectDetector $domainObjectDetector,
-        protected readonly PropertyInfoExtractorInterface $propertyInfoExtractor,
         protected readonly MultistoreFeature $multistoreFeature,
+        protected readonly SchemaAdapterChain $resourceSchemaAdapterChain,
+        protected readonly SchemaAdapterChain $operationSchemaAdapterChain,
         // No property promotion for this one since it's already defined in the ResourceMetadataTrait
         ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
     ) {
@@ -105,14 +93,10 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
             foreach ($resourceMetadataCollection as $resourceMetadata) {
                 $resourceDefinitionName = $this->definitionNameFactory->create($resourceMetadata->getClass());
 
-                // Adapt localized value schema for API resource schema (mostly for read schema)
+                // Adapt schema for API resource schema (mostly for read schema)
                 if ($parentOpenApi->getComponents()->getSchemas()->offsetExists($resourceDefinitionName)) {
                     $resourceSchema = $parentOpenApi->getComponents()->getSchemas()->offsetGet($resourceDefinitionName);
-                    $this->adaptLocalizedValues($resourceMetadata->getClass(), $resourceSchema);
-                    $this->adaptDecimalNumbers($resourceMetadata->getClass(), $resourceSchema);
-                    $this->adaptDateProperties($resourceMetadata->getClass(), $resourceSchema);
-                    // NEW: Synchronize schema with actual resource properties
-                    $this->synchronizeSchemaWithResource($resourceMetadata->getClass(), $resourceSchema);
+                    $this->resourceSchemaAdapterChain->adapt($resourceMetadata->getClass(), $resourceSchema, null);
                 }
 
                 /** @var Operation $operation */
@@ -133,14 +117,7 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
                         continue;
                     }
 
-                    $this->adaptMultiParametersSetters($operation, $definition);
-                    $this->applyCommandMapping($operation, $definition);
-                    // Adapt localized value schema for operation definition (for valid input example)
-                    $this->adaptLocalizedValues($operation->getClass(), $definition);
-                    $this->adaptDecimalNumbers($operation->getClass(), $definition);
-                    $this->synchronizeSchemaWithResource($operation->getClass(), $definition);
-                    // Adapt DateImmutable properties last to ensure examples are correctly set
-                    $this->adaptDateProperties($operation->getClass(), $definition);
+                    $this->operationSchemaAdapterChain->adapt($operation->getClass(), $definition, $operation);
                 }
             }
         }
@@ -202,101 +179,6 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
     }
 
     /**
-     * Synchronizes the OpenAPI schema with the actual properties available in the resource
-     * This removes fields that are documented but don't exist in the actual resource
-     */
-    protected function synchronizeSchemaWithResource(string $resourceClass, ArrayObject $definition): void
-    {
-        if (empty($definition['properties']) || !class_exists($resourceClass)) {
-            return;
-        }
-
-        $actualProperties = $this->getResourceProperties($resourceClass);
-        if (empty($actualProperties)) {
-            return;
-        }
-
-        $currentProperties = $definition['properties'];
-        $synchronizedProperties = [];
-
-        foreach ($currentProperties as $propertyName => $propertySchema) {
-            if (in_array($propertyName, $actualProperties)) {
-                $synchronizedProperties[$propertyName] = $propertySchema;
-            }
-        }
-
-        $definition['properties'] = $synchronizedProperties;
-
-        if (!empty($definition['required'])) {
-            $definition['required'] = array_values(array_intersect($definition['required'], $actualProperties));
-        }
-    }
-
-    protected function getResourceProperties(string $resourceClass): array
-    {
-        try {
-            $properties = $this->propertyInfoExtractor->getProperties($resourceClass) ?? [];
-
-            if (!empty($properties)) {
-                return array_filter($properties, function ($property) {
-                    return !in_array($property, ['@context', '@id', '@type']);
-                });
-            }
-        } catch (Exception $e) {
-            // Fallback to reflection if PropertyInfoExtractor fails
-        }
-
-        return $this->getPropertiesUsingReflection($resourceClass);
-    }
-
-    protected function getPropertiesUsingReflection(string $resourceClass): array
-    {
-        try {
-            $reflection = new ReflectionClass($resourceClass);
-            $properties = [];
-
-            foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-                if (!$property->isStatic()) {
-                    $properties[] = $property->getName();
-                }
-            }
-
-            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-                $methodName = $method->getName();
-
-                if ($method->isStatic() || $method->isConstructor() || $method->getNumberOfParameters() > 0) {
-                    continue;
-                }
-
-                if (str_starts_with($methodName, 'get') && strlen($methodName) > 3) {
-                    $propertyName = lcfirst(substr($methodName, 3));
-                    if (!in_array($propertyName, $properties)) {
-                        $properties[] = $propertyName;
-                    }
-                }
-
-                if (str_starts_with($methodName, 'is') && strlen($methodName) > 2) {
-                    $propertyName = lcfirst(substr($methodName, 2));
-                    if (!in_array($propertyName, $properties)) {
-                        $properties[] = $propertyName;
-                    }
-                }
-
-                if (str_starts_with($methodName, 'has') && strlen($methodName) > 3) {
-                    $propertyName = lcfirst(substr($methodName, 3));
-                    if (!in_array($propertyName, $properties)) {
-                        $properties[] = $propertyName;
-                    }
-                }
-            }
-
-            return array_unique($properties);
-        } catch (Exception $e) {
-            return [];
-        }
-    }
-
-    /**
      * Returns the list of multishop context parameters added to each operation.
      *
      * @return Parameter[]
@@ -343,10 +225,6 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
      *      PrestaShop\Module\APIResources\ApiPlatform\Resources\ApiClient\ApiClientList => ApiClient
      *      PrestaShop\Module\APIResources\ApiPlatform\Resources\Product\Product => Product
      *      PrestaShop\Module\APIResources\ApiPlatform\Resources\Product\ProductList => Product
-     *
-     * @param HttpOperation $operation
-     *
-     * @return string|null
      */
     protected function getOperationDomain(HttpOperation $operation): ?string
     {
@@ -370,317 +248,5 @@ class CQRSOpenApiFactory implements OpenApiFactoryInterface
         $splitDomain = explode('\\', $domainEnd);
 
         return $splitDomain[count($splitDomain) - 2];
-    }
-
-    /**
-     * Localized values are arrays indexed by locales (or objects with properties matching the locale in JSON), this
-     * method adapts the expected format along with an example to indicate the user that the key to use is the locale.
-     *
-     * @param string $class
-     * @param ArrayObject $definition
-     *
-     * @return void
-     */
-    protected function adaptLocalizedValues(string $class, ArrayObject $definition): void
-    {
-        if (empty($definition['properties'])) {
-            return;
-        }
-
-        $resourceClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
-        $resourceReflectionClass = $resourceClassMetadata->getReflectionClass();
-
-        foreach ($definition['properties'] as $propertyName => $propertySchema) {
-            if (!$resourceReflectionClass->hasProperty($propertyName)) {
-                continue;
-            }
-
-            $property = $resourceReflectionClass->getProperty($propertyName);
-            foreach ($property->getAttributes() as $attribute) {
-                // Adapt the schema of localized values, they must be an object index by the Language's locale (not an array)
-                if ($attribute->getName() === LocalizedValue::class || is_subclass_of($attribute->getName(), LocalizedValue::class)) {
-                    $definition['properties'][$propertyName]['type'] = 'object';
-                    $definition['properties'][$propertyName]['example'] = [
-                        'en-US' => 'value',
-                        'fr-FR' => 'valeur',
-                    ];
-                    unset($definition['properties'][$propertyName]['items']);
-                }
-            }
-        }
-    }
-
-    /**
-     * Internally we rely on DecimalNumber for float values because they are more accurate, but in the JSON format
-     * they should be considered as float, so we update the schema for these types.
-     *
-     * @param string $class
-     * @param ArrayObject $definition
-     *
-     * @return void
-     */
-    protected function adaptDecimalNumbers(string $class, ArrayObject $definition): void
-    {
-        if (empty($definition['properties'])) {
-            return;
-        }
-
-        $resourceClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
-        $resourceReflectionClass = $resourceClassMetadata->getReflectionClass();
-
-        foreach ($definition['properties'] as $propertyName => $propertySchema) {
-            if (!$resourceReflectionClass->hasProperty($propertyName)) {
-                continue;
-            }
-
-            $property = $resourceReflectionClass->getProperty($propertyName);
-            if ($property->hasType() && $property->getType() instanceof ReflectionNamedType) {
-                $propertyType = $property->getType()->getName();
-                if ($propertyType === DecimalNumber::class || is_subclass_of($propertyType, DecimalNumber::class)) {
-                    $definition['properties'][$propertyName]['type'] = 'number';
-                    $definition['properties'][$propertyName]['example'] = 42.99;
-                    unset($definition['properties'][$propertyName]['$ref']);
-                    unset($definition['properties'][$propertyName]['allOf']);
-                }
-            }
-        }
-    }
-
-    /**
-     * Adapts DateImmutable properties to use 'date' format instead of 'date-time' in OpenAPI schema.
-     * Checks both property types and getter/setter method signatures to detect DateImmutable usage.
-     */
-    protected function adaptDateProperties(string $class, ArrayObject $definition): void
-    {
-        if (empty($definition['properties'])) {
-            return;
-        }
-
-        $resourceClassMetadata = $this->classMetadataFactory->getMetadataFor($class);
-        $resourceReflectionClass = $resourceClassMetadata->getReflectionClass();
-
-        foreach ($definition['properties'] as $propertyName => $propertySchema) {
-            // Check if property exists and get its type
-            $propertyType = null;
-            if ($resourceReflectionClass->hasProperty($propertyName)) {
-                $property = $resourceReflectionClass->getProperty($propertyName);
-                if ($property->hasType() && $property->getType() instanceof ReflectionNamedType) {
-                    $propertyType = $property->getType()->getName();
-                }
-            }
-
-            // If property not found or has no type, check getter/setter methods
-            if (!$propertyType) {
-                $camelCasePropertyName = ucfirst($propertyName);
-                $getterMethodName = 'get' . $camelCasePropertyName;
-                $setterMethodName = 'set' . $camelCasePropertyName;
-
-                if ($resourceReflectionClass->hasMethod($getterMethodName)) {
-                    $getterMethod = $resourceReflectionClass->getMethod($getterMethodName);
-                    if ($getterMethod->hasReturnType() && $getterMethod->getReturnType() instanceof ReflectionNamedType) {
-                        $propertyType = $getterMethod->getReturnType()->getName();
-                    }
-                } elseif ($resourceReflectionClass->hasMethod($setterMethodName)) {
-                    $setterMethod = $resourceReflectionClass->getMethod($setterMethodName);
-                    $parameters = $setterMethod->getParameters();
-                    if (!empty($parameters) && $parameters[0]->hasType() && $parameters[0]->getType() instanceof ReflectionNamedType) {
-                        $propertyType = $parameters[0]->getType()->getName();
-                    }
-                }
-            }
-
-            // If property type is DateImmutable, change format from date-time to date and update example
-            if ($propertyType === DateImmutable::class || is_subclass_of($propertyType, DateImmutable::class)) {
-                // Always set format to 'date' for DateImmutable properties
-                $definition['properties'][$propertyName]['format'] = 'date';
-
-                // Always update example to use date format (Y-m-d) - overwrite any existing example
-                $example = $definition['properties'][$propertyName]['example'] ?? null;
-                if (is_string($example)) {
-                    // If example is a datetime string (ISO 8601 or similar), extract just the date part
-                    if (preg_match('/^(\d{4}-\d{2}-\d{2})(T|\s|$)/', $example, $matches)) {
-                        $definition['properties'][$propertyName]['example'] = $matches[1];
-                    } elseif (preg_match('/^(\d{4}-\d{2}-\d{2})/', $example, $matches)) {
-                        // Already a date format, keep it
-                        $definition['properties'][$propertyName]['example'] = $matches[1];
-                    } else {
-                        // Set a default date example if format is unrecognized
-                        $definition['properties'][$propertyName]['example'] = '2025-11-05';
-                    }
-                } else {
-                    // Add a date example if none exists
-                    $definition['properties'][$propertyName]['example'] = '2025-11-05';
-                }
-            }
-        }
-    }
-
-    /**
-     * Some CQRS commands rely on multi-parameters setters, this is usually done to force specifying related parameters
-     * all together because only one is not enough. For such setters we expect the method parameters to be provided in
-     * a sub object, so this method transforms the schema to match this expected sib object.
-     *
-     * Example:
-     *   UpdateProductCommand::setRedirectOption(string $redirectType, int $redirectTarget)
-     *      => expected input ['redirectOption' => ['redirectType' => '301-category', 'redirectTarget' => 42]]
-     *
-     * @param Operation $operation
-     * @param ArrayObject $definition
-     *
-     * @return void
-     */
-    protected function adaptMultiParametersSetters(Operation $operation, ArrayObject $definition): void
-    {
-        $operationClass = ($operation->getInput()['class'] ?? null) ?: $operation->getClass();
-        // We only handle the special case of multi-parameters setters for classes that belong in our Domain
-        if (!class_exists($operationClass) || !$this->classMetadataFactory->hasMetadataFor($operationClass) || !$this->domainObjectDetector->isDomainObject($operationClass)) {
-            return;
-        }
-
-        $operationClassMetadata = $this->classMetadataFactory->getMetadataFor($operationClass);
-        $operationReflectionClass = $operationClassMetadata->getReflectionClass();
-        $methodsWithMultipleArguments = $this->findMethodsWithMultipleArguments($operationReflectionClass);
-        if (empty($methodsWithMultipleArguments)) {
-            return;
-        }
-
-        foreach ($methodsWithMultipleArguments as $methodPropertyName => $setterMethod) {
-            $methodSchema = new ArrayObject([
-                'type' => 'object',
-                'properties' => [
-                ],
-            ]);
-            foreach ($setterMethod->getParameters() as $methodParameter) {
-                // If one of the parameters cannot be handled we skip the whole method
-                if (!$methodParameter->getType() instanceof ReflectionNamedType) {
-                    continue 2;
-                }
-
-                // If one of the parameters is not a built-in value we skip it (too complex to handle, but could be improved someday)
-                if ($this->isDateTime($methodParameter->getType())) {
-                    $parameterTypeName = $methodParameter->getType()->getName();
-                    $isDateImmutable = ($parameterTypeName === DateImmutable::class || is_subclass_of($parameterTypeName, DateImmutable::class));
-                    $format = $isDateImmutable ? 'date' : 'date-time';
-                    $methodParameterSchema = new ArrayObject([
-                        'format' => $format,
-                        'type' => 'string',
-                    ]);
-                    // Add date example for DateImmutable parameters
-                    if ($isDateImmutable) {
-                        $methodParameterSchema['example'] = '2025-11-05';
-                    }
-                } elseif ($methodParameter->getType()->isBuiltin()) {
-                    $methodParameterSchema = new ArrayObject([
-                        'type' => $this->getSchemaType($methodParameter->getType()->getName()),
-                    ]);
-                } else {
-                    continue 2;
-                }
-                $methodSchema['properties'][$methodParameter->getName()] = $methodParameterSchema;
-            }
-
-            // Method parameters are now in a sub-object, so they are removed from the top level
-            // They must be removed before we add the methodSchema in case one of the parameter name matches the method name
-            // (or it would unset it right after it was updated)
-            foreach (array_keys($methodSchema['properties']) as $propertyName) {
-                unset($definition['properties'][$propertyName]);
-            }
-            $definition['properties'][$methodPropertyName] = $methodSchema;
-        }
-    }
-
-    protected function getSchemaType(string $builtInType): string
-    {
-        return match ($builtInType) {
-            'int' => 'integer',
-            'float' => 'number',
-            'bool' => 'boolean',
-            default => $builtInType,
-        };
-    }
-
-    protected function isDateTime(ReflectionNamedType $methodParameter): bool
-    {
-        if (!class_exists($methodParameter->getName()) && !interface_exists($methodParameter->getName())) {
-            return false;
-        }
-
-        $implements = class_implements($methodParameter->getName());
-        if (empty($implements)) {
-            return false;
-        }
-
-        return in_array(DateTimeInterface::class, $implements);
-    }
-
-    /**
-     * @param ReflectionClass $reflectionClass
-     *
-     * @return array<string, ReflectionMethod>
-     */
-    protected function findMethodsWithMultipleArguments(ReflectionClass $reflectionClass): array
-    {
-        $methodsWithMultipleArguments = [];
-        foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
-            // We only look into public method that can be setters with multiple parameters
-            if (
-                $reflectionMethod->getNumberOfRequiredParameters() <= 1
-                || $reflectionMethod->isStatic()
-                || $reflectionMethod->isConstructor()
-                || $reflectionMethod->isDestructor()
-            ) {
-                continue;
-            }
-
-            // Remove set/with to get the potential matching property in data (use full method name by default)
-            if (str_starts_with($reflectionMethod->getName(), 'set')) {
-                $methodPropertyName = lcfirst(substr($reflectionMethod->getName(), 3));
-            } elseif (str_starts_with($reflectionMethod->getName(), 'with')) {
-                $methodPropertyName = lcfirst(substr($reflectionMethod->getName(), 4));
-            } else {
-                $methodPropertyName = $reflectionMethod->getName();
-            }
-            $methodsWithMultipleArguments[$methodPropertyName] = $reflectionMethod;
-        }
-
-        return $methodsWithMultipleArguments;
-    }
-
-    /**
-     * Updates the schema property names based on the mapping specified, if for example the CQRS commands has a localizedNames
-     * property that was renamed via the mapping into names then the schema won't use localizedNames but names for the final
-     * schema output so that it matches the actual expected format.
-     *
-     * @param Operation $operation
-     * @param ArrayObject $definition
-     *
-     * @return void
-     */
-    protected function applyCommandMapping(Operation $operation, ArrayObject $definition): void
-    {
-        if (empty($operation->getExtraProperties()['CQRSCommandMapping'])) {
-            return;
-        }
-
-        foreach ($operation->getExtraProperties()['CQRSCommandMapping'] as $apiPath => $cqrsPath) {
-            // Replace properties that are scanned from CQRS command to their expected API path
-            if ($this->propertyAccessor->isReadable($definition['properties'], $cqrsPath)) {
-                // Automatic value from context are simply removed from the schema, the others are "moved" to match the expected property path
-                if (!str_starts_with($apiPath, '[_context]') && $this->propertyAccessor->isWritable($definition['properties'], $apiPath)) {
-                    $this->propertyAccessor->setValue($definition['properties'], $apiPath, $this->propertyAccessor->getValue($definition['properties'], $cqrsPath));
-                }
-                // Use property path to set null, the null values will then be cleaned in a second loop (because unset cannot use property path as an input)
-                if ($this->propertyAccessor->isWritable($definition['properties'], $cqrsPath)) {
-                    $this->propertyAccessor->setValue($definition['properties'], $cqrsPath, null);
-                }
-            }
-        }
-
-        // Now clean the values that were set to null by the previous loop
-        foreach ($definition['properties'] as $propertyName => $propertyValue) {
-            if (null === $propertyValue) {
-                unset($definition['properties'][$propertyName]);
-            }
-        }
     }
 }

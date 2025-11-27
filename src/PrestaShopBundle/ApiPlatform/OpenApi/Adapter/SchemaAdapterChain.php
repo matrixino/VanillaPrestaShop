@@ -23,61 +23,37 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
 
-class bankwire extends PaymentModule
+declare(strict_types=1);
+
+namespace PrestaShopBundle\ApiPlatform\OpenApi\Adapter;
+
+use ApiPlatform\Metadata\Operation;
+use ArrayObject;
+
+/**
+ * Chain of schema adapters that applies all adaptations in the correct order.
+ */
+class SchemaAdapterChain implements OpenApiSchemaAdapterInterface
 {
-    protected $_html = '';
-    protected $_postErrors = [];
-
-    public $details;
-    public $owner;
-    public $address;
-    public $extra_mail_vars;
     /**
-     * @var int
+     * @param iterable<OpenApiSchemaAdapterInterface> $adapters
      */
-    public $is_eu_compatible;
-
-    public function install()
-    {
-        if (!parent::install()
-            || !$this->registerHook('paymentReturn')
-            || !$this->registerHook('paymentOptions')
-            || !$this->registerHook('displayHome')
-        ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function uninstall()
-    {
-        if (!Configuration::deleteByName('BANK_WIRE_DETAILS')
-                || !Configuration::deleteByName('BANK_WIRE_OWNER')
-                || !Configuration::deleteByName('BANK_WIRE_ADDRESS')
-                || !parent::uninstall()) {
-            return false;
-        }
-
-        return true;
+    public function __construct(
+        iterable $adapters
+    ) {
+        $this->adapters = is_array($adapters) ? $adapters : iterator_to_array($adapters);
     }
 
     /**
-     * tests for ModuleGetPossibleHooks
+     * @var OpenApiSchemaAdapterInterface[]
      */
-    public function hookPaymentReturn()
-    {
-    }
+    protected readonly array $adapters;
 
-    public function hookPaymentOptions()
+    public function adapt(string $class, ArrayObject $definition, ?Operation $operation = null): void
     {
-    }
-
-    public function hookDisplayHome()
-    {
+        foreach ($this->adapters as $adapter) {
+            $adapter->adapt($class, $definition, $operation);
+        }
     }
 }

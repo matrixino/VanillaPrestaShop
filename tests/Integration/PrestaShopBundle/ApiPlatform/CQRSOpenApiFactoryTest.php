@@ -425,7 +425,7 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                             'fr-FR' => 'valeur',
                         ],
                     ]),
-                    // Nullable DateTime
+                    // Nullable DateImmutable (format is 'date' not 'date-time')
                     'availableDate' => new ArrayObject([
                         'format' => 'date',
                         'type' => [
@@ -653,6 +653,17 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                             'fr-FR' => 'valeur',
                         ],
                     ]),
+                    'redirectOption' => new ArrayObject([
+                        'type' => 'object',
+                        'properties' => [
+                            'redirectType' => new ArrayObject([
+                                'type' => 'string',
+                            ]),
+                            'redirectTarget' => new ArrayObject([
+                                'type' => 'integer',
+                            ]),
+                        ],
+                    ]),
                     'packStockType' => new ArrayObject([
                         'type' => 'integer',
                     ]),
@@ -676,7 +687,7 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                             'fr-FR' => 'valeur',
                         ],
                     ]),
-                    // Nullable DateTime
+                    // Nullable DateImmutable
                     'availableDate' => new ArrayObject([
                         'format' => 'date',
                         'type' => 'string',
@@ -685,6 +696,8 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
                 ],
             ]),
         ];
+
+        // @todo Add a schema with a dateTime like discount when it is released or virtual product's expiration date.
     }
 
     /**
@@ -737,5 +750,22 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
             'get',
             ['ApiClient'],
         ];
+    }
+
+    public function testApiPropertyOpenApiContextApplied(): void
+    {
+        /** @var OpenApiFactoryInterface $openApiFactory */
+        $openApiFactory = $this->getContainer()->get(OpenApiFactoryInterface::class);
+        /** @var OpenApi $openApi */
+        $openApi = $openApiFactory->__invoke();
+        $schemas = $openApi->getComponents()->getSchemas();
+
+        /** @var ArrayObject $contactSchema */
+        $contactSchema = $schemas['Contact'];
+        $shopIdsProperty = $contactSchema['properties']['shopIds'];
+
+        $this->assertEquals('array', $shopIdsProperty['type']);
+        $this->assertEquals(['type' => 'integer'], $shopIdsProperty['items']);
+        $this->assertEquals([1, 3], $shopIdsProperty['example']);
     }
 }

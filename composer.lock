@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd51c944bd40163cd7758d9ff6b47f14",
+    "content-hash": "77e46e6c4d78a80f2a010570465a8582",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5210,16 +5210,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-product-categories",
+            "version": "dev-Issue-39827-fix-documentation-for-attribute-endpoint",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jolelievre/ps_apiresources.git",
-                "reference": "a5192780cc5cb98a7ac449144bb8f89a7d0e9e30"
+                "url": "https://github.com/tleon/ps_apiresources.git",
+                "reference": "5b56615b0492b8c2a77e85162dd1b4be4c6a9cf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jolelievre/ps_apiresources/zipball/a5192780cc5cb98a7ac449144bb8f89a7d0e9e30",
-                "reference": "a5192780cc5cb98a7ac449144bb8f89a7d0e9e30",
+                "url": "https://api.github.com/repos/tleon/ps_apiresources/zipball/5b56615b0492b8c2a77e85162dd1b4be4c6a9cf3",
+                "reference": "5b56615b0492b8c2a77e85162dd1b4be4c6a9cf3",
                 "shasum": ""
             },
             "require": {
@@ -5283,9 +5283,9 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/jolelievre/ps_apiresources/tree/product-categories"
+                "source": "https://github.com/tleon/ps_apiresources/tree/Issue-39827-fix-documentation-for-attribute-endpoint"
             },
-            "time": "2025-11-25T11:38:01+00:00"
+            "time": "2025-11-26T10:27:29+00:00"
         },
         {
             "name": "prestashop/ps_banner",
@@ -10244,16 +10244,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v6.4.25",
+            "version": "v6.4.29",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "6bc974c0035b643aa497c58d46d9e25185e4b272"
+                "reference": "b03d11e015552a315714c127d8d1e0f9e970ec88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/6bc974c0035b643aa497c58d46d9e25185e4b272",
-                "reference": "6bc974c0035b643aa497c58d46d9e25185e4b272",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/b03d11e015552a315714c127d8d1e0f9e970ec88",
+                "reference": "b03d11e015552a315714c127d8d1e0f9e970ec88",
                 "shasum": ""
             },
             "require": {
@@ -10301,7 +10301,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v6.4.25"
+                "source": "https://github.com/symfony/http-foundation/tree/v6.4.29"
             },
             "funding": [
                 {
@@ -10321,7 +10321,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-20T06:48:20+00:00"
+            "time": "2025-11-08T16:40:12+00:00"
         },
         {
             "name": "symfony/http-kernel",

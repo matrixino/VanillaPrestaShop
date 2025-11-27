@@ -1,4 +1,5 @@
-{# **
+<?php
+/**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
@@ -21,24 +22,26 @@
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * #}
+ */
 
-{% block kpi_row %}
-  <div class="card card-kpis">
+declare(strict_types=1);
 
-    <div class="kpi-row">
-      {% for kpi in kpiRow.kpis %}
-        {{ kpi|raw }}
-      {% endfor %}
-    </div>
+namespace PrestaShopBundle\ApiPlatform\OpenApi\Adapter;
 
-    {% if kpiRow.allowRefresh %}
-    <div class="kpi-refresh">
-      <button class="refresh-kpis btn btn-primary" type="button">
-        <i class="material-icons">refresh</i>
-      </button>
-    </div>
-    {% endif %}
+use ApiPlatform\Metadata\Operation;
+use ArrayObject;
 
-  </div>
-{% endblock %}
+/**
+ * Interface for OpenAPI schema adapters that transform schema definitions.
+ */
+interface OpenApiSchemaAdapterInterface
+{
+    /**
+     * Adapts the OpenAPI schema definition for a given class.
+     *
+     * @param string $class The class name to adapt the schema for
+     * @param ArrayObject $definition The schema definition to adapt (modified in place)
+     * @param Operation|null $operation Optional operation context for the adaptation
+     */
+    public function adapt(string $class, ArrayObject $definition, ?Operation $operation = null): void;
+}

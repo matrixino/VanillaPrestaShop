@@ -212,18 +212,21 @@ describe('API : POST /products', async () => {
       expect(value).to.equal(jsonResponse.active);
     });
 
-    it('should check the JSON Response : `names` (EN)', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseNamesEN', baseContext);
+    it('should check the JSON Response : `categories`', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseCategories', baseContext);
 
-      const value = await boProductsCreatePage.getProductName(page, dataLanguages.english.isoCode);
-      expect(value).to.equal(jsonResponse.names[dataLanguages.english.locale]);
+      const value = await boProductsCreateTabDescriptionPage.getSelectedCategories(page);
+
+      for (let incCategory = 0; incCategory < jsonResponse.categories.length; incCategory++) {
+        expect(value).to.contains(jsonResponse.categories[incCategory].displayName);
+      }
     });
 
-    it('should check the JSON Response : `names` (FR)', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseNamesFR', baseContext);
+    it('should check the JSON Response : `defaultCategoryId`', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseDefaultCategoryId', baseContext);
 
-      const value = await boProductsCreatePage.getProductName(page, dataLanguages.french.isoCode);
-      expect(value).to.equal(jsonResponse.names[dataLanguages.french.locale]);
+      const value = parseInt(await boProductsCreateTabDescriptionPage.getValue(page, 'id_category_default'), 10);
+      expect(value).to.equal(jsonResponse.defaultCategoryId);
     });
 
     it('should check the JSON Response : `description` (EN)', async function () {
@@ -238,6 +241,20 @@ describe('API : POST /products', async () => {
 
       const value = await boProductsCreateTabDescriptionPage.getValue(page, 'description', dataLanguages.french.id.toString());
       expect(value).to.equal(jsonResponse.descriptions[dataLanguages.french.locale]);
+    });
+
+    it('should check the JSON Response : `names` (EN)', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseNamesEN', baseContext);
+
+      const value = await boProductsCreatePage.getProductName(page, dataLanguages.english.isoCode);
+      expect(value).to.equal(jsonResponse.names[dataLanguages.english.locale]);
+    });
+
+    it('should check the JSON Response : `names` (FR)', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkResponseNamesFR', baseContext);
+
+      const value = await boProductsCreatePage.getProductName(page, dataLanguages.french.isoCode);
+      expect(value).to.equal(jsonResponse.names[dataLanguages.french.locale]);
     });
   });
 

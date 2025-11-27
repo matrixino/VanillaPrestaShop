@@ -64,8 +64,7 @@ describe('API : POST /admin-api/attributes/attributes', async () => {
           shopIds: [1],
         },
       });
-      // @todo : https://github.com/PrestaShop/PrestaShop/issues/39827
-      this.skip();
+
       expect(apiResponse.status()).to.eq(201);
       expect(utilsAPI.hasResponseHeader(apiResponse, 'Content-Type')).to.eq(true);
       expect(utilsAPI.getResponseHeader(apiResponse, 'Content-Type')).to.contains('application/json');
