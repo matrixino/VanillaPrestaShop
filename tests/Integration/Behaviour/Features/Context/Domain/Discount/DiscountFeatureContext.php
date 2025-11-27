@@ -37,6 +37,7 @@ use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkDeleteDiscountsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkUpdateDiscountsStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\DeleteDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
@@ -720,5 +721,36 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         $this->getCommandBus()->handle(
             new BulkUpdateDiscountsStatusCommand($this->referencesToIds($discountReferences), $enable)
         );
+    }
+
+    /**
+     * @When /^I bulk delete discounts "(.*)"$/
+     *
+     * @param string $discountReferences
+     */
+    public function bulkDeleteDiscounts(string $discountReferences)
+    {
+        $this->getCommandBus()->handle(
+            new BulkDeleteDiscountsCommand($this->referencesToIds($discountReferences))
+        );
+    }
+
+    /**
+     * @Then /^discount "(.*)" (should|should not) exist$/
+     *
+     * @param string $discountReference
+     * @param bool $shouldExist
+     */
+    public function assertDiscountExistence(string $discountReference, bool $shouldExist)
+    {
+        try {
+            $this->getDiscountForEditing($discountReference);
+        } catch (DiscountNotFoundException) {
+            Assert::assertFalse($shouldExist, sprintf('Discount "%s" was not found, but it was expected to exist', $discountReference));
+
+            return;
+        }
+
+        Assert::assertTrue($shouldExist, sprintf('Discount "%s" was found, but it was expected to be deleted', $discountReference));
     }
 }
