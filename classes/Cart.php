@@ -3107,7 +3107,7 @@ class CartCore extends ObjectModel
      *
      * @param array $delivery_option Delivery option array
      */
-    public function setDeliveryOption($delivery_option = null)
+    public function setDeliveryOption($delivery_option = null, bool $useOrderPrices = false)
     {
         if (empty($delivery_option)) {
             $this->delivery_option = '';
@@ -3137,8 +3137,8 @@ class CartCore extends ObjectModel
         $this->delivery_option = json_encode($delivery_option);
 
         // update auto cart rules
-        CartRule::autoRemoveFromCart();
-        CartRule::autoAddToCart();
+        CartRule::autoRemoveFromCart(null, $useOrderPrices);
+        CartRule::autoAddToCart(null, $useOrderPrices);
     }
 
     /**

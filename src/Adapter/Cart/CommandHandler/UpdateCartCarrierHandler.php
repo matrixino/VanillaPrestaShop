@@ -65,9 +65,10 @@ final class UpdateCartCarrierHandler extends AbstractCartHandler implements Upda
         $this->setCartContext($this->contextStateManager, $cart);
 
         try {
-            $cart->setDeliveryOption([
-                (int) $cart->id_address_delivery => $this->formatLegacyDeliveryOptionFromCarrierId($command->getNewCarrierId()),
-            ]);
+            $cart->setDeliveryOption(
+                [(int) $cart->id_address_delivery => $this->formatLegacyDeliveryOptionFromCarrierId($command->getNewCarrierId())],
+                true
+            );
             $cart->update();
         } finally {
             $this->contextStateManager->restorePreviousContext();
