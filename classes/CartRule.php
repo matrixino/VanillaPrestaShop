@@ -768,10 +768,9 @@ class CartRuleCore extends ObjectModel
             if (strtotime($this->date_to) < time()) {
                 return (!$display_error) ? false : $this->trans('This voucher has expired', [], 'Shop.Notifications.Error');
             }
-        
+
             // We verify the quantity per user, if customer is already assigned to the cart
             if ($cart->id_customer) {
-
                 // First, we check if the customer has already used this cart rule in past orders
                 $quantityUsed = Db::getInstance()->getValue('
                 SELECT count(*)
