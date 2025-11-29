@@ -1656,7 +1656,7 @@ class FrontControllerCore extends Controller
 
         $ext = pathinfo($logoFileDir, PATHINFO_EXTENSION);
         if ($ext == 'svg') {
-            $svg = new DomDocument();
+            $svg = new DOMDocument();
             $svg->load($logoFileDir);
             $logoWidth = $this->getPixelValue($svg->documentElement->getAttribute('width'));
             $logoHeight = $this->getPixelValue($svg->documentElement->getAttribute('height'));
