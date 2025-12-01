@@ -1663,10 +1663,10 @@ class FrontControllerCore extends Controller
             $svg->load($logoFileDir);
             $logoWidth = $this->getPixelValue($svg->documentElement->getAttribute('width'));
             $logoHeight = $this->getPixelValue($svg->documentElement->getAttribute('height'));
-            /** If width and height is not explicitly set, use the aspect ratio from the viewBox attribute as base size */
+            /* If width and height is not explicitly set, use the aspect ratio from the viewBox attribute as base size */
             if (!$logoWidth || !$logoHeight) {
                 $viewBox = preg_split('/[\s,]+/', $svg->documentElement->getAttribute('viewBox') ?: '');
-                if (isset($viewBox[2]) && isset($viewBox[3])) {
+                if (isset($viewBox[2], $viewBox[3])) {
                     $logoWidth = round((float) $viewBox[2]);
                     $logoHeight = round((float) $viewBox[3]);
                 }
