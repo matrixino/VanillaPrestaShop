@@ -5210,16 +5210,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-dev",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_apiresources.git",
-                "reference": "36411ab4193601d00f9fef5385ef59d2f28edaf3"
+                "reference": "7c99f0bfccf0226ac13ffc424092e8fe2d7330c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/36411ab4193601d00f9fef5385ef59d2f28edaf3",
-                "reference": "36411ab4193601d00f9fef5385ef59d2f28edaf3",
+                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/7c99f0bfccf0226ac13ffc424092e8fe2d7330c0",
+                "reference": "7c99f0bfccf0226ac13ffc424092e8fe2d7330c0",
                 "shasum": ""
             },
             "require": {
@@ -5233,7 +5233,6 @@
                 "prestashop/php-dev-tools": "^4.3",
                 "rector/rector": "^2.0"
             },
-            "default-branch": true,
             "type": "prestashop-module",
             "autoload": {
                 "psr-4": {
@@ -5284,9 +5283,9 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_apiresources/tree/dev"
+                "source": "https://github.com/PrestaShop/ps_apiresources/tree/v0.2.0"
             },
-            "time": "2025-11-28T11:42:43+00:00"
+            "time": "2025-11-28T16:38:53+00:00"
         },
         {
             "name": "prestashop/ps_banner",
@@ -18251,9 +18250,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "prestashop/ps_apiresources": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
