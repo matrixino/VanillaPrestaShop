@@ -56,9 +56,6 @@ describe('API : POST /admin-api/attributes/attributes', async () => {
     it('should request the endpoint /admin-api/attributes/attributes', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestEndpoint', baseContext);
 
-      // @todo : https://github.com/PrestaShop/PrestaShop/issues/39827
-      this.skip();
-
       const apiResponse = await apiContext.post('attributes/attributes', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
