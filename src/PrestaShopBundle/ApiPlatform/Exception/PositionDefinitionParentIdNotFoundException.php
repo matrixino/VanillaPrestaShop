@@ -29,11 +29,11 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\ApiPlatform\Exception;
 
-use ApiPlatform\Exception\InvalidResourceException;
+use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
 
 /**
- * Is thrown when the gridDataFactory property is not defined on a resource on which it should be.
+ * Is thrown when the parentId field property is not in data.
  */
-class GridDataFactoryNotFoundException extends InvalidResourceException
+class PositionDefinitionParentIdNotFoundException extends InvalidArgumentException
 {
 }

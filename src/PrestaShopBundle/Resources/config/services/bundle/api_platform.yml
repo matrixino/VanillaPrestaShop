@@ -89,6 +89,11 @@ services:
     arguments:
       - '@prestashop.core.command_bus'
 
+  # Custom processor for position update
+  PrestaShopBundle\ApiPlatform\Processor\UpdatePositionProcessor:
+    tags: [ 'api_platform.state_processor' ]
+    autowire: true
+
   # Custom provider for paginated listing
   PrestaShopBundle\ApiPlatform\Provider\QueryListProvider:
     tags: [ 'api_platform.state_provider' ]
