@@ -609,8 +609,7 @@ abstract class DbCore
         // This method must be used only with queries which display results
         if (
             !preg_match('#^\s*\(?\s*(select|show|explain|describe|desc|checksum)\s#i', $sql)
-            || stripos($sql, 'outfile') !== false
-            || stripos($sql, 'dumpfile') !== false
+            || preg_match('#\bIN\s*\([^)]*\)(*SKIP)(*FAIL)|\binto\s+(?:outfile|dumpfile)\b#i', $sql)
         ) {
             throw new PrestaShopDatabaseException('Db->executeS() must be used only with select, show, explain or describe queries');
         }
