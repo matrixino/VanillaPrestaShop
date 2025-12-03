@@ -193,6 +193,8 @@ class SearchCore
 
         // The string gets into this method in a raw form of, like "Prestashop Tést A-1000".
         // This get rid of all tags, special characters and convert everything to lowercase.
+        // Add spaces after closing block html elements to avoid malformed words
+        $string = preg_replace('/(<\/(p|div|li|br|h[1-6]|ul|ol|table|tr|td)>)/i', '$1 ', $string);
         $string = Tools::strtolower(strip_tags($string));
         $string = html_entity_decode($string, ENT_NOQUOTES, 'utf-8');
         $string = preg_replace('/([' . PREG_CLASS_NUMBERS . ']+)[' . PREG_CLASS_PUNCTUATION . ']+(?=[' . PREG_CLASS_NUMBERS . '])/u', '\1', $string);
