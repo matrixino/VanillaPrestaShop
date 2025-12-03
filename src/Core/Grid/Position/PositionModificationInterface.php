@@ -42,7 +42,10 @@ interface PositionModificationInterface
     /**
      * The former row position.
      *
-     * @return int
+     * @return int|null
+     *
+     * @deprecated Since 9.0 because this field is never used and should be removed.
+     * *
      */
     public function getOldPosition();
 
