@@ -40,6 +40,7 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkDeleteDiscountsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkUpdateDiscountsStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\DeleteDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\DuplicateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountConditionsCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
@@ -113,6 +114,26 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             );
         } catch (DiscountException $e) {
             $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @Then discount :discountReference shouldn't have :codeNotExpected as code
+     *
+     * @param string $discountReference
+     * @param string $codeNotExpected
+     */
+    public function assertNotDiscountCode(string $discountReference, string $codeNotExpected): void
+    {
+        try {
+            $discount = $this->getDiscountForEditing($discountReference);
+            Assert::assertNotSame(
+                $codeNotExpected,
+                $discount->getCode(),
+                sprintf('Discount "%s" has unexpected code "%s"', $discountReference, $codeNotExpected)
+            );
+        } catch (DiscountNotFoundException $e) {
+            $this->getSharedStorage()->clear($discountReference);
         }
     }
 
@@ -519,7 +540,11 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_tax_included']), $discountForEditing->getMinimumAmountTaxIncluded(), 'Unexpected minimum amount tax included');
         }
         if (isset($expectedData['minimum_amount_shipping_included'])) {
-            Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_shipping_included']), $discountForEditing->getMinimumAmountShippingIncluded(), 'Unexpected minimum amount shipping included');
+            Assert::assertSame(
+                PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_shipping_included']),
+                $discountForEditing->getMinimumAmountShippingIncluded(),
+                'Unexpected minimum amount shipping included'
+            );
         }
         if (isset($expectedData['carriers'])) {
             Assert::assertSame($this->referencesToIds($expectedData['carriers']), $discountForEditing->getCarrierIds(), 'Unexpected carriers');
@@ -752,5 +777,21 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         }
 
         Assert::assertTrue($shouldExist, sprintf('Discount "%s" was found, but it was expected to be deleted', $discountReference));
+    }
+
+    /**
+     * @When I duplicate the discount :discountReference as :copyDiscountReference
+     */
+    public function duplicateDiscount(string $discountReference, string $copyDiscountReference): void
+    {
+        try {
+            /** @var DiscountId $copyDiscountId */
+            $copyDiscountId = $this->getCommandBus()->handle(new DuplicateDiscountCommand(
+                $this->getSharedStorage()->get($discountReference)
+            ));
+            $this->getSharedStorage()->set($copyDiscountReference, $copyDiscountId->getValue());
+        } catch (DiscountException $e) {
+            $this->setLastException($e);
+        }
     }
 }
