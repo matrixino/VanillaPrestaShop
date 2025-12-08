@@ -208,7 +208,8 @@ class DiscountFormDataProvider implements FormDataProviderInterface
                     'minimum_amount' => [
                         'value' => $discountForEditing->getMinimumAmount() ? (float) (string) $discountForEditing->getMinimumAmount() : null,
                         'currency' => $discountForEditing->getMinimumAmountCurrencyId(),
-                        'include_tax' => $discountForEditing->getMinimumAmountTaxIncluded(),
+                        'tax_included' => $discountForEditing->getMinimumAmountTaxIncluded(),
+                        'shipping_included' => $discountForEditing->getMinimumAmountShippingIncluded(),
                     ],
                 ],
                 DiscountConditionsType::DELIVERY_CONDITIONS => [
