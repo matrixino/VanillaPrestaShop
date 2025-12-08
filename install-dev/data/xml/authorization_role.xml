@@ -466,5 +466,9 @@
     <authorization_role id="TAB_DEFAULT_CREATE" slug="ROLE_MOD_TAB_DEFAULT_CREATE"/>
     <authorization_role id="TAB_DEFAULT_UPDATE" slug="ROLE_MOD_TAB_DEFAULT_UPDATE"/>
     <authorization_role id="TAB_DEFAULT_DELETE" slug="ROLE_MOD_TAB_DEFAULT_DELETE"/>
+    <authorization_role id="TAB_ADMINSHOPMODES_READ" slug="ROLE_MOD_TAB_ADMINSHOPMODES_READ"/>
+    <authorization_role id="TAB_ADMINSHOPMODES_CREATE" slug="ROLE_MOD_TAB_ADMINSHOPMODES_CREATE"/>
+    <authorization_role id="TAB_ADMINSHOPMODES_UPDATE" slug="ROLE_MOD_TAB_ADMINSHOPMODES_UPDATE"/>
+    <authorization_role id="TAB_ADMINSHOPMODES_DELETE" slug="ROLE_MOD_TAB_ADMINSHOPMODES_DELETE"/>
   </entities>
 </entity_authorization_role>

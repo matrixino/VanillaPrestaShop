@@ -1,0 +1,16 @@
+admin_shop_modes:
+  path: /
+  methods: [ GET ]
+  defaults:
+    _controller: 'PrestaShopBundle\Controller\Admin\Configure\ShopParameters\ShopModeController::indexAction'
+    _legacy_controller: AdminShopModes
+    _legacy_link: AdminShopModes
+    _legacy_feature_flag: 'improved_b2b'
+admin_ShopModes_save:
+  path: /
+  methods: [ PATCH, POST ]
+  defaults:
+    _controller: 'PrestaShopBundle\Controller\Admin\Configure\ShopParameters\ShopModeController::processFormAction'
+    _legacy_controller: AdminShopModes
+    _legacy_link: AdminShopModes:update
+    _legacy_feature_flag: 'improved_b2b'

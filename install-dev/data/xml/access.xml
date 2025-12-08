@@ -457,5 +457,9 @@
     <access id="access_1_509" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINALIASES_CREATE"/>
     <access id="access_1_510" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINALIASES_UPDATE"/>
     <access id="access_1_511" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINALIASES_DELETE"/>
+    <access id="access_1_512" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINSHOPMODES_READ"/>
+    <access id="access_1_513" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINSHOPMODES_CREATE"/>
+    <access id="access_1_514" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINSHOPMODES_UPDATE"/>
+    <access id="access_1_515" id_profile="SuperAdmin" id_authorization_role="TAB_ADMINSHOPMODES_DELETE"/>
   </entities>
 </entity_access>

@@ -108,6 +108,7 @@
     <tab id="Shipping" name="Shipping" />
     <tab id="Shop_parameters" name="Shop Parameters" />
     <tab id="Shop_URLs" name="Shop URLs" />
+    <tab id="ShopModes" name="Shop Modes" />
     <tab id="Shopping_Carts" name="Shopping Carts" />
     <tab id="Shops" name="Shops" />
     <tab id="SQL_Manager" name="SQL Manager" />

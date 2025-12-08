@@ -924,5 +924,11 @@ Country</value>
     <configuration id="PS_MIN_LOGGER_LEVEL_IN_DB" name="PS_MIN_LOGGER_LEVEL_IN_DB">
       <value>1</value>
     </configuration>
+    <configuration id="PS_B2C_ENABLE" name="PS_B2C_ENABLE">
+      <value>1</value>
+    </configuration>
+    <configuration id="PS_IMPROVED_B2B_ENABLE" name="PS_IMPROVED_B2B_ENABLE">
+      <value>0</value>
+    </configuration>
   </entities>
 </entity_configuration>

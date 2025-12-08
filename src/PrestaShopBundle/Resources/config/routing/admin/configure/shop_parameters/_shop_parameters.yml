@@ -57,3 +57,7 @@ _tag:
 _title:
   resource: "titles.yml"
   prefix: /titles/
+
+_shop_modes:
+  resource: "shop_modes.yml"
+  prefix: /shop-modes/

@@ -384,6 +384,11 @@
             <wording>Maintenance</wording>
             <wording_domain>Admin.Navigation.Menu</wording_domain>
         </tab>
+        <tab id="ShopModes" id_parent="General" active="1" enabled="1">
+            <class_name>AdminShopModes</class_name>
+            <wording>Shop modes</wording>
+            <wording_domain>Admin.Navigation.Menu</wording_domain>
+        </tab>
         <tab id="Order_settings" id_parent="Shop_parameters" active="1" enabled="1">
             <class_name>AdminParentOrderPreferences</class_name>
             <wording>Order Settings</wording>

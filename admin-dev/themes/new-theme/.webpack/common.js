@@ -148,6 +148,7 @@ module.exports = {
     search_engine: './js/pages/search-engine',
     security: './js/pages/security',
     shipping_preferences: './js/pages/shipping-preferences',
+    shop_modes: './js/pages/shop-modes',
     specific_price_form: './js/pages/product/specific-price/form',
     sql_manager: './js/pages/sql-manager',
     state: './js/pages/state',
