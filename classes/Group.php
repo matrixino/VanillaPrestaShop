@@ -232,7 +232,7 @@ class GroupCore extends ObjectModel
                 return false;
             }
             // Delete specific price rules associated to this group
-            if (!$this->deleteAssociatedSpecificPriceRules()) {
+            if ((int) $this->id > 0 && !$this->deleteAssociatedSpecificPriceRules()) {
                 return false;
             }
 
