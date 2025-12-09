@@ -219,11 +219,6 @@ class GroupCore extends ObjectModel
             return false;
         }
 
-        // Prevent deletion of default non-removable groups
-        if (in_array($this->id, [1, 2, 3]))  {
-            throw new PrestaShopException('You cannot delete one of the default groups.');
-        }
-
         // Prevent deletion of groups currently used in configuration
         if (in_array($this->id, [
             (int) Configuration::get('PS_UNIDENTIFIED_GROUP'),
