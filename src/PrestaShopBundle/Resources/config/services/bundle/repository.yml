@@ -158,6 +158,8 @@ services:
     factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
     arguments:
       - PrestaShopBundle\Entity\Shipment
+    calls:
+      - setTablePrefix: [ '%database_prefix%' ]
 
   PrestaShopBundle\Entity\Repository\MutationRepository:
     factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
@@ -175,3 +177,8 @@ services:
       - PrestaShopBundle\Entity\Employee\Employee
     calls:
       - setIdnConverter: [ '@PrestaShop\PrestaShop\Core\Util\InternationalizedDomainNameConverter' ]
+
+  PrestaShopBundle\Entity\Repository\AttributeGroupRepository:
+    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
+    arguments:
+      - PrestaShopBundle\Entity\AttributeGroup

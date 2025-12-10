@@ -128,6 +128,9 @@ final class UpdateProductInOrderHandler extends AbstractOrderCommandHandler impl
             // Update invoice, quantity and amounts
             $order = $this->orderProductQuantityUpdater->update($order, $orderDetail, $command->getQuantity(), $orderInvoice);
 
+            // Update order_detail_tax table without modifying prices
+            $this->orderDetailUpdater->updateOrderDetailTaxTableOnly($order);
+
             Hook::exec('actionOrderEdited', ['order' => $order]);
         } catch (Exception $e) {
             throw $e;

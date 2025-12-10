@@ -14,7 +14,7 @@ import {
 
 const baseContext: string = 'functional_BO_design_linkWidget_sortLinkList';
 
-describe('BO - Design - Link Widget : Sort link list', async () => {
+describe('BO - Design - Link Widget : Sort Link List', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

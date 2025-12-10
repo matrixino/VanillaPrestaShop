@@ -18,7 +18,7 @@ Go to FO
 Check all categories and subcategories links in header
  */
 
-describe('FO - Menu and Navigation : Check categories and subcategories links in header', async () => {
+describe('FO - Menu and Navigation - Navigate in Categories : Check categories and subcategories links in header', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

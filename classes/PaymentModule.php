@@ -514,7 +514,7 @@ abstract class PaymentModuleCore extends Module
                         $customization_text = '';
                         if (isset($customization['datas'][Product::CUSTOMIZE_TEXTFIELD])) {
                             foreach ($customization['datas'][Product::CUSTOMIZE_TEXTFIELD] as $text) {
-                                $customization_text .= '<strong>' . $text['name'] . '</strong>: ' . $text['value'] . '<br />';
+                                $customization_text .= '<strong>' . $text['name'] . '</strong>: ' . htmlspecialchars($text['value'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<br />';
                             }
                         }
 
@@ -723,7 +723,7 @@ abstract class PaymentModuleCore extends Module
                         '{id_order}' => $order->id,
                         '{date}' => Tools::displayDate(date('Y-m-d H:i:s'), true),
                         '{carrier}' => ($virtual_product || !isset($carrier->name)) ? $this->trans('No carrier', [], 'Admin.Payment.Notification') : $carrier->name,
-                        '{payment}' => Tools::substr($order->payment, 0, 255) . ($order->hasBeenPaid() ? '' : '&nbsp;' . $this->trans('(waiting for validation)', [], 'Emails.Body')),
+                        '{payment}' => $order->payment,
                         '{products}' => $product_list_html,
                         '{products_txt}' => $product_list_txt,
                         '{discounts}' => $cart_rules_list_html,
@@ -1348,8 +1348,20 @@ abstract class PaymentModuleCore extends Module
 
         /** @var OrderShipmentCreator $orderShipmentCreator */
         $orderShipmentCreator = $this->get('PrestaShop\PrestaShop\Adapter\Shipment\OrderShipmentCreator');
+        $physicalProductsByCarrier = [];
 
-        $orderShipmentCreator->addShipmentOrder($order, $productsByCarrier);
+        foreach ($productsByCarrier as $carrierId => $products) {
+            $filteredProducts = array_filter($products['product_list'], function (array $product) {
+                return !$product['is_virtual'];
+            });
+
+            if (!empty($filteredProducts)) {
+                $physicalProductsByCarrier[$carrierId]['product_list'] = array_values($filteredProducts);
+                $physicalProductsByCarrier[$carrierId]['total_shipping_tax_excl'] = $products['total_shipping_tax_excl'];
+                $physicalProductsByCarrier[$carrierId]['total_shipping_tax_incl'] = $products['total_shipping_tax_incl'];
+            }
+        }
+        $orderShipmentCreator->addShipmentOrder($order, $physicalProductsByCarrier);
     }
 
     private function isFeatureFlagIsEnabledForMultiShipment()

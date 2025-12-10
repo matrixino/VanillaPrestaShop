@@ -25,7 +25,7 @@ Scenario:
 Post-condition:
 - Reset the number of products per page
  */
-describe('FO - Menu and navigation : Filter products', async () => {
+describe('FO - Menu and Navigation - Sort and filter : Filter products', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let numberOfActiveProducts: number;

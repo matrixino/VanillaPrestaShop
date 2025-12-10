@@ -67,7 +67,11 @@ final class AvailableCarriersForShipmentChoiceProvider implements ConfigurableFo
         }
 
         /** @var GetCarriersResult $carriers */
-        $carriers = $this->commandBus->handle(new GetAvailableCarriers($productQuantities, new AddressId($shipment->getAddressId())));
+        $carriers = $this->commandBus->handle(new GetAvailableCarriers(
+            $productQuantities,
+            new AddressId($shipment->getAddressId()),
+            $shipment->getCarrierId()
+        ));
 
         return FormChoiceFormatter::formatFormChoices(
             $carriers->getAvailableCarriersToArray(),

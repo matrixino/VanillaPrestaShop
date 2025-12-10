@@ -43,9 +43,11 @@ use PrestaShop\PrestaShop\Adapter\Tax\TaxComputer;
 use PrestaShop\PrestaShop\Core\Category\NameBuilder\CategoryDisplayNameBuilder;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 use PrestaShop\PrestaShop\Core\Domain\Attachment\QueryResult\AttachmentInformation;
+use PrestaShop\PrestaShop\Core\Domain\Category\Exception\CategoryNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Category\ValueObject\CategoryId;
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ProductCustomizabilitySettings;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryHandler\GetProductForEditingHandlerInterface;
@@ -481,10 +483,17 @@ class GetProductForEditingHandler implements GetProductForEditingHandlerInterfac
      */
     private function getSeoOptions(Product $product): ProductSeoOptions
     {
-        $redirectTarget = $this->targetProvider->getRedirectTarget(
-            $product->redirect_type,
-            (int) $product->id_type_redirected
-        );
+        $redirectTarget = null;
+        try {
+            $redirectTarget = $this->targetProvider->getRedirectTarget(
+                $product->redirect_type,
+                (int) $product->id_type_redirected
+            );
+        } catch (ProductNotFoundException|CategoryNotFoundException $e) {
+            // If the redirect target (product or category) has been deleted,
+            // we still allow loading the product but with no redirect target
+            $redirectTarget = null;
+        }
 
         return new ProductSeoOptions(
             $product->meta_title,

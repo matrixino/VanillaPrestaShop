@@ -872,6 +872,15 @@ class OrderCore extends ObjectModel
         WHERE ocr.`deleted` = 1 AND ocr.`id_order` = ' . (int) $this->id);
     }
 
+    /**
+     * Returns the number of times a cart rule has been used by a customer.
+     * Checks all orders of a given customer for a given cart rule.
+     *
+     * @param int $id_customer Customer ID
+     * @param int $id_cart_rule CartRule ID
+     *
+     * @return int Amount of cart rules used
+     */
     public static function getDiscountsCustomer($id_customer, $id_cart_rule)
     {
         $cache_id = 'Order::getDiscountsCustomer_' . (int) $id_customer . '-' . (int) $id_cart_rule;

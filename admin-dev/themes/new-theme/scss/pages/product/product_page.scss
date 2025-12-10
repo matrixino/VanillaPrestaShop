@@ -519,6 +519,11 @@ $product-page-padding-bottom: 80px !default;
     }
   }
 
+  /* Let default category selector take full width */
+  #product_description_categories .form-group.select-widget {
+    max-width: 100%;
+  }
+
   .hide {
     display: none;
   }

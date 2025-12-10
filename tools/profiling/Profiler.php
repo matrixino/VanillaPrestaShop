@@ -331,10 +331,10 @@ class Profiler
 
         return [
             'summary' => [
-                'loadTime' => $this->profiler[count($this->profiler) - 1]['time'] - $this->startTime,
+                'loadTime' => empty($this->profiler) ? null : $this->profiler[count($this->profiler) - 1]['time'] - $this->startTime,
                 'queryTime' => round(1000 * $this->totalQueryTime),
                 'nbQueries' => count($this->queries),
-                'peakMemoryUsage' => $this->profiler[count($this->profiler) - 1]['peak_memory_usage'],
+                'peakMemoryUsage' => empty($this->profiler) ? null : $this->profiler[count($this->profiler) - 1]['peak_memory_usage'],
                 'globalVarSize' => $this->globalVarSize,
                 'includedFiles' => count(get_included_files()),
                 'totalFileSize' => $this->totalFilesize,

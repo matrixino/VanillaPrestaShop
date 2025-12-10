@@ -1282,7 +1282,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     /**
      * @param int $combinationId
      *
-     * @return ProductController|null
+     * @return array<string, mixed>|null
      */
     public function findProductCombinationById(int $combinationId)
     {

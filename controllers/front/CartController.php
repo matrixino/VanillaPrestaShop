@@ -79,14 +79,22 @@ class CartControllerCore extends FrontController
         $this->id_address_delivery = (int) Tools::getValue('id_address_delivery');
         $this->preview = ('1' === Tools::getValue('preview'));
 
-        /* Check if the products in the cart are available */
         if ('show' === Tools::getValue('action')) {
+            /* Check if the products in the cart are available */
             $isAvailable = $this->areProductsAvailable();
             if (Tools::getIsset('checkout')) {
                 Tools::redirect($this->context->link->getPageLink('order'));
             }
             if (true !== $isAvailable) {
                 $this->errors[] = $isAvailable;
+            }
+            /* Check if countries used in the cart are enabled */
+            if (true !== $this->context->cart->checkCountriesAreEnabled()) {
+                $this->errors[] = $this->trans(
+                    'Some of the countries used in your cart are not available and cannot be used.',
+                    [],
+                    'Shop.Notifications.Error'
+                );
             }
         }
     }
@@ -264,7 +272,11 @@ class CartControllerCore extends FrontController
                             if ($error = $cartRule->checkValidity($this->context)) {
                                 $this->errors[] = $error;
                             } else {
-                                $this->context->cart->addCartRule($cartRule->id);
+                                $result = $this->context->cart->addCartRule($cartRule->id);
+                                if ($result !== true) {
+                                    // we have an incompatibility with another cart rule
+                                    $this->errors[] = $result;
+                                }
                             }
                         } else {
                             $this->errors[] = $this->trans(

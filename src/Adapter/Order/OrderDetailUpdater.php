@@ -221,6 +221,61 @@ class OrderDetailUpdater
     }
 
     /**
+     * Updates only the order_detail_tax table without recalculating or modifying order_detail prices
+     * This is used when prices have been precisely set and we only need to update the tax breakdown
+     *
+     * Note: This method does NOT update order_detail table, only order_detail_tax
+     */
+    public function updateOrderDetailTaxTableOnly(Order $order): void
+    {
+        list($roundType, $computingPrecision, $taxAddress) = $this->prepareOrderContext($order);
+
+        try {
+            $orderDetailsData = $order->getProducts();
+            foreach ($orderDetailsData as $orderDetailData) {
+                $orderDetail = new OrderDetail($orderDetailData['id_order_detail']);
+
+                // Clean existing order_detail_tax
+                Db::getInstance()->delete('order_detail_tax', 'id_order_detail = ' . (int) $orderDetail->id);
+
+                $taxCalculator = $this->getTaxCalculatorByAddress($taxAddress, $orderDetail);
+                $taxesAmount = $taxCalculator->getTaxesAmount($orderDetail->unit_price_tax_excl);
+                if (!empty($taxesAmount)) {
+                    $orderDetailTaxes = [];
+                    foreach ($taxesAmount as $taxId => $amount) {
+                        $unitAmount = 0;
+                        $totalAmount = 0;
+                        switch ($roundType) {
+                            case Order::ROUND_ITEM:
+                                $unitAmount = (float) Tools::ps_round($amount, $computingPrecision);
+                                $totalAmount = $unitAmount * $orderDetail->product_quantity;
+                                break;
+                            case Order::ROUND_LINE:
+                                $unitAmount = $amount;
+                                $totalAmount = Tools::ps_round($unitAmount * $orderDetail->product_quantity, $computingPrecision);
+                                break;
+                            case Order::ROUND_TOTAL:
+                                $unitAmount = $amount;
+                                $totalAmount = $unitAmount * $orderDetail->product_quantity;
+                                break;
+                        }
+                        $orderDetailTaxes[] = [
+                            'id_order_detail' => $orderDetail->id,
+                            'id_tax' => $taxId,
+                            'unit_amount' => (float) $unitAmount,
+                            'total_amount' => (float) $totalAmount,
+                        ];
+                    }
+
+                    Db::getInstance()->insert('order_detail_tax', $orderDetailTaxes, false);
+                }
+            }
+        } finally {
+            $this->contextStateManager->restorePreviousContext();
+        }
+    }
+
+    /**
      * @param Order $order
      *
      * @return array

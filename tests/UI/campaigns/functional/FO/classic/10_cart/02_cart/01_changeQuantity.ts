@@ -13,7 +13,7 @@ import {
 
 const baseContext: string = 'functional_FO_classic_cart_cart_changeQuantity';
 
-describe('FO - cart : Change quantity', async () => {
+describe('FO - Cart : Change quantity', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

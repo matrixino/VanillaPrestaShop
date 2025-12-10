@@ -108,7 +108,6 @@
   @import "~@scss/config/settings.scss";
 
   .serp-preview {
-    max-width: 43.75rem;
     padding: var(--#{$cdk}size-24) var(--#{$cdk}size-30);
     margin: var(--#{$cdk}size-16) 0;
     background-color: var(--#{$cdk}white);
@@ -151,6 +150,8 @@
       white-space: nowrap;
       cursor: pointer;
       visibility: visible;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .serp-title:hover {

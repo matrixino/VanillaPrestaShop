@@ -49,7 +49,7 @@ class DiscountRepository extends AbstractObjectModelRepository
     public function __construct(
         protected readonly DiscountValidator $cartRuleValidator,
         protected readonly Connection $connection,
-        protected readonly string $dbPrefix
+        protected readonly string $dbPrefix,
     ) {
     }
 
@@ -145,15 +145,13 @@ class DiscountRepository extends AbstractObjectModelRepository
     }
 
     /**
-     * @param DiscountId $discountId
-     *
      * @return int[]
      */
-    public function getCarriers(DiscountId $discountId): array
+    public function getCarriersIds(DiscountId $discountId): array
     {
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('*')
+            ->select('crc.id_carrier')
             ->from($this->dbPrefix . 'cart_rule_carrier', 'crc')
             ->where('crc.id_cart_rule = :discountId')
             ->setparameter('discountId', $discountId->getValue())
@@ -162,17 +160,84 @@ class DiscountRepository extends AbstractObjectModelRepository
         return array_map(fn (array $row) => (int) $row['id_carrier'], $qb->executeQuery()->fetchAllAssociative());
     }
 
-    public function getCountries(DiscountId $discountId)
+    /**
+     * @return int[]
+     */
+    public function getCountriesIds(DiscountId $discountId): array
     {
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('*')
+            ->select('crc.id_country')
             ->from($this->dbPrefix . 'cart_rule_country', 'crc')
             ->where('crc.id_cart_rule = :discountId')
             ->setparameter('discountId', $discountId->getValue())
         ;
 
         return array_map(fn (array $row) => (int) $row['id_country'], $qb->executeQuery()->fetchAllAssociative());
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getCustomerGroupsIds(DiscountId $discountId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('crg.id_group')
+            ->from($this->dbPrefix . 'cart_rule_group', 'crg')
+            ->where('crg.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_group'], $qb->executeQuery()->fetchAllAssociative());
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getCompatibleTypesIds(DiscountId $discountId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('crt.id_cart_rule_type')
+            ->from($this->dbPrefix . 'cart_rule_compatible_types', 'crt')
+            ->where('crt.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_cart_rule_type'], $qb->executeQuery()->fetchAllAssociative());
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getGroupsIds(DiscountId $discountId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('crg.id_group')
+            ->from($this->dbPrefix . 'cart_rule_group', 'crg')
+            ->where('crg.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_group'], $qb->executeQuery()->fetchAllAssociative());
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getShopsIds(DiscountId $discountId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('crs.id_shop')
+            ->from($this->dbPrefix . 'cart_rule_shop', 'crs')
+            ->where('crs.id_cart_rule = :discountId')
+            ->setparameter('discountId', $discountId->getValue())
+        ;
+
+        return array_map(fn (array $row) => (int) $row['id_shop'], $qb->executeQuery()->fetchAllAssociative());
     }
 
     /**

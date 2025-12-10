@@ -37,6 +37,7 @@ class StatePage {
     stateGrid.addExtension(new window.prestashop.component.GridExtensions.FiltersSubmitButtonEnablerExtension());
     stateGrid.addExtension(new window.prestashop.component.GridExtensions.SubmitGridActionExtension());
     stateGrid.addExtension(new window.prestashop.component.GridExtensions.AsyncToggleColumnExtension());
+    stateGrid.addExtension(new window.prestashop.component.GridExtensions.ModalFormSubmitExtension());
   }
 }
 

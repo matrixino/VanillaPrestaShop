@@ -82,6 +82,10 @@ class DiscountFiller
             $cartRule->quantity_per_user = $command->getQuantityPerUser();
             $updatableProperties[] = 'quantity_per_user';
         }
+        if (null !== $command->getPriority()) {
+            $cartRule->priority = $command->getPriority();
+            $updatableProperties[] = 'priority';
+        }
         if (null !== $command->getReductionProduct()) {
             $cartRule->reduction_product = $command->getReductionProduct();
             $updatableProperties[] = 'reduction_product';

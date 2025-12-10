@@ -24,7 +24,7 @@ Scenario:
 Post-condition:
 - Uninstall hummingbird theme
 */
-describe('FO - cart : Change quantity', async () => {
+describe('FO - Cart : Change quantity', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

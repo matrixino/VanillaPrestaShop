@@ -99,3 +99,68 @@ Feature: Zones management
     When I delete states "StateNotFound, StateBrittany" using bulk action
     Then I should get an error that the state has not been found
     And state "StateBrittany" should not be deleted
+
+  Scenario: Bulk assigning states to a new zone
+    When I add new state "StateAlsace" with following properties:
+      | name    | Alsace        |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Europe        |
+      | iso_code| ALS           |
+    And I add new state "StateLorraine" with following properties:
+      | name    | Lorraine      |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Europe        |
+      | iso_code| LOR           |
+    And I add new state "StateProvence" with following properties:
+      | name    | Provence      |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Europe        |
+      | iso_code| PRV           |
+    Then state "StateAlsace" zone should be "Europe"
+    And state "StateLorraine" zone should be "Europe"
+    And state "StateProvence" zone should be "Europe"
+    When I bulk update states "StateAlsace, StateLorraine, StateProvence" to zone "North America"
+    Then state "StateAlsace" zone should be "North America"
+    And state "StateLorraine" zone should be "North America"
+    And state "StateProvence" zone should be "North America"
+
+  Scenario: Bulk assigning a single state to a new zone
+    When I add new state "StateSavoy" with following properties:
+      | name    | Savoy         |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Europe        |
+      | iso_code| SAV           |
+    Then state "StateSavoy" zone should be "Europe"
+    When I bulk update states "StateSavoy" to zone "Asia"
+    Then state "StateSavoy" zone should be "Asia"
+
+  Scenario: Bulk assigning states from different zones to a common zone
+    When I add new state "StateAuvergne" with following properties:
+      | name    | Auvergne      |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Europe        |
+      | iso_code| AUV           |
+    And I add new state "StateLimousin" with following properties:
+      | name    | Limousin      |
+      | enabled | true          |
+      | country | United States |
+      | zone    | Asia          |
+      | iso_code| LIM           |
+    And I add new state "StatePoitou" with following properties:
+      | name    | Poitou        |
+      | enabled | true          |
+      | country | United States |
+      | zone    | North America |
+      | iso_code| POI           |
+    Then state "StateAuvergne" zone should be "Europe"
+    And state "StateLimousin" zone should be "Asia"
+    And state "StatePoitou" zone should be "North America"
+    When I bulk update states "StateAuvergne, StateLimousin, StatePoitou" to zone "South America"
+    Then state "StateAuvergne" zone should be "South America"
+    And state "StateLimousin" zone should be "South America"
+    And state "StatePoitou" zone should be "South America"

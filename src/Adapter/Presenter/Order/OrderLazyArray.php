@@ -36,13 +36,17 @@ use Currency;
 use CustomerMessage;
 use Doctrine\Common\Annotations\AnnotationException;
 use Order;
+use OrderDetail;
 use OrderReturn;
+use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Adapter\Presenter\AbstractLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
 use PrestaShop\PrestaShop\Adapter\Presenter\LazyArrayAttribute;
 use PrestaShop\PrestaShop\Adapter\Presenter\Object\ObjectPresenter;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Core\Util\ColorBrightnessCalculator;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
+use PrestaShopBundle\Entity\ShipmentProduct;
 use PrestaShopBundle\Translation\TranslatorComponent;
 use PrestaShopException;
 use ProductDownload;
@@ -73,6 +77,9 @@ class OrderLazyArray extends AbstractLazyArray
     /** @var OrderSubtotalLazyArray */
     private $subTotals;
 
+    /** @var ShipmentRepository */
+    private $shipmentRepository;
+
     /**
      * OrderArray constructor.
      *
@@ -88,6 +95,10 @@ class OrderLazyArray extends AbstractLazyArray
         $this->translator = Context::getContext()->getTranslator();
         $this->taxConfiguration = new TaxConfiguration();
         $this->subTotals = new OrderSubtotalLazyArray($this->order);
+        $containerFinder = new ContainerFinder(Context::getContext());
+        /* @var ShipmentRepository $shipmentRepository */
+        $this->shipmentRepository = $containerFinder->getContainer()->get(ShipmentRepository::class);
+
         parent::__construct();
     }
 
@@ -210,13 +221,85 @@ class OrderLazyArray extends AbstractLazyArray
                     break;
                 }
             }
-
-            OrderReturn::addReturnedQuantity($orderProducts, $order->id);
         }
 
+        OrderReturn::addReturnedQuantity($orderProducts, $order->id);
         $orderProducts = $this->cartPresenter->addCustomizedData($orderProducts, $cart);
 
         return $this->addOrderReferenceToCustomizationFileUrls($orderProducts);
+    }
+
+    /**
+     * @return array{
+     *     virtual_products: array<int, array<string, mixed>>,
+     *     physical_products: array<int, array{
+     *         carrier: array{
+     *             name: string,
+     *             delay: string|array<string>
+     *         },
+     *         products: array<int, array<string, mixed>>
+     *     }>
+     * }
+     */
+    #[LazyArrayAttribute(arrayAccess: true)]
+    public function getOrderShipments(): array
+    {
+        $orderProducts = $this->getProducts();
+        $shipments = $this->shipmentRepository->findByOrderId($this->order->id);
+        $langId = Context::getContext()->language->id;
+
+        $indexedOrderProducts = [];
+        $virtualProducts = [];
+
+        foreach ($orderProducts as $product) {
+            if (!empty($product['is_virtual'])) {
+                $virtualProducts[] = $product;
+            } else {
+                $indexedOrderProducts[$product['id_order_detail']] = $product;
+            }
+        }
+
+        $physicalProductsByCarrier = [];
+
+        foreach ($shipments as $shipment) {
+            $carrier = new Carrier($shipment->getCarrierId());
+
+            /** @var ShipmentProduct[] $shipmentProducts */
+            $shipmentProducts = $shipment->getProducts();
+
+            $mappedProducts = [];
+
+            foreach ($shipmentProducts as $shipmentProduct) {
+                $orderDetailId = $shipmentProduct->getOrderDetailId();
+
+                if (isset($indexedOrderProducts[$orderDetailId])) {
+                    $product = $indexedOrderProducts[$orderDetailId];
+
+                    $mappedProducts[] = array_merge(
+                        $product,
+                        [
+                            'quantity_shipped' => $shipmentProduct->getQuantity(),
+                            'shipment_id' => $shipment->getId(),
+                        ]
+                    );
+                }
+            }
+
+            if (!empty($mappedProducts)) {
+                $physicalProductsByCarrier[] = [
+                    'carrier' => [
+                        'name' => $carrier->name,
+                        'delay' => $carrier->delay[$langId] ?? $carrier->delay,
+                    ],
+                    'products' => $mappedProducts,
+                ];
+            }
+        }
+
+        return [
+            'virtual_products' => $virtualProducts,
+            'physical_products' => $physicalProductsByCarrier,
+        ];
     }
 
     /**
@@ -277,7 +360,7 @@ class OrderLazyArray extends AbstractLazyArray
     #[LazyArrayAttribute(arrayAccess: true)]
     public function getDetails()
     {
-        return new OrderDetailLazyArray($this->order);
+        return new OrderDetailLazyArray($this->order, $this->shipmentRepository);
     }
 
     /**

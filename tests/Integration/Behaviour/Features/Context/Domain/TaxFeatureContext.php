@@ -89,7 +89,7 @@ class TaxFeatureContext extends AbstractDomainFeatureContext
             $command->setLocalizedNames([$this->getDefaultLangId() => $data['name']]);
         }
         if (isset($data['rate'])) {
-            $command->setRate($data['rate']);
+            $command->setRate((float) $data['rate']);
         }
 
         if (isset($data['is_enabled'])) {

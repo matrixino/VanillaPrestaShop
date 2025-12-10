@@ -147,13 +147,13 @@ class ImageTypeContext extends AbstractDomainFeatureContext
         }
 
         if (isset($expectedData['width'])) {
-            if ($imageType->getWidth() != $expectedData['width']) {
+            if ($imageType->getWidth() != (int) $expectedData['width']) {
                 $errors[] = 'width';
             }
         }
 
         if (isset($expectedData['height'])) {
-            if ($imageType->getHeight() != $expectedData['height']) {
+            if ($imageType->getHeight() != (int) $expectedData['height']) {
                 $errors[] = 'height';
             }
         }

@@ -28,12 +28,18 @@ namespace PrestaShop\PrestaShop\Adapter\CartRule;
 
 use CartRule;
 use DateTimeImmutable;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime as DateTimeUtil;
 
 class CartRuleBuilder
 {
+    public function __construct(
+        private readonly DiscountTypeRepository $discountTypeRepository
+    ) {
+    }
+
     public function build(AddDiscountCommand $command): CartRule
     {
         $cartRule = new CartRule();
@@ -52,10 +58,12 @@ class CartRuleBuilder
         $cartRule->date_to = $validTo->format(DateTimeUtil::DEFAULT_DATETIME_FORMAT);
         $cartRule->quantity = $command->getTotalQuantity();
         $cartRule->quantity_per_user = $command->getQuantityPerUser();
-        $cartRule->type = $command->getDiscountType()->getValue();
-        $cartRule->free_shipping = $command->getDiscountType()->getValue() === DiscountType::FREE_SHIPPING;
 
-        if ($command->getDiscountType()->getValue() === DiscountType::CART_LEVEL || $command->getDiscountType()->getValue() === DiscountType::ORDER_LEVEL) {
+        $discountType = $command->getDiscountType()->getValue();
+        $cartRule->id_cart_rule_type = $this->discountTypeRepository->getTypeIdByString($discountType);
+        $cartRule->free_shipping = $discountType === DiscountType::FREE_SHIPPING;
+
+        if ($command->getDiscountType()->getValue() === DiscountType::CART_LEVEL || $command->getDiscountType()->getValue() === DiscountType::ORDER_LEVEL || $command->getDiscountType()->getValue() === DiscountType::PRODUCT_LEVEL) {
             if ($command->getPercentDiscount()) {
                 $cartRule->reduction_percent = (float) (string) $command->getPercentDiscount();
                 $cartRule->reduction_amount = 0;

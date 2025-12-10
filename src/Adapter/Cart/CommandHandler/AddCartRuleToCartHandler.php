@@ -84,7 +84,16 @@ final class AddCartRuleToCartHandler extends AbstractCartHandler implements AddC
             throw new CartRuleValidityException($errorMessage);
         }
 
-        if (!$cart->addCartRule($cartRule->id)) {
+        $addResult = $cart->addCartRule($cartRule->id);
+
+        // addCartRule() can return: true (success), false (failure), or string (error message)
+        if (is_string($addResult)) {
+            $this->contextStateManager->restorePreviousContext();
+
+            throw new CartRuleValidityException($addResult);
+        }
+
+        if (!$addResult) {
             $this->contextStateManager->restorePreviousContext();
 
             throw new CartException('Failed to add cart rule to cart.');

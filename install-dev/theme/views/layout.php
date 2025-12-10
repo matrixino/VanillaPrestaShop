@@ -47,7 +47,9 @@
     <script type="text/javascript" src="../js/jquery/plugins/jquery.chosen.js"></script>
 
     <script src="theme/js/sprintf.min.js" integrity="sha512-pmG0OkYtZVB2EqETE5HPsEaok7sNZFfStp5rNdpHv0tGQjbt1z8Qjzhtx88/4wsttOtDwq5DZGJyKyzEe7ribg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="theme/js/zxcvbn.js" integrity="sha512-TZlMGFY9xKj38t/5m2FzJ+RM/aD5alMHDe26p0mYUMoCF5G7ibfHUQILq0qQPV3wlsnCwL+TPRNK4vIWGLOkUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="theme/js/zxcvbn-core.js"></script>
+    <script src="theme/js/zxcvbn-language-common.js"></script>
+    <script src="theme/js/zxcvbn-language-en.js"></script>
 
     <script type="text/javascript" src="theme/js/install.js"></script>
     <?php if (file_exists(_PS_INSTALL_PATH_ . 'theme/js/' . self::getSteps()->current()->getName() . '.js')) { ?>

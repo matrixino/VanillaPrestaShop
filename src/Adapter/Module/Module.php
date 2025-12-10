@@ -45,6 +45,7 @@ class Module implements ModuleInterface
     public const ACTION_DISABLE = 'disable';
     public const ACTION_RESET = 'reset';
     public const ACTION_UPGRADE = 'upgrade';
+    public const ACTION_UPLOAD = 'upload';
     public const ACTION_CONFIGURE = 'configure';
     public const ACTION_DELETE = 'delete';
 
@@ -412,7 +413,7 @@ class Module implements ModuleInterface
             AddonListFilterOrigin::ADDONS_MUST_HAVE => 'addonsMustHave',
         ];
 
-        return isset($conversionTable[$value]) ? $conversionTable[$value] : '';
+        return is_null($value) ? '' : (isset($conversionTable[$value]) ? $conversionTable[$value] : '');
     }
 
     /**

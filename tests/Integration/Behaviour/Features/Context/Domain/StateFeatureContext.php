@@ -34,6 +34,7 @@ use PHPUnit\Framework\Assert;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\AddStateCommand;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\BulkDeleteStateCommand;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\BulkToggleStateStatusCommand;
+use PrestaShop\PrestaShop\Core\Domain\State\Command\BulkUpdateStateZoneCommand;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\DeleteStateCommand;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\EditStateCommand;
 use PrestaShop\PrestaShop\Core\Domain\State\Command\ToggleStateStatusCommand;
@@ -45,6 +46,7 @@ use PrestaShop\PrestaShop\Core\Domain\State\Exception\StateNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\State\Query\GetStateForEditing;
 use PrestaShop\PrestaShop\Core\Domain\State\QueryResult\EditableState;
 use PrestaShop\PrestaShop\Core\Domain\State\ValueObject\StateId;
+use PrestaShop\PrestaShop\Core\Domain\Zone\Exception\ZoneNotFoundException;
 use RuntimeException;
 use State;
 use Tests\Integration\Behaviour\Features\Context\SharedStorage;
@@ -315,6 +317,28 @@ class StateFeatureContext extends AbstractDomainFeatureContext
     {
         foreach (PrimitiveUtils::castStringArrayIntoArray($stateReferences) as $stateReference) {
             $this->assertStateIsDeleted($stateReference);
+        }
+    }
+
+    /**
+     * @When I bulk update states :stateReferences to zone :zoneName
+     *
+     * @param string $stateReferences
+     * @param string $zoneName
+     */
+    public function bulkUpdateStatesZone(string $stateReferences, string $zoneName): void
+    {
+        $stateIds = [];
+        foreach (PrimitiveUtils::castStringArrayIntoArray($stateReferences) as $stateReference) {
+            $stateIds[] = (int) SharedStorage::getStorage()->get($stateReference);
+        }
+
+        $zoneId = (int) Zone::getIdByName($zoneName);
+
+        try {
+            $this->getCommandBus()->handle(new BulkUpdateStateZoneCommand($stateIds, $zoneId));
+        } catch (StateException|StateNotFoundException|ZoneNotFoundException|CannotUpdateStateException $e) {
+            $this->setLastException($e);
         }
     }
 

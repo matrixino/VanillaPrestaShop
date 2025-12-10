@@ -17,7 +17,7 @@ import {
 
 const baseContext: string = 'functional_FO_hummingbird_cart_cart_addPromoCode';
 
-describe('FO - cart : Add promo code', async () => {
+describe('FO - Cart : Add promo code', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

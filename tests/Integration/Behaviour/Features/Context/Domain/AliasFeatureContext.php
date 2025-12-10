@@ -266,9 +266,10 @@ class AliasFeatureContext extends AbstractDomainFeatureContext
 
         // We retrieve the data from the table and cast the active column to a boolean
         $aliases = $table->getColumnsHash();
-        array_walk($aliases, function (&$alias) {
-            $alias['active'] = filter_var($alias['active'], FILTER_VALIDATE_BOOL);
-        });
+        /** @var array{array{alias: string, active: bool}} $aliases */
+        foreach ($aliases as &$alias) {
+            $alias['active'] = (bool) filter_var($alias['active'], FILTER_VALIDATE_BOOL);
+        }
 
         // Then, we create the UpdateAliasesBySearchTermCommand and dispatch it
         try {
@@ -279,7 +280,7 @@ class AliasFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
-     * @param object[] $expectedData
+     * @param array<int, array<string, string>> $expectedData
      * @param array[] $aliases
      */
     private function assertExistAliasProperties(array $expectedData, array $aliases): void
@@ -288,7 +289,7 @@ class AliasFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
-     * @param object[] $expectedData
+     * @param array<int, array<string, string>> $expectedData
      * @param array[] $aliases
      */
     private function assertNotExistAliasProperties(array $expectedData, array $aliases): void
@@ -297,7 +298,7 @@ class AliasFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
-     * @param object[] $expectedData
+     * @param array<int, array<string, string>> $expectedData
      * @param array[] $aliases
      * @param bool $exist
      */

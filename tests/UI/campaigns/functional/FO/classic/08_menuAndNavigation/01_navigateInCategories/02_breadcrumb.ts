@@ -13,7 +13,7 @@ import {
 
 const baseContext: string = 'functional_FO_classic_menuAndNavigation_navigateInCategories_breadcrumb';
 
-describe('FO - Menu and Navigation : Breadcrumb', async () => {
+describe('FO - Menu and Navigation - Navigate in Categories : Breadcrumb', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

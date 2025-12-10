@@ -25,6 +25,7 @@
  */
 
 use PrestaShop\PrestaShop\Adapter\Shipment\DeliveryOptionsInterface;
+use PrestaShop\PrestaShop\Adapter\Shipment\DeliveryOptionsProvider;
 
 class CheckoutSessionCore
 {
@@ -154,6 +155,15 @@ class CheckoutSessionCore
     public function getSelectedDeliveryOption()
     {
         return $this->deliveryOptions->getSelectedDeliveryOption();
+    }
+
+    public function getProductsByCarrier()
+    {
+        if ($this->deliveryOptions instanceof DeliveryOptionsProvider) {
+            return $this->deliveryOptions->getProductsByCarrier();
+        }
+
+        return [];
     }
 
     public function getDeliveryOptions()

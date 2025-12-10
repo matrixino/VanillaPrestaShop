@@ -28,7 +28,7 @@ import {expect} from 'chai';
 
 const baseContext = 'functional_BO_customers_customers_transformGuestToCustomer';
 
-describe('BO - Customers _ Customers : Transform guest to customer account', async () => {
+describe('BO - Customers - Customers : Transform guest to customer account', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let numberOfCustomers: number;

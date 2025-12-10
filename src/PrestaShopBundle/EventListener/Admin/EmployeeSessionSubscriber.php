@@ -215,8 +215,11 @@ class EmployeeSessionSubscriber implements EventSubscriberInterface
         // Set the redirection so the process stops right away
         $event->setResponse(new RedirectResponse($this->router->generate('admin_login')));
 
-        // Save the target path so the next login will redirect to the url requested at the moment of the logout
-        $this->saveTargetPath($event->getRequest()->getSession(), 'main', $event->getRequest()->getUri());
+        // Save the target path so the next login will redirect to the url requested at the moment of the logout, avoid saving
+        // ajax requests or not GET request because the redirection would fail
+        if ($event->getRequest()->hasSession() && $event->getRequest()->isMethodSafe() && !$event->getRequest()->isXmlHttpRequest()) {
+            $this->saveTargetPath($event->getRequest()->getSession(), 'main', $event->getRequest()->getUri());
+        }
 
         // Stop the event propagation, nothing more needs to happen except for redirection, and it prevents the event to
         // keep travelling and be caught by other unwanted listeners (like the TokenizedUrlsListener)

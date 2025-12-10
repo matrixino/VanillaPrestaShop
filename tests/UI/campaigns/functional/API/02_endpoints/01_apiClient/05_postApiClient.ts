@@ -20,7 +20,7 @@ import {
 
 const baseContext: string = 'functional_API_endpoints_apiClient_postApiClient';
 
-describe('API : POST /api-client', async () => {
+describe('API : POST /api-clients', async () => {
   let apiContext: APIRequestContext;
   let browserContext: BrowserContext;
   let page: Page;
@@ -46,7 +46,7 @@ describe('API : POST /api-client', async () => {
     await utilsPlaywright.closeBrowserContext(browserContext);
   });
 
-  describe('BackOffice : Fetch the access token', async () => {
+  describe('API : Fetch the access token', async () => {
     it(`should request the endpoint /access_token with scope ${clientScope}`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestOauth2Token', baseContext);
       accessToken = await requestAccessToken(clientScope);
@@ -54,10 +54,10 @@ describe('API : POST /api-client', async () => {
   });
 
   describe('API : Create the API Access', async () => {
-    it('should request the endpoint /api-client', async function () {
+    it('should request the endpoint /api-clients', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestEndpoint', baseContext);
 
-      const apiResponse = await apiContext.post('api-client', {
+      const apiResponse = await apiContext.post('api-clients', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

@@ -122,6 +122,21 @@ class UpdateDiscountCommand
         return $this;
     }
 
+    /**
+     * @throws DiscountConstraintException
+     */
+    public function setValidityDateRange(DateTimeImmutable $from, DateTimeImmutable $to): self
+    {
+        if ($from > $to) {
+            throw new DiscountConstraintException('Date from cannot be greater than date to.', DiscountConstraintException::DATE_FROM_GREATER_THAN_DATE_TO);
+        }
+
+        $this->validFrom = $from;
+        $this->validTo = $to;
+
+        return $this;
+    }
+
     public function getPriority(): ?int
     {
         return $this->priority;

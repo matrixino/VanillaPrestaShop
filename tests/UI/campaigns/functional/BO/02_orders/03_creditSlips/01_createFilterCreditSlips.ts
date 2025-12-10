@@ -99,11 +99,42 @@ describe('BO - Orders - Credit slips : Create, filter and check credit slips fil
       expect(pageTitle).to.contains(boOrdersViewBlockTabListPage.pageTitle);
     });
 
+    it('should check that there is 0 document in documents tab', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'check0Documents', baseContext);
+
+      const documentsTab = await boOrdersViewBlockTabListPage.getTabName(page, 2);
+      expect(documentsTab).to.contains('Documents (0)');
+    });
+
     it(`should change the order status to '${dataOrderStatuses.shipped.name}' and check it`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'updateCreatedOrderStatus', baseContext);
 
       const result = await boOrdersViewBlockTabListPage.modifyOrderStatus(page, dataOrderStatuses.shipped.name);
       expect(result).to.equal(dataOrderStatuses.shipped.name);
+    });
+
+    it('should check that the documents tab title is Documents (2)', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkDocumentsTitle', baseContext);
+
+      const documentsTabTitle = await boOrdersViewBlockTabListPage.getTabName(page, 2);
+      expect(documentsTabTitle).to.contains('Documents (2)');
+    });
+
+    it('should check that there is 2 rows in documents tab', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'check2Documents', baseContext);
+
+      const numberOfDocuments = await boOrdersViewBlockTabListPage.getNumberOfDocuments(page);
+      expect(numberOfDocuments).to.equal(2);
+    });
+
+    it('should check the list of documents', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkListOfDocuments', baseContext);
+
+      await boOrdersViewBlockTabListPage.goToDocumentsTab(page);
+
+      const documents = await boOrdersViewBlockTabListPage.getAllDocumentsName(page);
+      expect(documents).to.contain('Invoice')
+        .and.to.contain('Delivery slip');
     });
 
     const tests = [
@@ -125,13 +156,30 @@ describe('BO - Orders - Credit slips : Create, filter and check credit slips fil
         expect(textMessage).to.contains(boOrdersViewBlockProductsPage.partialRefundValidationMessage);
       });
 
-      it('should check the existence of the Credit slip document', async function () {
-        await testContext.addContextItem(this, 'testIdentifier', `checkCreditSlipDocument${index + 1}`, baseContext);
+      it(`should check that documents tab title is Documents (${index + 3})`, async function () {
+        await testContext.addContextItem(this, 'testIdentifier', `checkDocumentsTitle${index + 1}`, baseContext);
 
-        // Get document name
-        const documentType = await boOrdersViewBlockTabListPage.getDocumentType(page, test.args.documentRow);
-        expect(documentType).to.be.equal('Credit slip');
+        const documentsTab = await boOrdersViewBlockTabListPage.getTabName(page, 2);
+        expect(documentsTab).to.contain(`Documents (${index + 3})`);
       });
+
+      it(`should check that there is ${index + 3} documents in documents tab`, async function () {
+        await testContext.addContextItem(this, 'testIdentifier', `checkNumberOfDocuments${index + 1}`, baseContext);
+
+        const numberOfDocuments = await boOrdersViewBlockTabListPage.getNumberOfDocuments(page);
+        expect(numberOfDocuments).to.equal(index + 3);
+      });
+    });
+
+    it('should check the list of documents', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkListOfDocuments2', baseContext);
+
+      await boOrdersViewBlockTabListPage.goToDocumentsTab(page);
+
+      const documents = await boOrdersViewBlockTabListPage.getAllDocumentsName(page);
+      expect(documents).to.contain('Invoice')
+        .and.to.contain('Delivery slip')
+        .and.to.contain('Credit slip');
     });
   });
 

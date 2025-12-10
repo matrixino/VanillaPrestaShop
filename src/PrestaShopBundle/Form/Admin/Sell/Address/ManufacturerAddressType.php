@@ -106,7 +106,7 @@ class ManufacturerAddressType extends TranslatorAwareType
                 'choices' => $this->getManufacturersChoiceList(),
                 'translation_domain' => false,
                 'placeholder' => false,
-                'required' => false,
+                'required' => true,
             ])
             ->add('last_name', TextType::class, [
                 'label' => $this->trans('Last name', 'Admin.Global'),
@@ -341,8 +341,6 @@ class ManufacturerAddressType extends TranslatorAwareType
      */
     private function getManufacturersChoiceList()
     {
-        $this->manufacturerChoices['--'] = 0;
-
         return $this->manufacturerChoices;
     }
 }

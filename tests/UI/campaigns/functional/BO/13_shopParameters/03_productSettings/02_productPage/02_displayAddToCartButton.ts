@@ -17,7 +17,7 @@ import {
 
 const baseContext: string = 'functional_BO_shopParameters_productSettings_productPage_displayAddToCartButton';
 
-describe('BO - Shop Parameters - Product Settings : Display add to cart button when a product has attributes', async () => {
+describe('BO - Shop Parameters - Product Settings : Display the "add to cart" button when a product has attributes', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

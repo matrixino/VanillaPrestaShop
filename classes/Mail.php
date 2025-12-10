@@ -734,6 +734,18 @@ class MailCore extends ObjectModel
             }
         }
 
+        if ($moduleName === false && is_dir(_PS_MODULE_DIR_)) {
+            $modulesDir = new DirectoryIterator(_PS_MODULE_DIR_);
+            foreach ($modulesDir as $moduleDir) {
+                if ($moduleDir->isDir() && !$moduleDir->isDot()) {
+                    $moduleTemplatePath = $moduleDir->getPathname() . '/mails/' . $isoTemplate;
+                    if (file_exists($moduleTemplatePath . '.txt') || file_exists($moduleTemplatePath . '.html')) {
+                        return $moduleDir->getPathname() . '/mails/';
+                    }
+                }
+            }
+        }
+
         return '';
     }
 

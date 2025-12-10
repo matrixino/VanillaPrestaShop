@@ -177,7 +177,7 @@ class CustomerFeatureContext extends AbstractDomainFeatureContext
             $defaultGroupId,
             $groupIds,
             isset($data['shopId']) ? $data['shopId'] : 0,
-            isset($data['genderId']) ? $data['genderId'] : null,
+            isset($data['genderId']) ? (int) $data['genderId'] : null,
             isset($data['isEnabled']) ? $data['isEnabled'] : true,
             isset($data['isPartnerOffersSubscribed']) ? $data['isPartnerOffersSubscribed'] : false,
             isset($data['birthday']) ? $data['birthday'] : null,

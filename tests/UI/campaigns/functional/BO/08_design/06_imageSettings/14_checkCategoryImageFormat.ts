@@ -20,7 +20,7 @@ import {
 
 const baseContext: string = 'functional_BO_design_imageSettings_checkCategoryImageFormat';
 
-describe('BO - Design - Image Settings - Check category image format', async () => {
+describe('BO - Design - Image Settings : Check category image format', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let idCategory: number = 0;

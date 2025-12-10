@@ -54,7 +54,7 @@ services:
     depends_on:
       - mysql
     volumes:
-      - ./:/var/www/html:delegated
+      - ./:/var/www/html
     networks:
       - prestashop-network
 

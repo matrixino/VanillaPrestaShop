@@ -198,7 +198,7 @@ CREATE TABLE `PREFIX_cart_rule` (
   `active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `date_add` datetime NOT NULL,
   `date_upd` datetime NOT NULL,
-  `type` varchar(128) DEFAULT NULL,
+  `id_cart_rule_type` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id_cart_rule`),
   KEY `id_customer` (
     `id_customer`, `active`, `date_to`
@@ -216,7 +216,7 @@ CREATE TABLE `PREFIX_cart_rule` (
   ),
   KEY `date_from` (`date_from`),
   KEY `date_to` (`date_to`),
-  KEY `type` (`type`)
+  KEY `id_cart_rule_type` (`id_cart_rule_type`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
 /* Localized name assocatied with a promo code */
@@ -301,6 +301,36 @@ CREATE TABLE `PREFIX_cart_rule_shop` (
   `id_cart_rule` int(10) unsigned NOT NULL,
   `id_shop` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id_cart_rule`, `id_shop`)
+) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
+
+/* Discount types for compatibility */
+CREATE TABLE `PREFIX_cart_rule_type` (
+  `id_cart_rule_type` int(10) unsigned NOT NULL auto_increment,
+  `type` varchar(128) NOT NULL,
+  `is_core` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `active` tinyint(1) unsigned NOT NULL DEFAULT '1',
+  `date_add` datetime NOT NULL,
+  `date_upd` datetime NOT NULL,
+  PRIMARY KEY (`id_cart_rule_type`),
+  UNIQUE KEY `type` (`type`)
+) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
+
+/* Localized names for cart rule types */
+CREATE TABLE `PREFIX_cart_rule_type_lang` (
+  `id_cart_rule_type` int(10) unsigned NOT NULL,
+  `id_lang` int(10) unsigned NOT NULL,
+  `name` varchar(254) NOT NULL,
+  `description` TEXT,
+  PRIMARY KEY (`id_cart_rule_type`, `id_lang`)
+) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
+
+/* Cart rule compatibility table */
+CREATE TABLE `PREFIX_cart_rule_compatible_types` (
+  `id_cart_rule` int(10) unsigned NOT NULL,
+  `id_cart_rule_type` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id_cart_rule`, `id_cart_rule_type`),
+  KEY `id_cart_rule` (`id_cart_rule`),
+  KEY `id_cart_rule_type` (`id_cart_rule_type`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
 /* List of products inside a cart */
@@ -672,7 +702,7 @@ CREATE TABLE `PREFIX_customer_message` (
   `message` MEDIUMTEXT NOT NULL,
   `file_name` varchar(18) DEFAULT NULL,
   `ip_address` varchar(16) DEFAULT NULL,
-  `user_agent` varchar(128) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
   `date_add` datetime NOT NULL,
   `date_upd` datetime NOT NULL,
   `private` TINYINT NOT NULL DEFAULT '0',

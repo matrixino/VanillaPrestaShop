@@ -42,12 +42,18 @@ class GetAvailableCarriers
     private $productQuantities;
 
     /**
+     * @var int|null
+     */
+    private $currentCarrierId;
+
+    /**
      * @param ProductQuantity[] $productQuantities
      */
-    public function __construct(array $productQuantities, AddressId $addressId)
+    public function __construct(array $productQuantities, AddressId $addressId, ?int $currentCarrierId = null)
     {
         $this->productQuantities = $productQuantities;
         $this->addressId = $addressId;
+        $this->currentCarrierId = $currentCarrierId;
     }
 
     /**
@@ -77,5 +83,10 @@ class GetAvailableCarriers
     public function setAddressId(AddressId $addressId): void
     {
         $this->addressId = $addressId;
+    }
+
+    public function getCurrentCarrierId(): ?int
+    {
+        return $this->currentCarrierId;
     }
 }

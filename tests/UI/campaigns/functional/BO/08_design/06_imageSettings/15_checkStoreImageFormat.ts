@@ -19,7 +19,7 @@ import {
 
 const baseContext: string = 'functional_BO_design_imageSettings_checkStoreImageFormat';
 
-describe('BO - Design - Image Settings - Check store image format', async () => {
+describe('BO - Design - Image Settings : Check stores image format', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let idStore: number = 0;

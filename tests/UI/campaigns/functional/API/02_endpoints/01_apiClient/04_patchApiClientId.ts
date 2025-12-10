@@ -20,7 +20,7 @@ import {
 
 const baseContext: string = 'functional_API_endpoints_apiClient_patchApiClientId';
 
-describe('API : PATCH /api-client/{apiClientId}', async () => {
+describe('API : PATCH /api-clients/{apiClientId}', async () => {
   let apiContext: APIRequestContext;
   let browserContext: BrowserContext;
   let page: Page;
@@ -51,7 +51,7 @@ describe('API : PATCH /api-client/{apiClientId}', async () => {
     await utilsPlaywright.closeBrowserContext(browserContext);
   });
 
-  describe('BackOffice : Fetch the access token', async () => {
+  describe('API : Fetch the access token', async () => {
     it(`should request the endpoint /access_token with scope ${clientScope}`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestOauth2Token', baseContext);
       accessToken = await requestAccessToken(clientScope);
@@ -168,13 +168,13 @@ describe('API : PATCH /api-client/{apiClientId}', async () => {
     },
   ].forEach((data: { propertyName: string, propertyValue: boolean|number|string|string[] }) => {
     describe(`Update the property \`${data.propertyName}\` with API and check in BO`, async () => {
-      it('should request the endpoint /api-client/{apiClientId}', async function () {
+      it('should request the endpoint /api-clients/{apiClientId}', async function () {
         await testContext.addContextItem(this, 'testIdentifier', `requestEndpoint${data.propertyName}`, baseContext);
 
         const dataPatch: any = {};
         dataPatch[data.propertyName] = data.propertyValue;
 
-        const apiResponse = await apiContext.patch(`api-client/${idApiClient}`, {
+        const apiResponse = await apiContext.patch(`api-clients/${idApiClient}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

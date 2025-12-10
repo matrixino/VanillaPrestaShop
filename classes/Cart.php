@@ -28,12 +28,16 @@ use PrestaShop\PrestaShop\Adapter\Cache\CacheAdapter;
 use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Adapter\Customer\CustomerDataProvider;
 use PrestaShop\PrestaShop\Adapter\Database;
+use PrestaShop\PrestaShop\Adapter\Discount\Application\DiscountApplicationService;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Adapter\Group\GroupDataProvider;
 use PrestaShop\PrestaShop\Adapter\Product\PriceCalculator;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
 use PrestaShop\PrestaShop\Core\Cart\CartRow;
 use PrestaShop\PrestaShop\Core\Cart\CartRuleData;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountPriority;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use PrestaShop\PrestaShop\Core\Localization\Exception\LocalizationException;
 use PrestaShopBundle\Form\Admin\Type\FormattedTextareaType;
@@ -474,20 +478,48 @@ class CartCore extends ObjectModel
 
         $cache_key = 'Cart::getCartRules_' . $this->id . '-' . $filter;
         if (!Cache::isStored($cache_key)) {
-            $result = Db::getInstance()->executeS(
-                'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`
-                FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
-                LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
-                LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
-                    cd.`id_cart_rule` = crl.`id_cart_rule`
-                    AND crl.id_lang = ' . (int) $this->getAssociatedLanguage()->getId() . '
-                )
-                WHERE `id_cart` = ' . (int) $this->id . '
-                ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
-                ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
-                ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
-                . ' ORDER by cr.priority ASC, cr.gift_product DESC'
-            );
+            // Check if new discount feature is enabled
+            $containerFinder = new ContainerFinder(Context::getContext());
+            $container = $containerFinder->getContainer();
+            $featureFlagManager = $container->get(FeatureFlagStateCheckerInterface::class);
+            $useNewDiscountSystem = $featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT);
+
+            if ($useNewDiscountSystem) {
+                $result = Db::getInstance()->executeS(
+                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`, crt.`type` as discount_type
+                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
+                        cd.`id_cart_rule` = crl.`id_cart_rule`
+                        AND crl.id_lang = ' . (int) $this->getAssociatedLanguage()->getId() . '
+                    )
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_type` crt ON cr.`id_cart_rule_type` = crt.`id_cart_rule_type`
+                    WHERE `id_cart` = ' . (int) $this->id . '
+                    ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
+                    . ' ORDER by cr.priority ASC, cr.gift_product DESC'
+                );
+
+                // Sort by the new 3-level priority system (Type → Priority Field → Creation Date)
+                $result = $this->sortCartRulesByPriority($result);
+            } else {
+                $result = Db::getInstance()->executeS(
+                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`
+                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
+                        cd.`id_cart_rule` = crl.`id_cart_rule`
+                        AND crl.id_lang = ' . (int) $this->getAssociatedLanguage()->getId() . '
+                    )
+                    WHERE `id_cart` = ' . (int) $this->id . '
+                    ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
+                    . ' ORDER by cr.priority ASC, cr.gift_product DESC'
+                );
+            }
+
             Cache::store($cache_key, $result);
         } else {
             $result = Cache::retrieve($cache_key);
@@ -545,20 +577,48 @@ class CartCore extends ObjectModel
     {
         $cache_key = 'Cart::getOrderedCartRulesIds_' . $this->id . '-' . $filter . '-ids';
         if (!Cache::isStored($cache_key)) {
-            $result = Db::getInstance()->executeS(
-                'SELECT cr.`id_cart_rule`
-                FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
-                LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
-                LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
-                    cd.`id_cart_rule` = crl.`id_cart_rule`
-                    AND crl.id_lang = ' . (int) $this->getAssociatedLanguage()->getId() . '
-                )
-                WHERE `id_cart` = ' . (int) $this->id . '
-                ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
-                ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
-                ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
-                . ' ORDER BY cr.priority ASC, cr.gift_product DESC'
-            );
+            // Check if new discount feature is enabled
+            $containerFinder = new ContainerFinder(Context::getContext());
+            $container = $containerFinder->getContainer();
+            $featureFlagManager = $container->get(FeatureFlagStateCheckerInterface::class);
+            $useNewDiscountSystem = $featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT);
+
+            if ($useNewDiscountSystem) {
+                $result = Db::getInstance()->executeS(
+                    'SELECT cr.`id_cart_rule`, crt.`type` as discount_type, cr.`priority`, cr.`date_add`
+                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
+                        cd.`id_cart_rule` = crl.`id_cart_rule`
+                        AND crl.id_lang = ' . (int) $this->getAssociatedLanguage()->getId() . '
+                    )
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_type` crt ON cr.`id_cart_rule_type` = crt.`id_cart_rule_type`
+                    WHERE `id_cart` = ' . (int) $this->id . '
+                    ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
+                );
+
+                // Sort by the new 3-level priority system (Type → Priority Field → Creation Date)
+                $result = $this->sortCartRulesByPriority($result);
+
+                // Extract only IDs for return
+                $result = array_map(function ($row) {
+                    return ['id_cart_rule' => $row['id_cart_rule']];
+                }, $result);
+            } else {
+                $result = Db::getInstance()->executeS(
+                    'SELECT cr.`id_cart_rule`
+                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
+                    LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
+                    WHERE `id_cart` = ' . (int) $this->id . '
+                    ' . ($filter == CartRule::FILTER_ACTION_SHIPPING ? 'AND free_shipping = 1' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_GIFT ? 'AND gift_product != 0' : '') . '
+                    ' . ($filter == CartRule::FILTER_ACTION_REDUCTION ? 'AND (reduction_percent != 0 OR reduction_amount != 0)' : '')
+                    . ' ORDER by cr.priority ASC, cr.gift_product DESC'
+                );
+            }
+
             Cache::store($cache_key, $result);
         } else {
             $result = Cache::retrieve($cache_key);
@@ -568,13 +628,11 @@ class CartCore extends ObjectModel
     }
 
     /**
-     * Get amount of Customer Discounts.
+     * Returns a total amount of cart rules of a specific ID in the current cart.
      *
      * @param int $id_cart_rule CartRule ID
      *
-     * @return int Amount of Customer Discounts
-     *
-     * @todo: What are customer discounts? Isn't this just a PriceRule and shouldn't this method be renamed instead?
+     * @return int Amount of cart rules used
      */
     public function getDiscountsCustomer($id_cart_rule)
     {
@@ -1365,6 +1423,18 @@ class CartCore extends ObjectModel
             return false;
         }
 
+        // Check compatibility with existing cart rules
+        $containerFinder = new ContainerFinder(Context::getContext());
+        $container = $containerFinder->getContainer();
+        $featureFlagManager = $container->get(FeatureFlagStateCheckerInterface::class);
+
+        if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT)) {
+            $compatibility = $this->checkCartRuleCompatibility($id_cart_rule);
+            if ($compatibility !== true) {
+                return $compatibility;
+            }
+        }
+
         // Add the cart rule to the cart
         if (!Db::getInstance()->insert('cart_cart_rule', [
             'id_cart_rule' => (int) $id_cart_rule,
@@ -1401,6 +1471,101 @@ class CartCore extends ObjectModel
         }
 
         return true;
+    }
+
+    /**
+     * Check if a cart rule is compatible with existing cart rules and determine priority order
+     *
+     * @param int $cartRuleId The cart rule ID to check
+     *
+     * @return bool|string True if compatible, error message if not compatible
+     */
+    protected function checkCartRuleCompatibility($cartRuleId)
+    {
+        // Get existing cart rule IDs directly from database without triggering calculations
+        // to avoid infinite loop: getCartRules() -> getOrderTotal() -> getCartRules()
+        $existingCartRuleIds = Db::getInstance()->executeS(
+            'SELECT id_cart_rule
+            FROM ' . _DB_PREFIX_ . 'cart_cart_rule
+            WHERE id_cart = ' . (int) $this->id . '
+            AND id_cart_rule != ' . (int) $cartRuleId
+        );
+
+        // Extract just the IDs
+        $existingCartRuleIds = !empty($existingCartRuleIds) ? array_column($existingCartRuleIds, 'id_cart_rule') : [];
+
+        $applicationService = $this->getDiscountApplicationService();
+        if (!$applicationService) {
+            // Service not available, skip compatibility check for backward compatibility
+            return true;
+        }
+
+        $result = $applicationService->determineDiscountsToApply($cartRuleId, $existingCartRuleIds);
+
+        if (!$result->canApply()) {
+            $errorMessage = $result->getRejectionReason()
+                ?? 'This voucher can not be combined with other vouchers in your cart';
+
+            return Context::getContext()->getTranslator()->trans(
+                $errorMessage,
+                [],
+                'Shop.Notifications.Error'
+            );
+        }
+
+        // Remove cart rules which are replaced by higher priority ones
+        foreach ($result->getDiscountsToRemove() as $ruleIdToRemove) {
+            $this->removeCartRule($ruleIdToRemove);
+        }
+
+        // Note: The priority order of discounts is determined by $result->getDiscountsToApply()
+        // The actual calculation will apply discounts in this priority order
+
+        return true;
+    }
+
+    /**
+     * Get the discount application service (handles compatibility and priority)
+     *
+     * @return DiscountApplicationService|null
+     */
+    protected function getDiscountApplicationService()
+    {
+        static $service = null;
+
+        if ($service === null) {
+            try {
+                // Try to get from container first
+                $containerFinder = new ContainerFinder(Context::getContext());
+                $container = $containerFinder->getContainer();
+
+                try {
+                    $service = $container->get(DiscountApplicationService::class);
+                } catch (Exception $e) {
+                    // Service not in container yet, instantiate directly
+                    $dbPrefix = _DB_PREFIX_;
+
+                    // Get dependencies from container or create them
+                    try {
+                        $discountTypeRepo = $container->get(DiscountTypeRepository::class);
+                    } catch (Exception $e2) {
+                        $connection = $container->get('doctrine.dbal.default_connection');
+                        $discountTypeRepo = new DiscountTypeRepository(
+                            $connection,
+                            $dbPrefix
+                        );
+                    }
+
+                    $service = new DiscountApplicationService(
+                        $discountTypeRepo
+                    );
+                }
+            } catch (Exception $e) {
+                $service = false;
+            }
+        }
+
+        return $service ?: null;
     }
 
     /**
@@ -2040,24 +2205,33 @@ class CartCore extends ObjectModel
 
         // EARLY RETURNS
 
-        // if cart rules are not used
+        // If the type of calculation is ONLY_DISCOUNTS and cart rules are disabled,
+        // we can immediately return 0
         if ($type == Cart::ONLY_DISCOUNTS && !CartRule::isFeatureActive()) {
             return 0;
         }
-        // no shipping cost if is a cart with only virtuals products
+
+        // If the cart is FULLY virtual and the type of calculation is ONLY_SHIPPING,
+        // we can immediately return 0
         $virtual = $this->isVirtualCart();
         if ($virtual && $type == Cart::ONLY_SHIPPING) {
             return 0;
         }
+
+        // If the cart is FULLY virtual and the type of calculation is BOTH,
+        // we can switch it to BOTH_WITHOUT_SHIPPING, because there is no shipping
         if ($virtual && $type == Cart::BOTH) {
             $type = Cart::BOTH_WITHOUT_SHIPPING;
         }
 
-        // filter products
+        // If no specific products list is provided, we get the full list of products in cart
+        // In most cases, we calculate the total for all products in cart
         if (null === $products) {
             $products = $this->getProducts(false, false, null, true, $keepOrderPrices);
         }
 
+        // If we want to calculate only physical products without shipping,
+        // we filter out virtual products from the products list
         if ($type == Cart::ONLY_PHYSICAL_PRODUCTS_WITHOUT_SHIPPING) {
             foreach ($products as $key => $product) {
                 if (!empty($product['is_virtual'])) {
@@ -2067,6 +2241,7 @@ class CartCore extends ObjectModel
             $type = Cart::ONLY_PRODUCTS;
         }
 
+        // If we want to calculate only products, we filter out gifts from the products list
         if ($type == Cart::ONLY_PRODUCTS) {
             foreach ($products as $key => $product) {
                 if (!empty($product['is_gift'])) {
@@ -2075,6 +2250,8 @@ class CartCore extends ObjectModel
             }
         }
 
+        // If taxes are disabled in configuration, we calculate everything without taxes,
+        // even if $withTaxes was passed as true
         if (!Configuration::get('PS_TAX')) {
             $withTaxes = false;
         }
@@ -2125,12 +2302,10 @@ class CartCore extends ObjectModel
                 throw new Exception('unknown cart calculation type : ' . $type);
         }
 
-        // TAXES ?
-
+        // Apply taxes if required
         $value = $withTaxes ? $amount->getTaxIncluded() : $amount->getTaxExcluded();
 
-        // ROUND AND RETURN
-
+        // Round it, return it
         return Tools::ps_round($value, $computePrecision);
     }
 
@@ -2234,6 +2409,8 @@ class CartCore extends ObjectModel
     }
 
     /**
+     * @deprecated since 9.1.0, just use $this->id_address_delivery directly
+     *
      * @param array $products - not used anymore
      *
      * @return int
@@ -2274,6 +2451,61 @@ class CartCore extends ObjectModel
     }
 
     /**
+     * Sort cart rules by priority using the 3-level system:
+     * 1. Type priority (product > cart/order > shipping > gift)
+     * 2. Priority field (lower number = higher priority)
+     * 3. Creation date (older = higher priority)
+     *
+     * @param array $cartRules
+     *
+     * @return array
+     */
+    protected function sortCartRulesByPriority(array $cartRules): array
+    {
+        if (empty($cartRules)) {
+            return $cartRules;
+        }
+
+        // Use DiscountPriority static methods to sort the cart rules
+        if (class_exists(DiscountPriority::class)) {
+            // Convert cart rule rows to the format expected by DiscountPriority
+            $discountsForSort = array_map(function ($cartRule) {
+                return [
+                    'id_cart_rule' => $cartRule['id_cart_rule'],
+                    'type' => $cartRule['discount_type'] ?? null,
+                    'priority' => $cartRule['priority'] ?? 0,
+                    'date_add' => $cartRule['date_add'] ?? null,
+                ];
+            }, $cartRules);
+
+            // Sort using DiscountPriority static method
+            $sortedDiscounts = DiscountPriority::sortByPriority($discountsForSort);
+
+            // Re-order the original cart rules array based on the sorted IDs
+            $sortedCartRules = [];
+            foreach ($sortedDiscounts as $sortedDiscount) {
+                foreach ($cartRules as $cartRule) {
+                    if ($cartRule['id_cart_rule'] == $sortedDiscount['id_cart_rule']) {
+                        $sortedCartRules[] = $cartRule;
+                        break;
+                    }
+                }
+            }
+
+            return $sortedCartRules;
+        }
+
+        // Fallback: sort by priority field only (legacy behavior)
+        usort($cartRules, function ($a, $b) {
+            return ($a['priority'] ?? 0) <=> ($b['priority'] ?? 0);
+        });
+
+        return $cartRules;
+    }
+
+    /**
+     * @deprecated since 9.1.0 - no longer used
+     *
      * @param bool $withTaxes
      * @param array $product
      * @param Context|null $virtualContext
@@ -2298,6 +2530,9 @@ class CartCore extends ObjectModel
     }
 
     /**
+     * Returns the address ID to be used for tax calculation according to the shop configuration.
+     * Basically the same as getTaxAddressId below, but with verification that the address exists.
+     *
      * @param array $product - not used anymore
      *
      * @return int|null
@@ -2320,7 +2555,8 @@ class CartCore extends ObjectModel
     }
 
     /**
-     * Returns the tax address id according to the shop's configuration
+     * Returns the address ID to be used for tax calculation according to the shop configuration.
+     * Basically the same as getProductAddressId above, but without verification that the address exists.
      *
      * @return int
      */
@@ -4699,6 +4935,21 @@ class CartCore extends ObjectModel
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    public function checkCountriesAreEnabled()
+    {
+        $deliveryAddress = new Address($this->id_address_delivery);
+        $invoiceAddress = new Address($this->id_address_invoice);
+
+        $deliveryCountry = new Country($deliveryAddress->id_country);
+        $invoiceCountry = new Country($invoiceAddress->id_country);
+
+        if (!$deliveryCountry->active || !$invoiceCountry->active) {
+            return false;
         }
 
         return true;

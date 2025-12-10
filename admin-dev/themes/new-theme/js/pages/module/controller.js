@@ -361,7 +361,7 @@ class AdminModuleController {
       });
     });
 
-    self.updateModuleVisibility();
+    self.updateModuleVisibilityFromHash();
   }
 
   updateModuleContainerDisplay() {
@@ -814,12 +814,16 @@ class AdminModuleController {
         return;
       }
 
-      self.moduleCardController.requestToController(
-        bulkModuleAction,
-        actionMenuLink,
-        forceDeletion,
-        unstackModulesActions,
-      );
+      if (bulkModuleAction !== 'upgrade') {
+        self.moduleCardController.requestToController(
+          bulkModuleAction,
+          actionMenuLink,
+          forceDeletion,
+          unstackModulesActions,
+        );
+      } else {
+        self.moduleCardController.upgradeWithUploadFallback(actionMenuLink, unstackModulesActions);
+      }
     }
 
     function unstackModulesActions() {
@@ -1003,6 +1007,24 @@ class AdminModuleController {
 
   isReadMoreModalOpened() {
     return $('.modal-read-more').is(':visible');
+  }
+
+  updateModuleVisibilityFromHash() {
+    const self = this;
+
+    if (window.location.hash !== '') {
+      const categoryRef = window.location.hash.substring(1);
+      self.currentCategoryFilter = categoryRef ? String(categoryRef).toLowerCase() : null;
+
+      const jqoCategory = $(`${self.categoryItemSelector}[data-category-ref="${self.currentCategoryFilter}"]`);
+
+      if (jqoCategory.length === 1) {
+        // Change dropdown label to set it to the current category's displayname
+        $(self.categorySelectorLabelSelector).text(jqoCategory.data('category-display-name'));
+        $(self.categoryResetBtnSelector).show();
+      }
+    }
+    self.updateModuleVisibility();
   }
 }
 

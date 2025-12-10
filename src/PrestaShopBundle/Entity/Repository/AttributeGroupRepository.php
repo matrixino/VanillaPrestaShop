@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -34,4 +35,26 @@ namespace PrestaShopBundle\Entity\Repository;
  */
 class AttributeGroupRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * Finds attribute groups by language and shop.
+     *
+     * @param int $idLang Language ID
+     * @param int $idShop Shop ID
+     *
+     * @return \PrestaShopBundle\Entity\AttributeGroup[]
+     */
+    public function findByLangAndShop(int $idLang, int $idShop): array
+    {
+        return $this->createQueryBuilder('ag')
+            ->addSelect('agl')
+            ->join('ag.shops', 'ags')
+            ->join('ag.attributeGroupLangs', 'agl')
+            ->andWhere('agl.lang = :idLang')
+            ->andWhere('ags.id = :idShop')
+            ->orderBy('ag.position', 'ASC')
+            ->setParameters([
+                'idShop' => $idShop,
+                'idLang' => $idLang,
+            ])->getQuery()->getResult();
+    }
 }

@@ -18,6 +18,22 @@ Feature: Carrier available
     And there is a state named "state1" with iso code "TEST-1" in country "country1" and zone "zone1"
     And there is an address named "address1" with postcode "1" in state "state1"
 
+Scenario: Carrier available when is deleted
+  Given I add product "s3_product1" with following information:
+    | name[en-US] | product D |
+    | type        | standard  |
+  And I create carrier "s42_carrier" with specified properties:
+    | name  | Deleted Carrier |
+    | zones | zone1           |
+  And I assign product "s3_product1" with following carriers:
+    | s42_carrier |
+  And I soft delete carrier "s42_carrier"
+  Then the products "s3_product1" should have the following carriers with address "address1":
+    | carrier          | carrier_reference | state     | products  |
+    | Deleted Carrier  | s42_carrier       | available | product D |
+    | Click and collect|                   | filtered  | product D |
+    | My carrier       |                   | filtered  | product D |
+
 Scenario: Get available carriers for existing order
   Given I add product "s0_product1" with following information:
     | name[fr-FR] | bouteille de bière |

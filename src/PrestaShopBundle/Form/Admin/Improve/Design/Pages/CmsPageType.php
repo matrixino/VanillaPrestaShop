@@ -144,6 +144,9 @@ class CmsPageType extends TranslatorAwareType
                 'data' => [
                     'cms_url' => $options['cms_preview_url'],
                 ],
+                'row_attr' => [
+                    'class' => 'seo_preview',
+                ],
             ])
             ->add('meta_title', TranslatableType::class, [
                 'label' => $this->trans('Meta title', 'Admin.Global'),

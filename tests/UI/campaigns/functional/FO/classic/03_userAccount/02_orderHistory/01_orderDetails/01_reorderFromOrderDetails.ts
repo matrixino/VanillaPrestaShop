@@ -37,7 +37,7 @@ Scenario:
 - Go to the order detail
 - Check if the reorder contain the same product as the "original" order
  */
-describe('FO - Account - Order details : Reorder from order detail', async () => {
+describe('FO - User Account - Order History - Order details : Reorder from order detail', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 

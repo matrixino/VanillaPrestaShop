@@ -31,8 +31,11 @@ namespace Tests\Integration\Behaviour\Features\Context\Domain;
 use Behat\Gherkin\Node\TableNode;
 use Exception;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\AddWebserviceKeyCommand;
+use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\BulkDeleteWebserviceKeyCommand;
+use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\DeleteWebserviceKeyCommand;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\EditWebserviceKeyCommand;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\Exception\DuplicateWebserviceKeyException;
+use RuntimeException;
 use Tests\Integration\Behaviour\Features\Context\SharedStorage;
 use Tests\Integration\Behaviour\Features\Context\Util\PrimitiveUtils;
 use WebserviceKey;
@@ -106,6 +109,53 @@ class WebserviceKeyFeatureContext extends AbstractDomainFeatureContext
             $this->getCommandBus()->handle($command);
         } catch (Exception $e) {
             $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When I delete webservice key :reference
+     */
+    public function deleteWebserviceKeyUsingCommand(string $reference): void
+    {
+        $this->getCommandBus()->handle(
+            new DeleteWebserviceKeyCommand((int) WebserviceKey::getIdFromKey($reference))
+        );
+    }
+
+    /**
+     * @Then I bulk delete webservice keys :references
+     */
+    public function bulkDeleteWebserviceKeyeUsingCommand(string $references): void
+    {
+        $references = explode(',', $references);
+        $webserviceKeyIds = [];
+        foreach ($references as $reference) {
+            $webserviceKeyIds[] = (int) WebserviceKey::getIdFromKey($reference);
+        }
+        $this->getCommandBus()->handle(
+            new BulkDeleteWebserviceKeyCommand($webserviceKeyIds)
+        );
+    }
+
+    /**
+     * @When webservice key :reference should not exist
+     */
+    public function assertWebserviceKeyDoesNotExist(string $reference): void
+    {
+        $wkExists = WebserviceKey::keyExists($reference);
+        if ($wkExists) {
+            throw new RuntimeException(sprintf('Webservice Key %s still exists', $reference));
+        }
+    }
+
+    /**
+     * @When webservice key :reference should exist
+     */
+    public function assertWebserviceKeyDoesExist(string $reference): void
+    {
+        $wkExists = WebserviceKey::keyExists($reference);
+        if (!$wkExists) {
+            throw new RuntimeException(sprintf('Webservice Key %s doesn\'t exists', $reference));
         }
     }
 

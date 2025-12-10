@@ -43,7 +43,7 @@ Post-condition:
 - Disable merchandise returns
 - Reset SMTP parameters
  */
-describe('BO - Orders - View and edit order : Return an order', async () => {
+describe('BO - Orders - View and edit order : Return a product', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let allEmails: MailDevEmail[];

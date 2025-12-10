@@ -73,17 +73,18 @@ class CategoriesType extends TranslatorAwareType
     {
         $builder
             ->add('product_categories', CategoryTagsCollectionType::class)
+            ->add('add_categories_btn', ButtonType::class, [
+                'label' => $this->trans('Choose categories', 'Admin.Catalog.Feature'),
+                'attr' => [
+                    'class' => 'add-categories-btn btn-outline-secondary',
+                ],
+            ])
             ->add('default_category_id', ChoiceType::class, [
                 'constraints' => [],
                 'choices' => $this->defaultCategoryChoiceProvider->getChoices(['product_id' => $options['product_id']]),
                 'label' => $this->trans('Default category', 'Admin.Catalog.Feature'),
+                'help' => $this->trans('Defines the product\'s primary placement, usually the deepest category in the hierarchy. It\'s used in breadcrumbs, URLs, structured data and many other parts of the shop.', 'Admin.Catalog.Help'),
                 'autocomplete' => true,
-            ])
-            ->add('add_categories_btn', ButtonType::class, [
-                'label' => $this->trans('Add categories', 'Admin.Catalog.Feature'),
-                'attr' => [
-                    'class' => 'add-categories-btn btn-outline-secondary',
-                ],
             ])
         ;
 

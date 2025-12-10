@@ -413,6 +413,22 @@ class CarrierFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
+     * @When I soft delete carrier :reference
+     */
+    public function deleteCarrier(string $reference): void
+    {
+        try {
+            // here we use objectmodel for soft delete because CQRS command delete a carrier soft delete only if is linked to an order
+            $carrierId = $this->referenceToId($reference);
+            $carrier = new Carrier($carrierId);
+            $carrier->deleted = true;
+            $carrier->save();
+        } catch (Exception $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
      * @Then the products :products should have the following carriers with address :address:
      */
     public function assertCarriersWithState(string $products, string $address, TableNode $table)
@@ -421,9 +437,17 @@ class CarrierFeatureContext extends AbstractDomainFeatureContext
 
         $expectedAvailable = [];
         $expectedFiltered = [];
+        $currentCarrierId = null;
 
         foreach ($expectedRows as $row) {
             $carrier = ['name' => $row['carrier']];
+
+            if (!empty($row['carrier_reference'])) {
+                $currentCarrier = new Carrier($this->getCarrier($row['carrier_reference'])->getCarrierId());
+                if ($currentCarrier->deleted) {
+                    $currentCarrierId = $currentCarrier->id;
+                }
+            }
 
             if (strtolower($row['state']) === 'available') {
                 $expectedAvailable[] = $carrier;
@@ -434,7 +458,6 @@ class CarrierFeatureContext extends AbstractDomainFeatureContext
                 ];
             }
         }
-
         $productNames = explode(',', $products);
         $productQuantities = [];
 
@@ -444,8 +467,9 @@ class CarrierFeatureContext extends AbstractDomainFeatureContext
         }
 
         $carriersResult = $this->getQueryBus()->handle(
-            new GetAvailableCarriers($productQuantities, new AddressId($this->referenceToId($address))
-            ));
+            new GetAvailableCarriers($productQuantities, new AddressId($this->referenceToId($address)), $currentCarrierId
+            )
+        );
 
         $actualAvailable = array_map(function ($carrierSummary) {
             return ['name' => $carrierSummary->getName()];

@@ -121,7 +121,7 @@ Feature: Update product stock from Back Office (BO)
       | location | dtc |
     And product "product1" last stock movements should be:
       | employee   | delta_quantity |
-      | Puff Daddy | 51             |
+      | Puffin Mummy | 51             |
     And product "product1" last stock movement increased by 51
     When I update product "product1" stock with following information:
       | delta_quantity | -9 |
@@ -131,8 +131,8 @@ Feature: Update product stock from Back Office (BO)
       | location |    |
     And product "product1" last stock movements should be:
       | employee   | delta_quantity |
-      | Puff Daddy | -9             |
-      | Puff Daddy | 51             |
+      | Puffin Mummy | -9             |
+      | Puffin Mummy | 51             |
     And product "product1" last stock movement decreased by 9
     # Next assert makes sure that 0 delta quantity is valid input for command but is skipped and stock does not move
     When I update product "product1" stock with following information:
@@ -141,8 +141,8 @@ Feature: Update product stock from Back Office (BO)
       | quantity | 42 |
     And product "product1" last stock movements should be:
       | employee   | delta_quantity |
-      | Puff Daddy | -9             |
-      | Puff Daddy | 51             |
+      | Puffin Mummy | -9             |
+      | Puffin Mummy | 51             |
     And product "product1" last stock movement decreased by 9
 
   Scenario: I update product simple stock fields
@@ -282,9 +282,9 @@ Feature: Update product stock from Back Office (BO)
     Then I should get error that stock available quantity is invalid
     And product "product2" last stock movements should be:
       | employee   | delta_quantity |
-      | Puff Daddy | -4294967295    |
-      | Puff Daddy | 4294967295     |
-      | Puff Daddy | -2147483648    |
+      | Puffin Mummy | -4294967295    |
+      | Puffin Mummy | 4294967295     |
+      | Puffin Mummy | -2147483648    |
 
   Scenario: I try to update product quantity with to big numbers
     Given I add product "product3" with following information:

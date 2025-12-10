@@ -26,13 +26,19 @@
 
 namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider;
 
+use DateTime;
+use DateTimeInterface;
 use PrestaShop\PrestaShop\Adapter\Attribute\Repository\AttributeRepository;
+use PrestaShop\PrestaShop\Adapter\Customer\Repository\CustomerRepository;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Combination\Repository\CombinationRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Context\LanguageContext;
 use PrestaShop\PrestaShop\Core\Context\ShopContext;
+use PrestaShop\PrestaShop\Core\Domain\Customer\Exception\CustomerNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\CustomerId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleType;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Query\GetDiscountForEditing;
@@ -49,11 +55,14 @@ use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\ShopAssociationNotFound;
 use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\ShopException;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 use PrestaShop\PrestaShop\Core\Product\Combination\NameBuilder\CombinationNameBuilder;
+use PrestaShop\PrestaShop\Core\Util\DateTime\DateTime as DateTimeUtil;
 use PrestaShopBundle\Form\Admin\Sell\Discount\CartConditionsType;
 use PrestaShopBundle\Form\Admin\Sell\Discount\DeliveryConditionsType;
 use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountConditionsType;
+use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountCustomerEligibilityChoiceType;
 use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountProductSegmentType;
 use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountUsabilityModeType;
+use PrestaShopBundle\Form\Admin\Sell\Discount\ProductConditionsType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 
@@ -70,16 +79,49 @@ class DiscountFormDataProvider implements FormDataProviderInterface
         private readonly FeatureValueRepository $featureValueRepository,
         private readonly ShopContext $shopContext,
         private readonly RequestStack $requestStack,
+        private readonly DiscountTypeRepository $discountTypeRepository,
+        private readonly CustomerRepository $customerRepository,
     ) {
     }
 
     public function getDefaultData()
     {
+        $now = new DateTime();
+        $startDate = (clone $now)->setTime(0, 0);
+        $endDate = (clone $now)->modify('+1 month')->setTime(23, 59);
+
         return [
+            'period' => [
+                'valid_date_range' => [
+                    'from' => $startDate->format(DateTimeUtil::DEFAULT_DATETIME_FORMAT),
+                    'to' => $endDate->format(DateTimeUtil::DEFAULT_DATETIME_FORMAT),
+                ],
+                'period_never_expires' => false,
+            ],
+            'customer_eligibility' => [
+                'eligibility' => [
+                    'children_selector' => DiscountCustomerEligibilityChoiceType::ALL_CUSTOMERS,
+                    DiscountCustomerEligibilityChoiceType::CUSTOMER_GROUPS => [],
+                    DiscountCustomerEligibilityChoiceType::SINGLE_CUSTOMER => [],
+                ],
+            ],
             'usability' => [
                 'mode' => [
                     'children_selector' => DiscountUsabilityModeType::AUTO_MODE,
                     'code' => '',
+                ],
+                'compatibility' => $this->getCompatibilityData(),
+                'priority' => 1,
+            ],
+            'conditions' => [
+                DiscountConditionsType::PRODUCT_CONDITIONS => [
+                    'children_selector' => ProductConditionsType::NONE,
+                ],
+                DiscountConditionsType::CART_CONDITIONS => [
+                    'children_selector' => ProductConditionsType::NONE,
+                ],
+                DiscountConditionsType::DELIVERY_CONDITIONS => [
+                    'children_selector' => ProductConditionsType::NONE,
                 ],
             ],
         ];
@@ -107,32 +149,26 @@ class DiscountFormDataProvider implements FormDataProviderInterface
             || !empty($productSegment[DiscountProductSegmentType::FEATURES]['groups'])
         ;
 
-        $selectedCondition = 'none';
-        $selectedCartCondition = 'none';
-        $selectedDeliveryCondition = 'none';
+        $selectedProductCondition = ProductConditionsType::NONE;
+        $selectedCartCondition = CartConditionsType::NONE;
+        $selectedDeliveryCondition = DeliveryConditionsType::NONE;
+
+        if (!empty($specificProducts)) {
+            $selectedProductCondition = ProductConditionsType::SPECIFIC_PRODUCTS;
+        } elseif ($productSegmentDefined) {
+            $selectedProductCondition = ProductConditionsType::PRODUCT_SEGMENT;
+        }
+
         if ($discountForEditing->getMinimumProductQuantity()) {
-            $selectedCondition = DiscountConditionsType::CART_CONDITIONS;
             $selectedCartCondition = CartConditionsType::MINIMUM_PRODUCT_QUANTITY;
         } elseif ($discountForEditing->getMinimumAmount()) {
-            $selectedCondition = DiscountConditionsType::CART_CONDITIONS;
             $selectedCartCondition = CartConditionsType::MINIMUM_AMOUNT;
-        } elseif (!empty($specificProducts)) {
-            $selectedCondition = DiscountConditionsType::CART_CONDITIONS;
-            $selectedCartCondition = CartConditionsType::SPECIFIC_PRODUCTS;
-        } elseif ($productSegmentDefined) {
-            $selectedCondition = DiscountConditionsType::CART_CONDITIONS;
-            $selectedCartCondition = CartConditionsType::PRODUCT_SEGMENT;
-        } elseif (!empty($discountForEditing->getCarrierIds())) {
-            $selectedCondition = DiscountConditionsType::DELIVERY_CONDITIONS;
+        }
+
+        if (!empty($discountForEditing->getCarrierIds())) {
             $selectedDeliveryCondition = DeliveryConditionsType::CARRIERS;
         } elseif (!empty($discountForEditing->getCountryIds())) {
-            $selectedCondition = DiscountConditionsType::DELIVERY_CONDITIONS;
             $selectedDeliveryCondition = DeliveryConditionsType::COUNTRY;
-            $selectedCondition = 'cart_conditions';
-            $selectedCartCondition = 'specific_products';
-        } elseif (!empty($productSegment['manufacturer']) || !empty($productSegment['category']) || !empty($productSegment['features'])) {
-            $selectedCondition = 'cart_conditions';
-            $selectedCartCondition = 'product_segment';
         }
 
         return [
@@ -140,6 +176,7 @@ class DiscountFormDataProvider implements FormDataProviderInterface
             'information' => [
                 'discount_type' => $discountForEditing->getType()->getValue(),
                 'names' => $discountForEditing->getLocalizedNames(),
+                'description' => $discountForEditing->getDescription(),
             ],
             'value' => [
                 'reduction' => [
@@ -160,17 +197,20 @@ class DiscountFormDataProvider implements FormDataProviderInterface
                 ],
             ],
             'conditions' => [
-                'children_selector' => $selectedCondition,
+                DiscountConditionsType::PRODUCT_CONDITIONS => [
+                    'children_selector' => $selectedProductCondition,
+                    'specific_products' => $specificProducts,
+                    ProductConditionsType::PRODUCT_SEGMENT => $productSegment,
+                ],
                 DiscountConditionsType::CART_CONDITIONS => [
                     'children_selector' => $selectedCartCondition,
                     'minimum_product_quantity' => $discountForEditing->getMinimumProductQuantity(),
                     'minimum_amount' => [
                         'value' => $discountForEditing->getMinimumAmount() ? (float) (string) $discountForEditing->getMinimumAmount() : null,
                         'currency' => $discountForEditing->getMinimumAmountCurrencyId(),
-                        'include_tax' => $discountForEditing->getMinimumAmountTaxIncluded(),
+                        'tax_included' => $discountForEditing->getMinimumAmountTaxIncluded(),
+                        'shipping_included' => $discountForEditing->getMinimumAmountShippingIncluded(),
                     ],
-                    'specific_products' => $specificProducts,
-                    CartConditionsType::PRODUCT_SEGMENT => $productSegment,
                 ],
                 DiscountConditionsType::DELIVERY_CONDITIONS => [
                     'children_selector' => $selectedDeliveryCondition,
@@ -178,11 +218,23 @@ class DiscountFormDataProvider implements FormDataProviderInterface
                     DeliveryConditionsType::COUNTRY => $discountForEditing->getCountryIds(),
                 ],
             ],
+            'period' => [
+                'valid_date_range' => [
+                    'from' => $discountForEditing->getValidFrom() ? $discountForEditing->getValidFrom()->format(DateTimeUtil::DEFAULT_DATETIME_FORMAT) : null,
+                    'to' => $discountForEditing->getValidTo() ? $discountForEditing->getValidTo()->format(DateTimeUtil::DEFAULT_DATETIME_FORMAT) : null,
+                ],
+                'period_never_expires' => $this->isPeriodNeverExpires($discountForEditing->getValidFrom(), $discountForEditing->getValidTo()),
+            ],
+            'customer_eligibility' => [
+                'eligibility' => $this->getCustomerEligibilityData($discountForEditing),
+            ],
             'usability' => [
                 'mode' => [
                     'children_selector' => $discountForEditing->getCode() ? DiscountUsabilityModeType::CODE_MODE : DiscountUsabilityModeType::AUTO_MODE,
                     'code' => $discountForEditing->getCode(),
                 ],
+                'compatibility' => $this->getCompatibilityData($id),
+                'priority' => $discountForEditing->getPriority(),
             ],
         ];
     }
@@ -370,5 +422,81 @@ class DiscountFormDataProvider implements FormDataProviderInterface
         }
 
         return $productSegment;
+    }
+
+    private function getCompatibilityData(?int $discountId = null): array
+    {
+        $compatibilityData = [];
+
+        // Get all available cart rule types
+        $availableTypes = $this->discountTypeRepository->getAllActiveTypes();
+
+        // If editing an existing discount, get its compatible types
+        $compatibleTypeIds = [];
+        if ($discountId) {
+            $compatibleTypes = $this->discountTypeRepository->getCompatibleTypesForDiscount($discountId);
+            $compatibleTypeIds = array_column($compatibleTypes, 'id_cart_rule_type');
+        }
+
+        // Build compatibility data for form
+        foreach ($availableTypes as $type) {
+            $fieldName = 'compatible_type_' . $type['id_cart_rule_type'];
+            $compatibilityData[$fieldName] = in_array($type['id_cart_rule_type'], $compatibleTypeIds);
+        }
+
+        return $compatibilityData;
+    }
+
+    private function getCustomerEligibilityData(DiscountForEditing $discountForEditing): array
+    {
+        $customerId = $discountForEditing->getCustomerId();
+        $customerGroupIds = $discountForEditing->getCustomerGroupIds();
+
+        $data = [
+            'children_selector' => DiscountCustomerEligibilityChoiceType::ALL_CUSTOMERS,
+            DiscountCustomerEligibilityChoiceType::CUSTOMER_GROUPS => [],
+            DiscountCustomerEligibilityChoiceType::SINGLE_CUSTOMER => [],
+        ];
+
+        if (!empty($customerGroupIds)) {
+            $data['children_selector'] = DiscountCustomerEligibilityChoiceType::CUSTOMER_GROUPS;
+            $data[DiscountCustomerEligibilityChoiceType::CUSTOMER_GROUPS] = $customerGroupIds;
+        } elseif ($customerId) {
+            try {
+                $customer = $this->customerRepository->get(new CustomerId($customerId));
+                $fullnameAndEmail = sprintf(
+                    '%s %s - %s',
+                    $customer->firstname,
+                    $customer->lastname,
+                    $customer->email
+                );
+
+                $data['children_selector'] = DiscountCustomerEligibilityChoiceType::SINGLE_CUSTOMER;
+                $data[DiscountCustomerEligibilityChoiceType::SINGLE_CUSTOMER] = [
+                    [
+                        'id_customer' => $customerId,
+                        'fullname_and_email' => $fullnameAndEmail,
+                    ],
+                ];
+            } catch (CustomerNotFoundException $e) {
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Check if the discount period is set to "never expires" (>= 100 years duration).
+     */
+    private function isPeriodNeverExpires(?DateTimeInterface $validFrom, ?DateTimeInterface $validTo): bool
+    {
+        if ($validFrom === null || $validTo === null) {
+            return false;
+        }
+
+        $diff = $validFrom->diff($validTo);
+        $years = $diff->y + ($diff->m / 12) + ($diff->d / 365);
+
+        return $years >= 100;
     }
 }

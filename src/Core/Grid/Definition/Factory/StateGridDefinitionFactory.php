@@ -30,6 +30,7 @@ namespace PrestaShop\PrestaShop\Core\Grid\Definition\Factory;
 
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollectionInterface;
+use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ModalFormSubmitBulkAction;
 use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\SubmitBulkAction;
 use PrestaShop\PrestaShop\Core\Grid\Action\GridActionCollection;
 use PrestaShop\PrestaShop\Core\Grid\Action\GridActionCollectionInterface;
@@ -278,6 +279,14 @@ final class StateGridDefinitionFactory extends AbstractGridDefinitionFactory
             )
             ->add(
                 $this->buildBulkDeleteAction('admin_states_delete_bulk')
+            )
+            ->add(
+                (new ModalFormSubmitBulkAction('assign_zone'))
+                    ->setName($this->trans('Assign to a new zone', [], 'Admin.International.Feature'))
+                    ->setOptions([
+                        'submit_route' => 'admin_states_bulk_update_zone',
+                        'modal_id' => 'changeStatesZoneModal',
+                    ])
             );
     }
 }

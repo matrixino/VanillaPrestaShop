@@ -23,7 +23,7 @@ Scenario:
 - Filter products by composition and availability
 - Clear one filter
  */
-describe('FO - Menu and navigation : Clear one filter', async () => {
+describe('FO - Menu and Navigation - Sort and filter : Clear one filter', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let numberOfActiveProducts: number;

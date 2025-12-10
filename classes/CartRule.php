@@ -25,7 +25,9 @@
  */
 
 use PrestaShop\PrestaShop\Adapter\ContainerFinder;
+use PrestaShop\PrestaShop\Adapter\Discount\Application\DiscountApplicationService;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\CartRuleSettings;
+use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
@@ -113,7 +115,7 @@ class CartRuleCore extends ObjectModel
     public $active = true;
     public $date_add;
     public $date_upd;
-    public ?string $type = null;
+    public $id_cart_rule_type;
 
     protected static $cartAmountCache = [];
 
@@ -128,7 +130,7 @@ class CartRuleCore extends ObjectModel
             'id_customer' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'date_from' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true],
             'date_to' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true],
-            'description' => ['type' => self::TYPE_STRING, 'validate' => 'isCleanHtml', 'size' => CartRuleSettings::DESCRIPTION_MAX_LENGTH],
+            'description' => ['type' => self::TYPE_STRING, 'validate' => 'isCleanHtml', 'size' => DiscountSettings::MAX_DESCRIPTION_LENGTH],
             'quantity' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'quantity_per_user' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'priority' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
@@ -158,7 +160,7 @@ class CartRuleCore extends ObjectModel
             'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
             'date_add' => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
             'date_upd' => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
-            'type' => ['type' => self::TYPE_STRING, 'validate' => 'isString'],
+            'id_cart_rule_type' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             /* Lang fields */
             'name' => [
                 'type' => self::TYPE_HTML,
@@ -169,6 +171,31 @@ class CartRuleCore extends ObjectModel
             ],
         ],
     ];
+
+    /**
+     * Get the discount type string from id_cart_rule_type
+     *
+     * @return string|null
+     */
+    public function getType(): ?string
+    {
+        static $typeCache = [];
+
+        if (!$this->id_cart_rule_type) {
+            return null;
+        }
+
+        if (!isset($typeCache[$this->id_cart_rule_type])) {
+            $result = Db::getInstance()->getValue('
+                SELECT type
+                FROM ' . _DB_PREFIX_ . 'cart_rule_type
+                WHERE id_cart_rule_type = ' . (int) $this->id_cart_rule_type
+            );
+            $typeCache[$this->id_cart_rule_type] = $result ?: null;
+        }
+
+        return $typeCache[$this->id_cart_rule_type];
+    }
 
     public static function resetStaticCache()
     {
@@ -260,6 +287,7 @@ class CartRuleCore extends ObjectModel
 			WHERE `' . _DB_PREFIX_ . 'cart_rule_product_rule`.`id_product_rule_group` = `' . _DB_PREFIX_ . 'cart_rule_product_rule_group`.`id_product_rule_group`)');
         $r &= Db::getInstance()->delete('cart_rule_product_rule_value', 'NOT EXISTS (SELECT 1 FROM `' . _DB_PREFIX_ . 'cart_rule_product_rule`
 			WHERE `' . _DB_PREFIX_ . 'cart_rule_product_rule_value`.`id_product_rule` = `' . _DB_PREFIX_ . 'cart_rule_product_rule`.`id_product_rule`)');
+        $r &= Db::getInstance()->delete('cart_rule_compatible_types', '`id_cart_rule` = ' . (int) $this->id);
 
         return (bool) $r;
     }
@@ -1036,10 +1064,34 @@ class CartRuleCore extends ObjectModel
         $container = $containerFinder->getContainer();
         $featureFlagManager = $container->get(FeatureFlagStateCheckerInterface::class);
         if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT)) {
-            // This part will have to handle the incompatibility between discount types, for now we can't edit those incompatibility
-            // rules yet, so for the sake of the initial POC we simplify the check by preventing discounts to be compatible with each others
-            if ($nbOfCartRules >= 1) {
-                return (!$display_error) ? false : $this->trans(sprintf('This voucher is not combinable with an other voucher already in your cart: %s', $cart_rule['code'] ?? ''), [], 'Shop.Notifications.Error');
+            // Use DiscountApplicationService to determine which discounts to apply and their priority order
+            $existingCartRuleIds = array_filter(
+                array_column($otherCartRules, 'id_cart_rule'),
+                function ($id) {
+                    return $id != $this->id;
+                }
+            );
+
+            try {
+                $applicationService = $container->get(DiscountApplicationService::class);
+                $result = $applicationService->determineDiscountsToApply($this->id, $existingCartRuleIds);
+
+                if (!$result->canApply()) {
+                    $errorMessage = $result->getRejectionReason()
+                        ?? 'This voucher is not combinable with other vouchers in your cart';
+
+                    return (!$display_error) ? false : $this->trans($errorMessage, [], 'Shop.Notifications.Error');
+                }
+
+                // Remove conflicting discounts that were replaced by higher priority ones
+                foreach ($result->getDiscountsToRemove() as $ruleIdToRemove) {
+                    $cart->removeCartRule($ruleIdToRemove);
+                }
+
+                // Note: The actual application order is determined by the result
+                // The cart will apply discounts in the priority order specified by $result->getDiscountsToApply()
+            } catch (Exception $e) {
+                // Fallback: if service is not available or discount has no type, skip compatibility check
             }
         }
 
@@ -1466,7 +1518,7 @@ class CartRuleCore extends ObjectModel
             $featureFlagManager = $container->get(FeatureFlagStateCheckerInterface::class);
 
             if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT)) {
-                if ($this->type === DiscountType::ORDER_LEVEL && $this->reduction_percent > 0.00 && $this->reduction_product == 0) {
+                if ($this->getType() === DiscountType::ORDER_LEVEL && $this->reduction_percent > 0.00 && $this->reduction_product == 0) {
                     $order_products_total = $context->cart->getOrderTotal($use_tax, Cart::ONLY_PRODUCTS, $package_products);
                     $order_shipping_total = $context->cart->getOrderTotal($use_tax, Cart::ONLY_SHIPPING, $package_products);
                     $order_total = $order_products_total + $order_shipping_total;
@@ -1651,7 +1703,7 @@ class CartRuleCore extends ObjectModel
 
                         // The reduction cannot exceed the products total, except when we do not want it to be limited (for the partial use calculation)
                         if ($filter != CartRule::FILTER_ACTION_ALL_NOCAP) {
-                            if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $this->type === DiscountType::ORDER_LEVEL) {
+                            if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $this->getType() === DiscountType::ORDER_LEVEL) {
                                 $max_reduction_amount = $this->reduction_tax
                                     ? $cart_amount_ti + $context->cart->getOrderTotal(true, Cart::ONLY_SHIPPING, $package_products)
                                     : $cart_amount_te + $context->cart->getOrderTotal(false, Cart::ONLY_SHIPPING, $package_products);
@@ -1707,7 +1759,7 @@ class CartRuleCore extends ObjectModel
                         $current_cart_amount = max($current_cart_amount - (float) $previous_reduction_amount, 0);
                     }
 
-                    if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $this->type === DiscountType::ORDER_LEVEL) {
+                    if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $this->getType() === DiscountType::ORDER_LEVEL) {
                         $current_cart_amount += $this->reduction_tax
                             ? $context->cart->getOrderTotal(true, Cart::ONLY_SHIPPING, $package_products)
                             : $context->cart->getOrderTotal(false, Cart::ONLY_SHIPPING, $package_products);

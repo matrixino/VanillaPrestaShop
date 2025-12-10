@@ -143,3 +143,8 @@ services:
     arguments:
       $psImageDir: !php/const _PS_IMG_DIR_
       $psImageBaseUrl: !php/const _PS_IMG_
+
+  PrestaShop\PrestaShop\Core\Form\ChoiceProvider\AttributeGroupChoiceProvider:
+    autowire: true
+    arguments:
+      $shopId: '@=service("prestashop.adapter.shop.context").getContextShopID()'

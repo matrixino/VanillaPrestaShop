@@ -42,6 +42,7 @@ export default class TranslatableChoice {
     );
 
     $('select.translatable_choice_language').trigger('change');
+    $('select.translatable_choice').trigger('change');
   }
 
   filterSelect(event: JQueryEventObject): void {

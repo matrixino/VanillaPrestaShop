@@ -107,7 +107,7 @@ class CartRuleCalculator
         if (!CartRule::isFeatureActive()) {
             return;
         }
-        if ($cartRule->type === DiscountType::ORDER_LEVEL && (float) $cartRule->reduction_percent > 0 && $cartRule->reduction_product == 0) {
+        if ($cartRule->getType() === DiscountType::ORDER_LEVEL && (float) $cartRule->reduction_percent > 0 && $cartRule->reduction_product == 0) {
             if ($this->featureFlagManager !== null && $this->featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT)) {
                 $initialShippingFees = $this->calculator->getFees()->getInitialShippingFees();
                 $productsTotal = $this->calculator->getRowTotal();
@@ -325,7 +325,7 @@ class CartRuleCalculator
                 $cartRuleData->addDiscountApplied($amount);
             }
 
-            if ($this->featureFlagManager !== null && $this->featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $cartRule->type === DiscountType::ORDER_LEVEL) {
+            if ($this->featureFlagManager !== null && $this->featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT) && $cartRule->getType() === DiscountType::ORDER_LEVEL) {
                 $totalProducts = $cartRule->reduction_tax ? $totalTaxIncl : $totalTaxExcl;
                 // The total discount is superior to the products amount, so we apply the remaining part of the discount globally
                 if ($totalDiscountConverted > $totalProducts) {

@@ -76,8 +76,8 @@ $install->initializeTestContext();
 $install->installDefaultData('test_shop', false, false, false);
 $install->populateDatabase();
 $install->configureShop([
-    'admin_firstname' => 'puff',
-    'admin_lastname' => 'daddy',
+    'admin_firstname' => 'puffin',
+    'admin_lastname' => 'mummy',
     'admin_password' => 'test',
     'admin_email' => 'test@prestashop.com',
     'configuration_agrement' => true,
@@ -122,3 +122,4 @@ $resourceResetter->backupDownloads();
 $resourceResetter->backupTestModules();
 
 $logger->log('Test DB was successfully created');
+$logger->log('Clearing cache in progress, please wait...');

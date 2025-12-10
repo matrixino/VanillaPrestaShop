@@ -54,6 +54,7 @@ class AdminModuleDataProvider implements ModuleInterface
         Module::ACTION_DISABLE => 'Disable',
         Module::ACTION_RESET => 'Reset',
         Module::ACTION_UPGRADE => 'Update',
+        Module::ACTION_UPLOAD => 'Upload',
         Module::ACTION_CONFIGURE => 'Configure',
         Module::ACTION_DELETE => 'Delete',
     ];
@@ -212,9 +213,6 @@ class AdminModuleDataProvider implements ModuleInterface
                     'action' => $action,
                     'module_name' => $moduleAttributes->get('name'),
                 ];
-                if ($action === 'upgrade' && $moduleAttributes->get('download_url') !== null) {
-                    $parameters['source'] = $moduleAttributes->get('download_url');
-                }
                 $urls[$action] = $this->router->generate('admin_module_manage_action', $parameters);
             }
 
@@ -237,6 +235,15 @@ class AdminModuleDataProvider implements ModuleInterface
 
                 if (!$module->canBeUpgraded()) {
                     unset($urls['upgrade']);
+                } elseif ($moduleAttributes->get('download_url') !== null) {
+                    // If the module can be upgraded and has a download URL,
+                    // we also generate an upload URL to be used for uploading the archive during the module upgrade process.
+                    $upload_url = $this->router->generate('admin_module_manage_action', [
+                        'action' => 'upload',
+                        'module_name' => $moduleAttributes->get('name'),
+                        'source' => $moduleAttributes->get('download_url'),
+                    ]);
+                    $moduleAttributes->set('upload_url', $upload_url);
                 }
 
                 if (!$module->isConfigurable()) {

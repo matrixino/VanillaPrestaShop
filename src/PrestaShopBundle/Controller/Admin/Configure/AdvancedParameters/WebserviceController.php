@@ -29,6 +29,9 @@ namespace PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters;
 use Exception;
 use PrestaShop\PrestaShop\Adapter\Webservice\WebserviceKeyEraser;
 use PrestaShop\PrestaShop\Adapter\Webservice\WebserviceKeyStatusModifier;
+use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\BulkDeleteWebserviceKeyCommand;
+use PrestaShop\PrestaShop\Core\Domain\Webservice\Command\DeleteWebserviceKeyCommand;
+use PrestaShop\PrestaShop\Core\Domain\Webservice\Exception\CannotDeleteWebserviceException;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\Exception\DuplicateWebserviceKeyException;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\Exception\WebserviceConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Webservice\ValueObject\Key;
@@ -181,15 +184,15 @@ class WebserviceController extends PrestaShopAdminController
         int $webserviceKeyId,
         WebserviceKeyEraser $webserviceEraser,
     ): RedirectResponse {
-        $errors = $webserviceEraser->erase([$webserviceKeyId]);
+        try {
+            $this->dispatchCommand(new DeleteWebserviceKeyCommand($webserviceKeyId));
 
-        if (!empty($errors)) {
-            $this->addFlashErrors($errors);
-        } else {
             $this->addFlash(
                 'success',
                 $this->trans('Successful deletion', [], 'Admin.Notifications.Success')
             );
+        } catch (CannotDeleteWebserviceException $e) {
+            $this->addFlashErrors($e->getErrors());
         }
 
         return $this->redirectToRoute('admin_webservice_keys_index');
@@ -208,16 +211,17 @@ class WebserviceController extends PrestaShopAdminController
         Request $request,
         WebserviceKeyEraser $webserviceEraser,
     ): RedirectResponse {
-        $webserviceToDelete = $request->request->all('webservice_key_bulk_action');
-        $errors = $webserviceEraser->erase($webserviceToDelete);
+        $webserviceKeyIds = $request->request->all('webservice_key_bulk_action');
 
-        if (!empty($errors)) {
-            $this->addFlashErrors($errors);
-        } else {
+        try {
+            $this->dispatchCommand(new BulkDeleteWebserviceKeyCommand($webserviceKeyIds));
+
             $this->addFlash(
                 'success',
                 $this->trans('The selection has been successfully deleted.', [], 'Admin.Notifications.Success')
             );
+        } catch (CannotDeleteWebserviceException $e) {
+            $this->addFlashErrors($e->getErrors());
         }
 
         return $this->redirectToRoute('admin_webservice_keys_index');

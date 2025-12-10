@@ -126,8 +126,12 @@ class DiscountValidator extends AbstractObjectModelValidator
                 }
                 break;
             case DiscountType::PRODUCT_LEVEL:
-                if ($command->getReductionProduct() === 0 || $command->getPercentDiscount() === null) {
-                    throw new DiscountConstraintException('Product discount must have his properties set.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_PROPERTIES);
+                if ($command->getReductionProduct() === 0) {
+                    throw new DiscountConstraintException('Product discount must have reduction product set.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_PROPERTIES);
+                }
+                // Must have either amount or percent discount
+                if ($command->getAmountDiscount() === null && $command->getPercentDiscount() === null) {
+                    throw new DiscountConstraintException('Product discount must have a discount value (amount or percent).', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_PROPERTIES);
                 }
                 break;
             case DiscountType::FREE_GIFT:

@@ -50,8 +50,9 @@ class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterf
     {
         $cartRule = $this->discountRepository->get($query->getDiscountId());
         $discountConditions = $this->discountRepository->getProductRulesGroup($query->getDiscountId());
-        $carrierIds = $this->discountRepository->getCarriers($query->getDiscountId());
-        $countryIds = $this->discountRepository->getCountries($query->getDiscountId());
+        $carrierIds = $this->discountRepository->getCarriersIds($query->getDiscountId());
+        $countryIds = $this->discountRepository->getCountriesIds($query->getDiscountId());
+        $customerGroupIds = $this->discountRepository->getCustomerGroupsIds($query->getDiscountId());
 
         return new DiscountForEditing(
             $query->getDiscountId()->getValue(),
@@ -67,7 +68,7 @@ class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterf
             (int) $cartRule->id_customer,
             $cartRule->highlight,
             $cartRule->partial_use,
-            $cartRule->type,
+            $cartRule->getType(),
             (float) $cartRule->reduction_percent > 0.00 ? new DecimalNumber($cartRule->reduction_percent) : null,
             (float) $cartRule->reduction_amount > 0.00 ? new DecimalNumber($cartRule->reduction_amount) : null,
             $cartRule->reduction_currency,
@@ -83,6 +84,7 @@ class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterf
             $cartRule->minimum_amount_shipping,
             $carrierIds,
             $countryIds,
+            $customerGroupIds,
         );
     }
 }

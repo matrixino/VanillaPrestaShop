@@ -129,7 +129,8 @@ class OrderControllerCore extends FrontController
                 $this->context,
                 $this->getTranslator(),
                 $this->objectPresenter,
-                new PriceFormatter()
+                new PriceFormatter(),
+                $this->cart_presenter,
             );
         } else {
             $deliveryOptionsFinder = new DeliveryOptionsFinder(
@@ -246,7 +247,8 @@ class OrderControllerCore extends FrontController
 
         if ($this->context->cart->isAllProductsInStock() !== true
             || $this->context->cart->checkAllProductsAreStillAvailableInThisState() !== true
-            || $this->context->cart->checkAllProductsHaveMinimalQuantities() !== true) {
+            || $this->context->cart->checkAllProductsHaveMinimalQuantities() !== true
+            || $this->context->cart->checkCountriesAreEnabled() !== true) {
             $responseData['errors'] = true;
             $responseData['cartUrl'] = $this->context->link->getPageLink('cart', null, null, ['action' => 'show']);
         }
@@ -285,6 +287,11 @@ class OrderControllerCore extends FrontController
         if ($this->context->cart->isAllProductsInStock() !== true
             || $this->context->cart->checkAllProductsAreStillAvailableInThisState() !== true
             || $this->context->cart->checkAllProductsHaveMinimalQuantities() !== true) {
+            $shouldRedirectToCart = true;
+        }
+
+        // Additionally, check that the addresses are valid
+        if ($this->context->cart->checkCountriesAreEnabled() !== true) {
             $shouldRedirectToCart = true;
         }
 
@@ -439,7 +446,7 @@ class OrderControllerCore extends FrontController
                 new ConditionsToApproveFinder(
                     $this->context,
                     $translator
-                )
+                ),
             ));
 
         return $checkoutProcess;
