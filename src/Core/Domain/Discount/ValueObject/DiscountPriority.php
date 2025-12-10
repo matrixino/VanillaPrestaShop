@@ -72,14 +72,14 @@ class DiscountPriority
      * 2. Priority field (lower number = higher priority)
      * 3. Creation date (older = higher priority)
      *
-     * @param array $discount1 Discount data with 'type', 'priority', 'date_add' keys
-     * @param array $discount2 Discount data with 'type', 'priority', 'date_add' keys
+     * @param array $discount1 Discount data with 'discount_type', 'priority', 'date_add' keys
+     * @param array $discount2 Discount data with 'discount_type', 'priority', 'date_add' keys
      */
     public static function compareDiscounts(array $discount1, array $discount2): int
     {
         // 1. Compare by type priority
-        $typePriority1 = self::getPriorityForType($discount1['type'] ?? '');
-        $typePriority2 = self::getPriorityForType($discount2['type'] ?? '');
+        $typePriority1 = self::getPriorityForType($discount1['discount_type'] ?? '');
+        $typePriority2 = self::getPriorityForType($discount2['discount_type'] ?? '');
 
         if ($typePriority1 !== $typePriority2) {
             return $typePriority1 <=> $typePriority2;

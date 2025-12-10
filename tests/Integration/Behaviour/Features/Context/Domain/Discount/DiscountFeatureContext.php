@@ -630,7 +630,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $qb = $connection->createQueryBuilder();
             $qb->select('crt.id_cart_rule_type')
                 ->from($dbPrefix . 'cart_rule_type', 'crt')
-                ->where('crt.type = :typeString')
+                ->where('crt.discount_type = :typeString')
                 ->setParameter('typeString', $typeString);
 
             $result = $qb->executeQuery()->fetchAssociative();
@@ -677,7 +677,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
 
         // Get actual compatible types
         $qb = $connection->createQueryBuilder();
-        $qb->select('crt.type')
+        $qb->select('crt.discount_type')
             ->from($dbPrefix . 'cart_rule_compatible_types', 'crct')
             ->innerJoin('crct', $dbPrefix . 'cart_rule_type', 'crt', 'crct.id_cart_rule_type = crt.id_cart_rule_type')
             ->where('crct.id_cart_rule = :discountId')
@@ -685,7 +685,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             ->setParameter('discountId', $discountId);
 
         $results = $qb->executeQuery()->fetchAllAssociative();
-        $actualTypeStrings = array_column($results, 'type');
+        $actualTypeStrings = array_column($results, 'discount_type');
 
         // Sort both arrays for comparison
         sort($expectedTypeStrings);

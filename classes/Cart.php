@@ -486,7 +486,7 @@ class CartCore extends ObjectModel
 
             if ($useNewDiscountSystem) {
                 $result = Db::getInstance()->executeS(
-                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`, crt.`type` as discount_type
+                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`, crt.`discount_type` as discount_type
                     FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
@@ -585,7 +585,7 @@ class CartCore extends ObjectModel
 
             if ($useNewDiscountSystem) {
                 $result = Db::getInstance()->executeS(
-                    'SELECT cr.`id_cart_rule`, crt.`type` as discount_type, cr.`priority`, cr.`date_add`
+                    'SELECT cr.`id_cart_rule`, crt.`discount_type` as discount_type, cr.`priority`, cr.`date_add`
                     FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
