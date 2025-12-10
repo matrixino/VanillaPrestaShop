@@ -122,6 +122,10 @@ describe('API : Check endpoints', async () => {
         // tests/UI/campaigns/functional/API/02_endpoints/02_attribute/11_deleteAttributesGroupsBulkDelete.ts
         '/attributes/groups/bulk-delete: DELETE',
         // @todo: add tests
+        '/attributes/groups/positions: PATCH',
+        // @todo: add tests
+        '/attributes/groups/{attributeGroupId}/attributes/positions: PATCH',
+        // @todo: add tests
         '/attributes/groups/{attributeGroupId}/attributes: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/02_attribute/07_deleteAttributesGroupId.ts
         '/attributes/groups/{attributeGroupId}: DELETE',

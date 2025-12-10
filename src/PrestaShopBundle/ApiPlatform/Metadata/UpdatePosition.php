@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -28,17 +29,33 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\ApiPlatform\Metadata;
 
-use ApiPlatform\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\Parameters;
 use ApiPlatform\OpenApi\Attributes\Webhook;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\State\OptionsInterface;
+use Attribute;
+use PrestaShopBundle\ApiPlatform\Processor\UpdatePositionProcessor;
 use Stringable;
 
-abstract class AbstractCQRSOperation extends AbstractScopedOperation
+/**
+ * Class UpdatePosition is a custom operation to update the entities positions.
+ * The API Resource itself represent a position modification:
+ *  - rowId: int (can be customized via the PositionCollection attribute)
+ *  - newPosition: int
+ *  - parentId: int (optional, customizable vie $parentIdField)
+ *
+ * This operation should be used on a dedicated ApiResource class (one operation only)
+ * containing a field
+ *
+ * #[PositionCollection]
+ * public array $positions;
+ *
+ * The attribute allows automatizing the normalization and documentation process.
+ */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
+class UpdatePosition extends AbstractScopedOperation
 {
     public function __construct(
-        string $method = self::METHOD_GET,
         ?string $uriTemplate = null,
         ?array $types = null,
         $formats = null,
@@ -115,104 +132,58 @@ abstract class AbstractCQRSOperation extends AbstractScopedOperation
         array|Parameters|null $parameters = null,
         ?bool $queryParameterValidationEnabled = null,
         array $extraProperties = [],
-        ?string $CQRSQuery = null,
         array $scopes = [],
-        ?array $CQRSQueryMapping = null,
         ?array $ApiResourceMapping = null,
         ?bool $experimentalOperation = null,
+        ?string $positionDefinition = null,
+        ?string $parentIdField = null,
     ) {
         $passedArguments = \get_defined_vars();
+        $passedArguments['method'] = self::METHOD_PATCH;
+        // Disable read listener because it is forced when using PATCH method, but we don't need it since we rely on CQRS commands/queries
+        $passedArguments['read'] = $read ?? false;
+        // Usually position operation has nothing to show so no output is needed
+        $passedArguments['output'] = $output ?? false;
+        $passedArguments['processor'] = $processor ?? UpdatePositionProcessor::class;
 
-        if (!empty($CQRSQuery)) {
-            $this->checkArgumentAndExtraParameterValidity('CQRSQuery', $CQRSQuery, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['CQRSQuery'] = $CQRSQuery;
+        if (!empty($positionDefinition)) {
+            $this->checkArgumentAndExtraParameterValidity('positionDefinition', $positionDefinition, $passedArguments['extraProperties']);
+            $passedArguments['extraProperties']['positionDefinition'] = $positionDefinition;
         }
+        unset($passedArguments['positionDefinition']);
 
-        if (!empty($CQRSQueryMapping)) {
-            $this->checkArgumentAndExtraParameterValidity('CQRSQueryMapping', $CQRSQueryMapping, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['CQRSQueryMapping'] = $CQRSQueryMapping;
+        if (!empty($parentIdField)) {
+            $this->checkArgumentAndExtraParameterValidity('parentIdField', $parentIdField, $passedArguments['extraProperties']);
+            $passedArguments['extraProperties']['parentIdField'] = $parentIdField;
         }
-
-        // Remove custom arguments
-        unset($passedArguments['CQRSQuery']);
-        unset($passedArguments['CQRSQueryMapping']);
+        unset($passedArguments['parentIdField']);
 
         parent::__construct(...$passedArguments);
     }
 
-    public function getScopes(): array
+    public function getPositionDefinition(): ?string
     {
-        return $this->extraProperties['scopes'] ?? [];
+        return $this->extraProperties['positionDefinition'] ?? null;
     }
 
-    public function withScopes(array $scopes): static
+    public function withPositionDefinition(string $positionDefinition): static
     {
         $self = clone $this;
-        $self->extraProperties['scopes'] = $scopes;
+        $self->extraProperties['positionDefinition'] = $positionDefinition;
 
         return $self;
     }
 
-    public function getCQRSQuery(): ?string
+    public function getParentIdField(): ?string
     {
-        return $this->extraProperties['CQRSQuery'] ?? null;
+        return $this->extraProperties['parentIdField'] ?? null;
     }
 
-    public function withCQRSQuery(string $CQRSQuery): static
+    public function withParentIdField(string $parentIdField): static
     {
         $self = clone $this;
-        $self->extraProperties['CQRSQuery'] = $CQRSQuery;
+        $self->extraProperties['parentIdField'] = $parentIdField;
 
         return $self;
-    }
-
-    public function getCQRSQueryMapping(): ?array
-    {
-        return $this->extraProperties['CQRSQueryMapping'] ?? null;
-    }
-
-    public function withCQRSQueryMapping(array $CQRSQuery): static
-    {
-        $self = clone $this;
-        $self->extraProperties['CQRSQueryMapping'] = $CQRSQuery;
-
-        return $self;
-    }
-
-    public function getApiResourceMapping(): ?array
-    {
-        return $this->extraProperties['ApiResourceMapping'] ?? null;
-    }
-
-    public function withApiResourceMapping(array $CQRSQuery): static
-    {
-        $self = clone $this;
-        $self->extraProperties['ApiResourceMapping'] = $CQRSQuery;
-
-        return $self;
-    }
-
-    public function getExperimentalOperation(): bool
-    {
-        return $this->extraProperties['experimentalOperation'] ?? false;
-    }
-
-    public function withExperimentalOperation(bool $experimentalOperation): static
-    {
-        $self = clone $this;
-        $self->extraProperties['experimentalOperation'] = $experimentalOperation;
-
-        return $self;
-    }
-
-    protected function checkArgumentAndExtraParameterValidity(string $extraParameterName, $constructorParameterValue, array $extraProperties): void
-    {
-        if (!empty($extraProperties[$extraParameterName]) && $extraProperties[$extraParameterName] !== $constructorParameterValue) {
-            throw new InvalidArgumentException(sprintf(
-                'Specifying an extra property %s and a %s argument that are different is invalid',
-                $extraParameterName,
-                $extraParameterName
-            ));
-        }
     }
 }

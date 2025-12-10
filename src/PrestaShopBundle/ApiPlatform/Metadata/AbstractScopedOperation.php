@@ -29,13 +29,14 @@ declare(strict_types=1);
 namespace PrestaShopBundle\ApiPlatform\Metadata;
 
 use ApiPlatform\Exception\InvalidArgumentException;
+use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Parameters;
 use ApiPlatform\OpenApi\Attributes\Webhook;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\State\OptionsInterface;
 use Stringable;
 
-abstract class AbstractCQRSOperation extends AbstractScopedOperation
+abstract class AbstractScopedOperation extends HttpOperation
 {
     public function __construct(
         string $method = self::METHOD_GET,
@@ -115,27 +116,34 @@ abstract class AbstractCQRSOperation extends AbstractScopedOperation
         array|Parameters|null $parameters = null,
         ?bool $queryParameterValidationEnabled = null,
         array $extraProperties = [],
-        ?string $CQRSQuery = null,
         array $scopes = [],
-        ?array $CQRSQueryMapping = null,
         ?array $ApiResourceMapping = null,
         ?bool $experimentalOperation = null,
     ) {
         $passedArguments = \get_defined_vars();
 
-        if (!empty($CQRSQuery)) {
-            $this->checkArgumentAndExtraParameterValidity('CQRSQuery', $CQRSQuery, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['CQRSQuery'] = $CQRSQuery;
+        if (!empty($scopes)) {
+            $extraScopes = $passedArguments['extraProperties']['scopes'] ?? [];
+            $passedArguments['extraProperties']['scopes'] = array_values(array_unique(array_merge($extraScopes, $scopes)));
         }
 
-        if (!empty($CQRSQueryMapping)) {
-            $this->checkArgumentAndExtraParameterValidity('CQRSQueryMapping', $CQRSQueryMapping, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['CQRSQueryMapping'] = $CQRSQueryMapping;
+        if (!empty($ApiResourceMapping)) {
+            $this->checkArgumentAndExtraParameterValidity('ApiResourceMapping', $ApiResourceMapping, $passedArguments['extraProperties']);
+            $passedArguments['extraProperties']['ApiResourceMapping'] = $ApiResourceMapping;
+        }
+
+        if (null !== $experimentalOperation) {
+            $this->checkArgumentAndExtraParameterValidity('experimentalOperation', $experimentalOperation, $passedArguments['extraProperties']);
+            $passedArguments['extraProperties']['experimentalOperation'] = $experimentalOperation;
         }
 
         // Remove custom arguments
-        unset($passedArguments['CQRSQuery']);
-        unset($passedArguments['CQRSQueryMapping']);
+        unset($passedArguments['scopes']);
+        unset($passedArguments['ApiResourceMapping']);
+        unset($passedArguments['experimentalOperation']);
+
+        // Unless especially specified we only handle JSON format by default
+        $passedArguments['formats'] = $formats ?? ['json'];
 
         parent::__construct(...$passedArguments);
     }
@@ -149,32 +157,6 @@ abstract class AbstractCQRSOperation extends AbstractScopedOperation
     {
         $self = clone $this;
         $self->extraProperties['scopes'] = $scopes;
-
-        return $self;
-    }
-
-    public function getCQRSQuery(): ?string
-    {
-        return $this->extraProperties['CQRSQuery'] ?? null;
-    }
-
-    public function withCQRSQuery(string $CQRSQuery): static
-    {
-        $self = clone $this;
-        $self->extraProperties['CQRSQuery'] = $CQRSQuery;
-
-        return $self;
-    }
-
-    public function getCQRSQueryMapping(): ?array
-    {
-        return $this->extraProperties['CQRSQueryMapping'] ?? null;
-    }
-
-    public function withCQRSQueryMapping(array $CQRSQuery): static
-    {
-        $self = clone $this;
-        $self->extraProperties['CQRSQueryMapping'] = $CQRSQuery;
 
         return $self;
     }

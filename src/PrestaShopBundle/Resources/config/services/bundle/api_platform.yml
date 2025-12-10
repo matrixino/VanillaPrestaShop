@@ -62,6 +62,8 @@ services:
     autowire: true
   PrestaShopBundle\ApiPlatform\LocalizedValueUpdater:
     autowire: true
+  PrestaShopBundle\ApiPlatform\PositionCollectionUpdater:
+    autowire: true
 
   # This is a custom validator for CQRS commands
   PrestaShopBundle\ApiPlatform\Validator\CQRSApiValidator:
@@ -88,6 +90,11 @@ services:
     autowire: true
     arguments:
       - '@prestashop.core.command_bus'
+
+  # Custom processor for position update
+  PrestaShopBundle\ApiPlatform\Processor\UpdatePositionProcessor:
+    tags: [ 'api_platform.state_processor' ]
+    autowire: true
 
   # Custom provider for paginated listing
   PrestaShopBundle\ApiPlatform\Provider\QueryListProvider:

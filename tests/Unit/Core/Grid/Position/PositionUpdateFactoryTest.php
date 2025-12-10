@@ -103,11 +103,6 @@ class PositionUpdateFactoryTest extends TestCase
         $this->checkDataValidation($data, PositionUpdateFactory::POSITION_KEY, [0, 'rowId']);
 
         $data = ['positions' => [
-            ['rowId' => 1],
-        ]];
-        $this->checkDataValidation($data, PositionUpdateFactory::POSITION_KEY, [0, 'oldPosition']);
-
-        $data = ['positions' => [
             ['rowId' => 1, 'oldPosition' => 1],
         ]];
         $this->checkDataValidation($data, PositionUpdateFactory::POSITION_KEY, [0, 'newPosition']);

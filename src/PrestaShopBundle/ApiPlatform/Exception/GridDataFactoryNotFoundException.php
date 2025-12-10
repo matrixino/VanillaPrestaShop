@@ -32,7 +32,7 @@ namespace PrestaShopBundle\ApiPlatform\Exception;
 use ApiPlatform\Exception\InvalidResourceException;
 
 /**
- * Is thrown when the Query builder property is not defined on a resource on which it should be.
+ * Is thrown when the gridDataFactory property is not defined on a resource on which it should be.
  */
 class GridDataFactoryNotFoundException extends InvalidResourceException
 {

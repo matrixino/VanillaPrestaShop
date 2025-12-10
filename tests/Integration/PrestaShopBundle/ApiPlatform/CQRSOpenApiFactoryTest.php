@@ -734,6 +734,37 @@ class CQRSOpenApiFactoryTest extends KernelTestCase
             ]),
         ];
 
+        yield 'UpdatePositionResource, the documentation is adapted thanks to the PositionCollection attribute' => [
+            'UpdatePositionResource',
+            new ArrayObject([
+                'type' => 'object',
+                'description' => '',
+                'deprecated' => false,
+                'properties' => [
+                    'positions' => new ArrayObject([
+                        'type' => 'array',
+                        'items' => new ArrayObject([
+                            'type' => 'object',
+                            'properties' => new ArrayObject([
+                                'testId' => ['type' => 'integer'],
+                                'newPosition' => ['type' => 'integer'],
+                            ]),
+                        ]),
+                        'example' => new ArrayObject([
+                            [
+                                'testId' => 5,
+                                'newPosition' => 3,
+                            ],
+                            [
+                                'testId' => 8,
+                                'newPosition' => 1,
+                            ],
+                        ]),
+                    ]),
+                ],
+            ]),
+        ];
+
         // @todo Add a schema with a dateTime like discount when it is released or virtual product's expiration date.
     }
 

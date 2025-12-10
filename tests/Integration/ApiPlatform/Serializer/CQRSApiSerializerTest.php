@@ -63,6 +63,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\File\File;
 use Tests\Integration\Utility\LanguageTrait;
 use Tests\Resources\ApiPlatform\Resources\LocalizedResource;
+use Tests\Resources\ApiPlatform\Resources\UpdatePositionResource;
 use Tests\Resources\Resetter\LanguageResetter;
 use Tests\Resources\ResourceResetter;
 
@@ -523,7 +524,8 @@ class CQRSApiSerializerTest extends KernelTestCase
         $serializer = self::getContainer()->get(CQRSApiSerializer::class);
         foreach ($this->getNormalizationData() as $useCase => $normalizationData) {
             list($dataToNormalize, $expectedNormalizedData, $normalizationMapping, $extraContext) = array_pad($normalizationData, 4, null);
-            $context = [NormalizationMapper::NORMALIZATION_MAPPING => ($normalizationMapping ?? [])] + ($extraContext ?? []);
+            // Force iri in context to avoid calling the IriConverter from ApiPlatform to run and cause error not relevant for this test
+            $context = ['iri' => 'kiri'] + [NormalizationMapper::NORMALIZATION_MAPPING => ($normalizationMapping ?? [])] + ($extraContext ?? []);
 
             self::assertEquals($expectedNormalizedData, $serializer->normalize($dataToNormalize, null, $context), $useCase);
         }
@@ -531,6 +533,46 @@ class CQRSApiSerializerTest extends KernelTestCase
 
     public static function getNormalizationData(): iterable
     {
+        $productResource = new Product();
+        $productResource->type = ProductType::TYPE_STANDARD;
+        $productResource->enabled = true;
+        $productResource->names = [
+            'en-US' => 'Product name',
+            'fr-FR' => 'Nom du produit',
+        ];
+        yield 'product resource with localized values' => [
+            $productResource,
+            [
+                'type' => ProductType::TYPE_STANDARD,
+                'enabled' => true,
+                'names' => [
+                    'en-US' => 'Product name',
+                    'fr-FR' => 'Nom du produit',
+                ],
+                'redirectTarget' => null,
+                'availableDate' => null,
+            ],
+        ];
+
+        $positionResource = new UpdatePositionResource();
+        $positionResource->positions = [
+            [
+                'testId' => 3,
+                'newPosition' => 1,
+            ],
+        ];
+        yield 'resource with position collection' => [
+            $positionResource,
+            [
+                'positions' => [
+                    [
+                        'rowId' => 3,
+                        'newPosition' => 1,
+                    ],
+                ],
+            ],
+        ];
+
         $virtualProduct = new VirtualProductFileForEditing(
             42,
             'virtual file',
@@ -548,15 +590,6 @@ class CQRSApiSerializerTest extends KernelTestCase
                 'accessDays' => 23,
                 'downloadTimesLimit' => 1,
                 'expirationDate' => '1969-07-11 00:00:00',
-            ],
-        ];
-
-        $createdApiClient = new CreatedApiClient(42, 'my_secret');
-        yield 'test' => [
-            $createdApiClient,
-            [
-                'apiClientId' => 42,
-                'secret' => 'my_secret',
             ],
         ];
 
@@ -596,6 +629,15 @@ class CQRSApiSerializerTest extends KernelTestCase
                     'fr-FR' => 'http://mylink.fr',
                     'en-US' => 'http://mylink.com',
                 ],
+            ],
+        ];
+
+        $createdApiClient = new CreatedApiClient(42, 'my_secret');
+        yield 'test' => [
+            $createdApiClient,
+            [
+                'apiClientId' => 42,
+                'secret' => 'my_secret',
             ],
         ];
 

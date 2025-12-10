@@ -24,65 +24,25 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-namespace PrestaShop\PrestaShop\Core\Grid\Position;
+namespace Tests\Resources\ApiPlatform\Resources;
 
-/**
- * Class PositionModification contains the modification for a
- * designated row.
- */
-final class PositionModification implements PositionModificationInterface
+use ApiPlatform\Metadata\ApiResource;
+use PrestaShopBundle\ApiPlatform\Metadata\PositionCollection;
+use PrestaShopBundle\ApiPlatform\Metadata\UpdatePosition;
+
+#[ApiResource(
+    operations: [
+        new UpdatePosition(
+            uriTemplate: '/test/positions',
+            scopes: [
+                'test_positions_write',
+            ],
+            positionDefinition: 'prestashop.core.grid.test.position_definition',
+        ),
+    ]
+)]
+class UpdatePositionResource
 {
-    /**
-     * @var string|int
-     */
-    private $id;
-
-    /**
-     * @var int
-     */
-    private $oldPosition;
-
-    /**
-     * @var int
-     */
-    private $newPosition;
-
-    /**
-     * @param string|int $id
-     * @param int|null $oldPosition
-     * @param int $newPosition
-     */
-    public function __construct(
-        $id,
-        $oldPosition,
-        $newPosition
-    ) {
-        $this->id = $id;
-        $this->oldPosition = $oldPosition;
-        $this->newPosition = $newPosition;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOldPosition()
-    {
-        return $this->oldPosition;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getNewPosition()
-    {
-        return $this->newPosition;
-    }
+    #[PositionCollection(rowIdField: 'testId')]
+    public array $positions;
 }

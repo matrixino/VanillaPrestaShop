@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -24,65 +25,15 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-namespace PrestaShop\PrestaShop\Core\Grid\Position;
+declare(strict_types=1);
+
+namespace PrestaShopBundle\ApiPlatform\Exception;
+
+use ApiPlatform\Exception\InvalidResourceException;
 
 /**
- * Class PositionModification contains the modification for a
- * designated row.
+ * Is thrown when the positionDefinition property is not defined on a resource on which it should be.
  */
-final class PositionModification implements PositionModificationInterface
+class PositionDefinitionNotFoundException extends InvalidResourceException
 {
-    /**
-     * @var string|int
-     */
-    private $id;
-
-    /**
-     * @var int
-     */
-    private $oldPosition;
-
-    /**
-     * @var int
-     */
-    private $newPosition;
-
-    /**
-     * @param string|int $id
-     * @param int|null $oldPosition
-     * @param int $newPosition
-     */
-    public function __construct(
-        $id,
-        $oldPosition,
-        $newPosition
-    ) {
-        $this->id = $id;
-        $this->oldPosition = $oldPosition;
-        $this->newPosition = $newPosition;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOldPosition()
-    {
-        return $this->oldPosition;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getNewPosition()
-    {
-        return $this->newPosition;
-    }
 }

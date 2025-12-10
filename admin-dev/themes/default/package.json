@@ -50,7 +50,7 @@
     "open-sans-fonts": "^1.6.2",
     "path": "^0.12.7",
     "perfect-scrollbar": "^1.5.5",
-    "prestakit": "^2.0.1",
+    "prestakit": "^2.0.5",
     "terser-webpack-plugin": "^5.3.10",
     "vazirmatn": "33.0.3",
     "webpack-font-preload-plugin": "^1.5.0",
