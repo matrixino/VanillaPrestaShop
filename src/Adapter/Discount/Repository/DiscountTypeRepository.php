@@ -28,7 +28,6 @@ namespace PrestaShop\PrestaShop\Adapter\Discount\Repository;
 
 use Doctrine\DBAL\Connection;
 use Exception;
-use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 
 /**
  * Repository for discount type operations
@@ -48,11 +47,9 @@ class DiscountTypeRepository
      */
     public function getAllActiveTypes(): array
     {
-        $this->addDefaultTypes();
-
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('crt.id_cart_rule_type', 'crt.type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
+            ->select('crt.id_cart_rule_type', 'crt.discount_type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
             ->from($this->dbPrefix . 'cart_rule_type', 'crt')
             ->leftJoin('crt', $this->dbPrefix . 'cart_rule_type_lang', 'crtl', 'crt.id_cart_rule_type = crtl.id_cart_rule_type')
             ->where('crt.active = 1')
@@ -60,77 +57,6 @@ class DiscountTypeRepository
         ;
 
         return $qb->executeQuery()->fetchAllAssociative();
-    }
-
-    /**
-     * Add default discount types if they don't exist
-     */
-    public function addDefaultTypes(): void
-    {
-        $qb = $this->connection->createQueryBuilder();
-        $qb
-            ->select('COUNT(*) as count')
-            ->from($this->dbPrefix . 'cart_rule_type')
-        ;
-        $result = $qb->executeQuery()->fetchAssociative();
-
-        if ($result['count'] > 0) {
-            return;
-        }
-
-        $defaultTypes = [
-            ['type' => DiscountType::FREE_SHIPPING, 'name' => 'On free shipping', 'description' => 'Discount that provides free shipping to the order'],
-            ['type' => DiscountType::CART_LEVEL, 'name' => 'On cart amount', 'description' => 'Discount applied to cart'],
-            ['type' => DiscountType::ORDER_LEVEL, 'name' => 'On total order', 'description' => 'Discount applied to the order'],
-            ['type' => DiscountType::PRODUCT_LEVEL, 'name' => 'On catalog products', 'description' => 'Discount applied to specific products'],
-            ['type' => DiscountType::FREE_GIFT, 'name' => 'On free gift', 'description' => 'Discount that provides a free gift product'],
-        ];
-
-        foreach ($defaultTypes as $typeData) {
-            // Check if this specific type already exists to avoid duplicates
-            $qb = $this->connection->createQueryBuilder();
-            $qb
-                ->select('COUNT(*) as count')
-                ->from($this->dbPrefix . 'cart_rule_type')
-                ->where('type = :type')
-                ->setParameter('type', $typeData['type'])
-            ;
-            $exists = $qb->executeQuery()->fetchAssociative();
-
-            if ($exists['count'] > 0) {
-                continue;
-            }
-
-            $qb = $this->connection->createQueryBuilder();
-            $qb
-                ->insert($this->dbPrefix . 'cart_rule_type')
-                ->values([
-                    'type' => ':type',
-                    'is_core' => 1,
-                    'active' => 1,
-                    'date_add' => 'NOW()',
-                    'date_upd' => 'NOW()',
-                ])
-                ->setParameter('type', $typeData['type'])
-            ;
-            $qb->executeStatement();
-            $typeId = (int) $this->connection->lastInsertId();
-
-            $qb = $this->connection->createQueryBuilder();
-            $qb
-                ->insert($this->dbPrefix . 'cart_rule_type_lang')
-                ->values([
-                    'id_cart_rule_type' => ':typeId',
-                    'id_lang' => 1,
-                    'name' => ':name',
-                    'description' => ':description',
-                ])
-                ->setParameter('typeId', $typeId)
-                ->setParameter('name', $typeData['name'])
-                ->setParameter('description', $typeData['description'])
-            ;
-            $qb->executeStatement();
-        }
     }
 
     /**
@@ -144,7 +70,7 @@ class DiscountTypeRepository
     {
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('crt.id_cart_rule_type', 'crt.type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
+            ->select('crt.id_cart_rule_type', 'crt.discount_type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
             ->from($this->dbPrefix . 'cart_rule_compatible_types', 'crct')
             ->innerJoin('crct', $this->dbPrefix . 'cart_rule_type', 'crt', 'crct.id_cart_rule_type = crt.id_cart_rule_type')
             ->leftJoin('crt', $this->dbPrefix . 'cart_rule_type_lang', 'crtl', 'crt.id_cart_rule_type = crtl.id_cart_rule_type')
@@ -246,14 +172,11 @@ class DiscountTypeRepository
      */
     public function getTypeIdByString(string $typeString): ?int
     {
-        // Ensure default types exist
-        $this->addDefaultTypes();
-
         $qb = $this->connection->createQueryBuilder();
         $qb
             ->select('crt.id_cart_rule_type')
             ->from($this->dbPrefix . 'cart_rule_type', 'crt')
-            ->where('crt.type = :typeString')
+            ->where('crt.discount_type = :typeString')
             ->setParameter('typeString', $typeString)
         ;
 
@@ -273,7 +196,7 @@ class DiscountTypeRepository
     {
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('crt.id_cart_rule_type', 'crt.type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
+            ->select('crt.id_cart_rule_type', 'crt.discount_type', 'crt.is_core', 'crt.active', 'crtl.name', 'crtl.description', 'crtl.id_lang')
             ->from($this->dbPrefix . 'cart_rule', 'cr')
             ->innerJoin('cr', $this->dbPrefix . 'cart_rule_type', 'crt', 'cr.id_cart_rule_type = crt.id_cart_rule_type')
             ->leftJoin('crt', $this->dbPrefix . 'cart_rule_type_lang', 'crtl', 'crt.id_cart_rule_type = crtl.id_cart_rule_type')
@@ -289,13 +212,13 @@ class DiscountTypeRepository
     /**
      * Get discount information including type, priority field, and creation date
      *
-     * @return array|null Array with keys: 'id', 'type', 'priority', 'date_add'
+     * @return array|null Array with keys: 'id', 'discount_type', 'priority', 'date_add'
      */
     public function getDiscountInfoForPriority(int $discountId): ?array
     {
         $qb = $this->connection->createQueryBuilder();
         $qb
-            ->select('cr.id_cart_rule', 'crt.type', 'cr.priority', 'cr.date_add')
+            ->select('cr.id_cart_rule', 'crt.discount_type', 'cr.priority', 'cr.date_add')
             ->from($this->dbPrefix . 'cart_rule', 'cr')
             ->leftJoin('cr', $this->dbPrefix . 'cart_rule_type', 'crt', 'cr.id_cart_rule_type = crt.id_cart_rule_type')
             ->where('cr.id_cart_rule = :discountId')
@@ -310,7 +233,7 @@ class DiscountTypeRepository
 
         return [
             'id' => (int) $result['id_cart_rule'],
-            'type' => $result['type'] ?? '',
+            'discount_type' => $result['discount_type'] ?? '',
             'priority' => (int) $result['priority'],
             'date_add' => $result['date_add'],
         ];

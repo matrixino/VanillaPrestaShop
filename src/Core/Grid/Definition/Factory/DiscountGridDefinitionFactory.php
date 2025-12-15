@@ -112,10 +112,10 @@ final class DiscountGridDefinitionFactory extends AbstractGridDefinitionFactory 
                     ])
             )
             ->add(
-                (new DataColumn('type'))
+                (new DataColumn('discount_type'))
                     ->setName($this->trans('Type', [], 'Admin.Catalog.Feature'))
                     ->setOptions([
-                        'field' => 'type',
+                        'field' => 'discount_type',
                     ])
             )
             ->add(

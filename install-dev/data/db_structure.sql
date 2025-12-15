@@ -306,13 +306,13 @@ CREATE TABLE `PREFIX_cart_rule_shop` (
 /* Discount types for compatibility */
 CREATE TABLE `PREFIX_cart_rule_type` (
   `id_cart_rule_type` int(10) unsigned NOT NULL auto_increment,
-  `type` varchar(128) NOT NULL,
+  `discount_type` varchar(128) NOT NULL,
   `is_core` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `active` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `date_add` datetime NOT NULL,
   `date_upd` datetime NOT NULL,
   PRIMARY KEY (`id_cart_rule_type`),
-  UNIQUE KEY `type` (`type`)
+  UNIQUE KEY `discount_type` (`discount_type`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
 /* Localized names for cart rule types */

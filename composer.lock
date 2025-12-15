@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ede1675ebc98625d0ceb50438ae9662",
+    "content-hash": "f3a07b6749362e468416d0ea2165b1e6",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5210,16 +5210,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-attribute-position",
+            "version": "dev-fix-discount-with-discount_type",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jolelievre/ps_apiresources.git",
-                "reference": "f115ea61f1bc4419f3d77015582400b62baacde6"
+                "url": "https://github.com/boherm/ps_apiresources.git",
+                "reference": "8acc16bed3508936bb8841e319a1f3e85c967288"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jolelievre/ps_apiresources/zipball/f115ea61f1bc4419f3d77015582400b62baacde6",
-                "reference": "f115ea61f1bc4419f3d77015582400b62baacde6",
+                "url": "https://api.github.com/repos/boherm/ps_apiresources/zipball/8acc16bed3508936bb8841e319a1f3e85c967288",
+                "reference": "8acc16bed3508936bb8841e319a1f3e85c967288",
                 "shasum": ""
             },
             "require": {
@@ -5283,9 +5283,9 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/jolelievre/ps_apiresources/tree/attribute-position"
+                "source": "https://github.com/boherm/ps_apiresources/tree/fix-discount-with-discount_type"
             },
-            "time": "2025-12-05T10:02:10+00:00"
+            "time": "2025-12-12T11:00:32+00:00"
         },
         {
             "name": "prestashop/ps_banner",

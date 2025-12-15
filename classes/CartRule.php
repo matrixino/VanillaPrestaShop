@@ -187,7 +187,7 @@ class CartRuleCore extends ObjectModel
 
         if (!isset($typeCache[$this->id_cart_rule_type])) {
             $result = Db::getInstance()->getValue('
-                SELECT type
+                SELECT discount_type
                 FROM ' . _DB_PREFIX_ . 'cart_rule_type
                 WHERE id_cart_rule_type = ' . (int) $this->id_cart_rule_type
             );
