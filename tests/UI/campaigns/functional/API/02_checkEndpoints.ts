@@ -165,6 +165,12 @@ describe('API : Check endpoints', async () => {
         '/contacts: GET',
         // @todo: add tests
         '/contacts: POST',
+        // @todo: add tests
+        '/customers/bulk-delete: DELETE',
+        // @todo: add tests
+        '/customers/bulk-disable: PUT',
+        // @todo: add tests
+        '/customers/bulk-enable: PUT',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/01_deleteCustomerGroupsId.ts
         '/customers/groups/{customerGroupId}: DELETE',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/02_getCustomerGroupsId.ts
@@ -175,6 +181,18 @@ describe('API : Check endpoints', async () => {
         '/customers/groups: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/04_postCustomersGroup.ts
         '/customers/groups: POST',
+        // @todo: add tests
+        '/customers/search: GET',
+        // @todo: add tests
+        '/customers/{customerId}/details: GET',
+        // @todo: add tests
+        '/customers/{customerId}: DELETE',
+        // @todo: add tests
+        '/customers/{customerId}: GET',
+        // @todo: add tests
+        '/customers/{customerId}: PATCH',
+        // @todo: add tests
+        '/customers: POST',
         // @todo: add tests
         '/features/bulk-delete: DELETE',
         // @todo: add tests
