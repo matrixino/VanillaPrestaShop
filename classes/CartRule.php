@@ -797,7 +797,7 @@ class CartRuleCore extends ObjectModel
             }
 
             // We verify the total available quantity
-            if (!$this->quantity) {
+            if ($this->quantity !== null && !$this->quantity) {
                 return (!$display_error) ? false : $this->trans('This voucher has already been used', [], 'Shop.Notifications.Error');
             }
 
@@ -840,7 +840,7 @@ class CartRuleCore extends ObjectModel
                     ++$quantityUsed;
                 }
 
-                if ($quantityUsed > $this->quantity_per_user) {
+                if ($this->quantity_per_user !== null && $quantityUsed > $this->quantity_per_user) {
                     return (!$display_error) ? false : $this->trans('You cannot use this voucher anymore (usage limit reached)', [], 'Shop.Notifications.Error');
                 }
             }
