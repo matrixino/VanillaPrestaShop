@@ -64,4 +64,23 @@ final class DoctrineSearchCriteriaApplicator implements DoctrineSearchCriteriaAp
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function applyDeterministicSorting(
+        SearchCriteriaInterface $searchCriteria,
+        QueryBuilder $queryBuilder,
+        string $alias,
+        string $primaryKey
+    ) {
+        if ($searchCriteria->getOrderBy() !== $primaryKey) {
+            $queryBuilder->addOrderBy(
+                sprintf('%s.`%s`', $alias, $primaryKey),
+                $searchCriteria->getOrderWay()
+            );
+        }
+
+        return $this;
+    }
 }

@@ -126,11 +126,7 @@ class ProductQueryBuilder extends AbstractDoctrineQueryBuilder
             $this->searchCriteriaApplicator->applySorting($searchCriteria, $qb);
         }
 
-        // Add a secondary ORDER BY on id_product to make results deterministic (stable sorting/pagination)
-        // when the primary sort is not id_product.
-        if ($searchCriteria->getOrderBy() !== 'id_product') {
-            $qb->addOrderBy('p.`id_product`', $searchCriteria->getOrderWay());
-        }
+        $this->searchCriteriaApplicator->applyDeterministicSorting($searchCriteria, $qb, 'p', 'id_product');
 
         return $qb;
     }

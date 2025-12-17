@@ -53,4 +53,18 @@ interface DoctrineSearchCriteriaApplicatorInterface
      * @return self
      */
     public function applySorting(SearchCriteriaInterface $searchCriteria, QueryBuilder $queryBuilder);
+
+    /**
+     * Apply deterministic sorting (stable order) on query builder.
+     * Useful when the requested sorting may lead to non-deterministic results
+     * (e.g. same values across many rows), so it appends a tie-breaker.
+     *
+     * @param SearchCriteriaInterface $searchCriteria
+     * @param QueryBuilder $queryBuilder
+     * @param string $alias The root alias used in the query (e.g. "a")
+     * @param string $primaryKey The primary key field name (e.g. "id")
+     *
+     * @return self
+     */
+    public function applyDeterministicSorting(SearchCriteriaInterface $searchCriteria, QueryBuilder $queryBuilder, string $alias, string $primaryKey);
 }
