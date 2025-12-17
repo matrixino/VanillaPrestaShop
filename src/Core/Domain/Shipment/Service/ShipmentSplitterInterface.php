@@ -34,8 +34,6 @@ use PrestaShopBundle\Entity\ShipmentProduct;
 interface ShipmentSplitterInterface
 {
     /**
-     * @param Shipment $source
-     * @param int $carrierId
      * @param ShipmentProduct[] $productsToMove
      */
     public function split(

@@ -34,8 +34,6 @@ use PrestaShopBundle\Entity\ShipmentProduct;
 interface ShipmentMergerInterface
 {
     /**
-     * @param Shipment $source
-     * @param Shipment $target
      * @param ShipmentProduct[] $productsToMove
      */
     public function merge(

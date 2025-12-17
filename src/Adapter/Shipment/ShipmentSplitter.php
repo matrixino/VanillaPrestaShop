@@ -32,12 +32,16 @@ use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Service\ShipmentSplitterInterface;
 use PrestaShopBundle\Entity\Shipment;
 use PrestaShopBundle\Entity\ShipmentProduct;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ShipmentSplitter implements ShipmentSplitterInterface
 {
+    public function __construct(
+        private TranslatorInterface $translator,
+    ) {
+    }
+
     /**
-     * @param Shipment $source
-     * @param int $carrierId
      * @param ShipmentProduct[] $productsToMove
      */
     public function split(
@@ -61,7 +65,11 @@ class ShipmentSplitter implements ShipmentSplitterInterface
 
             if (!isset($productsByOrderDetailId[$orderDetailId])) {
                 throw new ShipmentException(
-                    sprintf('Cannot find product with order detail id %s', $orderDetailId)
+                    $this->translator->trans(
+                        'Cannot find product with order detail id %id%.',
+                        ['%id%' => $orderDetailId],
+                        'Admin.Shipment.Error'
+                    )
                 );
             }
 

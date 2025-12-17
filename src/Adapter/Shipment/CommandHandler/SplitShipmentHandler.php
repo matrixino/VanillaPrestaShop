@@ -34,19 +34,18 @@ use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundExcepti
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Service\ShipmentSplitterInterface;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use PrestaShopBundle\Entity\ShipmentProduct;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[AsCommandHandler()]
+#[AsCommandHandler]
 class SplitShipmentHandler implements SplitShipmentHandlerInterface
 {
     public function __construct(
         private ShipmentRepository $repository,
         private ShipmentSplitterInterface $splitter,
+        private TranslatorInterface $translator,
     ) {
     }
 
-    /**
-     * @param SplitShipment $command
-     */
     public function handle(SplitShipment $command): void
     {
         $shipmentId = $command->getShipmentId()->getValue();
@@ -56,13 +55,21 @@ class SplitShipmentHandler implements SplitShipmentHandlerInterface
 
         if (!$shipment) {
             throw new ShipmentNotFoundException(
-                sprintf('Could not find shipment with id "%s"', $shipmentId)
+                $this->translator->trans(
+                    'Could not find shipment with id "%id%".',
+                    ['%id%' => $shipmentId],
+                    'Admin.Shipment.Error'
+                )
             );
         }
 
         if (!empty($shipment->getTrackingNumber())) {
             throw new CannotEditShipmentShippedException(
-                sprintf('Cannot split the shipment "%s" because is already shipped', $shipmentId)
+                $this->translator->trans(
+                    'Cannot split the shipment "%id%" because it has already been shipped.',
+                    ['%id%' => $shipmentId],
+                    'Admin.Shipment.Error'
+                )
             );
         }
 
@@ -78,11 +85,12 @@ class SplitShipmentHandler implements SplitShipmentHandlerInterface
             $productsToMove
         );
 
-        $this->repository->save($shipment);
         $this->repository->save($newShipment);
 
         if ($shipment->getProducts()->isEmpty()) {
             $this->repository->delete($shipment);
+        } else {
+            $this->repository->save($shipment);
         }
     }
 }

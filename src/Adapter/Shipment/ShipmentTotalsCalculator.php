@@ -55,8 +55,8 @@ class ShipmentTotalsCalculator implements ShipmentTotalsCalculatorInterface
         $order = $this->orderRepository->get(new OrderId($orderDetail->id_order));
 
         $unitPrice = $isTaxIncl
-            ? $orderDetail->unit_price_tax_incl
-            : $orderDetail->unit_price_tax_excl;
+            ? (float) $orderDetail->unit_price_tax_incl
+            : (float) $orderDetail->unit_price_tax_excl;
 
         return $this->calculateTotal($order, $unitPrice, $quantity);
     }

@@ -32,12 +32,16 @@ use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Service\ShipmentMergerInterface;
 use PrestaShopBundle\Entity\Shipment;
 use PrestaShopBundle\Entity\ShipmentProduct;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ShipmentMerger implements ShipmentMergerInterface
 {
+    public function __construct(
+        private TranslatorInterface $translator,
+    ) {
+    }
+
     /**
-     * @param Shipment $source
-     * @param Shipment $target
      * @param ShipmentProduct[] $productsToMove
      */
     public function merge(
@@ -54,7 +58,11 @@ class ShipmentMerger implements ShipmentMergerInterface
 
             if (!isset($sourceProducts[$orderDetailId])) {
                 throw new ShipmentException(
-                    sprintf('Order detail with id %d does not exist in source shipment', $orderDetailId)
+                    $this->translator->trans(
+                        'Order detail with id %id% does not exist in source shipment.',
+                        ['%id%' => $orderDetailId],
+                        'Admin.Shipment.Error'
+                    )
                 );
             }
 
@@ -67,7 +75,6 @@ class ShipmentMerger implements ShipmentMergerInterface
             } else {
                 $targetProduct = $targetProducts[$orderDetailId];
                 $newQty = $targetProduct->getQuantity() + $quantity;
-
                 $targetProduct->setQuantity($newQty);
             }
 
