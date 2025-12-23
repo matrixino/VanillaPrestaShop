@@ -1,7 +1,7 @@
 import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
-import {enableTheme, disableTheme} from '@commonTests/BO/design/classic';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 import {setupSmtpConfigTest, resetSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
 
 import {
@@ -133,7 +133,10 @@ describe('BO - International - Translation : Modify translation', async () => {
     });
   });
 
-  describe('Case 2 - Front office translations', async () => {
+  // Pre-condition : Install classic
+  enableTheme('classic', `${baseContext}_preTest_2`);
+
+  describe('Case 2 - Front office translations with classic theme', async () => {
     it('should go to \'International > Translations\' page', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'goToTranslationsPage2', baseContext);
 
@@ -183,8 +186,8 @@ describe('BO - International - Translation : Modify translation', async () => {
     });
   });
 
-  // Pre-condition : Install Hummingbird
-  enableTheme('hummingbird', `${baseContext}_preTest_2`);
+  // Post-condition : Uninstall classic
+  disableTheme('classic', `${baseContext}_postTest_1`);
 
   describe('Case 3 - Front office translations with hummingbird theme', async () => {
     it('should go back to BO', async function () {
@@ -255,9 +258,6 @@ describe('BO - International - Translation : Modify translation', async () => {
       expect(sendButtonLabel).to.equal('Send your message now');
     });
   });
-
-  // Post-condition : Uninstall Hummingbird
-  disableTheme('hummingbird', `${baseContext}_postTest_1`);
 
   describe('Case 4 - Installed modules translations', async () => {
     it('should go back to BO', async function () {
