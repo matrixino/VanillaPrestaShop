@@ -74,4 +74,5 @@ class DiscountConstraintException extends DiscountException
     public const INVALID_MINIMUM_PRODUCT_QUANTITY = 44;
     public const INVALID_PRODUCTS_CONDITIONS = 45;
     public const INVALID_SPECIFIC_PRODUCTS = 46;
+    public const INVALID_COMPATIBLE_TYPE_IDS = 47;
 }

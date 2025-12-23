@@ -27,6 +27,7 @@
 namespace PrestaShop\PrestaShop\Adapter\Discount\CommandHandler;
 
 use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Adapter\Discount\Update\DiscountConditionsUpdater;
 use PrestaShop\PrestaShop\Adapter\Discount\Update\Filler\DiscountFiller;
 use PrestaShop\PrestaShop\Adapter\Discount\Validate\DiscountValidator;
@@ -46,6 +47,7 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
         private readonly DiscountFiller $discountFiller,
         private readonly DiscountValidator $discountValidator,
         private readonly DiscountConditionsUpdater $updater,
+        private readonly DiscountTypeRepository $discountTypeRepository,
     ) {
     }
 
@@ -71,5 +73,9 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
             $command->getCountryIds() ? array_map(fn (CountryId $countryId) => $countryId->getValue(), $command->getCountryIds()) : null,
             $command->getCustomerGroupIds() ? array_map(fn (GroupId $groupId) => $groupId->getValue(), $command->getCustomerGroupIds()) : null,
         );
+
+        if (null !== $command->getCompatibleDiscountTypeIds()) {
+            $this->discountTypeRepository->setCompatibleTypesForDiscount($command->getDiscountId()->getValue(), $command->getCompatibleDiscountTypeIds());
+        }
     }
 }

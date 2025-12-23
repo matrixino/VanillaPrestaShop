@@ -35,6 +35,7 @@ use DateTimeInterface;
 use Exception;
 use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkDeleteDiscountsCommand;
@@ -58,6 +59,8 @@ use Tests\Integration\Behaviour\Features\Context\Util\PrimitiveUtils;
 
 class DiscountFeatureContext extends AbstractDomainFeatureContext
 {
+    private const DISCOUNT_TYPE_PREFIX = 'discount_type_';
+
     /**
      * @Then I should get error that discount field :field is invalid
      */
@@ -259,6 +262,10 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $command->setCustomerGroupIds($this->referencesToIds($data['customer_groups']));
         }
 
+        if (isset($data['compatible_types'])) {
+            $command->setCompatibleDiscountTypeIds($this->getDiscountTypeIds($data['compatible_types']));
+        }
+
         try {
             /** @var DiscountId $discountId */
             $discountId = $this->getCommandBus()->handle($command);
@@ -403,6 +410,9 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
 
         if (isset($data['customer_groups'])) {
             $command->setCustomerGroupIds($this->referencesToIds($data['customer_groups']));
+        }
+        if (isset($data['compatible_types'])) {
+            $command->setCompatibleDiscountTypeIds($this->getDiscountTypeIds($data['compatible_types']));
         }
 
         try {
@@ -580,6 +590,9 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
                 'Unexpected period_never_expires value'
             );
         }
+        if (isset($expectedData['compatible_types'])) {
+            Assert::assertEquals($this->getDiscountTypeIds($expectedData['compatible_types']), $discountForEditing->getCompatibleDiscountTypeIds());
+        }
     }
 
     /**
@@ -627,99 +640,6 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         );
 
         return $discountForEditing;
-    }
-
-    /**
-     * @When I set compatible types for discount :discountReference to:
-     *
-     * @param string $discountReference
-     * @param TableNode $tableNode
-     */
-    public function setCompatibleTypesForDiscount(string $discountReference, TableNode $tableNode): void
-    {
-        $discountId = $this->getSharedStorage()->get($discountReference);
-        $typeStrings = array_filter(array_column($tableNode->getRows(), 0));
-
-        // Get Doctrine connection
-        $connection = $this->getContainer()->get('doctrine.dbal.default_connection');
-        $dbPrefix = $this->getContainer()->getParameter('database_prefix');
-
-        // Convert type strings to type IDs
-        $compatibleTypeIds = [];
-        foreach ($typeStrings as $typeString) {
-            $qb = $connection->createQueryBuilder();
-            $qb->select('crt.id_cart_rule_type')
-                ->from($dbPrefix . 'cart_rule_type', 'crt')
-                ->where('crt.discount_type = :typeString')
-                ->setParameter('typeString', $typeString);
-
-            $result = $qb->executeQuery()->fetchAssociative();
-            if ($result) {
-                $compatibleTypeIds[] = (int) $result['id_cart_rule_type'];
-            }
-        }
-
-        // Delete existing compatible types
-        $qb = $connection->createQueryBuilder();
-        $qb->delete($dbPrefix . 'cart_rule_compatible_types')
-            ->where('id_cart_rule = :discountId')
-            ->setParameter('discountId', $discountId);
-        $qb->executeStatement();
-
-        // Insert new compatible types
-        foreach ($compatibleTypeIds as $typeId) {
-            $qb = $connection->createQueryBuilder();
-            $qb->insert($dbPrefix . 'cart_rule_compatible_types')
-                ->values([
-                    'id_cart_rule' => ':discountId',
-                    'id_cart_rule_type' => ':typeId',
-                ])
-                ->setParameter('discountId', $discountId)
-                ->setParameter('typeId', $typeId);
-            $qb->executeStatement();
-        }
-    }
-
-    /**
-     * @Then discount :discountReference should be compatible with types:
-     *
-     * @param string $discountReference
-     * @param TableNode $tableNode
-     */
-    public function assertDiscountCompatibleTypes(string $discountReference, TableNode $tableNode): void
-    {
-        $discountId = $this->getSharedStorage()->get($discountReference);
-        $expectedTypeStrings = array_filter(array_column($tableNode->getRows(), 0));
-
-        // Get Doctrine connection
-        $connection = $this->getContainer()->get('doctrine.dbal.default_connection');
-        $dbPrefix = $this->getContainer()->getParameter('database_prefix');
-
-        // Get actual compatible types
-        $qb = $connection->createQueryBuilder();
-        $qb->select('crt.discount_type')
-            ->from($dbPrefix . 'cart_rule_compatible_types', 'crct')
-            ->innerJoin('crct', $dbPrefix . 'cart_rule_type', 'crt', 'crct.id_cart_rule_type = crt.id_cart_rule_type')
-            ->where('crct.id_cart_rule = :discountId')
-            ->andWhere('crt.active = 1')
-            ->setParameter('discountId', $discountId);
-
-        $results = $qb->executeQuery()->fetchAllAssociative();
-        $actualTypeStrings = array_column($results, 'discount_type');
-
-        // Sort both arrays for comparison
-        sort($expectedTypeStrings);
-        sort($actualTypeStrings);
-
-        Assert::assertEquals(
-            $expectedTypeStrings,
-            $actualTypeStrings,
-            sprintf(
-                'Discount compatible types mismatch. Expected: [%s], Got: [%s]',
-                implode(', ', $expectedTypeStrings),
-                implode(', ', $actualTypeStrings)
-            )
-        );
     }
 
     /**
@@ -813,5 +733,37 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         } catch (DiscountException $e) {
             $this->setLastException($e);
         }
+    }
+
+    private function getDiscountTypeIds(string $discountTypes): array
+    {
+        if (empty(trim($discountTypes))) {
+            return [];
+        }
+
+        $discountNamesList = explode(',', $discountTypes);
+        $discountTypeIds = [];
+        foreach ($discountNamesList as $discountName) {
+            $discountTypeIds[] = $this->getDiscountTypeId(trim($discountName));
+        }
+        sort($discountTypeIds);
+
+        return $discountTypeIds;
+    }
+
+    private function getDiscountTypeId(string $discountType): int
+    {
+        if (!$this->getSharedStorage()->exists(self::DISCOUNT_TYPE_PREFIX . $discountType)) {
+            /** @var DiscountTypeRepository $repository */
+            $repository = $this->getContainer()->get(DiscountTypeRepository::class);
+            $activeTypes = $repository->getAllActiveTypes();
+
+            // Cache all existing discount types in shared storage for future references
+            foreach ($activeTypes as $activeType) {
+                $this->getSharedStorage()->set(self::DISCOUNT_TYPE_PREFIX . $activeType['discount_type'], $activeType['id_cart_rule_type']);
+            }
+        }
+
+        return (int) $this->getSharedStorage()->get(self::DISCOUNT_TYPE_PREFIX . $discountType);
     }
 }

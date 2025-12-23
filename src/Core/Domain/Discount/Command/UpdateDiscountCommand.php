@@ -91,6 +91,10 @@ class UpdateDiscountCommand
      * @var GroupId[]|null
      */
     private ?array $customerGroupIds = null;
+    /**
+     * @var int[]|null
+     */
+    private ?array $compatibleDiscountTypeIds = null;
 
     public function __construct(int $discountId)
     {
@@ -524,6 +528,34 @@ class UpdateDiscountCommand
     public function setCustomerGroupIds(?array $customerGroupIds): self
     {
         $this->customerGroupIds = $customerGroupIds ? array_map(fn (int $groupId) => new GroupId($groupId), $customerGroupIds) : null;
+
+        return $this;
+    }
+
+    /**
+     * @return int[]|null
+     */
+    public function getCompatibleDiscountTypeIds(): ?array
+    {
+        return $this->compatibleDiscountTypeIds;
+    }
+
+    /**
+     * @param int[]|null $compatibleDiscountTypeIds
+     */
+    public function setCompatibleDiscountTypeIds(?array $compatibleDiscountTypeIds): self
+    {
+        foreach ($compatibleDiscountTypeIds as $compatibleDiscountTypeId) {
+            if (!is_int($compatibleDiscountTypeId) || $compatibleDiscountTypeId <= 0) {
+                throw new DiscountConstraintException('Compatible discount type ID must be positive integer', DiscountConstraintException::INVALID_COMPATIBLE_TYPE_IDS);
+            }
+        }
+        $uniqueValues = array_unique($compatibleDiscountTypeIds);
+        if ($uniqueValues !== $compatibleDiscountTypeIds) {
+            throw new DiscountConstraintException('Provided compatible discount type ID must be unique', DiscountConstraintException::INVALID_COMPATIBLE_TYPE_IDS);
+        }
+
+        $this->compatibleDiscountTypeIds = $compatibleDiscountTypeIds;
 
         return $this;
     }

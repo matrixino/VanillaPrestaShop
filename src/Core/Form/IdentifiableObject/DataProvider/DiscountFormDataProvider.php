@@ -30,7 +30,6 @@ use DateTime;
 use DateTimeInterface;
 use PrestaShop\PrestaShop\Adapter\Attribute\Repository\AttributeRepository;
 use PrestaShop\PrestaShop\Adapter\Customer\Repository\CustomerRepository;
-use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Adapter\Feature\Repository\FeatureValueRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Combination\Repository\CombinationRepository;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
@@ -79,7 +78,6 @@ class DiscountFormDataProvider implements FormDataProviderInterface
         private readonly FeatureValueRepository $featureValueRepository,
         private readonly ShopContext $shopContext,
         private readonly RequestStack $requestStack,
-        private readonly DiscountTypeRepository $discountTypeRepository,
         private readonly CustomerRepository $customerRepository,
     ) {
     }
@@ -112,7 +110,7 @@ class DiscountFormDataProvider implements FormDataProviderInterface
                 ],
                 'quantity_total' => null,
                 'quantity_per_customer' => 1,
-                'compatibility' => $this->getCompatibilityData(),
+                'compatibility' => [],
                 'priority' => 1,
             ],
             'conditions' => [
@@ -237,7 +235,7 @@ class DiscountFormDataProvider implements FormDataProviderInterface
                 ],
                 'quantity_total' => $discountForEditing->getTotalQuantity(),
                 'quantity_per_customer' => $discountForEditing->getQuantityPerUser(),
-                'compatibility' => $this->getCompatibilityData($id),
+                'compatibility' => $discountForEditing->getCompatibleDiscountTypeIds(),
                 'priority' => $discountForEditing->getPriority(),
             ],
         ];
@@ -426,29 +424,6 @@ class DiscountFormDataProvider implements FormDataProviderInterface
         }
 
         return $productSegment;
-    }
-
-    private function getCompatibilityData(?int $discountId = null): array
-    {
-        $compatibilityData = [];
-
-        // Get all available cart rule types
-        $availableTypes = $this->discountTypeRepository->getAllActiveTypes();
-
-        // If editing an existing discount, get its compatible types
-        $compatibleTypeIds = [];
-        if ($discountId) {
-            $compatibleTypes = $this->discountTypeRepository->getCompatibleTypesForDiscount($discountId);
-            $compatibleTypeIds = array_column($compatibleTypes, 'id_cart_rule_type');
-        }
-
-        // Build compatibility data for form
-        foreach ($availableTypes as $type) {
-            $fieldName = 'compatible_type_' . $type['id_cart_rule_type'];
-            $compatibilityData[$fieldName] = in_array($type['id_cart_rule_type'], $compatibleTypeIds);
-        }
-
-        return $compatibilityData;
     }
 
     private function getCustomerEligibilityData(DiscountForEditing $discountForEditing): array

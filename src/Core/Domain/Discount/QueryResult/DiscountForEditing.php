@@ -63,7 +63,8 @@ class DiscountForEditing
         private readonly ?bool $minimumAmountShippingIncluded,
         private readonly array $carrierIds,
         private readonly array $countryIds,
-        private readonly array $customerGroupIds = [],
+        private readonly array $customerGroupIds,
+        private readonly array $compatibleDiscountTypeIds,
     ) {
     }
 
@@ -224,5 +225,13 @@ class DiscountForEditing
     public function getCustomerGroupIds(): array
     {
         return $this->customerGroupIds;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getCompatibleDiscountTypeIds(): array
+    {
+        return $this->compatibleDiscountTypeIds;
     }
 }

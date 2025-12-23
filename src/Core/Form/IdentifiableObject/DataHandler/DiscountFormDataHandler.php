@@ -29,7 +29,6 @@ namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataHandler;
 use DateTime;
 use DateTimeImmutable;
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
 use PrestaShop\PrestaShop\Core\Context\LanguageContext;
 use PrestaShop\PrestaShop\Core\Domain\Currency\Exception\CurrencyException;
@@ -62,7 +61,6 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         #[Autowire(service: 'prestashop.default.language.context')]
         protected readonly LanguageContext $defaultLanguageContext,
         protected readonly TranslatorInterface $translator,
-        protected readonly DiscountTypeRepository $discountTypeRepository,
     ) {
     }
 
@@ -165,12 +163,12 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         if (isset($data['usability']['priority']) && $data['usability']['priority'] > 0) {
             $command->setPriority((int) $data['usability']['priority']);
         }
+        $command->setCompatibleDiscountTypeIds(array_unique($data['usability']['compatibility'] ?? []));
 
         $this->updateDiscountConditions($command, $data);
 
         /** @var DiscountId $discountId */
         $discountId = $this->commandBus->handle($command);
-        $this->updateDiscountCompatibility($discountId->getValue(), $data);
 
         return $discountId->getValue();
     }
@@ -272,10 +270,10 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         if (isset($data['usability']['priority']) && $data['usability']['priority'] > 0) {
             $command->setPriority((int) $data['usability']['priority']);
         }
+        $command->setCompatibleDiscountTypeIds(array_unique($data['usability']['compatibility'] ?? []));
 
         $this->updateDiscountConditions($command, $data);
         $this->commandBus->handle($command);
-        $this->updateDiscountCompatibility($id, $data);
     }
 
     private function updateDiscountConditions(AddDiscountCommand|UpdateDiscountCommand $command, array $data): void
@@ -404,23 +402,6 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         if (array_key_exists('quantity_per_customer', $data['usability'])) {
             $command->setQuantityPerUser($data['usability']['quantity_per_customer']);
         }
-    }
-
-    private function updateDiscountCompatibility(int $discountId, array $data): void
-    {
-        if (!isset($data['usability']['compatibility'])) {
-            return;
-        }
-
-        $compatibleTypeIds = [];
-        foreach ($data['usability']['compatibility'] as $fieldName => $isChecked) {
-            if ($isChecked && str_starts_with($fieldName, 'compatible_type_')) {
-                $typeId = (int) str_replace('compatible_type_', '', $fieldName);
-                $compatibleTypeIds[] = $typeId;
-            }
-        }
-
-        $this->discountTypeRepository->setCompatibleTypesForDiscount($discountId, $compatibleTypeIds);
     }
 
     private function parseDateWithDefaultTime(?string $dateString, string $defaultTime): ?DateTimeImmutable

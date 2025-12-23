@@ -28,8 +28,10 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Discount;
 
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType as DiscountTypeVO;
 use PrestaShopBundle\Form\Admin\Type\CardType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -39,6 +41,13 @@ class DiscountUsabilityType extends TranslatorAwareType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $cartRuleTypeChoices = [];
+        foreach ($options['available_cart_rule_types'] as $cartRuleType) {
+            if ($cartRuleType['name'] === DiscountTypeVO::ORDER_LEVEL) {
+                continue;
+            }
+            $cartRuleTypeChoices[$cartRuleType['name']] = $cartRuleType['id_cart_rule_type'];
+        }
         $builder
             ->add('mode', DiscountUsabilityModeType::class, [
                 'label' => $this->trans('Specifiy discount mode', 'Admin.Catalog.Feature'),
@@ -96,9 +105,13 @@ class DiscountUsabilityType extends TranslatorAwareType
                     ]),
                 ],
             ])
-            ->add('compatibility', DiscountCompatibilityType::class, [
+            ->add('compatibility', ChoiceType::class, [
                 'label_tag_name' => 'h3',
-                'available_types' => $options['available_cart_rule_types'] ?? [],
+                'label' => $this->trans('Compatible with discounts', 'Admin.Catalog.Feature'),
+                'label_help_box' => $this->trans('Select which discount types this discount is compatible with.', 'Admin.Catalog.Help'),
+                'choices' => $cartRuleTypeChoices,
+                'multiple' => true,
+                'expanded' => true,
                 'required' => false,
             ])
             ->add('priority', IntegerType::class, [

@@ -30,6 +30,7 @@ use DateTimeImmutable;
 use Exception;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Query\GetDiscountForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Discount\QueryHandler\GetDiscountForEditingHandlerInterface;
@@ -39,7 +40,8 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\QueryResult\DiscountForEditing;
 class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterface
 {
     public function __construct(
-        protected readonly DiscountRepository $discountRepository
+        protected readonly DiscountRepository $discountRepository,
+        protected readonly DiscountTypeRepository $discountTypeRepository,
     ) {
     }
 
@@ -85,6 +87,7 @@ class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterf
             $carrierIds,
             $countryIds,
             $customerGroupIds,
+            $this->discountTypeRepository->getCompatibleTypesIdsForDiscount($query->getDiscountId()->getValue())
         );
     }
 }
