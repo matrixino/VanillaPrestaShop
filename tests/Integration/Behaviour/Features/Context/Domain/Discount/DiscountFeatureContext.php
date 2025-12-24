@@ -318,6 +318,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $command->setMinimumProductsQuantity((int) $data['minimum_product_quantity']);
         }
 
+        if (isset($data['carriers'])) {
+            $command->setCarrierIds($this->referencesToIds($data['carriers']));
+        }
+
+        if (isset($data['countries'])) {
+            $command->setCountryIds($this->referencesToIds($data['countries']));
+        }
+
         try {
             /** @var DiscountId $discountId */
             $discountId = $this->getCommandBus()->handle($command);
@@ -481,6 +489,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         }
         if (isset($data['minimum_product_quantity'])) {
             $command->setMinimumProductsQuantity((int) $data['minimum_product_quantity']);
+        }
+
+        if (isset($data['carriers'])) {
+            $command->setCarrierIds($this->referencesToIds($data['carriers']));
+        }
+
+        if (isset($data['countries'])) {
+            $command->setCountryIds($this->referencesToIds($data['countries']));
         }
 
         try {

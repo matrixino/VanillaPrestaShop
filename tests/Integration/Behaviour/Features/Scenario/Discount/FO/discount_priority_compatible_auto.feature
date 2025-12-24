@@ -28,7 +28,7 @@ Feature: Discount priority - Compatible auto discounts
       | reduction_currency | usd                    |
       | taxIncluded        | true                   |
       | compatible_types   | cart_level             |
-    And I update discount "auto_amount_prio5" with the condition of a minimum amount:
+    And I update discount "auto_amount_prio5" with the following properties:
       | minimum_amount                   | 1.00  |
       | minimum_amount_currency          | usd   |
       | minimum_amount_tax_included      | true  |
@@ -42,7 +42,7 @@ Feature: Discount priority - Compatible auto discounts
       | valid_to          | 2026-12-31 23:59:59     |
       | reduction_percent | 10.0                    |
       | compatible_types  | cart_level              |
-    And I update discount "auto_percent_prio3" with the condition of a minimum amount:
+    And I update discount "auto_percent_prio3" with the following properties:
       | minimum_amount                   | 1.00  |
       | minimum_amount_currency          | usd   |
       | minimum_amount_tax_included      | true  |

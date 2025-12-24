@@ -321,7 +321,6 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Domain\CategoryFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CustomerFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CustomerGroupFeatureContext
-        - Tests\Integration\Behaviour\Features\Context\Domain\Discount\DiscountConditionsFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Discount\DiscountFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ProductFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\AddProductFeatureContext

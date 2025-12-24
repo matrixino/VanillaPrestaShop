@@ -28,7 +28,7 @@ Feature: Discount priority - Incompatible auto discounts
       | reduction_currency | usd                                 |
       | taxIncluded        | true                                |
       | compatible_types   | product_level                       |
-    And I update discount "auto_incompat_amount_prio5" with the condition of a minimum amount:
+    And I update discount "auto_incompat_amount_prio5" with the following properties:
       | minimum_amount                   | 1.00  |
       | minimum_amount_currency          | usd   |
       | minimum_amount_tax_included      | true  |
@@ -42,7 +42,7 @@ Feature: Discount priority - Incompatible auto discounts
       | valid_to          | 2026-12-31 23:59:59                  |
       | reduction_percent | 15.0                                 |
       | compatible_types   | product_level                  |
-    And I update discount "auto_incompat_percent_prio3" with the condition of a minimum amount:
+    And I update discount "auto_incompat_percent_prio3" with the following properties:
       | minimum_amount                   | 1.00  |
       | minimum_amount_currency          | usd   |
       | minimum_amount_tax_included      | true  |

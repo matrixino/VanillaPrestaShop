@@ -87,19 +87,15 @@ Feature: Add discount with attribute trigger on FO
 
   Scenario: Test discount that gives a cart level discount when product matches two out of three attributes is selected
     When I create a "cart_level" discount "discount_with_two_attributes" with following properties:
-      | name[en-US]        | Promotion                    |
-      | name[fr-FR]        | Promotion                    |
-      | code               | DISCOUNT_WITH_TWO_ATTRIBUTES |
-      | active             | true                         |
-      | reduction_amount   | 3.0                          |
-      | reduction_currency | usd                          |
-      | taxIncluded        | true                         |
-    When I update discount "discount_with_two_attributes" with following conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | S,L   |
-    Then discount "discount_with_two_attributes" should have the following product conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | S,L   |
+      | name[en-US]                  | Promotion                    |
+      | name[fr-FR]                  | Promotion                    |
+      | code                         | DISCOUNT_WITH_TWO_ATTRIBUTES |
+      | active                       | true                         |
+      | reduction_amount             | 3.0                          |
+      | reduction_currency           | usd                          |
+      | taxIncluded                  | true                         |
+      | productConditionQuantity     | 1                            |
+      | productCondition[attributes] | S,L                          |
     Given I create an empty cart "first_cart" for customer "testCustomer"
     When I add 1 combination "metalTshirtM" from product "metalTshirt" to the cart "first_cart"
     And cart "first_cart" total with tax included should be '$19.00'
@@ -136,12 +132,9 @@ Feature: Add discount with attribute trigger on FO
     #
     # Now update the discount so that it needs to match 2 products
     #
-    When I update discount "discount_with_two_attributes" with following conditions matching at least 2 products:
-      | condition_type | items |
-      | attributes     | S,L   |
-    Then discount "discount_with_two_attributes" should have the following product conditions matching at least 2 products:
-      | condition_type | items |
-      | attributes     | S,L   |
+    When I update discount "discount_with_two_attributes" with the following properties:
+      | productConditionQuantity     | 2   |
+      | productCondition[attributes] | S,L |
     # Create a new cart (we need to create a new one because the first cart was not updated and still has the discount applied
     # even if the quantity no longer matches)
     Given I create an empty cart "second_cart" for customer "testCustomer"
@@ -170,12 +163,9 @@ Feature: Add discount with attribute trigger on FO
       | reduction_amount   | 4.0                            |
       | reduction_currency | usd                            |
       | taxIncluded        | true                           |
-    When I update discount "discount_with_different_groups" with following conditions matching at least 2 products:
-      | condition_type | items   |
-      | attributes     | S,L,Red |
-    Then discount "discount_with_different_groups" should have the following product conditions matching at least 2 products:
-      | condition_type | items   |
-      | attributes     | S,L,Red |
+    When I update discount "discount_with_different_groups" with the following properties:
+      | productConditionQuantity     | 2       |
+      | productCondition[attributes] | S,L,Red |
     Given I create an empty cart "third_cart" for customer "testCustomer"
     # It works with two combinations matching one of the attributes
     When I add 2 combination "metalTshirtL" from product "metalTshirt" to the cart "third_cart"
@@ -222,14 +212,10 @@ Feature: Add discount with attribute trigger on FO
       | reduction_amount   | 5.0                     |
       | reduction_currency | usd                     |
       | taxIncluded        | true                    |
-    When I update discount "discount_with_l_and_red" with following conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | L     |
-      | attributes     | Red   |
-    Then discount "discount_with_l_and_red" should have the following product conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | L     |
-      | attributes     | Red   |
+    When I update discount "discount_with_l_and_red" with the following properties:
+      | productConditionQuantity     | 1       |
+      | productCondition[attributes] | L       |
+      | productCondition[attributes] | Red     |
     Given I create an empty cart "fourth_cart" for customer "testCustomer"
     # Product with only L is not enough (tshirt has no color so it can never match with Red)
     When I add 1 combination "metalTshirtL" from product "metalTshirt" to the cart "fourth_cart"
@@ -290,14 +276,10 @@ Feature: Add discount with attribute trigger on FO
       | reduction_amount   | 6.0                                    |
       | reduction_currency | usd                                    |
       | taxIncluded        | true                                   |
-    When I update discount "discount_with_s_or_l_and_orange_or_red" with following conditions matching at least 2 products:
-      | condition_type | items      |
-      | attributes     | S,L        |
-      | attributes     | Red,Orange |
-    Then discount "discount_with_s_or_l_and_orange_or_red" should have the following product conditions matching at least 2 products:
-      | condition_type | items      |
-      | attributes     | S,L        |
-      | attributes     | Red,Orange |
+    When I update discount "discount_with_s_or_l_and_orange_or_red" with the following properties:
+      | productConditionQuantity     | 2          |
+      | productCondition[attributes] | S,L        |
+      | productCondition[attributes] | Red,Orange |
     Given I create an empty cart "fifth_cart" for customer "testCustomer"
     # Two products with only L but Black are not enough
     When I add 2 combinations "metalSweatLBlack" from product "metalSweat" to the cart "fifth_cart"
@@ -365,14 +347,10 @@ Feature: Add discount with attribute trigger on FO
       | reduction_amount   | 7.0                            |
       | reduction_currency | usd                            |
       | taxIncluded        | true                           |
-    When I update discount "discount_with_black_and_s_or_l" with following conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | S,L   |
-      | attributes     | Black |
-    Then discount "discount_with_black_and_s_or_l" should have the following product conditions matching at least 1 products:
-      | condition_type | items |
-      | attributes     | S,L   |
-      | attributes     | Black |
+    When I update discount "discount_with_black_and_s_or_l" with the following properties:
+      | productConditionQuantity     | 1     |
+      | productCondition[attributes] | S,L   |
+      | productCondition[attributes] | Black |
     Given I create an empty cart "sixth_cart" for customer "testCustomer"
     # Two products one with Black the other with S, should not work
     When I add 1 combination "metalSweatSOrange" from product "metalSweat" to the cart "sixth_cart"
