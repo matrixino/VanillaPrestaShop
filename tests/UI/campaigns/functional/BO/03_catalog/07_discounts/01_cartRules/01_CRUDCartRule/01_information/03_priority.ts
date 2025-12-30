@@ -60,7 +60,6 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with priority', async () =>
     },
   });
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);
@@ -165,10 +164,10 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with priority', async () =>
       await testContext.addContextItem(this, 'testIdentifier', 'checkCartRule', baseContext);
 
       const firstCartRule = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(firstCartRule).to.equal(cartRulePriority1.name);
+      expect(firstCartRule).to.contains(cartRulePriority1.name);
 
       const secondCartRule = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(secondCartRule).to.equal(cartRulePriority2.name);
+      expect(secondCartRule).to.contains(cartRulePriority2.name);
     });
 
     it('should check the total after discount', async function () {

@@ -4,7 +4,7 @@ import testContext from '@utils/testContext';
 // Import common tests
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
 import {resetSmtpConfigTest, setupSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,
@@ -58,16 +58,15 @@ describe('FO - Checkout - Personal information : Password reminder', async () =>
   customerNewPassword.email = customerData.email;
   customerNewPassword.password = newPassword;
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-Condition : Setup config SMTP
-  setupSmtpConfigTest(`${baseContext}_preTest_1`);
+  setupSmtpConfigTest(`${baseContext}_preTest_0`);
 
   // Pre-condition : Create new customer on FO
-  createAccountTest(customerData, `${baseContext}_preTest_2`);
+  createAccountTest(customerData, `${baseContext}_preTest_1`);
 
-  // before and after functions
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_2`);
+
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

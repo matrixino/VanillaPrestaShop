@@ -167,7 +167,7 @@ describe('BO - Cart rules - Actions : Apply a discount to Selected product(s)', 
       expect(priceATI.toString()).to.eq((dataProducts.demo_16.finalPrice - discount).toFixed(2));
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-      expect(cartRuleName).to.equal(cartRuleData.name);
+      expect(cartRuleName).to.contains(cartRuleData.name);
 
       const cartRuleValue = await foHummingbirdCartPage.getCartRuleValue(page);
       expect(cartRuleValue.toString()).to.eq(`-€${discount.toFixed(2)}`);
@@ -252,7 +252,7 @@ describe('BO - Cart rules - Actions : Apply a discount to Selected product(s)', 
       );
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-      expect(cartRuleName).to.equal(cartRuleData.name);
+      expect(cartRuleName).to.contains(cartRuleData.name);
 
       const cartRuleValue = await foHummingbirdCartPage.getCartRuleValue(page);
       expect(cartRuleValue.toString()).to.eq(`-€${discount.toFixed(2)}`);

@@ -24,7 +24,6 @@ describe('FO - Catalog : Filter Products by categories in Home page', async () =
   let page: Page;
   let allProductsNumber: number = 0;
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);
@@ -35,7 +34,6 @@ describe('FO - Catalog : Filter Products by categories in Home page', async () =
   });
 
   describe('Catalog FO: Filter products from catalog', async () => {
-    // Steps
     it('should open the shop page', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'goToShopFO', baseContext);
 

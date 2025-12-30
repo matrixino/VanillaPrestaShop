@@ -2,7 +2,7 @@ import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,
@@ -51,7 +51,6 @@ describe('FO - Account : CRUD address', async () => {
   // Pre-condition
   createAccountTest(newCustomerData, `${baseContext}_preTest_1`);
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

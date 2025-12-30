@@ -4,7 +4,7 @@ import testContext from '@utils/testContext';
 // Import common tests
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
 import {resetSmtpConfigTest, setupSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
-import createAccountTest from '@commonTests/FO/hummingbird/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,
@@ -61,7 +61,6 @@ describe('FO - Checkout - Personal information : Password reminder', async () =>
   // Pre-condition : Create new customer on FO
   createAccountTest(customerData, `${baseContext}_preTest_2`);
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

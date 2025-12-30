@@ -128,7 +128,6 @@ describe('BO - Catalog - Products : CRUD product with combinations', async () =>
     ],
   });
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

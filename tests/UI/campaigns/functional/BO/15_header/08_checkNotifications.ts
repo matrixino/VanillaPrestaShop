@@ -2,7 +2,7 @@ import testContext from '@utils/testContext';
 import {expect} from 'chai';
 import {faker} from '@faker-js/faker';
 
-import {createOrderByCustomerTest, createOrderByGuestTest} from '@commonTests/FO/classic/order';
+import {createOrderByCustomerTest, createOrderByGuestTest} from '@commonTests/FO/hummingbird/order';
 
 import {
   boCustomerServicePage,
@@ -81,7 +81,6 @@ describe('BO - Header : Check notifications', async () => {
   // PRE-condition : Create order by default customer
   createOrderByCustomerTest(orderByCustomerData, `${baseContext}_preTest`);
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

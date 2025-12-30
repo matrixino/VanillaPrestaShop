@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import commonTests
 import {createCartRuleTest} from '@commonTests/BO/catalog/cartRule';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import createAccountTest from '@commonTests/FO/hummingbird/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,
@@ -64,7 +64,6 @@ describe('FO - Account : View vouchers', async () => {
     createCartRuleTest(cartRule, `${baseContext}_preTest_${index + 2}`);
   });
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

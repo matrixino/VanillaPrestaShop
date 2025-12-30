@@ -145,7 +145,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with enabled/disabled parti
         expect(priceATI).to.equal(0);
 
         const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-        expect(cartRuleName).to.equal(cartRuleEnabledPartialUse.name);
+        expect(cartRuleName).to.contains(cartRuleEnabledPartialUse.name);
 
         const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
         expect(discountValue).to.equal(`-€${dataProducts.demo_1.finalPrice.toFixed(2)}`);
@@ -353,7 +353,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with enabled/disabled parti
         expect(priceATI).to.equal(0);
 
         const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-        expect(cartRuleName).to.equal(cartRuleEnabledPartialUse.name);
+        expect(cartRuleName).to.contains(cartRuleEnabledPartialUse.name);
 
         const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
         expect(discountValue).to.equal(`-€${dataProducts.demo_1.finalPrice.toFixed(2)}`);

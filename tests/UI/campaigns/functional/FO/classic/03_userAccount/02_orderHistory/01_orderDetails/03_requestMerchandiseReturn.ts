@@ -1,6 +1,6 @@
 import testContext from '@utils/testContext';
 import {expect} from 'chai';
-import {createOrderByCustomerTest} from '@commonTests/FO/classic/order';
+import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
 import {
   enableMerchandiseReturns,
   disableMerchandiseReturns,
@@ -63,16 +63,15 @@ describe('FO - Account - Order details : Request merchandise return', async () =
   });
   const today: string = utilsDate.getDateFormat('mm/dd/yyyy');
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Create order
-  createOrderByCustomerTest(orderData, `${baseContext}_preTest_1`);
+  createOrderByCustomerTest(orderData, `${baseContext}_preTest_0`);
 
   // Pre-condition: Enable merchandise returns
-  enableMerchandiseReturns(`${baseContext}_preTest_2`);
+  enableMerchandiseReturns(`${baseContext}_preTest_1`);
 
-  // before and after functions
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_2`);
+
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

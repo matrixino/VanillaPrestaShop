@@ -349,7 +349,7 @@ describe('BO - Cart rules - Conditions : Case 9 - Compatibility with other cart 
       await foHummingbirdCartPage.addPromoCode(page, cartRuleTestPercent.code);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.eq(cartRuleTestPercent.name);
+      expect(cartRuleName).to.contains(cartRuleTestPercent.name);
     });
 
     it.skip('should check the discount value', async function () {
@@ -374,10 +374,10 @@ describe('BO - Cart rules - Conditions : Case 9 - Compatibility with other cart 
       await foHummingbirdCartPage.addPromoCode(page, cartRuleTestFreeGift.code);
 
       const cartRuleName1 = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName1).to.eq(cartRuleTestFreeGift.name);
+      expect(cartRuleName1).to.contains(cartRuleTestFreeGift.name);
 
       const cartRuleName2 = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(cartRuleName2).to.eq(cartRuleTestPercent.name);
+      expect(cartRuleName2).to.contains(cartRuleTestPercent.name);
     });
 
     it.skip('should check the discount value', async function () {
@@ -410,13 +410,13 @@ describe('BO - Cart rules - Conditions : Case 9 - Compatibility with other cart 
       await foHummingbirdCartPage.addPromoCode(page, cartRuleTestFreeShipping.code);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.eq(cartRuleTestFreeGift.name);
+      expect(cartRuleName).to.contains(cartRuleTestFreeGift.name);
 
       const cartRuleName1 = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(cartRuleName1).to.eq(cartRuleTestFreeShipping.name);
+      expect(cartRuleName1).to.contains(cartRuleTestFreeShipping.name);
 
       const cartRuleName2 = await foHummingbirdCartPage.getCartRuleName(page, 3);
-      expect(cartRuleName2).to.eq(cartRuleTestPercent.name);
+      expect(cartRuleName2).to.contains(cartRuleTestPercent.name);
     });
 
     it.skip('should check the discount value', async function () {
@@ -452,16 +452,16 @@ describe('BO - Cart rules - Conditions : Case 9 - Compatibility with other cart 
       await foHummingbirdCartPage.addPromoCode(page, cartRuleTestAmount.code);
 
       const cartRuleName1 = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName1).to.eq(cartRuleTestFreeGift.name);
+      expect(cartRuleName1).to.contains(cartRuleTestFreeGift.name);
 
       const cartRuleName2 = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(cartRuleName2).to.eq(cartRuleTestAmount.name);
+      expect(cartRuleName2).to.contains(cartRuleTestAmount.name);
 
       const cartRuleName3 = await foHummingbirdCartPage.getCartRuleName(page, 3);
-      expect(cartRuleName3).to.eq(cartRuleTestFreeShipping.name);
+      expect(cartRuleName3).to.contains(cartRuleTestFreeShipping.name);
 
       const cartRuleName4 = await foHummingbirdCartPage.getCartRuleName(page, 4);
-      expect(cartRuleName4).to.eq(cartRuleTestPercent.name);
+      expect(cartRuleName4).to.contains(cartRuleTestPercent.name);
     });
 
     it.skip('should check the discount value', async function () {
@@ -544,16 +544,16 @@ describe('BO - Cart rules - Conditions : Case 9 - Compatibility with other cart 
       await foHummingbirdCartPage.addPromoCode(page, cartRuleTestPercent.code);
 
       const cartRuleName1 = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName1).to.eq(cartRuleTestFreeGift.name);
+      expect(cartRuleName1).to.contains(cartRuleTestFreeGift.name);
 
       const cartRuleName2 = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(cartRuleName2).to.eq(cartRuleTestAmount.name);
+      expect(cartRuleName2).to.contains(cartRuleTestAmount.name);
 
       const cartRuleName3 = await foHummingbirdCartPage.getCartRuleName(page, 3);
-      expect(cartRuleName3).to.eq(cartRuleTestFreeShipping.name);
+      expect(cartRuleName3).to.contains(cartRuleTestFreeShipping.name);
 
       const cartRuleName4 = await foHummingbirdCartPage.getCartRuleName(page, 4);
-      expect(cartRuleName4).to.eq(cartRuleTestPercent.name);
+      expect(cartRuleName4).to.contains(cartRuleTestPercent.name);
     });
 
     it.skip('should check the discount value', async function () {

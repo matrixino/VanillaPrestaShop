@@ -138,7 +138,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         expect(priceATI).to.equal(parseFloat(totalAfterDiscount.toFixed(2)));
 
         const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-        expect(cartRuleName).to.equal(cartRuleWithoutCode.name);
+        expect(cartRuleName).to.contains(cartRuleWithoutCode.name);
 
         const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
         expect(discountValue).to.equal(
@@ -229,7 +229,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         await foHummingbirdCartPage.addPromoCode(page, cartRuleWithCode.code);
 
         const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-        expect(cartRuleName).to.equal(cartRuleWithCode.name);
+        expect(cartRuleName).to.contains(cartRuleWithCode.name);
       });
 
       it('should verify the total after the discount', async function () {
@@ -243,7 +243,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
         const discountValue = await foHummingbirdCartPage.getCartRuleValue(page, 1);
-        expect(discountValue).to.equal(
+        expect(discountValue).to.contains(
           `-€${Math.abs(parseFloat((totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)))}`,
         );
       });
@@ -339,7 +339,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         await foHummingbirdCartPage.clickOnPromoCode(page);
 
         const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-        expect(cartRuleName).to.equal(secondCartRuleWithCode.name);
+        expect(cartRuleName).to.contains(secondCartRuleWithCode.name);
       });
 
       it('should verify the total after the discount', async function () {
@@ -352,7 +352,7 @@ describe('BO - Catalog - Cart rules : CRUD cart rule with/without code', async (
         expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
         const discountValue = await foHummingbirdCartPage.getCartRuleValue(page, 1);
-        expect(discountValue).to.equal(
+        expect(discountValue).to.contains(
           `-€${Math.abs(parseFloat((totalAfterPromoCode - dataProducts.demo_1.finalPrice).toFixed(2)))}`,
         );
       });

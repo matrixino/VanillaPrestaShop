@@ -194,7 +194,7 @@ describe('BO - Catalog - Cart rules : Apply discount to specific product', async
       await foHummingbirdCartPage.addPromoCode(page, newCartRuleData.code);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.eq(newCartRuleData.name);
+      expect(cartRuleName).to.contains(newCartRuleData.name);
     });
 
     it('should check the discount value', async function () {

@@ -2,7 +2,7 @@ import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
 // Import common tests
-import {createOrderByCustomerTest} from '@commonTests/FO/classic/order';
+import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
 import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -54,13 +54,12 @@ describe('FO - Account - Order history : Reorder from order list', async () => {
     paymentMethod: dataPaymentMethods.wirePayment,
   });
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Create order
-  createOrderByCustomerTest(orderData, `${baseContext}_preTest_1`);
+  createOrderByCustomerTest(orderData, `${baseContext}_preTest_0`);
 
-  // before and after functions
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_1`);
+
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

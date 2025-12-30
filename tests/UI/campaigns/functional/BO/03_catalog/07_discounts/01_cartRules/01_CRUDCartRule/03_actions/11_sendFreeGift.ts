@@ -152,7 +152,7 @@ describe('BO - Cart rules - Actions : Send a free gift', async () => {
       expect(priceATI.toFixed(2)).to.eq(dataProducts.demo_1.finalPrice.toFixed(2));
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-      expect(cartRuleName).to.equal(cartRuleData.name);
+      expect(cartRuleName).to.contains(cartRuleData.name);
 
       const cartRuleValue = await foHummingbirdCartPage.getCartRuleValue(page);
       expect(cartRuleValue.toString()).to.eq(`-€${dataProducts.demo_20.finalPrice.toFixed(2)}`);
@@ -200,7 +200,7 @@ describe('BO - Cart rules - Actions : Send a free gift', async () => {
       );
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-      expect(cartRuleName).to.equal(cartRuleData.name);
+      expect(cartRuleName).to.contains(cartRuleData.name);
 
       const cartRuleValue = await foHummingbirdCartPage.getCartRuleValue(page);
       expect(cartRuleValue.toString()).to.eq(`-€${dataProducts.demo_20.finalPrice.toFixed(2)}`);

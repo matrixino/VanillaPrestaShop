@@ -38,7 +38,6 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
     status: true,
   });
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

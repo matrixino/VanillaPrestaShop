@@ -27,8 +27,8 @@ describe('Check FO connected pages', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 
-  // Pre-condition : Enable Hummingbird
-  enableTheme('hummingbird', `${baseContext}_preTest_0`);
+  // Pre-condition : Enable Classic
+  enableTheme('classic', `${baseContext}_preTest_0`);
 
   describe('Check FO connected pages', async () => {
     before(async function () {
@@ -220,6 +220,6 @@ describe('Check FO connected pages', async () => {
     });
   });
 
-  // Post-condition : Disable Hummingbird
-  disableTheme('hummingbird', `${baseContext}_postTest_0`);
+  // Post-condition : Disable Classic
+  disableTheme('classic', `${baseContext}_postTest_0`);
 });
