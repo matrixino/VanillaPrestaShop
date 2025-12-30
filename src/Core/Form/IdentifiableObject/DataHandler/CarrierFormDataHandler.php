@@ -112,8 +112,6 @@ class CarrierFormDataHandler implements FormDataHandlerInterface
             'actionCarrierUpdate',
             [
                 'id_carrier' => (int) $id,
-                // BIG NOTE: 
-                // The hook "actionCarrierUpdate" expects the carrier (Carrier object) as a parameter, but we cannot use legacy classes here, so we need to decide how to proceed.
                 'carrier' => new Carrier((int) $carrierId->getValue()),
             ]
         );
