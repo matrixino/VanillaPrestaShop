@@ -225,6 +225,7 @@ class FrontControllerCore extends Controller
                 'controller' => $this,
             ]
         );
+        Hook::exec('actionFrontController' . $this->getControllerName() . 'InitBefore', ['controller' => $this]);
 
         /*
          * Globals are DEPRECATED as of version 1.5.0.1
@@ -492,6 +493,7 @@ class FrontControllerCore extends Controller
                 'controller' => $this,
             ]
         );
+        Hook::exec('actionFrontController' . $this->getControllerName() . 'InitAfter', ['controller' => $this]);
     }
 
     /**
@@ -506,6 +508,8 @@ class FrontControllerCore extends Controller
 
     /**
      * Initializes a set of commonly used variables, available for use in the template.
+     *
+     * @throws PrestaShopException
      */
     protected function assignGeneralPurposeVariables()
     {
@@ -514,6 +518,12 @@ class FrontControllerCore extends Controller
 
         Hook::exec(
             'actionFrontControllerSetVariablesBefore',
+            [
+                'templateVars' => &$templateVars,
+                'cart' => $cart,
+            ]
+        );
+        Hook::exec('actionFrontController' . $this->getControllerName() . 'SetVariablesBefore',
             [
                 'templateVars' => &$templateVars,
                 'cart' => $cart,
@@ -549,6 +559,16 @@ class FrontControllerCore extends Controller
             null,
             true
         );
+        $modulesVariables = array_merge(
+            $modulesVariables,
+            Hook::exec('actionFrontController' . $this->getControllerName() . 'SetVariables',
+                [
+                    'templateVars' => &$templateVars,
+                ],
+                null,
+                true
+            )
+        );
 
         if (is_array($modulesVariables)) {
             foreach ($modulesVariables as $moduleName => $variables) {
@@ -581,12 +601,17 @@ class FrontControllerCore extends Controller
         Hook::exec('actionBuildFrontEndObject', [
             'obj' => &$object,
         ]);
+        Hook::exec('actionBuildFront' . $this->getControllerName() . 'EndObject', [
+            'obj' => &$object,
+        ]);
 
         return $object;
     }
 
     /**
      * Initializes common front page content: header, footer and side columns.
+     *
+     * @throws PrestaShopException
      */
     public function initContent()
     {
@@ -594,7 +619,8 @@ class FrontControllerCore extends Controller
         $this->process();
 
         $this->context->smarty->assign([
-            'HOOK_HEADER' => Hook::exec('displayHeader'),
+            'HOOK_HEADER' => Hook::exec('displayHeader')
+                . Hook::exec('display' . $this->getControllerName() . 'Header'),
         ]);
     }
 
@@ -734,6 +760,7 @@ class FrontControllerCore extends Controller
         }
 
         Hook::exec('actionOutputHTMLBefore', ['html' => &$html]);
+        Hook::exec('actionOutput' . $this->getControllerName() . 'HTMLBefore', ['html' => &$html]);
         echo trim($html);
     }
 
@@ -783,7 +810,7 @@ class FrontControllerCore extends Controller
                 $this->context->smarty->assign([
                     'urls' => $this->getTemplateVarUrls(),
                     'shop' => $this->getTemplateVarShop(),
-                    'HOOK_MAINTENANCE' => Hook::exec('displayMaintenance', []),
+                    'HOOK_MAINTENANCE' => Hook::exec('displayMaintenance'),
                     'maintenance_text' => Configuration::get('PS_MAINTENANCE_TEXT', (int) $this->context->language->id),
                     'stylesheets' => $this->getStylesheets(),
                 ]);
@@ -935,6 +962,7 @@ class FrontControllerCore extends Controller
      * Sets controller CSS and JS files.
      *
      * @return bool
+     * @throws PrestaShopException
      */
     public function setMedia()
     {
@@ -962,7 +990,8 @@ class FrontControllerCore extends Controller
         }
 
         // Execute Hook FrontController SetMedia
-        Hook::exec('actionFrontControllerSetMedia', []);
+        Hook::exec('actionFrontControllerSetMedia');
+        Hook::exec('actionFrontController' . $this->getControllerName() . 'SetMedia');
 
         return true;
     }
@@ -2197,5 +2226,10 @@ class FrontControllerCore extends Controller
         }
 
         return Validate::isUrl($data);
+    }
+
+    protected function getControllerName(): string
+    {
+        return Tools::toCamelCase($this->php_self, true);
     }
 }
