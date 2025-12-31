@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import common tests
 import {createAddressTest} from '@commonTests/BO/customers/address';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {createOrderByCustomerTest} from '@commonTests/FO/classic/order';
 import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
@@ -66,11 +66,11 @@ describe('FO - Account - Order history : Consult order list', async () => {
   });
   const today: string = utilsDate.getDateFormat('mm/dd/yyyy');
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Create new account
-  createAccountTest(customerData, `${baseContext}_preTest_1`);
+  createAccountTest(customerData, `${baseContext}_preTest_0`);
+
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_1`);
 
   // Pre-condition: Create new address
   createAddressTest(addressData, `${baseContext}_preTest_2`);

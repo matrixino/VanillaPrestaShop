@@ -5,8 +5,8 @@ import {expect} from 'chai';
 import {resetSmtpConfigTest, setupSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
 import {createAddressTest} from '@commonTests/BO/customers/address';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
-import {createOrderByCustomerTest} from '@commonTests/FO/classic/order';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
+import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
 import {disableTheme, enableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -78,14 +78,14 @@ describe('FO - Consult credit slip list & View PDF Credit slip & View order', as
     paymentMethod: dataPaymentMethods.wirePayment,
   });
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
   // Pre-condition: Create new account on FO
-  createAccountTest(customerData, `${baseContext}_preTest_1`);
+  createAccountTest(customerData, `${baseContext}_preTest_0`);
   // Pre-condition: Create new address
-  createAddressTest(addressData, `${baseContext}_preTest_2`);
+  createAddressTest(addressData, `${baseContext}_preTest_1`);
   // Pre-condition: Create order
-  createOrderByCustomerTest(orderData, `${baseContext}_preTest_3`);
+  createOrderByCustomerTest(orderData, `${baseContext}_preTest_2`);
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_3`);
   // Pre-Condition: Setup config SMTP
   setupSmtpConfigTest(`${baseContext}_preTest_4`);
 

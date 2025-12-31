@@ -4,7 +4,7 @@ import testContext from '@utils/testContext';
 // Import commonTests
 import {setupSmtpConfigTest, resetSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -53,14 +53,14 @@ describe('FO - Login : Password reminder', async () => {
   customerNewPassword.email = customerData.email;
   customerNewPassword.password = newPassword;
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-Condition : Setup config SMTP
-  setupSmtpConfigTest(`${baseContext}_preTest_1`);
+  setupSmtpConfigTest(`${baseContext}_preTest_0`);
 
   // Pre-condition : Create new customer on FO
-  createAccountTest(customerData, `${baseContext}_preTest_2`);
+  createAccountTest(customerData, `${baseContext}_preTest_1`);
+
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_2`);
 
   // before and after functions
   before(async function () {

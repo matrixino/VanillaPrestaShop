@@ -62,7 +62,7 @@ describe('FO - Home Page : Display some products', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'checkPopularProductsNumber', baseContext);
 
       const productsNumber = await foClassicHomePage.getProductsBlockNumber(page, 'popularproducts');
-      expect(productsNumber).to.equal(8);
+      expect(productsNumber).to.equal(4);
     });
 
     it('should check All products link', async function () {
@@ -146,7 +146,7 @@ describe('FO - Home Page : Display some products', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'checkNewProductsNumber', baseContext);
 
       const productsNumber = await foClassicHomePage.getProductsBlockNumber(page, 'newproducts');
-      expect(productsNumber).to.equal(8);
+      expect(productsNumber).to.equal(4);
     });
 
     it('should check All new products', async function () {

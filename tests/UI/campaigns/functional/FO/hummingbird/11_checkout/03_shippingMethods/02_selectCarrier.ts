@@ -3,7 +3,7 @@ import testContext from '@utils/testContext';
 
 // Import common tests
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import createAccountTest from '@commonTests/FO/hummingbird/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,

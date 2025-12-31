@@ -18,10 +18,10 @@ import {
 const baseContext: string = 'functional_BO_shopParameters_general_general_allowIframes';
 
 /*
-Enable/Disable allow iframe
-Go to product page and edit the description
-Add an iframe in the description
-Preview product and check the product description
+ * Enable/Disable allow iframe
+ * Go to product page and edit the description
+ * Add an iframe in the description
+ * Preview product and check the product description
  */
 describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML field', async () => {
   let browserContext: BrowserContext;
@@ -30,7 +30,6 @@ describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML 
     + '/3qcApq8NMhw?si=0O8BBWjbJ7gJRkoi" title="YouTube video player" frameborder="0" allow="accelerometer; '
     + 'autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);
@@ -50,13 +49,11 @@ describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML 
     expect(pageTitle).to.contains(boDashboardPage.pageTitle);
   });
 
-  const tests = [
-    {args: {action: 'Disable', exist: false}},
-    {args: {action: 'Enable', exist: true}},
-  ];
-
-  tests.forEach((test, index: number) => {
-    describe(`${test.args.action} Allow iframes on HTML fields`, async () => {
+  [
+    {action: 'Disable', exist: false},
+    {action: 'Enable', exist: true},
+  ].forEach((arg: {action: string, exist: boolean}, index: number) => {
+    describe(`${arg.action} Allow iframes on HTML fields`, async () => {
       it('should go to \'Shop parameters > General\' page', async function () {
         await testContext.addContextItem(this, 'testIdentifier', `goToGeneralPage${index}`, baseContext);
 
@@ -71,10 +68,10 @@ describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML 
         expect(pageTitle).to.contains(boShopParametersPage.pageTitle);
       });
 
-      it(`should ${test.args.action} allow iframes`, async function () {
-        await testContext.addContextItem(this, 'testIdentifier', `${test.args.action}AllowIframes`, baseContext);
+      it(`should ${arg.action} allow iframes`, async function () {
+        await testContext.addContextItem(this, 'testIdentifier', `${arg.action}AllowIframes`, baseContext);
 
-        const result = await boShopParametersPage.setAllowIframes(page, test.args.exist);
+        const result = await boShopParametersPage.setAllowIframes(page, arg.exist);
         expect(result).to.contains(boShopParametersPage.successfulUpdateMessage);
       });
 
@@ -108,7 +105,7 @@ describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML 
 
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/33921
         // To delete after the fix of the issue
-        if (test.args.action === 'Disable') {
+        if (arg.action === 'Disable') {
           await boProductsCreatePage.clickOnSaveProductButton(page);
         } else {
           const message = await boProductsCreatePage.saveProduct(page);
@@ -130,9 +127,9 @@ describe('BO - Shop Parameters - General : Enable/Disable Allow iframes on HTML 
         await testContext.addContextItem(this, 'testIdentifier', `checkIframe${index}`, baseContext);
 
         const isIframeVisible = await foHummingbirdProductPage.isIframeVisibleInProductDescription(page);
-        expect(isIframeVisible).to.equal(test.args.exist);
+        expect(isIframeVisible).to.equal(arg.exist);
 
-        if (test.args.exist) {
+        if (arg.exist) {
           const youtubeURL = await foHummingbirdProductPage.getURLInProductDescription(page);
           expect(youtubeURL).to.equal('https://www.youtube.com/embed/3qcApq8NMhw?si=0O8BBWjbJ7gJRkoi');
         }

@@ -3,7 +3,7 @@ import {expect} from 'chai';
 
 import deleteCacheTest from '@commonTests/BO/advancedParameters/cache';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 
 import {
   type BrowserContext,

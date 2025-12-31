@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import common tests
 import {createAddressTest} from '@commonTests/BO/customers/address';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import createAccountTest from '@commonTests/FO/hummingbird/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
 
 import {

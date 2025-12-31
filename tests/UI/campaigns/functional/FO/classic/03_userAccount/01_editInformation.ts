@@ -4,7 +4,7 @@ import {expect} from 'chai';
 
 // Import commonTests
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {disableTheme, enableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -63,13 +63,12 @@ describe('FO - Account : Edit information', async () => {
   // New customer data with good password
   const editCustomerData9: FakerCustomer = new FakerCustomer({password: 'test edit information'});
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Create new account on FO
-  createAccountTest(createCustomerData, `${baseContext}_preTest_1`);
+  createAccountTest(createCustomerData, `${baseContext}_preTest_0`);
 
-  // before and after functions
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_1`);
+
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

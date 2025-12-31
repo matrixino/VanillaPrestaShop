@@ -34,7 +34,7 @@ describe('Check FO public pages', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 
-  // Pre-condition : Enable Hummingbird
+  // Pre-condition : Enable Classic
   enableTheme('classic', `${baseContext}_preTest_0`);
 
   describe('Check FO public pages', async () => {
@@ -182,6 +182,6 @@ describe('Check FO public pages', async () => {
     });
   });
 
-  // Post-condition : Disable Hummingbird
+  // Post-condition : Disable Classic
   disableTheme('classic', `${baseContext}_postTest_0`);
 });

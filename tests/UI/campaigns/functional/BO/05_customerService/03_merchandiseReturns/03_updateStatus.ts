@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import commonTests
 import {disableMerchandiseReturns, enableMerchandiseReturns} from '@commonTests/BO/customerService/merchandiseReturns';
 import {resetSmtpConfigTest, setupSmtpConfigTest} from '@commonTests/BO/advancedParameters/smtp';
-import {createOrderByCustomerTest} from '@commonTests/FO/classic/order';
+import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
 
 import {
   boDashboardPage,

@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import commonTests
 import {createCartRuleTest} from '@commonTests/BO/catalog/cartRule';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -59,11 +59,11 @@ describe('FO - Account : View vouchers', async () => {
     dateTo: futureDate,
   });
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Create new account on FO
-  createAccountTest(customerData, `${baseContext}_preTest_1`);
+  createAccountTest(customerData, `${baseContext}_preTest_0`);
+
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_1`);
 
   // Pre-condition: Create 2 cart rules for the created customer
   [firstCartRule, secondCartRule].forEach((cartRule: FakerCartRule, index: number) => {

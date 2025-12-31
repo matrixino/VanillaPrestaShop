@@ -3,7 +3,7 @@ import {expect} from 'chai';
 
 import deleteCacheTest from '@commonTests/BO/advancedParameters/cache';
 import {deleteCustomerTest} from '@commonTests/BO/customers/customer';
-import {createAccountTest} from '@commonTests/FO/classic/account';
+import {createAccountTest} from '@commonTests/FO/hummingbird/account';
 import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
@@ -53,16 +53,15 @@ describe('FO - Account : CRUD address', async () => {
   const editAddressData: FakerAddress = new FakerAddress({country: 'France'});
   const secondAddressData: FakerAddress = new FakerAddress({country: 'France'});
 
-  // Pre-condition : Enable the theme classic
-  enableTheme('classic', `${baseContext}_preTest_0`);
-
   // Pre-condition: Delete cache
-  deleteCacheTest(`${baseContext}_preTest_1`);
+  deleteCacheTest(`${baseContext}_preTest_0`);
 
   // Pre-condition
-  createAccountTest(newCustomerData, `${baseContext}_preTest_2`);
+  createAccountTest(newCustomerData, `${baseContext}_preTest_1`);
 
-  // before and after functions
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_2`);
+
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);

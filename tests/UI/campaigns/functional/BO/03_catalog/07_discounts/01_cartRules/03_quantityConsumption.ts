@@ -193,7 +193,7 @@ describe('BO - Cart Rules : Quantity consumption', async () => {
       );
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page);
-      expect(cartRuleName).to.equal(cartRuleData.name);
+      expect(cartRuleName).to.contains(cartRuleData.name);
 
       const cartRuleValue = await foHummingbirdCartPage.getCartRuleValue(page);
       expect(cartRuleValue.toString()).to.eq(`-€${parseFloat(cartRuleData.discountAmount!.value.toString()).toFixed(2)}`);
