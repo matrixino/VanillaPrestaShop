@@ -225,7 +225,7 @@ class FrontControllerCore extends Controller
                 'controller' => $this,
             ]
         );
-        Hook::exec('actionFrontController' . $this->getControllerName() . 'InitBefore', ['controller' => $this]);
+        Hook::exec('action' . $this->getControllerName() . 'InitBefore', ['controller' => $this]);
 
         /*
          * Globals are DEPRECATED as of version 1.5.0.1
@@ -493,7 +493,7 @@ class FrontControllerCore extends Controller
                 'controller' => $this,
             ]
         );
-        Hook::exec('actionFrontController' . $this->getControllerName() . 'InitAfter', ['controller' => $this]);
+        Hook::exec('action' . $this->getControllerName() . 'InitAfter', ['controller' => $this]);
     }
 
     /**
@@ -523,7 +523,7 @@ class FrontControllerCore extends Controller
                 'cart' => $cart,
             ]
         );
-        Hook::exec('actionFrontController' . $this->getControllerName() . 'SetVariablesBefore',
+        Hook::exec('action' . $this->getControllerName() . 'SetVariablesBefore',
             [
                 'templateVars' => &$templateVars,
                 'cart' => $cart,
@@ -561,7 +561,7 @@ class FrontControllerCore extends Controller
         );
         $modulesVariables = array_merge(
             $modulesVariables,
-            Hook::exec('actionFrontController' . $this->getControllerName() . 'SetVariables',
+            Hook::exec('action' . $this->getControllerName() . 'SetVariables',
                 [
                     'templateVars' => &$templateVars,
                 ],
@@ -601,7 +601,7 @@ class FrontControllerCore extends Controller
         Hook::exec('actionBuildFrontEndObject', [
             'obj' => &$object,
         ]);
-        Hook::exec('actionBuildFront' . $this->getControllerName() . 'EndObject', [
+        Hook::exec('actionBuild' . $this->getControllerName() . 'FrontEndObject', [
             'obj' => &$object,
         ]);
 
@@ -992,7 +992,7 @@ class FrontControllerCore extends Controller
 
         // Execute Hook FrontController SetMedia
         Hook::exec('actionFrontControllerSetMedia');
-        Hook::exec('actionFrontController' . $this->getControllerName() . 'SetMedia');
+        Hook::exec('action' . $this->getControllerName() . 'SetMedia');
 
         return true;
     }
