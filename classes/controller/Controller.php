@@ -816,6 +816,6 @@ abstract class ControllerCore
 
     public function getControllerName(): string
     {
-        return Tools::toCamelCase($this->php_self, true);
+        return str_replace('Core', '', get_class($this));
     }
 }
