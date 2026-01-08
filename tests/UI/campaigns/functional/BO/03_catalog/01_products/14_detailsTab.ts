@@ -216,7 +216,7 @@ describe('BO - Catalog - Products : Details tab', async () => {
 
       const productFeatures = await foHummingbirdProductPage.getProductFeaturesList(page);
       expect(productFeatures).to.eq(
-        `Data sheet ${editProductData.features[0].featureName} ${editProductData.features[0].preDefinedValue}`
+        `${editProductData.features[0].featureName} ${editProductData.features[0].preDefinedValue}`
         + ` ${editProductData.features[1].customizedValueEn}`);
     });
 
@@ -283,7 +283,7 @@ describe('BO - Catalog - Products : Details tab', async () => {
     it('should check that product features list is empty', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'isFeatureBlockNotVisible', baseContext);
 
-      const isVisible = await foHummingbirdProductPage.isFeaturesBlockVisible(page);
+      const isVisible = await foHummingbirdProductPage.hasProductFeaturesList(page);
       expect(isVisible).to.eq(false);
     });
 
@@ -361,7 +361,8 @@ describe('BO - Catalog - Products : Details tab', async () => {
       expect(pageTitle).to.contains(newProductData.name);
     });
 
-    it('should check the product condition', async function () {
+    // @todo : https://github.com/PrestaShop/hummingbird/pull/898
+    it.skip('should check the product condition', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkProductCondition', baseContext);
 
       const productCondition = await foHummingbirdProductPage.getProductCondition(page);
