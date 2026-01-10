@@ -38,10 +38,12 @@ use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\NoCustomerId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\MinimumAmount;
 use PrestaShop\PrestaShop\Core\Domain\Language\ValueObject\LanguageId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Exception\CombinationConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationIdInterface;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\NoCombinationId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\ValueObject\Money;
 
@@ -71,9 +73,7 @@ class AddDiscountCommand
      */
     private ?array $productConditions = null;
 
-    private ?Money $minimumAmount = null;
-
-    private ?bool $minimumAmountShippingIncluded = null;
+    private ?MinimumAmount $minimumAmount = null;
 
     /**
      * @var CarrierId[]|null
@@ -312,9 +312,12 @@ class AddDiscountCommand
         return $this->giftProductId;
     }
 
-    public function setGiftProductId(int $giftProductId): self
+    /**
+     * @throws ProductConstraintException
+     */
+    public function setGiftProductId(?int $giftProductId): self
     {
-        $this->giftProductId = new ProductId($giftProductId);
+        $this->giftProductId = null !== $giftProductId ? new ProductId($giftProductId) : null;
 
         return $this;
     }
@@ -324,13 +327,12 @@ class AddDiscountCommand
         return $this->giftCombinationId;
     }
 
-    public function setGiftCombinationId(int $giftCombinationId): self
+    /**
+     * @throws CombinationConstraintException
+     */
+    public function setGiftCombinationId(?int $giftCombinationId): self
     {
-        if (NoCombinationId::NO_COMBINATION_ID === $giftCombinationId) {
-            $this->giftCombinationId = new NoCombinationId();
-        } else {
-            $this->giftCombinationId = new CombinationId($giftCombinationId);
-        }
+        $this->giftCombinationId = null !== $giftCombinationId ? new CombinationId($giftCombinationId) : null;
 
         return $this;
     }
@@ -363,14 +365,9 @@ class AddDiscountCommand
         return $this;
     }
 
-    public function getMinimumAmount(): ?Money
+    public function getMinimumAmount(): ?MinimumAmount
     {
         return $this->minimumAmount;
-    }
-
-    public function getMinimumAmountShippingIncluded(): ?bool
-    {
-        return $this->minimumAmountShippingIncluded;
     }
 
     /**
@@ -382,8 +379,7 @@ class AddDiscountCommand
             throw new DiscountConstraintException(sprintf('Money amount cannot be lower than zero, %s given', $amount), DiscountConstraintException::INVALID_DISCOUNT_VALUE_CANNOT_BE_NEGATIVE);
         }
 
-        $this->minimumAmount = new Money($amount, new CurrencyId($currencyId), $taxIncluded);
-        $this->minimumAmountShippingIncluded = $shippingIncluded;
+        $this->minimumAmount = new MinimumAmount($amount, new CurrencyId($currencyId), $taxIncluded, $shippingIncluded);
 
         return $this;
     }

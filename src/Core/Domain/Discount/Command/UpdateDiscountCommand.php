@@ -38,10 +38,10 @@ use PrestaShop\PrestaShop\Core\Domain\Customer\ValueObject\NoCustomerId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountId;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\MinimumAmount;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\Exception\CombinationConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationIdInterface;
-use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\NoCombinationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\ValueObject\Money;
@@ -75,9 +75,7 @@ class UpdateDiscountCommand
      */
     private ?array $productConditions = null;
 
-    private ?Money $minimumAmount = null;
-
-    private ?bool $minimumAmountShippingIncluded = null;
+    private ?MinimumAmount $minimumAmount = null;
 
     /**
      * @var CarrierId[]|null
@@ -206,11 +204,6 @@ class UpdateDiscountCommand
         return $this;
     }
 
-    public function getTotalQuantity(): ?int
-    {
-        return $this->totalQuantity;
-    }
-
     public function isHighlightInCart(): ?bool
     {
         return $this->highlightInCart;
@@ -220,6 +213,11 @@ class UpdateDiscountCommand
     {
         $this->highlightInCart = $highlightInCart;
         $this->markDirty('highlightInCart');
+    }
+
+    public function getTotalQuantity(): ?int
+    {
+        return $this->totalQuantity;
     }
 
     /**
@@ -350,9 +348,9 @@ class UpdateDiscountCommand
     /**
      * @throws ProductConstraintException
      */
-    public function setGiftProductId(int $giftProductId): self
+    public function setGiftProductId(?int $giftProductId): self
     {
-        $this->giftProductId = new ProductId($giftProductId);
+        $this->giftProductId = null !== $giftProductId ? new ProductId($giftProductId) : null;
         $this->markDirty('giftProductId');
 
         return $this;
@@ -366,13 +364,9 @@ class UpdateDiscountCommand
     /**
      * @throws CombinationConstraintException
      */
-    public function setGiftCombinationId(int $giftCombinationId): self
+    public function setGiftCombinationId(?int $giftCombinationId): self
     {
-        if (NoCombinationId::NO_COMBINATION_ID === $giftCombinationId) {
-            $this->giftCombinationId = new NoCombinationId();
-        } else {
-            $this->giftCombinationId = new CombinationId($giftCombinationId);
-        }
+        $this->giftCombinationId = null !== $giftCombinationId ? new CombinationId($giftCombinationId) : null;
         $this->markDirty('giftCombinationId');
 
         return $this;
@@ -401,20 +395,15 @@ class UpdateDiscountCommand
         if ($minimumProductQuantity < 0) {
             throw new DiscountConstraintException('Minimum products quantity must be greater than 0', DiscountConstraintException::INVALID_MINIMUM_PRODUCT_QUANTITY);
         }
-
         $this->minimumProductQuantity = $minimumProductQuantity;
+        $this->markDirty('minimumProductQuantity');
 
         return $this;
     }
 
-    public function getMinimumAmount(): ?Money
+    public function getMinimumAmount(): ?MinimumAmount
     {
         return $this->minimumAmount;
-    }
-
-    public function getMinimumAmountShippingIncluded(): ?bool
-    {
-        return $this->minimumAmountShippingIncluded;
     }
 
     /**
@@ -426,8 +415,8 @@ class UpdateDiscountCommand
             throw new DiscountConstraintException(sprintf('Money amount cannot be lower than zero, %s given', $amount), DiscountConstraintException::INVALID_DISCOUNT_VALUE_CANNOT_BE_NEGATIVE);
         }
 
-        $this->minimumAmount = new Money($amount, new CurrencyId($currencyId), $taxIncluded);
-        $this->minimumAmountShippingIncluded = $shippingIncluded;
+        $this->minimumAmount = new MinimumAmount($amount, new CurrencyId($currencyId), $taxIncluded, $shippingIncluded);
+        $this->markDirty('minimumAmount');
 
         return $this;
     }
@@ -482,6 +471,7 @@ class UpdateDiscountCommand
             $validProductConditions[] = $productCondition;
         }
         $this->productConditions = $validProductConditions;
+        $this->markDirty('productConditions');
 
         return $this;
     }
@@ -502,6 +492,7 @@ class UpdateDiscountCommand
     public function setCarrierIds(?array $carrierIds): self
     {
         $this->carrierIds = $carrierIds !== null ? array_map(fn (int $carrierId) => new CarrierId($carrierId), $carrierIds) : null;
+        $this->markDirty('carrierIds');
 
         return $this;
     }
@@ -514,6 +505,7 @@ class UpdateDiscountCommand
     public function setCountryIds(?array $countryIds): self
     {
         $this->countryIds = $countryIds !== null ? array_map(fn (int $countryId) => new CountryId($countryId), $countryIds) : null;
+        $this->markDirty('countryIds');
 
         return $this;
     }
@@ -532,6 +524,7 @@ class UpdateDiscountCommand
     public function setCustomerGroupIds(?array $customerGroupIds): self
     {
         $this->customerGroupIds = $customerGroupIds !== null ? array_map(fn (int $groupId) => new GroupId($groupId), $customerGroupIds) : null;
+        $this->markDirty('customerGroupIds');
 
         return $this;
     }
@@ -560,6 +553,7 @@ class UpdateDiscountCommand
         }
 
         $this->compatibleDiscountTypeIds = $compatibleDiscountTypeIds;
+        $this->markDirty('compatibleDiscountTypeIds');
 
         return $this;
     }

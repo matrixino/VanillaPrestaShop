@@ -34,7 +34,7 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\CannotUpdateDiscountExc
 use PrestaShop\PrestaShop\Core\Domain\Discount\ProductRuleGroup;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
-use PrestaShop\PrestaShop\Core\Domain\ValueObject\Money;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\MinimumAmount;
 
 class DiscountConditionsUpdater
 {
@@ -53,8 +53,7 @@ class DiscountConditionsUpdater
      * @param DiscountId $discountId
      * @param int|null $minimumProductQuantity
      * @param array|null $productConditions
-     * @param Money|null $minimumAmount
-     * @param bool|null $minimumShippingIncluded
+     * @param MinimumAmount|null $minimumAmount
      * @param int[]|null $carrierIds
      * @param int[]|null $countryIds
      * @param int[]|null $customerGroupIds
@@ -65,8 +64,7 @@ class DiscountConditionsUpdater
         DiscountId $discountId,
         ?int $minimumProductQuantity = null,
         ?array $productConditions = null,
-        ?Money $minimumAmount = null,
-        ?bool $minimumShippingIncluded = null,
+        ?MinimumAmount $minimumAmount = null,
         ?array $carrierIds = null,
         ?array $countryIds = null,
         ?array $customerGroupIds = null,
@@ -75,7 +73,6 @@ class DiscountConditionsUpdater
         if ($minimumProductQuantity === null
             && $productConditions === null
             && $minimumAmount === null
-            && $minimumShippingIncluded === null
             && $carrierIds === null
             && $countryIds === null
             && $customerGroupIds === null) {
@@ -89,7 +86,7 @@ class DiscountConditionsUpdater
         }
 
         if (null !== $minimumAmount) {
-            $updatableProperties = array_merge($updatableProperties, $this->updateMinimalAmount($discount, $minimumAmount, $minimumShippingIncluded));
+            $updatableProperties = array_merge($updatableProperties, $this->updateMinimalAmount($discount, $minimumAmount));
         }
 
         // Product conditions can define product segments or a list of products (which is equivalent to a segment based on a product criteria)
@@ -122,12 +119,12 @@ class DiscountConditionsUpdater
         return ['minimum_product_quantity'];
     }
 
-    private function updateMinimalAmount(CartRule $discount, Money $minimumAmount, bool $minimumShippingIncluded): array
+    private function updateMinimalAmount(CartRule $discount, MinimumAmount $minimumAmount): array
     {
         $discount->minimum_amount = (float) (string) $minimumAmount->getAmount();
         $discount->minimum_amount_currency = $minimumAmount->getCurrencyId()->getValue();
         $discount->minimum_amount_tax = $minimumAmount->isTaxIncluded();
-        $discount->minimum_amount_shipping = $minimumShippingIncluded;
+        $discount->minimum_amount_shipping = $minimumAmount->isShippingIncluded();
 
         return [
             'minimum_amount',

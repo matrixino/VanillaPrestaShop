@@ -3,7 +3,6 @@
 @discount-priority-incompatible-auto
 @clear-cache-before-feature
 @clear-cache-after-feature
-
 Feature: Discount priority - Incompatible auto discounts
   Test that incompatible auto discounts are resolved by priority
 

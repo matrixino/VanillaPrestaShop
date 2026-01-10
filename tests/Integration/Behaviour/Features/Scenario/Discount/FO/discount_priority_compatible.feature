@@ -3,7 +3,6 @@
 @discount-priority-compatible
 @clear-cache-before-feature
 @clear-cache-after-feature
-
 Feature: Discount priority - Compatible discounts
   Test that compatible discounts are all applied in correct priority order
 

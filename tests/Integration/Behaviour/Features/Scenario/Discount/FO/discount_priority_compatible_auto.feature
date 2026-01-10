@@ -3,7 +3,6 @@
 @discount-priority-compatible-auto
 @clear-cache-before-feature
 @clear-cache-after-feature
-
 Feature: Discount priority - Compatible auto discounts
   Test that compatible auto discounts are all applied in correct priority order
 

@@ -132,11 +132,11 @@ class DiscountFiller
             }
         }
         if ($command->isDirty('giftProductId')) {
-            $cartRule->gift_product = $command->getGiftProductId()->getValue();
+            $cartRule->gift_product = $command->getGiftProductId()?->getValue() ?: 0;
             $updatableProperties[] = 'gift_product';
         }
         if ($command->isDirty('giftCombinationId')) {
-            $cartRule->gift_product_attribute = $command->getGiftCombinationId()->getValue();
+            $cartRule->gift_product_attribute = $command->getGiftCombinationId()?->getValue() ?: 0;
             $updatableProperties[] = 'gift_product_attribute';
         }
 

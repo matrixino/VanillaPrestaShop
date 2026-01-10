@@ -3,7 +3,6 @@
 @discount-compatibility-fo
 @clear-cache-before-feature
 @clear-cache-after-feature
-
 Feature: Discount compatibility in cart
   PrestaShop validates discount compatibility when applying multiple discounts to a cart
   As a customer

@@ -68,7 +68,6 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
             // If cheapest product is set we remove the product conditions (using empty array)
             $command->getCheapestProduct() ? [] : $command->getProductConditions(),
             $command->getMinimumAmount(),
-            $command->getMinimumAmountShippingIncluded(),
             $command->getCarrierIds() !== null ? array_map(fn (CarrierId $carrierId) => $carrierId->getValue(), $command->getCarrierIds()) : null,
             $command->getCountryIds() !== null ? array_map(fn (CountryId $countryId) => $countryId->getValue(), $command->getCountryIds()) : null,
             $command->getCustomerGroupIds() !== null ? array_map(fn (GroupId $groupId) => $groupId->getValue(), $command->getCustomerGroupIds()) : null,

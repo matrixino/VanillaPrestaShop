@@ -1,6 +1,8 @@
 # ./vendor/bin/behat -c tests/Integration/Behaviour/behat.yml -s discount --tags discount-usage-limits-fo
-@restore-all-tables-before-feature
 @discount-usage-limits-fo
+@restore-all-tables-before-feature
+@clear-cache-before-feature
+@clear-cache-after-feature
 Feature: Customer using discount with usage limits in FO
   PrestaShop allows customers to use discounts that are limited by usage per user or total.
   As a customer
@@ -8,6 +10,8 @@ Feature: Customer using discount with usage limits in FO
   And I should not be able to use a discount code that has reached its usage limit
 
   Background:
+    # The new rules for product level are only computed when the feature flag is enabled
+    Given I enable feature flag "discount"
     Given language with iso code "en" is the default one
     Given shop "shop1" with name "test_shop" exists
     And the module "dummy_payment" is installed
@@ -19,29 +23,29 @@ Feature: Customer using discount with usage limits in FO
     And customer "testCustomer" has address in "US" country
     And there is a customer named "testCustomer2" whose email is "pub2@prestashop.com"
     And I add new address to customer "testCustomer2" with following details:
-      | Address alias    | test-address                       |
-      | First name       | testFirstName                      |
-      | Last name        | testLastName                       |
-      | Address          | Work address st. 1234567890        |
-      | City             | Birmingham                         |
-      | Country          | United States                      |
-      | State            | Alabama                            |
-      | Postal code      | 12345                              |
+      | Address alias | test-address                |
+      | First name    | testFirstName               |
+      | Last name     | testLastName                |
+      | Address       | Work address st. 1234567890 |
+      | City          | Birmingham                  |
+      | Country       | United States               |
+      | State         | Alabama                     |
+      | Postal code   | 12345                       |
     And customer "testCustomer2" has address in "US" country
 
   Scenario: Discount Free shipping that is available only one time for all customers
     Given I create a "free_shipping" discount "vip_discount10" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_FREE_SHIPPING     |
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_FREE_SHIPPING   |
+      | total_quantity           | 1                   |
+      | quantity_per_user        | 1                   |
+      | minimum_product_quantity | 0                   |
     And discount "vip_discount10" should have the following properties:
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
+      | total_quantity    | 1 |
+      | quantity_per_user | 1 |
     # First Johh's cart + discount with order placed
     When I create an empty cart "john_cart10" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart10"
@@ -67,19 +71,20 @@ Feature: Customer using discount with usage limits in FO
 
   Scenario: Discount product level that is available only one time for all customers
     Given I create a "product_level" discount "vip_discount11" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_PRODUCT_LEVEL     |
-      | reduction_percent        | 10.0                  |
-      | reduction_product        | product1              |
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_PRODUCT_LEVEL   |
+      | reduction_percent        | 10.0                |
+      | reduction_product        | product1            |
+      | total_quantity           | 1                   |
+      | quantity_per_user        | 1                   |
+      | minimum_product_quantity | 0                   |
+      | cheapest_product         | true                |
     And discount "vip_discount11" should have the following properties:
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
+      | total_quantity    | 1 |
+      | quantity_per_user | 1 |
     # First Johh's cart + discount with order placed
     When I create an empty cart "john_cart12" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart12"
@@ -105,18 +110,18 @@ Feature: Customer using discount with usage limits in FO
 
   Scenario: Discount that is available only one time per user
     Given I create a "cart_level" discount "vip_discount" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_20                |
-      | reduction_percent        | 20.0                  |
-      | total_quantity           | 100                   |
-      | quantity_per_user        | 1                     |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_20              |
+      | reduction_percent        | 20.0                |
+      | total_quantity           | 100                 |
+      | quantity_per_user        | 1                   |
+      | minimum_product_quantity | 0                   |
     And discount "vip_discount" should have the following properties:
-      | total_quantity           | 100                   |
-      | quantity_per_user        | 1                     |
+      | total_quantity    | 100 |
+      | quantity_per_user | 1   |
     # First Johh's cart + discount with order placed
     When I create an empty cart "john_cart" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart"
@@ -140,18 +145,18 @@ Feature: Customer using discount with usage limits in FO
 
   Scenario: Discount that is available only one time for all customers
     Given I create a "cart_level" discount "vip_discount2" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_20_2              |
-      | reduction_percent        | 20.0                  |
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_20_2            |
+      | reduction_percent        | 20.0                |
+      | total_quantity           | 1                   |
+      | quantity_per_user        | 1                   |
+      | minimum_product_quantity | 0                   |
     And discount "vip_discount2" should have the following properties:
-      | total_quantity           | 1                     |
-      | quantity_per_user        | 1                     |
+      | total_quantity    | 1 |
+      | quantity_per_user | 1 |
     # First Johh's cart + discount with order placed
     When I create an empty cart "john_cart" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart"
@@ -169,18 +174,18 @@ Feature: Customer using discount with usage limits in FO
 
   Scenario: Discount that is available with no limit in total usage
     Given I create a "cart_level" discount "vip_discount4" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_20_4              |
-      | reduction_percent        | 20.0                  |
-      | total_quantity           | null                  |
-      | quantity_per_user        | 1                     |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_20_4            |
+      | reduction_percent        | 20.0                |
+      | total_quantity           | null                |
+      | quantity_per_user        | 1                   |
+      | minimum_product_quantity | 0                   |
     And discount "vip_discount4" should have the following properties:
-      | total_quantity           | null                  |
-      | quantity_per_user        | 1                     |
+      | total_quantity    | null |
+      | quantity_per_user | 1    |
     # First Johh's cart + discount with order placed
     And I create an empty cart "john_cart3" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart3"
@@ -204,18 +209,18 @@ Feature: Customer using discount with usage limits in FO
 
   Scenario: Discount that is available with no limit per user
     Given I create a "cart_level" discount "vip_discount3" with following properties:
-      | name[en-US]              | VIP Discount          |
-      | active                   | true                  |
-      | valid_from               | 2025-01-01 00:00:00   |
-      | valid_to                 | 2099-12-31 23:59:59   |
-      | code                     | VIP_20_3              |
-      | reduction_percent        | 20.0                  |
-      | total_quantity           | 10                    |
-      | quantity_per_user        | null                  |
-      | minimum_product_quantity | 0                     |
+      | name[en-US]              | VIP Discount        |
+      | active                   | true                |
+      | valid_from               | 2025-01-01 00:00:00 |
+      | valid_to                 | 2099-12-31 23:59:59 |
+      | code                     | VIP_20_3            |
+      | reduction_percent        | 20.0                |
+      | total_quantity           | 10                  |
+      | quantity_per_user        | null                |
+      | minimum_product_quantity | 0                   |
     And discount "vip_discount3" should have the following properties:
-      | total_quantity           | 10                    |
-      | quantity_per_user        | null                  |
+      | total_quantity    | 10   |
+      | quantity_per_user | null |
     # First Johh's cart + discount with order placed
     And I create an empty cart "john_cart1" for customer "testCustomer"
     And I add 2 product "product1" to the cart "john_cart1"

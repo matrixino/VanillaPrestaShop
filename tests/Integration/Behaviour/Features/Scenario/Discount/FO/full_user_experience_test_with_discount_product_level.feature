@@ -1,6 +1,8 @@
 # ./vendor/bin/behat -c tests/Integration/Behaviour/behat.yml -s discount --tags full-ux-discount-test-product-level
-@restore-all-tables-before-feature
 @full-ux-discount-test-product-level
+@restore-all-tables-before-feature
+@clear-cache-before-feature
+@clear-cache-after-feature
 Feature: Full UX discount test
   PrestaShop allows BO users to create discounts
   As a BO user
