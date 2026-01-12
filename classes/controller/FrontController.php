@@ -1723,7 +1723,7 @@ class FrontControllerCore extends Controller
 
         return (int) round($pixelValue);
     }
-    
+
     public function getCoreJsPublicPath()
     {
         return $this->context->shop->physical_uri . 'themes/';
