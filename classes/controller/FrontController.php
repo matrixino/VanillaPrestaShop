@@ -1662,7 +1662,26 @@ class FrontControllerCore extends Controller
             return [];
         }
 
-        list($logoWidth, $logoHeight) = getimagesize($logoFileDir);
+        $ext = pathinfo($logoFileDir, PATHINFO_EXTENSION);
+        $logoWidth = 0;
+        $logoHeight = 0;
+
+        if ($ext === 'svg') {
+            $svg = new DOMDocument();
+            $svg->load($logoFileDir);
+            $logoWidth = $this->getPixelValue($svg->documentElement->getAttribute('width'));
+            $logoHeight = $this->getPixelValue($svg->documentElement->getAttribute('height'));
+            /* If width and height is not explicitly set, use the aspect ratio from the viewBox attribute as base size */
+            if (!$logoWidth || !$logoHeight) {
+                $viewBox = preg_split('/[\s,]+/', $svg->documentElement->getAttribute('viewBox') ?: '');
+                if (isset($viewBox[2], $viewBox[3])) {
+                    $logoWidth = round((float) $viewBox[2]);
+                    $logoHeight = round((float) $viewBox[3]);
+                }
+            }
+        } else {
+            list($logoWidth, $logoHeight) = getimagesize($logoFileDir);
+        }
 
         return [
             'src' => ($this->getTemplateVarUrls()['img_ps_url'] ?? _PS_IMG_) . $logoFileName,
@@ -1671,6 +1690,40 @@ class FrontControllerCore extends Controller
         ];
     }
 
+    /**
+     * Converts sizes like 2em, 10cm or 12pt to pixels.
+     *
+     * @return int
+     */
+    private function getPixelValue(string $size): int
+    {
+        $map = [
+            'px' => 1,
+            'em' => 16,
+            'ex' => 16 / 2,
+            'pt' => 16 / 12,
+            'pc' => 16,
+            'in' => 16 * 6,
+            'cm' => 16 / (2.54 / 6),
+            'mm' => 16 / (25.4 / 6),
+        ];
+
+        $size = trim($size);
+
+        $value = substr($size, 0, -2);
+        $unit = substr($size, -2);
+
+        if (is_numeric($value) && isset($map[$unit])) {
+            $pixelValue = ((float) $value) * $map[$unit];
+        } elseif (is_numeric($size)) {
+            $pixelValue = (float) $size;
+        } else {
+            $pixelValue = 0;
+        }
+
+        return (int) round($pixelValue);
+    }
+    
     public function getCoreJsPublicPath()
     {
         return $this->context->shop->physical_uri . 'themes/';
