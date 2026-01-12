@@ -25,6 +25,7 @@
  */
 
 use PrestaShop\PrestaShop\Core\Session\SessionHandler;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 
 // Custom defines made by users
 if (is_file(__DIR__ . '/defines_custom.inc.php')) {
@@ -137,7 +138,7 @@ if ($context->shop && $context->shop->theme) {
     define('_PARENT_THEME_NAME_', $context->shop->theme->get('parent') ?: '');
 } else {
     // Not ideal fallback but on install when nothing else is available it does the job, better than not having these const at all
-    define('_THEME_NAME_', 'classic');
+    define('_THEME_NAME_', Theme::getDefaultTheme());
     define('_PARENT_THEME_NAME_', '');
 }
 

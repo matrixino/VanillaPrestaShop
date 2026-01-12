@@ -381,6 +381,8 @@ final class AddProductToOrderHandler extends AbstractOrderHandler implements Add
             0,
             new Shop($cart->id_shop),
             true,
+            true,
+            true,
             true
         );
 
@@ -461,7 +463,7 @@ final class AddProductToOrderHandler extends AbstractOrderHandler implements Add
             $freeShippingCartRule->add();
 
             // Add cart rule to cart and in order
-            $cart->addCartRule($freeShippingCartRule->id);
+            $cart->addCartRule($freeShippingCartRule->id, true);
             $values = [
                 'tax_incl' => $freeShippingCartRule->getContextualValue(true),
                 'tax_excl' => $freeShippingCartRule->getContextualValue(false),

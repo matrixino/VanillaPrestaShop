@@ -214,15 +214,27 @@ class GroupCore extends ObjectModel
 
     public function delete()
     {
-        if ($this->id == (int) Configuration::get('PS_CUSTOMER_GROUP')) {
+        // Prevent calling the logic in case of an invalid object
+        if (empty($this->id)) {
             return false;
         }
+
+        // Prevent deletion of groups currently used in configuration
+        if (in_array($this->id, [
+            (int) Configuration::get('PS_UNIDENTIFIED_GROUP'),
+            (int) Configuration::get('PS_GUEST_GROUP'),
+            (int) Configuration::get('PS_CUSTOMER_GROUP'),
+        ])) {
+            throw new PrestaShopException('You cannot delete a group that is used in the shop configuration.');
+        }
+
         if (parent::delete()) {
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'customer_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'category_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'group_reduction` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'product_group_reduction_cache` WHERE `id_group` = ' . (int) $this->id);
+
             $this->truncateModulesRestrictions($this->id);
 
             // Add default group (id 3) to customers without groups

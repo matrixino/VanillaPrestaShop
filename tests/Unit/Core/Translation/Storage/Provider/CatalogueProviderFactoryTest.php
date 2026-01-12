@@ -68,7 +68,7 @@ class CatalogueProviderFactoryTest extends TestCase
         $themeRepository
             ->method('getInstanceByName')
             ->willReturn(new Theme([
-                'name' => 'classic',
+                'name' => Theme::getDefaultTheme(),
                 'directory' => '',
             ])); // doesn't really matter
 
@@ -131,7 +131,7 @@ class CatalogueProviderFactoryTest extends TestCase
             ModuleCatalogueLayersProvider::class,
         ];
         yield [
-            new ThemeProviderDefinition('classic'),
+            new ThemeProviderDefinition(Theme::getDefaultTheme()),
             ThemeCatalogueLayersProvider::class,
         ];
     }

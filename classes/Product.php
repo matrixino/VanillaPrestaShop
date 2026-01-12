@@ -509,7 +509,7 @@ class ProductCore extends ObjectModel
             'available_for_order' => ['type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'],
             'available_date' => ['type' => self::TYPE_DATE, 'shop' => true, 'validate' => 'isDateFormat'],
             'show_condition' => ['type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'],
-            'condition' => ['type' => self::TYPE_STRING, 'shop' => true, 'validate' => 'isGenericName', 'values' => ['new', 'used', 'refurbished'], 'default' => 'new'],
+            'condition' => ['type' => self::TYPE_STRING, 'shop' => true, 'validate' => 'isGenericName', 'values' => ['new', 'used', 'refurbished', 'open_box', 'damaged', 'new_with_defects'], 'default' => 'new'],
             'show_price' => ['type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'],
             'indexed' => ['type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'],
             'visibility' => ['type' => self::TYPE_STRING, 'shop' => true, 'validate' => 'isProductVisibility', 'values' => ['both', 'catalog', 'search', 'none'], 'default' => 'both'],
@@ -3423,22 +3423,47 @@ class ProductCore extends ObjectModel
             }
         }
 
+        /*
+         * Instantiate currency - either by using the one in the context or by getting the default currency
+         */
         $id_currency = Validate::isLoadedObject($context->currency) ? (int) $context->currency->id : Currency::getDefaultCurrencyId();
 
+        /*
+         * Now, we need to retrieve address information. We need it to precisely calculate the price,
+         * without it, we cannot resolve proper tax, special prices to be used etc.
+         *
+         * First, if no address ID has been provided, we try to get it from the cart in the context.
+         */
         if (!$id_address && Validate::isLoadedObject($cur_cart)) {
             $id_address = $cur_cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
         }
 
-        // retrieve address informations
+        /*
+         * Now, we either have the address ID or still null - which is not a problem.
+         *
+         * Address::initialize will take care of everything and just return an address with required data.
+         * We either get a filled Address object if we had an ID.
+         * Or, we get a blank Address object with a country, sometimes even state and postcode. Depends on
+         * geolocation enabled or if we already assigned some country to the context. See the method insides
+         * to see the logic.
+         */
         $address = Address::initialize($id_address, true);
+
+        // Now, we extract other required data from the address
         $id_country = (int) $address->id_country;
         $id_state = (int) $address->id_state;
         $zipcode = $address->postcode;
 
+        // Check if tax has been enabled in configuration, if not, it will be always false
         if (!Configuration::get('PS_TAX')) {
             $usetax = false;
         }
 
+        /*
+         * If the customer has a valid VAT number, we calculate the price without tax.
+         * @TODO - This is historic and should be totally refactored for multiple reasons.
+         * No validation, only one address considered, dependence on configuration from legacy module.
+         */
         if (
             $usetax != false
             && !empty($address->vat_number)
@@ -3448,6 +3473,7 @@ class ProductCore extends ObjectModel
             $usetax = false;
         }
 
+        // If no customer ID has been provided, we try to get it from the context, if set
         if (null === $id_customer && Validate::isLoadedObject($context->customer)) {
             $id_customer = $context->customer->id;
         }
@@ -4078,6 +4104,28 @@ class ProductCore extends ObjectModel
         ?CartCore $cart = null,
         $idCustomization = null
     ) {
+        $result = Hook::exec(
+            'actionOverrideProductQuantity',
+            [
+                'id_product' => $idProduct,
+                'id_product_attribute' => $idProductAttribute,
+                'cart' => $cart,
+                'cacheIsPack' => $cacheIsPack,
+                'idCustomization' => $idCustomization,
+                'isCartProvided' => $cart !== null, // true if $cart is passed to reduce the quantity by the amount in cart
+            ],
+            null,
+            false,
+            true,
+            false,
+            null,
+            true
+        );
+
+        if (is_int($result)) {
+            return $result;
+        }
+
         // If the product is pack, we will handle the logic in another method, because pack stocks can be calculated
         // in multiple ways, depending on the configuration of the pack.
         if (Pack::isPack((int) $idProduct)) {
@@ -6534,6 +6582,11 @@ class ProductCore extends ObjectModel
      */
     public function getTaxesRate(?Address $address = null)
     {
+        /*
+         * If no address is provided, we let Address::initialize instantiate one blank
+         * for us with the all default/fallback data we can get. We get a blank Address
+         * object with a country, sometimes even state and postcode.
+         */
         if (!$address || !$address->id_country) {
             $address = Address::initialize();
         }

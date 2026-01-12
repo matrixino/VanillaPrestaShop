@@ -160,7 +160,9 @@ class UpdateLicensesCommand extends Command
             ->notPath([
                 // install
                 'install-dev/theme/js/sprintf.min.js',
-                'install-dev/theme/js/zxcvbn.js',
+                'install-dev/theme/js/zxcvbn-core.js',
+                'install-dev/theme/js/zxcvbn-language-common.js',
+                'install-dev/theme/js/zxcvbn-language-en.js',
             ])
             ->ignoreDotFiles(false);
         $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);

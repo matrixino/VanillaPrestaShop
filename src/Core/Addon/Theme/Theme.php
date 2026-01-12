@@ -35,9 +35,34 @@ use PrestaShop\PrestaShop\Core\Util\File\YamlParser;
 class Theme implements AddonInterface
 {
     /**
+     * If you change this value, you should probably also update the PS_FF_DEFAULT_THEME in .env file
+     *
+     * Priority (from most important to less important) is defined as (when present):
+     *  - Env variable PS_FF_DEFAULT_THEME from environment (system, shell, apache, ...)
+     *  - .env.local PS_FF_DEFAULT_THEME variable (if file is present)
+     *  - .env PS_FF_DEFAULT_THEME variable (if file is present, by default it should be)
+     *  - .env.dist PS_FF_DEFAULT_THEME variable (if file is present)
+     *  - Theme::DEFAULT_THEME private const (last fallback when no env variable is defined)
+     */
+    private const DEFAULT_THEME = 'classic';
+
+    /**
+     * List of core native themes.
+     */
+    public const CORE_THEMES = [
+        'classic',
+        'hummingbird',
+    ];
+
+    /**
      * @var ArrayFinder
      */
     private $attributes;
+
+    public static function getDefaultTheme(): string
+    {
+        return $_ENV['PS_FF_DEFAULT_THEME'] ?? Theme::DEFAULT_THEME;
+    }
 
     /**
      * @param array $attributes Theme attributes

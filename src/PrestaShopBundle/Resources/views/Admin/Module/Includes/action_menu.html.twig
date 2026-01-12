@@ -31,7 +31,8 @@
         classes: 'btn btn-primary-reverse btn-outline-secondary',
         url: module.attributes.urls[module.attributes.url_active],
         action: module.attributes.url_active,
-        label: module.attributes.urls_labels[module.attributes.url_active]}
+        label: module.attributes.urls_labels[module.attributes.url_active],
+        upload_url: module.attributes.upload_url|default(null)}
     ) }}
     {% if (module.attributes.urls|length > 1) %}
         <input type="hidden" class="btn" />
@@ -43,13 +44,14 @@
           {% for module_action, module_url in module.attributes.urls %}
             {% if module_action != module.attributes.url_active %}
                 <li>
-                  {{ include('@PrestaShop/Admin/Module/Includes/action_button.html.twig', {
-                      name: module.attributes.name,
-                      classes: 'dropdown-item',
-                      url: module_url,
-                      action: module_action,
-                      label: module.attributes.urls_labels[module_action]}
-                  ) }}
+                    {{ include('@PrestaShop/Admin/Module/Includes/action_button.html.twig', {
+                        name: module.attributes.name,
+                        classes: 'dropdown-item',
+                        url: module_url,
+                        action: module_action,
+                        label: module.attributes.urls_labels[module_action],
+                        upload_url: module.attributes.upload_url|default(null)}
+                    ) }}
                 </li>
             {% endif %}
           {% endfor %}

@@ -27,7 +27,6 @@
 namespace PrestaShopBundle\Controller\Admin\Sell\Catalog;
 
 use Category;
-use Dispatcher;
 use Exception;
 use ImageManager;
 use PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider;
@@ -307,11 +306,6 @@ class CategoryController extends PrestaShopAdminController
 
         $defaultGroups = $defaultGroupsProvider->getGroups();
 
-        // If we don't create the dispatcher instance with the current request,
-        // a new instance will be created later using `SymfonyRequest::createFromGlobals()`
-        // but as we may have already uploaded files, this can throw an exception
-        Dispatcher::getInstance($request);
-
         return $this->render(
             '@PrestaShop/Admin/Sell/Catalog/Categories/edit.html.twig',
             [
@@ -381,7 +375,7 @@ class CategoryController extends PrestaShopAdminController
                 $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_categories_index', [
-                    'categoryId' => (int) $this->getConfiguration()->get('PS_ROOT_CATEGORY'),
+                    'categoryId' => $categoryId,
                 ]);
             }
         } catch (Exception $e) {

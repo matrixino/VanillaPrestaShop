@@ -78,7 +78,10 @@ class Install extends AbstractInstall
     public const SETTINGS_FILE = 'app/config/parameters.php';
     public const BOOTSTRAP_FILE = 'config/bootstrap.php';
 
-    public const DEFAULT_THEME = 'classic';
+    /**
+     * @deprecated Remove in 10.0
+     */
+    public const DEFAULT_THEME = _PS_DEFAULT_THEME_NAME_;
 
     /**
      * The path of the bootsrap file we want to use for the installation.

@@ -31,14 +31,19 @@ namespace Tests\Integration\Behaviour\Features\Context\Domain;
 use Behat\Gherkin\Node\TableNode;
 use Exception;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Command\AddTagCommand;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Command\BulkDeleteTagCommand;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Command\DeleteTagCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Command\EditTagCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\DuplicateTagException;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\TagNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Query\GetTagForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Tag\QueryResult\EditableTag;
 use PrestaShop\PrestaShop\Core\Domain\Tag\ValueObject\TagId;
 use RuntimeException;
 use Tag;
 use Tests\Integration\Behaviour\Features\Context\SharedStorage;
+use Tests\Integration\Behaviour\Features\Context\Util\NoExceptionAlthoughExpectedException;
+use Tests\Integration\Behaviour\Features\Context\Util\PrimitiveUtils;
 
 class TagFeatureContext extends AbstractDomainFeatureContext
 {
@@ -165,6 +170,86 @@ class TagFeatureContext extends AbstractDomainFeatureContext
         }
     }
 
+    /**
+     * @When I delete the tag :tagReference
+     *
+     * @param string $tagReference
+     */
+    public function deleteTag(string $tagReference): void
+    {
+        /** @var int $tagId */
+        $tagId = SharedStorage::getStorage()->get($tagReference);
+
+        try {
+            $this->getCommandBus()->handle(new DeleteTagCommand((int) $tagId));
+        } catch (TagNotFoundException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When I delete tags :tagReferences using bulk action
+     *
+     * @param string $tagReferences
+     */
+    public function bulkDeleteTags(string $tagReferences): void
+    {
+        $tagIds = [];
+        foreach (PrimitiveUtils::castStringArrayIntoArray($tagReferences) as $tagReference) {
+            $tagIds[] = (int) SharedStorage::getStorage()->get($tagReference);
+        }
+
+        try {
+            $this->getCommandBus()->handle(new BulkDeleteTagCommand($tagIds));
+        } catch (TagNotFoundException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @Then I should get an error that the tag has not been found
+     */
+    public function assertLastErrorTagNotFound(): void
+    {
+        $this->assertLastErrorIs(TagNotFoundException::class);
+    }
+
+    /**
+     * @Then /^the tag "(.+)" should be deleted$/
+     *
+     * @param string $tagReference
+     */
+    public function assertTagIsDeleted(string $tagReference): void
+    {
+        if ($this->isFoundTag($tagReference)) {
+            throw new NoExceptionAlthoughExpectedException(sprintf('Tag %s exist, but it was expected to be deleted', $tagReference));
+        }
+    }
+
+    /**
+     * @Then /^the tag "(.+)" should not be deleted$/
+     *
+     * @param string $tagReference
+     */
+    public function assertTagIsNotDeleted(string $tagReference): void
+    {
+        if (!$this->isFoundTag($tagReference)) {
+            throw new NoExceptionAlthoughExpectedException(sprintf('Tag %s doesn\'t exist, but it was expected to be existing', $tagReference));
+        }
+    }
+
+    /**
+     * @Then tags :tagReferences should be deleted
+     *
+     * @param string $tagReferences
+     */
+    public function assertTagsAreDeleted(string $tagReferences): void
+    {
+        foreach (PrimitiveUtils::castStringArrayIntoArray($tagReferences) as $tagReference) {
+            $this->assertTagIsDeleted($tagReference);
+        }
+    }
+
     protected function getTagFromReference(string $reference): EditableTag
     {
         $idTag = (int) SharedStorage::getStorage()->get($reference);
@@ -173,5 +258,16 @@ class TagFeatureContext extends AbstractDomainFeatureContext
         $editableTag = $this->getQueryBus()->handle(new GetTagForEditing($idTag));
 
         return $editableTag;
+    }
+
+    protected function isFoundTag(string $tagReference): bool
+    {
+        try {
+            $this->getTagFromReference($tagReference);
+
+            return true;
+        } catch (TagNotFoundException $e) {
+            return false;
+        }
     }
 }

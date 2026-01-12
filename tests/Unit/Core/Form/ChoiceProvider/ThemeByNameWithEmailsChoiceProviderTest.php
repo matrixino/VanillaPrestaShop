@@ -71,14 +71,14 @@ class ThemeByNameWithEmailsChoiceProviderTest extends ChoiceProviderTestCase
         $themeCollection = new ThemeCollection();
         $themeCollection->add(
             new Theme([
-                'name' => 'classic',
-                'directory' => $themeDir . '/classic/',
+                'name' => Theme::getDefaultTheme(),
+                'directory' => $themeDir . '/' . Theme::getDefaultTheme() . '/',
             ])
         );
         yield [
             $themeCollection,
             [
-                'classic' => $themeDir . '/classic/',
+                Theme::getDefaultTheme() => $themeDir . '/' . Theme::getDefaultTheme() . '/',
             ],
         ];
 
@@ -87,8 +87,8 @@ class ThemeByNameWithEmailsChoiceProviderTest extends ChoiceProviderTestCase
         $themeCollection = new ThemeCollection();
         $themeCollection->add(
             new Theme([
-                'name' => 'classic',
-                'directory' => $themeDirNotFound . '/classic/',
+                'name' => Theme::getDefaultTheme(),
+                'directory' => $themeDirNotFound . '/' . Theme::getDefaultTheme() . '/',
             ])
         );
         yield [

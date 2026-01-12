@@ -1,6 +1,6 @@
 import testContext from '@utils/testContext';
 import {deleteProductTest} from '@commonTests/BO/catalog/product';
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 import {expect} from 'chai';
 
 import {
@@ -44,7 +44,7 @@ Post-condition:
 - Enable new product page
 - Uninstall the theme hummingbird
  */
-describe('FO - Navigation and display : Display tags', async () => {
+describe('FO - Menu and Navigation - Navigate and display : Display of tag products (New, Promo, Pack...)', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 
@@ -89,9 +89,8 @@ describe('FO - Navigation and display : Display tags', async () => {
   });
 
   // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest`);
+  enableTheme('hummingbird', `${baseContext}_preTest`);
 
-  // before and after functions
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
     page = await utilsPlaywright.newTab(browserContext);
@@ -430,5 +429,5 @@ describe('FO - Navigation and display : Display tags', async () => {
   deleteProductTest(packOfProducts, `${baseContext}_deleteProduct_2`);
 
   // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest_3`);
+  disableTheme('hummingbird', `${baseContext}_postTest_3`);
 });

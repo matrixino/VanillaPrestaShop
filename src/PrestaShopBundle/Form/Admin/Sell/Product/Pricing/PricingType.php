@@ -79,6 +79,7 @@ class PricingType extends TranslatorAwareType
                 'label' => $this->trans('Cost price', 'Admin.Catalog.Feature'),
                 'label_tag_name' => 'h3',
                 'label_subtitle' => $this->trans('Cost price (tax excl.)', 'Admin.Catalog.Feature'),
+                'label_help_box' => $this->trans('Internal purchase price of the product. You can use it for margin calculations, statistics, and internal reporting. This value is not shown to customers.', 'Admin.Catalog.Help'),
                 'attr' => ['data-display-price-precision' => FormHelper::DEFAULT_PRICE_PRECISION],
                 'currency' => $this->defaultCurrencyIsoCode,
                 'modify_all_shops' => true,

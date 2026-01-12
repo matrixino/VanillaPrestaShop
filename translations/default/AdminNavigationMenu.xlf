@@ -105,12 +105,12 @@
       <trans-unit id="af1b98adf7f686b84cd0b443e022b7a0">
         <source>Categories</source>
         <target>Categories</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 119]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 118]</note>
       </trans-unit>
       <trans-unit id="b419dbbbb81b8738bc4bd26565bd3965">
         <source>Category %name%</source>
         <target>Category %name%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 121]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 120]</note>
       </trans-unit>
       <trans-unit id="f0dbca7d922e4e759a1e3b512b9be852">
         <source>Choose layouts</source>
@@ -245,7 +245,7 @@
       <trans-unit id="9d5bf15117441a1b52eb1f0808e4aad3">
         <source>Discounts</source>
         <target>Discounts</target>
-        <note>File: classes/lang/KeysReference/TabLang.php [Line: 98]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/DiscountController.php [Line: 185]</note>
       </trans-unit>
       <trans-unit id="aecb63e193fd78cde871402ce2797b9b">
         <source>Downloading backup %s</source>
@@ -310,12 +310,12 @@
       <trans-unit id="dcddbc77942fb8ec96b780157188b671">
         <source>Editing carrier %name%</source>
         <target>Editing carrier %name%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/Shipping/CarrierController.php [Line: 181]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/Shipping/CarrierController.php [Line: 191]</note>
       </trans-unit>
       <trans-unit id="19866a55363b5b9057abca52dfecdffc">
         <source>Editing category %category_name%</source>
         <target>Editing category %category_name%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 404]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 398]</note>
       </trans-unit>
       <trans-unit id="f6bfa27c865a06ef9b0d9bb5a5724be6">
         <source>Editing category %name%</source>
@@ -340,7 +340,7 @@
       <trans-unit id="c5181dffbcb3a594b06bee627e6d7a73">
         <source>Editing feature %name%</source>
         <target>Editing feature %name%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/FeatureController.php [Line: 285]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/FeatureController.php [Line: 288]</note>
       </trans-unit>
       <trans-unit id="ce153042d579430501074bdc85f19971">
         <source>Editing file %value%</source>
@@ -385,12 +385,17 @@
       <trans-unit id="f997e0cedf6946f95298ba0830f8d837">
         <source>Editing state %value%</source>
         <target>Editing state %value%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/International/StateController.php [Line: 235]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/International/StateController.php [Line: 239]</note>
       </trans-unit>
       <trans-unit id="72cba91b377120d11a1c99f0780452c4">
         <source>Editing supplier %name%</source>
         <target>Editing supplier %name%</target>
         <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/SupplierController.php [Line: 315]</note>
+      </trans-unit>
+      <trans-unit id="44a31674eecd7f417148100d283ff9c6">
+        <source>Editing tag "%name%"</source>
+        <target>Editing tag "%name%"</target>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/ShopParameters/TagController.php [Line: 137]</note>
       </trans-unit>
       <trans-unit id="2e4e97c7fd7922e46577eb55d3da836c">
         <source>Editing tax %name%</source>
@@ -405,7 +410,7 @@
       <trans-unit id="b0ada7bf3a1d7af00453c044175db84d">
         <source>Editing webservice key %key%</source>
         <target>Editing webservice key %key%</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/WebserviceController.php [Line: 161]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/WebserviceController.php [Line: 164]</note>
       </trans-unit>
       <trans-unit id="754ff66f97c1812a40a1dadf0dab4263">
         <source>Editing zone %name%</source>
@@ -565,7 +570,7 @@
       <trans-unit id="5f265dfcb9ab68a1258ec25393ffb886">
         <source>Module Manager</source>
         <target>Module Manager</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/ModuleController.php [Line: 581]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/ModuleController.php [Line: 586]</note>
       </trans-unit>
       <trans-unit id="d6cf804374b3ac23c1f9bd818c3dce97">
         <source>Module alerts</source>
@@ -634,7 +639,7 @@
       <trans-unit id="c859d4cf251409ec72d0f1f6ab825366">
         <source>New Carrier</source>
         <target>New Carrier</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/Shipping/CarrierController.php [Line: 144]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/Shipping/CarrierController.php [Line: 149]</note>
       </trans-unit>
       <trans-unit id="19332a885dc877d5643fd0e567dad064">
         <source>New Feature Value</source>
@@ -679,7 +684,7 @@
       <trans-unit id="52015afb6ec8b940ef903ff73f4c4058">
         <source>New category</source>
         <target>New category</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 243]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php [Line: 242]</note>
       </trans-unit>
       <trans-unit id="a21d7cef80483da4ac834359332c6c6e">
         <source>New contact</source>
@@ -709,7 +714,7 @@
       <trans-unit id="824a3a83a007a97494ec5981cebf67a5">
         <source>New feature</source>
         <target>New feature</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/FeatureController.php [Line: 141]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/FeatureController.php [Line: 144]</note>
       </trans-unit>
       <trans-unit id="681e10aecbafd7dd385fa51798ca0fd6">
         <source>New file</source>
@@ -724,7 +729,7 @@
       <trans-unit id="4c9120f1a5947445c0e9620254ceb30b">
         <source>New order</source>
         <target>New order</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Order/OrderController.php [Line: 283]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Order/OrderController.php [Line: 306]</note>
       </trans-unit>
       <trans-unit id="13069ec50d7bc6460b29455250382a96">
         <source>New order message</source>
@@ -759,12 +764,17 @@
       <trans-unit id="2ad00a107b7c5572feb9d89a90a21a67">
         <source>New state</source>
         <target>New state</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/International/StateController.php [Line: 280]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Improve/International/StateController.php [Line: 284]</note>
       </trans-unit>
       <trans-unit id="993efb6924edde322dfef8ff31340eef">
         <source>New supplier</source>
         <target>New supplier</target>
         <note>File: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/SupplierController.php [Line: 137]</note>
+      </trans-unit>
+      <trans-unit id="0b7effbd011c5cf6eefd6e92a9e3888b">
+        <source>New tag</source>
+        <target>New tag</target>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/ShopParameters/TagController.php [Line: 98]</note>
       </trans-unit>
       <trans-unit id="c1a4412c87fdc53070b2a0d8cd1cf3cd">
         <source>New tax</source>
@@ -779,7 +789,7 @@
       <trans-unit id="d1bb24de3713f9eecce6dd4d55cc816d">
         <source>New webservice key</source>
         <target>New webservice key</target>
-        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/WebserviceController.php [Line: 117]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/WebserviceController.php [Line: 120]</note>
       </trans-unit>
       <trans-unit id="09462056b43efa6d8213540519406c56">
         <source>New zone</source>
@@ -979,7 +989,7 @@
       <trans-unit id="b8464cdd84b5f068ad72bf5c4f32163d">
         <source>States</source>
         <target>States</target>
-        <note>File: src/Core/Grid/Definition/Factory/StateGridDefinitionFactory.php [Line: 79]</note>
+        <note>File: src/Core/Grid/Definition/Factory/StateGridDefinitionFactory.php [Line: 80]</note>
       </trans-unit>
       <trans-unit id="452a7601dbc6f2c38aa89e68bda8b603">
         <source>Stats</source>
@@ -1029,7 +1039,7 @@
       <trans-unit id="189f63f277cd73395561651753563065">
         <source>Tags</source>
         <target>Tags</target>
-        <note>File: classes/lang/KeysReference/TabLang.php [Line: 122]</note>
+        <note>File: src/PrestaShopBundle/Controller/Admin/Configure/ShopParameters/TagController.php [Line: 66]</note>
       </trans-unit>
       <trans-unit id="8d4ae51b8b5831db49a6dcde1b83e175">
         <source>Tax Rules</source>

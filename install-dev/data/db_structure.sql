@@ -306,13 +306,13 @@ CREATE TABLE `PREFIX_cart_rule_shop` (
 /* Discount types for compatibility */
 CREATE TABLE `PREFIX_cart_rule_type` (
   `id_cart_rule_type` int(10) unsigned NOT NULL auto_increment,
-  `type` varchar(128) NOT NULL,
+  `discount_type` varchar(128) NOT NULL,
   `is_core` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `active` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `date_add` datetime NOT NULL,
   `date_upd` datetime NOT NULL,
   PRIMARY KEY (`id_cart_rule_type`),
-  UNIQUE KEY `type` (`type`)
+  UNIQUE KEY `discount_type` (`discount_type`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
 /* Localized names for cart rule types */
@@ -1661,7 +1661,7 @@ CREATE TABLE `PREFIX_product` (
   `available_for_order` tinyint(1) NOT NULL DEFAULT '1',
   `available_date` date DEFAULT NULL,
   `show_condition` tinyint(1) NOT NULL DEFAULT '0',
-  `condition` ENUM('new', 'used', 'refurbished') NOT NULL DEFAULT 'new',
+  `condition` ENUM('new', 'used', 'refurbished', 'open_box', 'damaged', 'new_with_defects') NOT NULL DEFAULT 'new',
   `show_price` tinyint(1) NOT NULL DEFAULT '1',
   `indexed` tinyint(1) NOT NULL DEFAULT '0',
   `visibility` ENUM(
@@ -1721,7 +1721,7 @@ CREATE TABLE IF NOT EXISTS `PREFIX_product_shop` (
   `available_for_order` tinyint(1) NOT NULL DEFAULT '1',
   `available_date` date DEFAULT NULL,
   `show_condition` tinyint(1) NOT NULL DEFAULT '1',
-  `condition` enum('new', 'used', 'refurbished') NOT NULL DEFAULT 'new',
+  `condition` enum('new', 'used', 'refurbished', 'open_box', 'damaged', 'new_with_defects') NOT NULL DEFAULT 'new',
   `show_price` tinyint(1) NOT NULL DEFAULT '1',
   `indexed` tinyint(1) NOT NULL DEFAULT '0',
   `visibility` enum(

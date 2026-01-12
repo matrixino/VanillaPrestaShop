@@ -197,6 +197,7 @@ class ModuleController extends ModuleAbstractController
             case ModuleAdapter::ACTION_UPGRADE:
             case ModuleAdapter::ACTION_RESET:
             case ModuleAdapter::ACTION_ENABLE:
+            case ModuleAdapter::ACTION_UPLOAD:
             case ModuleAdapter::ACTION_DISABLE:
                 $deniedAccess = !$this->isGranted(Permission::UPDATE, self::CONTROLLER_NAME);
                 break;
@@ -254,8 +255,12 @@ class ModuleController extends ModuleAbstractController
                 $response[$moduleName]['refresh_needed'] = false;
                 $response[$moduleName]['has_download_url'] = $moduleInstance->attributes->has('download_url');
             }
-
-            $response[$moduleName]['status'] = call_user_func([$moduleManager, $action], ...$args);
+            if ($action === ModuleAdapter::ACTION_UPLOAD) {
+                $response[$moduleName]['status'] = (bool) call_user_func([$moduleManager, $action], ...[$source]);
+                $response[$moduleName]['refresh_needed'] = false;
+            } else {
+                $response[$moduleName]['status'] = call_user_func([$moduleManager, $action], ...$args);
+            }
         } catch (Exception $e) {
             $response[$moduleName]['status'] = false;
             $response[$moduleName]['msg'] = $this->trans(

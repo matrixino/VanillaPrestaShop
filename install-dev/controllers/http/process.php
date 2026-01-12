@@ -26,6 +26,7 @@
 
 use PrestaShopBundle\Install\Install;
 use PrestaShopBundle\Install\XmlLoader;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Context\ContextBuilderPreparer;
 
@@ -104,7 +105,7 @@ class InstallControllerHttpProcess extends InstallControllerHttp implements Http
             } elseif (Tools::getValue('configureShop') && !empty($this->session->process_validated['populateDatabase'])) {
                 Language::getRtlStylesheetProcessor()
                     ->setLanguageCode($this->session->lang)
-                    ->setProcessFOThemes(['classic'])
+                    ->setProcessFOThemes([Theme::getDefaultTheme()])
                     ->process();
                 $this->processConfigureShop();
             } elseif (Tools::getValue('installTheme') && !empty($this->session->process_validated['configureShop'])) {

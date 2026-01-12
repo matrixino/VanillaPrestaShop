@@ -1,6 +1,6 @@
 import testContext from '@utils/testContext';
 import {deleteProductTest} from '@commonTests/BO/catalog/product';
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 import {expect} from 'chai';
 
 import {
@@ -28,7 +28,7 @@ Post-condition:
 - Delete created product
 - Uninstall the theme hummingbird
  */
-describe('FO - Navigation and display : Display \'On sale\' flag', async () => {
+describe('FO - Menu and Navigation - Navigate and display : Display "On sale!" bandeau', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 
@@ -40,7 +40,7 @@ describe('FO - Navigation and display : Display \'On sale\' flag', async () => {
   });
 
   // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest`);
+  enableTheme('hummingbird', `${baseContext}_preTest`);
 
   // before and after functions
   before(async function () {
@@ -121,5 +121,5 @@ describe('FO - Navigation and display : Display \'On sale\' flag', async () => {
   deleteProductTest(onSaleProductData, `${baseContext}_postTest_1`);
 
   // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest_2`);
+  disableTheme('hummingbird', `${baseContext}_postTest_2`);
 });

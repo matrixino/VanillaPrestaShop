@@ -107,9 +107,10 @@ final class ChangeOrderDeliveryAddressHandler extends AbstractOrderCommandHandle
             $comparator = new CartProductsComparator($cart);
 
             $cart->updateDeliveryAddressId((int) $cart->id_address_delivery, (int) $address->id);
-            $cart->setDeliveryOption([
-                (int) $cart->id_address_delivery => $this->formatLegacyDeliveryOptionFromCarrierId($order->id_carrier),
-            ]);
+            $cart->setDeliveryOption(
+                [(int) $cart->id_address_delivery => $this->formatLegacyDeliveryOptionFromCarrierId($order->id_carrier)],
+                true
+            );
             $cart->update();
 
             // gift could have been added/deleted when changing delivery address

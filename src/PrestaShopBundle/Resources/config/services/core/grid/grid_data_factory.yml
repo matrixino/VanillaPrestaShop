@@ -384,7 +384,7 @@ services:
     class: 'PrestaShop\PrestaShop\Core\Grid\Data\Factory\AttachmentGridDataFactoryDecorator'
     arguments:
       - '@prestashop.core.grid.data_factory.attachment'
-      - "@=service('prestashop.adapter.legacy.context').getContext().employee.id_lang"
+      - '@PrestaShop\PrestaShop\Core\Context\LanguageContext'
       - '@doctrine.dbal.default_connection'
       - '%database_prefix%'
       - '@PrestaShop\PrestaShop\Core\Util\File\FileSizeConverter'

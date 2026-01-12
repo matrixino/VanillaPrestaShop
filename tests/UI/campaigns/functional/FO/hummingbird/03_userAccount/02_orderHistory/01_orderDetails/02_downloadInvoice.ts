@@ -1,6 +1,6 @@
 import testContext from '@utils/testContext';
 import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 import {expect} from 'chai';
 
 import {
@@ -38,7 +38,7 @@ Scenario:
 Post-condition:
 - Uninstall the theme hummingbird
  */
-describe('FO - Account - Order details : Download invoice', async () => {
+describe('FO - User account - Order history - Order details : Download invoice from order details', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let fileName: string;
@@ -55,7 +55,7 @@ describe('FO - Account - Order details : Download invoice', async () => {
   });
 
   // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest_0`);
+  enableTheme('hummingbird', `${baseContext}_preTest_0`);
 
   // Pre-condition: Create order
   createOrderByCustomerTest(orderData, `${baseContext}_preTest_1`);
@@ -226,5 +226,5 @@ describe('FO - Account - Order details : Download invoice', async () => {
   });
 
   // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest`);
+  disableTheme('hummingbird', `${baseContext}_postTest`);
 });

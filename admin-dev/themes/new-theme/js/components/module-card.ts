@@ -208,17 +208,15 @@ export default class ModuleCard {
           },
 
           () => self.dispatchPreEvent('update', this)
-            && self.confirmAction('update', this)
-            && self.requestToController('update', $(this)),
+          && self.confirmAction('update', this)
+          && self.upgradeWithUploadFallback(this),
         );
 
         updateConfirmModal.show();
       } else {
-        return (
-          self.dispatchPreEvent('update', this)
+        return self.dispatchPreEvent('update', this)
           && self.confirmAction('update', this)
-          && self.requestToController('update', $(this))
-        );
+          && self.upgradeWithUploadFallback(this);
       }
 
       return false;
@@ -320,7 +318,7 @@ export default class ModuleCard {
     action: string,
     element: JQuery,
     forceDeletion: string | boolean = false,
-    callback = () => true,
+    callback: (response?: any) => boolean = () => true,
   ): boolean {
     if (this.pendingRequest) {
       $.growl.warning({
@@ -336,14 +334,18 @@ export default class ModuleCard {
     const spinnerObj = $(
       '<button class="btn-primary-reverse onclick unbind spinner "></button>',
     );
-    const url = `//${window.location.host}${form.attr('action')}`;
+    // Use custom upload_url for 'upgrade' if available, otherwise use the default URL.
+    let url = `//${window.location.host}${form.attr('action')}`;
+
+    if (action === 'upload' && form.data('upload-url')) {
+      url = form.data('upload-url');
+    }
     const actionParams = form.serializeArray();
     let refreshNeeded = false;
 
     if (forceDeletion === 'true' || forceDeletion === true) {
       actionParams.push({name: 'actionParams[deletion]', value: 'true'});
     }
-
     $.ajax({
       url,
       dataType: 'json',
@@ -374,11 +376,6 @@ export default class ModuleCard {
           $.growl.error({message: result[moduleTechName].msg, fixed: true});
           return;
         }
-
-        $.growl({
-          message: result[moduleTechName].msg,
-          duration: 6000,
-        });
 
         if (result[moduleTechName].refresh_needed === true) {
           refreshNeeded = true;
@@ -426,11 +423,18 @@ export default class ModuleCard {
           this.eventEmitter.emit('Module Upgraded', mainElement);
         }
 
-        // Since we replace the DOM content
-        // we need to update the jquery object reference to target the new content,
-        // and we need to hide the new content which is not hidden by default
-        jqElementObj = $(result[moduleTechName].action_menu_html).replaceAll(jqElementObj);
-        jqElementObj.hide();
+        if (action !== 'upload') {
+          $.growl({
+            message: result[moduleTechName].msg,
+            duration: 6000,
+          });
+
+          // Since we replace the DOM content
+          // we need to update the jquery object reference to target the new content,
+          // and we need to hide the new content which is not hidden by default
+          jqElementObj = $(result[moduleTechName].action_menu_html).replaceAll(jqElementObj);
+          jqElementObj.hide();
+        }
       })
       .fail(() => {
         const moduleItem = jqElementObj.closest('module-item-list');
@@ -440,7 +444,7 @@ export default class ModuleCard {
           fixed: true,
         });
       })
-      .always(() => {
+      .always((response) => {
         if (refreshNeeded) {
           document.location.reload();
           return;
@@ -450,10 +454,31 @@ export default class ModuleCard {
         this.pendingRequest = false;
 
         if (callback) {
-          callback();
+          callback(Object.values(response)[0]);
         }
       });
 
     return false;
+  }
+
+  upgradeWithUploadFallback(element: string, callback = () => true): boolean {
+    const form = $(element).closest('form');
+
+    // If the form contains a data-upload-url attribute, we use two step workflow.
+    if (form.data('upload-url')) {
+      try {
+        return this.requestToController('upload', $(element), false, (response): boolean => {
+          if (response.status === true) {
+            return this.requestToController('upgrade', $(element), false, callback);
+          }
+          return false;
+        });
+      } catch (error) {
+        console.error('Error making request', error);
+        return false;
+      }
+    } else {
+      return this.requestToController('upgrade', $(element), false, callback);
+    }
   }
 }

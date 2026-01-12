@@ -29,8 +29,11 @@ declare(strict_types=1);
 namespace PrestaShopBundle\Controller\Admin\Configure\ShopParameters;
 
 use Exception;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Command\BulkDeleteTagCommand;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Command\DeleteTagCommand;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\CannotAddTagException;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\CannotUpdateTagException;
+use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\TagException;
 use PrestaShop\PrestaShop\Core\Domain\Tag\Exception\TagNotFoundException;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface;
@@ -38,7 +41,9 @@ use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use PrestaShop\PrestaShop\Core\Search\Filters\TagFilters;
 use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
+use PrestaShopBundle\Security\Attribute\DemoRestricted;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -138,6 +143,53 @@ class TagController extends PrestaShopAdminController
                 'Admin.Notifications.Info'
             ),
         ]);
+    }
+
+    #[DemoRestricted(redirectRoute: 'admin_tags_index')]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You need permission to delete this.', redirectRoute: 'admin_tags_index')]
+    public function deleteAction(int $tagId): RedirectResponse
+    {
+        try {
+            $this->dispatchCommand(new DeleteTagCommand($tagId));
+            $this->addFlash(
+                'success',
+                $this->trans('Successful deletion', [], 'Admin.Notifications.Success')
+            );
+        } catch (TagException $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
+        }
+
+        return $this->redirectToRoute('admin_tags_index');
+    }
+
+    #[DemoRestricted(redirectRoute: 'admin_tags_index')]
+    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_tags_index')]
+    public function bulkDeleteAction(Request $request): RedirectResponse
+    {
+        $tagIds = $this->getBulkTagsFromRequest($request);
+
+        try {
+            $this->dispatchCommand(new BulkDeleteTagCommand($tagIds));
+            $this->addFlash(
+                'success',
+                $this->trans('Successful deletion', [], 'Admin.Notifications.Success')
+            );
+        } catch (TagException $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
+        }
+
+        return $this->redirectToRoute('admin_tags_index');
+    }
+
+    private function getBulkTagsFromRequest(Request $request): array
+    {
+        $tagIds = $request->request->all('tag_tag_bulk');
+
+        foreach ($tagIds as $i => $tagId) {
+            $tagIds[$i] = (int) $tagId;
+        }
+
+        return $tagIds;
     }
 
     /**

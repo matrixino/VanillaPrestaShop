@@ -23,6 +23,25 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
+// Initialize zxcvbn-ts with language packages
+(function() {
+  if (typeof zxcvbnts !== 'undefined' && zxcvbnts.core && zxcvbnts['language-common'] && zxcvbnts['language-en']) {
+    const options = {
+      translations: zxcvbnts['language-en'].translations,
+      graphs: zxcvbnts['language-common'].adjacencyGraphs,
+      dictionary: {
+        ...zxcvbnts['language-common'].dictionary,
+        ...zxcvbnts['language-en'].dictionary,
+      },
+    };
+    zxcvbnts.core.zxcvbnOptions.setOptions(options);
+    // Create global zxcvbn function for backward compatibility
+    window.zxcvbn = function(password) {
+      return zxcvbnts.core.zxcvbn(password);
+    };
+  }
+})();
+
 $(function() {
   checkTimeZone($('#infosCountry'));
   // When a country is changed

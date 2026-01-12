@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -23,7 +24,10 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
+
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderPresenter;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 
 class OrderDetailControllerCore extends FrontController
 {
@@ -208,10 +212,14 @@ class OrderDetailControllerCore extends FrontController
 
                 $this->reference = $order->reference;
 
+                /** @var FeatureFlagStateCheckerInterface $featureFlagManager */
+                $featureFlagManager = $this->get(FeatureFlagStateCheckerInterface::class);
+
                 $this->context->smarty->assign([
                     'order' => $this->order_to_display,
                     'orderIsVirtual' => $order->isVirtual(),
                     'HOOK_DISPLAYORDERDETAIL' => Hook::exec('displayOrderDetail', ['order' => $order]),
+                    'is_multishipment_enabled' => $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
                 ]);
             } else {
                 $this->redirect_after = '404';

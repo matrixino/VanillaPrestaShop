@@ -37,8 +37,13 @@ use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkDeleteDiscountsCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\BulkUpdateDiscountsStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\DeleteDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\DuplicateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountConditionsCommand;
+use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountNotFoundException;
@@ -62,6 +67,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         $errorCode = match ($field) {
             'name' => DiscountConstraintException::INVALID_NAME,
             'gift_product' => DiscountConstraintException::INVALID_GIFT_PRODUCT,
+            'description' => DiscountConstraintException::INVALID_DESCRIPTION,
             default => null,
         };
 
@@ -108,6 +114,26 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             );
         } catch (DiscountException $e) {
             $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @Then discount :discountReference shouldn't have :codeNotExpected as code
+     *
+     * @param string $discountReference
+     * @param string $codeNotExpected
+     */
+    public function assertNotDiscountCode(string $discountReference, string $codeNotExpected): void
+    {
+        try {
+            $discount = $this->getDiscountForEditing($discountReference);
+            Assert::assertNotSame(
+                $codeNotExpected,
+                $discount->getCode(),
+                sprintf('Discount "%s" has unexpected code "%s"', $discountReference, $codeNotExpected)
+            );
+        } catch (DiscountNotFoundException $e) {
+            $this->getSharedStorage()->clear($discountReference);
         }
     }
 
@@ -168,7 +194,9 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $command->setQuantityPerUser((int) $data['quantity_per_user']);
         }
 
-        $command->setDescription($data['description'] ?? '');
+        if (isset($data['description'])) {
+            $command->setDescription($data['description']);
+        }
         if (!empty($data['code'])) {
             $command->setCode($data['code']);
         }
@@ -217,6 +245,30 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
                 $command->setCombinationId($this->referenceToId($data['gift_combination']));
             }
         }
+
+        try {
+            /** @var DiscountId $discountId */
+            $discountId = $this->getCommandBus()->handle($command);
+            $this->getSharedStorage()->set($discountReference, $discountId->getValue());
+
+            // Handle customer groups using conditions command
+            if (isset($data['customer_groups'])) {
+                $conditionsCommand = new UpdateDiscountConditionsCommand($discountId->getValue());
+                $conditionsCommand->setCustomerGroupIds($this->referencesToIds($data['customer_groups']));
+                $this->getCommandBus()->handle($conditionsCommand);
+            }
+        } catch (DiscountConstraintException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When I create a :discountType discount :discountReference with a very large description
+     */
+    public function createDiscountWithVeryLargeDescription(string $discountReference, string $discountType): void
+    {
+        $command = new AddDiscountCommand($discountType, ['en-US' => 'Test Discount']);
+        $command->setDescription(str_repeat('A', DiscountSettings::MAX_DESCRIPTION_LENGTH + 1));
 
         try {
             /** @var DiscountId $discountId */
@@ -288,7 +340,9 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $command->setQuantityPerUser((int) $data['quantity_per_user']);
         }
 
-        $command->setDescription($data['description'] ?? '');
+        if (isset($data['description'])) {
+            $command->setDescription($data['description']);
+        }
         if (!empty($data['code'])) {
             $command->setCode($data['code']);
         }
@@ -337,6 +391,13 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         try {
             /* @var DiscountId $discountId */
             $this->getCommandBus()->handle($command);
+
+            // Handle customer groups using conditions command
+            if (isset($data['customer_groups'])) {
+                $conditionsCommand = new UpdateDiscountConditionsCommand($discountId);
+                $conditionsCommand->setCustomerGroupIds($this->referencesToIds($data['customer_groups']));
+                $this->getCommandBus()->handle($conditionsCommand);
+            }
         } catch (DiscountConstraintException $e) {
             $this->setLastException($e);
         }
@@ -404,6 +465,18 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
                 'Unexpected customer id'
             );
         }
+
+        if (isset($expectedData['customer_groups'])) {
+            $expectedGroupIds = $this->referencesToIds($expectedData['customer_groups']);
+            $actualGroupIds = $discountForEditing->getCustomerGroupIds();
+            sort($expectedGroupIds);
+            sort($actualGroupIds);
+            Assert::assertSame(
+                $expectedGroupIds,
+                $actualGroupIds,
+                'Unexpected customer group ids'
+            );
+        }
         if (isset($expectedData['priority'])) {
             Assert::assertSame((int) $expectedData['priority'], $discountForEditing->getPriority(), 'Unexpected priority');
         }
@@ -467,7 +540,11 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_tax_included']), $discountForEditing->getMinimumAmountTaxIncluded(), 'Unexpected minimum amount tax included');
         }
         if (isset($expectedData['minimum_amount_shipping_included'])) {
-            Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_shipping_included']), $discountForEditing->getMinimumAmountShippingIncluded(), 'Unexpected minimum amount shipping included');
+            Assert::assertSame(
+                PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['minimum_amount_shipping_included']),
+                $discountForEditing->getMinimumAmountShippingIncluded(),
+                'Unexpected minimum amount shipping included'
+            );
         }
         if (isset($expectedData['carriers'])) {
             Assert::assertSame($this->referencesToIds($expectedData['carriers']), $discountForEditing->getCarrierIds(), 'Unexpected carriers');
@@ -553,7 +630,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $qb = $connection->createQueryBuilder();
             $qb->select('crt.id_cart_rule_type')
                 ->from($dbPrefix . 'cart_rule_type', 'crt')
-                ->where('crt.type = :typeString')
+                ->where('crt.discount_type = :typeString')
                 ->setParameter('typeString', $typeString);
 
             $result = $qb->executeQuery()->fetchAssociative();
@@ -600,7 +677,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
 
         // Get actual compatible types
         $qb = $connection->createQueryBuilder();
-        $qb->select('crt.type')
+        $qb->select('crt.discount_type')
             ->from($dbPrefix . 'cart_rule_compatible_types', 'crct')
             ->innerJoin('crct', $dbPrefix . 'cart_rule_type', 'crt', 'crct.id_cart_rule_type = crt.id_cart_rule_type')
             ->where('crct.id_cart_rule = :discountId')
@@ -608,7 +685,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             ->setParameter('discountId', $discountId);
 
         $results = $qb->executeQuery()->fetchAllAssociative();
-        $actualTypeStrings = array_column($results, 'type');
+        $actualTypeStrings = array_column($results, 'discount_type');
 
         // Sort both arrays for comparison
         sort($expectedTypeStrings);
@@ -642,5 +719,79 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $cartRules,
             sprintf('Expected %d cart rules but found %d', $count, count($cartRules))
         );
+    }
+
+    /**
+     * @Given /^discount "(.*)" is (enabled|disabled)$/
+     *
+     * Status type "enabled|disabled" should be converted by transform context. @see StringToBoolTransformContext
+     *
+     * @param string $discountReference
+     * @param bool $expectedStatus
+     */
+    public function assertDiscountStatus(string $discountReference, bool $expectedStatus): void
+    {
+        $discount = $this->getDiscountForEditing($discountReference);
+        Assert::assertSame($expectedStatus, $discount->isActive());
+    }
+
+    /**
+     * @When /^I bulk (enable|disable) discounts "(.*)"$/
+     *
+     * @param bool $enable
+     * @param string $discountReferences
+     */
+    public function bulkUpdateDiscountsStatus(bool $enable, string $discountReferences)
+    {
+        $this->getCommandBus()->handle(
+            new BulkUpdateDiscountsStatusCommand($this->referencesToIds($discountReferences), $enable)
+        );
+    }
+
+    /**
+     * @When /^I bulk delete discounts "(.*)"$/
+     *
+     * @param string $discountReferences
+     */
+    public function bulkDeleteDiscounts(string $discountReferences)
+    {
+        $this->getCommandBus()->handle(
+            new BulkDeleteDiscountsCommand($this->referencesToIds($discountReferences))
+        );
+    }
+
+    /**
+     * @Then /^discount "(.*)" (should|should not) exist$/
+     *
+     * @param string $discountReference
+     * @param bool $shouldExist
+     */
+    public function assertDiscountExistence(string $discountReference, bool $shouldExist)
+    {
+        try {
+            $this->getDiscountForEditing($discountReference);
+        } catch (DiscountNotFoundException) {
+            Assert::assertFalse($shouldExist, sprintf('Discount "%s" was not found, but it was expected to exist', $discountReference));
+
+            return;
+        }
+
+        Assert::assertTrue($shouldExist, sprintf('Discount "%s" was found, but it was expected to be deleted', $discountReference));
+    }
+
+    /**
+     * @When I duplicate the discount :discountReference as :copyDiscountReference
+     */
+    public function duplicateDiscount(string $discountReference, string $copyDiscountReference): void
+    {
+        try {
+            /** @var DiscountId $copyDiscountId */
+            $copyDiscountId = $this->getCommandBus()->handle(new DuplicateDiscountCommand(
+                $this->getSharedStorage()->get($discountReference)
+            ));
+            $this->getSharedStorage()->set($copyDiscountReference, $copyDiscountId->getValue());
+        } catch (DiscountException $e) {
+            $this->setLastException($e);
+        }
     }
 }

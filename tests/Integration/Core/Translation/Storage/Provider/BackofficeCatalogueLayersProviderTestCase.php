@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Core\Translation\Storage\Provider;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\CoreCatalogueLayersProvider;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\BackofficeProviderDefinition;
@@ -96,7 +97,7 @@ class BackofficeCatalogueLayersProviderTestCase extends AbstractCatalogueLayersP
                 'key' => 'Some made up text',
                 'translation' => 'Un texte inventé',
                 'domain' => 'ShopActions',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 

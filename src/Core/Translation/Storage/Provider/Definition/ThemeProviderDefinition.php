@@ -27,12 +27,17 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
+
 /**
  * Properties container for single Module translation provider.
  */
 class ThemeProviderDefinition implements ProviderDefinitionInterface
 {
-    public const DEFAULT_THEME_NAME = 'classic';
+    /**
+     * @deprecated To be removed in 10.0
+     */
+    public const DEFAULT_THEME_NAME = _PS_DEFAULT_THEME_NAME_;
 
     private const FILENAME_FILTERS_REGEX = [];
 
@@ -49,7 +54,7 @@ class ThemeProviderDefinition implements ProviderDefinitionInterface
     public function __construct(?string $themeName = null)
     {
         if (null === $themeName) {
-            $themeName = static::DEFAULT_THEME_NAME;
+            $themeName = Theme::getDefaultTheme();
         }
 
         $this->themeName = $themeName;

@@ -52,7 +52,6 @@
  * @property string $fixtures
  * @property array $xml_loader_ids
  * @property string|array $modules
- * @property string $theme
  */
 class Datas
 {

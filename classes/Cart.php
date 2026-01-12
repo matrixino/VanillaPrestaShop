@@ -486,7 +486,7 @@ class CartCore extends ObjectModel
 
             if ($useNewDiscountSystem) {
                 $result = Db::getInstance()->executeS(
-                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`, crt.`type` as discount_type
+                    'SELECT cr.*, crl.`id_lang`, crl.`name`, cd.`id_cart`, crt.`discount_type` as discount_type
                     FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
@@ -585,7 +585,7 @@ class CartCore extends ObjectModel
 
             if ($useNewDiscountSystem) {
                 $result = Db::getInstance()->executeS(
-                    'SELECT cr.`id_cart_rule`, crt.`type` as discount_type, cr.`priority`, cr.`date_add`
+                    'SELECT cr.`id_cart_rule`, crt.`discount_type` as discount_type, cr.`priority`, cr.`date_add`
                     FROM `' . _DB_PREFIX_ . 'cart_cart_rule` cd
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cd.`id_cart_rule` = cr.`id_cart_rule`
                     LEFT JOIN `' . _DB_PREFIX_ . 'cart_rule_lang` crl ON (
@@ -3344,8 +3344,9 @@ class CartCore extends ObjectModel
      * Set the delivery option and Carrier ID, if there is only one Carrier.
      *
      * @param array $delivery_option Delivery option array
+     * @param bool $useOrderPrices
      */
-    public function setDeliveryOption($delivery_option = null)
+    public function setDeliveryOption($delivery_option = null, bool $useOrderPrices = false)
     {
         if (empty($delivery_option)) {
             $this->delivery_option = '';
@@ -3375,8 +3376,8 @@ class CartCore extends ObjectModel
         $this->delivery_option = json_encode($delivery_option);
 
         // update auto cart rules
-        CartRule::autoRemoveFromCart();
-        CartRule::autoAddToCart();
+        CartRule::autoRemoveFromCart(null, $useOrderPrices);
+        CartRule::autoAddToCart(null, $useOrderPrices);
     }
 
     /**

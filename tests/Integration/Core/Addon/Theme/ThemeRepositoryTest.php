@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Core\Addon\Theme;
 
 use PrestaShop\PrestaShop\Adapter\Configuration;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Addon\Theme\ThemeRepository;
 use Shop;
 use Symfony\Component\Filesystem\Filesystem;
@@ -66,7 +67,7 @@ class ThemeRepositoryTest extends ContextStateTestCase
 
     public function testGetInstanceByName()
     {
-        $expectedTheme = $this->repository->getInstanceByName('classic');
+        $expectedTheme = $this->repository->getInstanceByName(Theme::getDefaultTheme());
         $this->assertInstanceOf(
             'PrestaShop\PrestaShop\Core\Addon\Theme\Theme',
             $expectedTheme,
@@ -90,7 +91,7 @@ class ThemeRepositoryTest extends ContextStateTestCase
     public function testGetListExcluding()
     {
         $themeListWithoutRestrictions = $this->repository->GetListExcluding([]);
-        $themeListWithoutClassic = $this->repository->GetListExcluding(['classic']);
+        $themeListWithoutClassic = $this->repository->GetListExcluding([Theme::getDefaultTheme()]);
         $this->assertEquals(
             $themeListWithoutRestrictions,
             $this->repository->getList(),

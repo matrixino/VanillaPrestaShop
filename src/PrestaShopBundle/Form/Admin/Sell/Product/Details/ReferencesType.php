@@ -51,7 +51,7 @@ class ReferencesType extends TranslatorAwareType
             ->add('reference', TextType::class, [
                 'required' => false,
                 'label' => $this->trans('Reference', 'Admin.Global'),
-                'label_help_box' => $this->trans('Allowed special characters: %allowed_characters%', 'Admin.Global', ['%allowed_characters%' => '.-_#']),
+                'label_help_box' => $this->trans('Your own primary unique product code used to identify this product. We recommend using a clear and consistent scheme that helps you keep everything organized. Allowed special characters: %allowed_characters%', 'Admin.Global', ['%allowed_characters%' => '.-_#']),
                 'constraints' => [
                     new TypedRegex(TypedRegex::TYPE_REFERENCE),
                     new Length(['max' => Reference::MAX_LENGTH]),
@@ -61,7 +61,7 @@ class ReferencesType extends TranslatorAwareType
             ->add('mpn', TextType::class, [
                 'required' => false,
                 'label' => $this->trans('MPN', 'Admin.Catalog.Feature'),
-                'label_help_box' => $this->trans('MPN is used internationally to identify the Manufacturer Part Number.', 'Admin.Catalog.Help'),
+                'label_help_box' => $this->trans('Manufacturer part number that allows to identify this product internationally.', 'Admin.Catalog.Help'),
                 'constraints' => [
                     new Length(['max' => ProductSettings::MAX_MPN_LENGTH]),
                 ],
@@ -80,7 +80,7 @@ class ReferencesType extends TranslatorAwareType
             ->add('ean_13', TextType::class, [
                 'required' => false,
                 'label' => $this->trans('GTIN (EAN, JA, ITF or UCC code)', 'Admin.Catalog.Feature'),
-                'label_help_box' => $this->trans('This type of product code is specific to Europe and Japan, but is widely used internationally. It is a superset of the UPC code: all products marked with an EAN will be accepted in North America.', 'Admin.Catalog.Help'),
+                'label_help_box' => $this->trans('The product\'s worldwide barcode. Filling this field improves product traceability, catalog management, and overall searchability.', 'Admin.Catalog.Help'),
                 'constraints' => [
                     new TypedRegex(TypedRegex::TYPE_GTIN),
                     new Length(['max' => Gtin::MAX_LENGTH]),
@@ -109,6 +109,7 @@ class ReferencesType extends TranslatorAwareType
         $resolver->setDefaults([
             'label' => $this->trans('References', 'Admin.Catalog.Feature'),
             'label_tag_name' => 'h3',
+            'label_help_box' => $this->trans('All existing identifiers of the product. We recommend filling in every relevant field you can obtain, as it will improve the product\'s searchability and management.', 'Admin.Catalog.Help'),
             'required' => false,
             'columns_number' => 3,
         ]);

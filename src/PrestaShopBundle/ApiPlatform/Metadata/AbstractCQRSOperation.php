@@ -29,14 +29,13 @@ declare(strict_types=1);
 namespace PrestaShopBundle\ApiPlatform\Metadata;
 
 use ApiPlatform\Exception\InvalidArgumentException;
-use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Parameters;
 use ApiPlatform\OpenApi\Attributes\Webhook;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\State\OptionsInterface;
 use Stringable;
 
-abstract class AbstractCQRSOperation extends HttpOperation
+abstract class AbstractCQRSOperation extends AbstractScopedOperation
 {
     public function __construct(
         string $method = self::METHOD_GET,
@@ -124,11 +123,6 @@ abstract class AbstractCQRSOperation extends HttpOperation
     ) {
         $passedArguments = \get_defined_vars();
 
-        if (!empty($scopes)) {
-            $extraScopes = $passedArguments['extraProperties']['scopes'] ?? [];
-            $passedArguments['extraProperties']['scopes'] = array_values(array_unique(array_merge($extraScopes, $scopes)));
-        }
-
         if (!empty($CQRSQuery)) {
             $this->checkArgumentAndExtraParameterValidity('CQRSQuery', $CQRSQuery, $passedArguments['extraProperties']);
             $passedArguments['extraProperties']['CQRSQuery'] = $CQRSQuery;
@@ -139,25 +133,9 @@ abstract class AbstractCQRSOperation extends HttpOperation
             $passedArguments['extraProperties']['CQRSQueryMapping'] = $CQRSQueryMapping;
         }
 
-        if (!empty($ApiResourceMapping)) {
-            $this->checkArgumentAndExtraParameterValidity('ApiResourceMapping', $ApiResourceMapping, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['ApiResourceMapping'] = $ApiResourceMapping;
-        }
-
-        if (null !== $experimentalOperation) {
-            $this->checkArgumentAndExtraParameterValidity('experimentalOperation', $experimentalOperation, $passedArguments['extraProperties']);
-            $passedArguments['extraProperties']['experimentalOperation'] = $experimentalOperation;
-        }
-
         // Remove custom arguments
-        unset($passedArguments['scopes']);
         unset($passedArguments['CQRSQuery']);
         unset($passedArguments['CQRSQueryMapping']);
-        unset($passedArguments['ApiResourceMapping']);
-        unset($passedArguments['experimentalOperation']);
-
-        // Unless especially specified we only handle JSON format by default
-        $passedArguments['formats'] = $formats ?? ['json'];
 
         parent::__construct(...$passedArguments);
     }

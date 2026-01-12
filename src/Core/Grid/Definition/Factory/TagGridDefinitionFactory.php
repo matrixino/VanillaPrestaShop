@@ -45,6 +45,7 @@ use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class TagGridDefinitionFactory creates definition for tag grid.
@@ -150,14 +151,15 @@ class TagGridDefinitionFactory extends AbstractGridDefinitionFactory
                     'route_param_name' => 'tagId',
                     'route_param_field' => 'id_tag',
                 ])
-            )/*
+            )
             ->add(
                 $this->buildDeleteAction(
-                    'admin_api_clients_delete',
-                    'apiClientId',
-                    'id_api_client',
+                    'admin_tag_delete',
+                    'tagId',
+                    'id_tag',
+                    Request::METHOD_DELETE
                 )
-            )*/;
+            );
 
         return $rowActions;
     }
@@ -249,6 +251,9 @@ class TagGridDefinitionFactory extends AbstractGridDefinitionFactory
      */
     protected function getBulkActions()
     {
-        return new BulkActionCollection();
+        return (new BulkActionCollection())
+            ->add(
+                $this->buildBulkDeleteAction('admin_tag_bulk_delete')
+            );
     }
 }

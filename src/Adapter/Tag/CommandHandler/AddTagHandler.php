@@ -81,7 +81,10 @@ class AddTagHandler implements AddTagCommandHandlerInterface
             throw new CannotAddTagException('Failed to add Tag');
         }
 
-        $tag->setProducts($command->getProductIds());
+        $productIds = $command->getProductIds();
+        if (!empty($productIds)) {
+            $tag->setProducts($productIds);
+        }
 
         return $tag;
     }

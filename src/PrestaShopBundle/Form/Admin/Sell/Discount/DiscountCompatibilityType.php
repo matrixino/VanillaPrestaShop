@@ -41,7 +41,7 @@ class DiscountCompatibilityType extends TranslatorAwareType
         foreach ($availableTypes as $type) {
             // Skip "On total order" discount type
             // (Disabled temporarily, because of infinite loop issue with this kind of discount. See issue #39419)
-            if ($type['type'] === DiscountType::ORDER_LEVEL) {
+            if ($type['discount_type'] === DiscountType::ORDER_LEVEL) {
                 continue;
             }
 

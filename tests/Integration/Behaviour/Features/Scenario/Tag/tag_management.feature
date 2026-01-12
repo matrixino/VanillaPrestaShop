@@ -10,6 +10,7 @@ Feature: Tag management
     Given shop "shop1" with name "test_shop" exists
     And language "english" with locale "en-US" exists
     And language "french" with locale "fr-FR" exists
+    And I define an uncreated tag "tagNotFound"
 
   Scenario: Create Products
     Given I add product "product1" with following information:
@@ -56,3 +57,41 @@ Feature: Tag management
     And tag "tag1" name should be "Tag 2"
     And tag "tag1" language should be "english"
     And tag "tag1" products should be "product2,product3"
+
+  Scenario: Deleting tag
+    When I delete the tag "tag1"
+    Then the tag "tag1" should be deleted
+
+  Scenario: Deleting not found tag
+    When I delete the tag "tagNotFound"
+    Then I should get an error that the tag has not been found
+
+  Scenario: Deleting multiple tags in bulk action
+    Given I add a tag "tag4" with specified properties:
+      | name             | Tag 4               |
+      | language         | french              |
+      | products         | product1,product2   |
+    Given I add a tag "tag5" with specified properties:
+      | name             | Tag 5               |
+      | language         | french              |
+      | products         | product1,product2   |
+    When I delete tags "tag4, tag5" using bulk action
+    Then tags "tag4, tag5" should be deleted
+
+  Scenario: Deleting multiple tags in bulk action with existing in first
+    Given I add a tag "tag6" with specified properties:
+      | name             | Tag 6               |
+      | language         | french              |
+      | products         | product1,product2   |
+    When I delete tags "tag6, tagNotFound" using bulk action
+    Then I should get an error that the tag has not been found
+    And the tag "tag6" should be deleted
+
+  Scenario: Deleting multiple tags in bulk action with existing in last
+    Given I add a tag "tag7" with specified properties:
+      | name             | Tag 7               |
+      | language         | french              |
+      | products         | product1,product2   |
+    When I delete tags "tagNotFound, tag7" using bulk action
+    Then I should get an error that the tag has not been found
+    And the tag "tag7" should not be deleted

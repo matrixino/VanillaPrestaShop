@@ -4,7 +4,7 @@ import {expect} from 'chai';
 // Import commonTests
 import {enableMerchandiseReturns, disableMerchandiseReturns} from '@commonTests/BO/customerService/merchandiseReturns';
 import {createOrderByCustomerTest} from '@commonTests/FO/hummingbird/order';
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
   boDashboardPage,
@@ -49,7 +49,7 @@ Post-condition:
 - Disable merchandise returns
 - Uninstall the theme hummingbird
  */
-describe('FO - Account : Check order return PDF', async () => {
+describe('FO - User account - Merchandise Returns : Check PDF order return', async () => {
   let browserContext: BrowserContext;
   let page: Page;
   let orderID: number;
@@ -72,7 +72,7 @@ describe('FO - Account : Check order return PDF', async () => {
   });
 
   // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest_0`);
+  enableTheme('hummingbird', `${baseContext}_preTest_0`);
 
   // Pre-condition: Create order
   createOrderByCustomerTest(orderData, `${baseContext}_preTest_1`);
@@ -452,5 +452,5 @@ describe('FO - Account : Check order return PDF', async () => {
   disableMerchandiseReturns(`${baseContext}_postTest_1`);
 
   // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest_2`);
+  disableTheme('hummingbird', `${baseContext}_postTest_2`);
 });

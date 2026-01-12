@@ -79,7 +79,20 @@ export function refreshCheckoutPage() {
  * Estimate guesses needed to crack the password.
  */
 prestashop.checkPasswordScore = async(password) => {
-  const zxcvbn = (await import('zxcvbn')).default;
+  const { zxcvbn, zxcvbnOptions } = await import('@zxcvbn-ts/core');
+  const zxcvbnCommonPackage = await import('@zxcvbn-ts/language-common');
+  const zxcvbnEnPackage = await import('@zxcvbn-ts/language-en');
+
+  const options = {
+    translations: zxcvbnEnPackage.translations,
+    graphs: zxcvbnCommonPackage.adjacencyGraphs,
+    dictionary: {
+      ...zxcvbnCommonPackage.dictionary,
+      ...zxcvbnEnPackage.dictionary,
+    },
+  };
+
+  zxcvbnOptions.setOptions(options);
 
   return zxcvbn(password);
 };

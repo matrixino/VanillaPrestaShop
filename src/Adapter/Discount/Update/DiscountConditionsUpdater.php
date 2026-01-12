@@ -61,6 +61,7 @@ class DiscountConditionsUpdater
         ?bool $minimumShippingIncluded = null,
         ?array $carrierIds = null,
         ?array $countryIds = null,
+        ?array $customerGroupIds = null,
     ): void {
         // todo: when other conditions are added we check that only one is provided
         $discount = $this->discountRepository->get($discountId);
@@ -84,6 +85,10 @@ class DiscountConditionsUpdater
 
         if (null !== $countryIds) {
             $updatableProperties = array_merge($updatableProperties, $this->applyCountryConditions($discount, $countryIds));
+        }
+
+        if (null !== $customerGroupIds) {
+            $updatableProperties = array_merge($updatableProperties, $this->applyCustomerGroupConditions($discount, $customerGroupIds));
         }
 
         $updatableProperties = array_unique($updatableProperties);
@@ -237,6 +242,7 @@ class DiscountConditionsUpdater
             $this->cleanDiscountProductRules($discount),
             $this->cleanDiscountCarriers($discount),
             $this->cleanDiscountCountries($discount),
+            $this->cleanCustomerGroups($discount),
             [
                 'minimum_product_quantity',
                 'minimum_amount',
@@ -254,8 +260,8 @@ class DiscountConditionsUpdater
 
         // First delete all associated product rule groups
         $this->connection->createQueryBuilder()
-            ->delete($this->dbPrefix . 'cart_rule_product_rule_group', 'prg')
-            ->where('prg.id_cart_rule = :discountId')
+            ->delete($this->dbPrefix . 'cart_rule_product_rule_group')
+            ->where('id_cart_rule = :discountId')
             ->setParameter('discountId', (int) $discount->id)
             ->executeStatement()
         ;
@@ -282,8 +288,8 @@ class DiscountConditionsUpdater
         $discount->carrier_restriction = false;
 
         $this->connection->createQueryBuilder()
-            ->delete($this->dbPrefix . 'cart_rule_carrier', 'crc')
-            ->where('crc.id_cart_rule = :discountId')
+            ->delete($this->dbPrefix . 'cart_rule_carrier')
+            ->where('id_cart_rule = :discountId')
             ->setParameter('discountId', (int) $discount->id)
             ->executeStatement()
         ;
@@ -297,12 +303,60 @@ class DiscountConditionsUpdater
         $discount->country_restriction = false;
 
         $this->connection->createQueryBuilder()
-            ->delete($this->dbPrefix . 'cart_rule_country', 'crc')
-            ->where('crc.id_cart_rule = :discountId')
+            ->delete($this->dbPrefix . 'cart_rule_country')
+            ->where('id_cart_rule = :discountId')
             ->setParameter('discountId', (int) $discount->id)
             ->executeStatement()
         ;
 
         return ['country_restriction'];
+    }
+
+    /**
+     * Update customer group restrictions for a discount.
+     *
+     * @param CartRule $discount
+     * @param int[] $customerGroupIds
+     *
+     * @return array List of updated properties
+     */
+    private function applyCustomerGroupConditions(CartRule $discount, array $customerGroupIds): array
+    {
+        if (!empty($customerGroupIds)) {
+            $discount->group_restriction = true;
+            foreach ($customerGroupIds as $groupId) {
+                $this->connection->createQueryBuilder()
+                    ->insert($this->dbPrefix . 'cart_rule_group')
+                    ->values([
+                        'id_cart_rule' => (int) $discount->id,
+                        'id_group' => $groupId,
+                    ])
+                    ->executeStatement()
+                ;
+            }
+
+            return ['group_restriction'];
+        }
+
+        return ['group_restriction'];
+    }
+
+    /**
+     * Clean all customer groups for a discount.
+     *
+     * @return array List of updated properties
+     */
+    private function cleanCustomerGroups(CartRule $discount): array
+    {
+        $discount->group_restriction = false;
+
+        $this->connection->createQueryBuilder()
+            ->delete($this->dbPrefix . 'cart_rule_group')
+            ->where('id_cart_rule = :discountId')
+            ->setParameter('discountId', (int) $discount->id)
+            ->executeStatement()
+        ;
+
+        return ['group_restriction'];
     }
 }

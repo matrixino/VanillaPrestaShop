@@ -35,3 +35,25 @@ admin_tags_edit:
     _legacy_controller: AdminTags
     _legacy_link: AdminTags:updatetag
     _legacy_feature_flag: tag
+
+admin_tag_delete:
+  path: /{tagId}/delete
+  methods: [ POST, DELETE ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Configure\ShopParameters\TagController::deleteAction
+    _legacy_controller: AdminTags
+    _legacy_link: AdminTags:deletetag
+    _legacy_feature_flag: tag
+    _legacy_parameters:
+      id_tag: tagId
+  requirements:
+    tagId: \d+
+
+admin_tag_bulk_delete:
+  path: /bulk-delete
+  methods: [ POST ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Configure\ShopParameters\TagController::bulkDeleteAction
+    _legacy_controller: AdminTags
+    _legacy_link: AdminTags:submitBulkdeletetag
+    _legacy_feature_flag: tag

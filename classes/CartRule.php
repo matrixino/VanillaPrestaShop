@@ -27,6 +27,7 @@
 use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Adapter\Discount\Application\DiscountApplicationService;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\CartRuleSettings;
+use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
@@ -129,7 +130,7 @@ class CartRuleCore extends ObjectModel
             'id_customer' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedId'],
             'date_from' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true],
             'date_to' => ['type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true],
-            'description' => ['type' => self::TYPE_STRING, 'validate' => 'isCleanHtml', 'size' => CartRuleSettings::DESCRIPTION_MAX_LENGTH],
+            'description' => ['type' => self::TYPE_STRING, 'validate' => 'isCleanHtml', 'size' => DiscountSettings::MAX_DESCRIPTION_LENGTH],
             'quantity' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'quantity_per_user' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'priority' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
@@ -186,7 +187,7 @@ class CartRuleCore extends ObjectModel
 
         if (!isset($typeCache[$this->id_cart_rule_type])) {
             $result = Db::getInstance()->getValue('
-                SELECT type
+                SELECT discount_type
                 FROM ' . _DB_PREFIX_ . 'cart_rule_type
                 WHERE id_cart_rule_type = ' . (int) $this->id_cart_rule_type
             );
@@ -286,6 +287,7 @@ class CartRuleCore extends ObjectModel
 			WHERE `' . _DB_PREFIX_ . 'cart_rule_product_rule`.`id_product_rule_group` = `' . _DB_PREFIX_ . 'cart_rule_product_rule_group`.`id_product_rule_group`)');
         $r &= Db::getInstance()->delete('cart_rule_product_rule_value', 'NOT EXISTS (SELECT 1 FROM `' . _DB_PREFIX_ . 'cart_rule_product_rule`
 			WHERE `' . _DB_PREFIX_ . 'cart_rule_product_rule_value`.`id_product_rule` = `' . _DB_PREFIX_ . 'cart_rule_product_rule`.`id_product_rule`)');
+        $r &= Db::getInstance()->delete('cart_rule_compatible_types', '`id_cart_rule` = ' . (int) $this->id);
 
         return (bool) $r;
     }
@@ -783,57 +785,64 @@ class CartRuleCore extends ObjectModel
             return (!$display_error) ? true : null;
         }
 
-        // All these checks are necessary when you add the cart rule the first time, so when it's not in cart yet
-        // However when it's in the cart and you are checking if the cart rule is still valid (when performing auto remove)
-        // these rules are outdated For example:
-        //  - the cart rule can now be disabled but it was at the time it was applied, so it doesn't need to be removed
-        //  - the current date is not in the range any more but it was at the time
-        //  - the quantity is now zero but it was not when it was added
-        if (!$alreadyInCart) {
+        /*
+         * All these checks are relevant only for non-ordered carts. When an order has been already
+         * created from the cart, we do not check this. $useOrderPrices is a bit confusing as a name,
+         * but it indicates that we are validating a cart that has already been ordered.
+         */
+        if (!$useOrderPrices) {
+            // We verify that the cart rule is active
             if (!$this->active) {
                 return (!$display_error) ? false : $this->trans('This voucher is disabled', [], 'Shop.Notifications.Error');
             }
+
+            // We verify the total available quantity
             if (!$this->quantity) {
                 return (!$display_error) ? false : $this->trans('This voucher has already been used', [], 'Shop.Notifications.Error');
             }
+
+            // We verify the date range
             if (strtotime($this->date_from) > time()) {
                 return (!$display_error) ? false : $this->trans('This voucher is not valid yet', [], 'Shop.Notifications.Error');
             }
             if (strtotime($this->date_to) < time()) {
                 return (!$display_error) ? false : $this->trans('This voucher has expired', [], 'Shop.Notifications.Error');
             }
-        }
 
-        if ($cart->id_customer) {
-            $quantityUsed = Db::getInstance()->getValue('
-			SELECT count(*)
-			FROM `' . _DB_PREFIX_ . 'orders` o
-			LEFT JOIN `' . _DB_PREFIX_ . 'order_cart_rule` ocr ON o.`id_order` = ocr.`id_order`
-			WHERE o.`id_customer` = ' . $cart->id_customer . '
-			AND ocr.`deleted` = 0
-			AND ocr.`id_cart_rule` = ' . (int) $this->id . '
-			AND ' . (int) Configuration::get('PS_OS_ERROR') . ' != o.`current_state`
-			');
-
-            if ($alreadyInCart) {
-                // Sometimes a cart rule is already in a cart, but the cart is not yet attached to an order (when logging
-                // in for example), these cart rules are not taken into account by the query above:
-                // so we count cart rules that are already linked to the current cart but not attached to an order yet.
-
-                $quantityUsed += (int) Db::getInstance()->getValue('
-                    SELECT count(*)
-                    FROM `' . _DB_PREFIX_ . 'cart_cart_rule` ccr
-                    INNER JOIN `' . _DB_PREFIX_ . 'cart` c ON c.id_cart = ccr.id_cart
-                    LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = c.id_cart
-                    WHERE c.id_customer = ' . $cart->id_customer . ' AND c.id_cart = ' . (int) $cart->id . ' AND ccr.id_cart_rule = ' . (int) $this->id . ' AND o.id_order IS NULL
+            // We verify the quantity per user, if customer is already assigned to the cart
+            if ($cart->id_customer) {
+                // First, we check if the customer has already used this cart rule in past orders
+                $quantityUsed = Db::getInstance()->getValue('
+                SELECT count(*)
+                FROM `' . _DB_PREFIX_ . 'orders` o
+                LEFT JOIN `' . _DB_PREFIX_ . 'order_cart_rule` ocr ON o.`id_order` = ocr.`id_order`
+                WHERE o.`id_customer` = ' . $cart->id_customer . '
+                AND ocr.`deleted` = 0
+                AND ocr.`id_cart_rule` = ' . (int) $this->id . '
+                AND ' . (int) Configuration::get('PS_OS_ERROR') . ' != o.`current_state`
                 ');
-            } else {
-                // When checking the cart rules present in that cart the request result is accurate
-                // When we check if using the cart rule one more time is valid then we increment this value
-                ++$quantityUsed;
-            }
-            if ($quantityUsed > $this->quantity_per_user) {
-                return (!$display_error) ? false : $this->trans('You cannot use this voucher anymore (usage limit reached)', [], 'Shop.Notifications.Error');
+
+                if ($alreadyInCart) {
+                    // Sometimes a cart rule is already in a cart, but the cart is not yet attached to an order (when logging
+                    // in for example), these cart rules are not taken into account by the query above:
+                    // so we count cart rules that are already linked to the current cart but not attached to an order yet.
+
+                    $quantityUsed += (int) Db::getInstance()->getValue('
+                        SELECT count(*)
+                        FROM `' . _DB_PREFIX_ . 'cart_cart_rule` ccr
+                        INNER JOIN `' . _DB_PREFIX_ . 'cart` c ON c.id_cart = ccr.id_cart
+                        LEFT JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = c.id_cart
+                        WHERE c.id_customer = ' . $cart->id_customer . ' AND c.id_cart = ' . (int) $cart->id . ' AND ccr.id_cart_rule = ' . (int) $this->id . ' AND o.id_order IS NULL
+                    ');
+                } else {
+                    // When checking the cart rules present in that cart the request result is accurate
+                    // When we check if using the cart rule one more time is valid then we increment this value
+                    ++$quantityUsed;
+                }
+
+                if ($quantityUsed > $this->quantity_per_user) {
+                    return (!$display_error) ? false : $this->trans('You cannot use this voucher anymore (usage limit reached)', [], 'Shop.Notifications.Error');
+                }
             }
         }
 

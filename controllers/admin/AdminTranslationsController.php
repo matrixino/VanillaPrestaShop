@@ -30,6 +30,9 @@ use PrestaShop\PrestaShop\Core\Security\Permission;
 
 class AdminTranslationsControllerCore extends AdminController
 {
+    /**
+     * @deprecated Will be removed in 10.0
+     */
     /** Name of theme by default */
     public const DEFAULT_THEME_NAME = _PS_DEFAULT_THEME_NAME_;
     public const TEXTAREA_SIZED = 70;
@@ -238,7 +241,7 @@ class AdminTranslationsControllerCore extends AdminController
         }
 
         $this->tpl_view_vars = [
-            'theme_default' => self::DEFAULT_THEME_NAME,
+            'theme_default' => Theme::getDefaultTheme(),
             'theme_lang_dir' => _THEME_LANG_DIR_,
             'token' => $this->token,
             'languages' => $this->languages,
@@ -615,6 +618,8 @@ class AdminTranslationsControllerCore extends AdminController
     }
 
     /**
+     * @deprecated To be removed in 10.0
+     *
      * Move theme translations in selected themes.
      *
      * @param array $files
@@ -635,7 +640,7 @@ class AdminTranslationsControllerCore extends AdminController
                     $theme_file_old = _PS_THEME_DIR_ . 'lang/' . $name_file;
                 } else {
                     $deleted_old_theme = true;
-                    $theme_file_old = str_replace(self::DEFAULT_THEME_NAME, $name_default_theme, _PS_THEME_DIR_ . 'lang/' . $name_file);
+                    $theme_file_old = str_replace(Theme::getDefaultTheme(), $name_default_theme, _PS_THEME_DIR_ . 'lang/' . $name_file);
                 }
 
                 // Move the old file theme in the new folder
@@ -2169,6 +2174,10 @@ class AdminTranslationsControllerCore extends AdminController
             );
         }
 
+        if (!empty($arr_return['files'])) {
+            ksort($arr_return['files']);
+        }
+
         return $arr_return;
     }
 
@@ -2448,6 +2457,10 @@ class AdminTranslationsControllerCore extends AdminController
                     }
                 }
             }
+        }
+
+        if (!empty($arr_modules)) {
+            ksort($arr_modules);
         }
 
         return $arr_modules;
@@ -2844,7 +2857,7 @@ class AdminTranslationsControllerCore extends AdminController
         }
 
         $this->tpl_view_vars = array_merge($this->tpl_view_vars, [
-            'default_theme_name' => self::DEFAULT_THEME_NAME,
+            'default_theme_name' => Theme::getDefaultTheme(),
             'count' => $this->total_expression,
             'limit_warning' => $this->displayLimitPostWarning($this->total_expression),
             'mod_security_warning' => Tools::apacheModExists('mod_security'),

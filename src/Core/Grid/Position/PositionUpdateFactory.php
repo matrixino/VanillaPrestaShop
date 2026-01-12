@@ -94,9 +94,9 @@ final class PositionUpdateFactory implements PositionUpdateFactoryInterface
             $this->validatePositionData($position, $index);
 
             $updates->add(new PositionModification(
-                $position[$this->rowIdField],
-                $position[$this->oldPositionField],
-                $position[$this->newPositionField]
+                (int) $position[$this->rowIdField],
+                isset($position[$this->oldPositionField]) ? (int) $position[$this->oldPositionField] : null,
+                (int) $position[$this->newPositionField]
             ));
         }
 
@@ -138,9 +138,6 @@ final class PositionUpdateFactory implements PositionUpdateFactoryInterface
     {
         if (!isset($position[$this->rowIdField])) {
             throw new PositionDataException(self::POSITION_KEY, 'Admin.Notifications.Failure', [$index, $this->rowIdField]);
-        }
-        if (!isset($position[$this->oldPositionField])) {
-            throw new PositionDataException(self::POSITION_KEY, 'Admin.Notifications.Failure', [$index, $this->oldPositionField]);
         }
         if (!isset($position[$this->newPositionField])) {
             throw new PositionDataException(self::POSITION_KEY, 'Admin.Notifications.Failure', [$index, $this->newPositionField]);
