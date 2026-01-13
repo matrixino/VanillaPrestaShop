@@ -5523,5 +5523,15 @@
       <title>Override product quantity calculation</title>
       <description>Allows modules to override the final product quantity returned by Product::getQuantity(), including cart-aware calculations.</description>
     </hook>
+    <hook id="actionFrontControllerDetectContextCountryAfter">
+      <name>actionFrontControllerDetectContextCountryAfter</name>
+      <title>Action after detecting context country</title>
+      <description>Allows modules to modify the context country after it has been detected via geolocation.</description>
+    </hook>
+    <hook id="actionFrontControllerInitContextCurrencyAfter">
+      <name>actionFrontControllerInitContextCurrencyAfter</name>
+      <title>Action after initializing context currency</title>
+      <description>Allows modules to modify the context currency after it has been initialized.</description>
+    </hook>
   </entities>
 </entity_hook>
