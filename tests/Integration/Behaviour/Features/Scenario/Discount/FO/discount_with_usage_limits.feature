@@ -81,7 +81,6 @@ Feature: Customer using discount with usage limits in FO
       | total_quantity           | 1                   |
       | quantity_per_user        | 1                   |
       | minimum_product_quantity | 0                   |
-      | cheapest_product         | true                |
     And discount "vip_discount11" should have the following properties:
       | total_quantity    | 1 |
       | quantity_per_user | 1 |

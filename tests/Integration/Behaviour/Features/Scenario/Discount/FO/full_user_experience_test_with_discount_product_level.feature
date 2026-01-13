@@ -89,25 +89,27 @@ Feature: Full UX discount test
   Scenario: Create product level with 50% discount on a specific product
     Given I create an empty cart "dummy_cart2" for customer "testCustomer2"
     When I create a "product_level" discount "specific_product_half_price_discount" with following properties:
-      | name[en-US]                | Promotion2                           |
-      | name[fr-FR]                | Promotion_2_fr                       |
-      | active                     | true                                 |
-      | valid_from                 | 2025-01-01 11:05:00                  |
-      | valid_to                   | 2026-12-01 00:00:00                  |
-      | code                       | specific_product_half_price_discount |
-      | reduction_percent          | 50.0                                 |
-      | productConditionQuantity   | 1                                    |
-      | productCondition[products] | product3                             |
+      | name[en-US]              | Promotion2                           |
+      | name[fr-FR]              | Promotion_2_fr                       |
+      | active                   | true                                 |
+      | valid_from               | 2025-01-01 11:05:00                  |
+      | valid_to                 | 2026-12-01 00:00:00                  |
+      | code                     | specific_product_half_price_discount |
+      | reduction_percent        | 50.0                                 |
+      | reduction_product        | product3                             |
+      | productConditionQuantity |                                      |
+      | productCondition         |                                      |
     And discount "specific_product_half_price_discount" should have the following properties:
-      | name[en-US]                | Promotion2                           |
-      | name[fr-FR]                | Promotion_2_fr                       |
-      | active                     | true                                 |
-      | valid_from                 | 2025-01-01 11:05:00                  |
-      | valid_to                   | 2026-12-01 00:00:00                  |
-      | code                       | specific_product_half_price_discount |
-      | reduction_percent          | 50.0                                 |
-      | productConditionQuantity   | 1                                    |
-      | productCondition[products] | product3                             |
+      | name[en-US]              | Promotion2                           |
+      | name[fr-FR]              | Promotion_2_fr                       |
+      | active                   | true                                 |
+      | valid_from               | 2025-01-01 11:05:00                  |
+      | valid_to                 | 2026-12-01 00:00:00                  |
+      | code                     | specific_product_half_price_discount |
+      | reduction_percent        | 50.0                                 |
+      | reduction_product        | product3                             |
+      | productConditionQuantity |                                      |
+      | productCondition         |                                      |
     # Despite adding a cheaper product the discount is applied on product3
     When I add 1 product "cheap_product" to the cart "dummy_cart2"
     And I add 1 product "product3" to the cart "dummy_cart2"
@@ -140,30 +142,30 @@ Feature: Full UX discount test
   Scenario: Create product level with 6$ discount on a specific product
     Given I create an empty cart "dummy_cart3" for customer "testCustomer2"
     When I create a "product_level" discount "specific_product_fixed_price_discount" with following properties:
-      | name[en-US]                | Promotion3                            |
-      | name[fr-FR]                | Promotion_3_fr                        |
-      | active                     | true                                  |
-      | valid_from                 | 2025-01-01 11:05:00                   |
-      | valid_to                   | 2026-12-01 00:00:00                   |
-      | code                       | specific_product_fixed_price_discount |
-      | reduction_amount           | 6.0                                   |
-      | reduction_currency         | usd                                   |
-      | reduction_tax_included     | true                                  |
-      | productConditionQuantity   | 1                                     |
-      | productCondition[products] | product3                              |
+      | name[en-US]            | Promotion3                            |
+      | name[fr-FR]            | Promotion_3_fr                        |
+      | active                 | true                                  |
+      | valid_from             | 2025-01-01 11:05:00                   |
+      | valid_to               | 2026-12-01 00:00:00                   |
+      | code                   | specific_product_fixed_price_discount |
+      | reduction_amount       | 6.0                                   |
+      | reduction_currency     | usd                                   |
+      | reduction_tax_included | true                                  |
+      | reduction_product      | product3                              |
     And discount "specific_product_fixed_price_discount" should have the following properties:
-      | name[en-US]                | Promotion3                            |
-      | name[fr-FR]                | Promotion_3_fr                        |
-      | active                     | true                                  |
-      | valid_from                 | 2025-01-01 11:05:00                   |
-      | valid_to                   | 2026-12-01 00:00:00                   |
-      | code                       | specific_product_fixed_price_discount |
-      | reduction_percent          |                                       |
-      | reduction_amount           | 6.0                                   |
-      | reduction_currency         | usd                                   |
-      | reduction_tax_included     | true                                  |
-      | productConditionQuantity   | 1                                     |
-      | productCondition[products] | product3                              |
+      | name[en-US]              | Promotion3                            |
+      | name[fr-FR]              | Promotion_3_fr                        |
+      | active                   | true                                  |
+      | valid_from               | 2025-01-01 11:05:00                   |
+      | valid_to                 | 2026-12-01 00:00:00                   |
+      | code                     | specific_product_fixed_price_discount |
+      | reduction_percent        |                                       |
+      | reduction_amount         | 6.0                                   |
+      | reduction_currency       | usd                                   |
+      | reduction_tax_included   | true                                  |
+      | reduction_product        | product3                              |
+      | productConditionQuantity |                                       |
+      | productCondition         |                                       |
     # Despite adding a cheaper product the discount is applied on product3
     And I add 1 product "cheap_product" to the cart "dummy_cart3"
     And I add 1 product "product3" to the cart "dummy_cart3"

@@ -57,6 +57,7 @@ class DiscountForEditing
         ?int $reductionAmountCurrencyId,
         ?bool $reductionAmountTaxIncluded,
         private readonly bool $cheapestProduct,
+        private readonly ?int $reductionProductId,
         private readonly ?int $giftProductId,
         private readonly ?int $giftCombinationId,
         private readonly int $minimumProductQuantity,
@@ -156,6 +157,11 @@ class DiscountForEditing
     public function getCheapestProduct(): bool
     {
         return $this->cheapestProduct;
+    }
+
+    public function getReductionProductId(): ?int
+    {
+        return $this->reductionProductId;
     }
 
     public function getGiftProductId(): ?int

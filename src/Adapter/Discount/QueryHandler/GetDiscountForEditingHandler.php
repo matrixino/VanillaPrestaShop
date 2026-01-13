@@ -78,6 +78,7 @@ class GetDiscountForEditingHandler implements GetDiscountForEditingHandlerInterf
             $cartRule->reduction_currency,
             $cartRule->reduction_tax,
             $cartRule->reduction_product === DiscountSettings::CHEAPEST_PRODUCT,
+            $cartRule->reduction_product > 0 ? $cartRule->reduction_product : null,
             $cartRule->gift_product ?: null,
             $cartRule->gift_product_attribute ?: null,
             $cartRule->minimum_product_quantity,

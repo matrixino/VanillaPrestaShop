@@ -39,6 +39,7 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\Command\AddDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\CommandHandler\AddDiscountHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountId;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 
 #[AsCommandHandler]
 class AddDiscountHandler implements AddDiscountHandlerInterface
@@ -59,6 +60,12 @@ class AddDiscountHandler implements AddDiscountHandlerInterface
     {
         $builtCartRule = $this->discountBuilder->build($command);
         $this->discountValidator->validateDiscountPropertiesForType($builtCartRule, $command->getProductConditions());
+        // This should be tested by the validator but since both getters impact the same entity field and the validator is based on it
+        // this is the only place where we can check this constraint
+        if ($builtCartRule->getType() === DiscountType::PRODUCT_LEVEL && $command->getCheapestProduct() && null !== $command->getReductionProductId()) {
+            throw new DiscountConstraintException('You need to choose only one target, cheapest, single product or product segment.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_INCOMPATIBLE_TARGETS);
+        }
+
         $this->discountValidator->validateAssociations(
             $command->getProductConditions(),
             $command->getCarrierIds() ? array_map(fn (CarrierId $carrierId) => $carrierId->getValue(), $command->getCarrierIds()) : null,

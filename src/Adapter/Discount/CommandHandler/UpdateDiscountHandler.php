@@ -38,6 +38,8 @@ use PrestaShop\PrestaShop\Core\Domain\Customer\Group\ValueObject\GroupId;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Command\UpdateDiscountCommand;
 use PrestaShop\PrestaShop\Core\Domain\Discount\CommandHandler\UpdateDiscountCommandHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\CannotUpdateDiscountException;
+use PrestaShop\PrestaShop\Core\Domain\Discount\Exception\DiscountConstraintException;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
 
 #[AsCommandHandler]
 class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
@@ -55,6 +57,11 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
     {
         $cartRule = $this->discountRepository->get($command->getDiscountId());
         $updatableProperties = $this->discountFiller->fillUpdatableProperties($cartRule, $command);
+        // This should be tested by the validator but since both getters impact the same entity field and the validator is based on it
+        // this is the only place where we can check this constraint
+        if ($cartRule->getType() === DiscountType::PRODUCT_LEVEL && $command->getCheapestProduct() && null !== $command->getReductionProductId()) {
+            throw new DiscountConstraintException('You need to choose only one target, cheapest, single product or product segment.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_INCOMPATIBLE_TARGETS);
+        }
         $this->discountValidator->validateDiscountPropertiesForType($cartRule, $command->getProductConditions());
         $this->discountValidator->validateAssociations(
             $command->getProductConditions(),
@@ -71,8 +78,8 @@ class UpdateDiscountHandler implements UpdateDiscountCommandHandlerInterface
 
         $this->discountConditionsUpdater->update(
             $command->getDiscountId(),
-            // If cheapest product is set we remove the product conditions (using empty array)
-            $command->getCheapestProduct() ? [] : $command->getProductConditions(),
+            // If cheapest product or single product is set we remove the product conditions (using empty array)
+            $command->getCheapestProduct() || null !== $command->getReductionProductId() ? [] : $command->getProductConditions(),
             $command->getCarrierIds() !== null ? array_map(fn (CarrierId $carrierId) => $carrierId->getValue(), $command->getCarrierIds()) : null,
             $command->getCountryIds() !== null ? array_map(fn (CountryId $countryId) => $countryId->getValue(), $command->getCountryIds()) : null,
             $command->getCustomerGroupIds() !== null ? array_map(fn (GroupId $groupId) => $groupId->getValue(), $command->getCustomerGroupIds()) : null,

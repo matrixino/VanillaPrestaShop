@@ -65,6 +65,7 @@ class AddDiscountCommand
     private ?Money $reductionAmount = null;
     private ?ProductId $giftProductId = null;
     private ?CombinationId $giftCombinationId = null;
+    private ?ProductId $reductionProductId = null;
     private bool $cheapestProduct = false;
     private ?int $minimumProductQuantity = null;
     /**
@@ -344,6 +345,21 @@ class AddDiscountCommand
     public function setCheapestProduct(bool $cheapestProduct): self
     {
         $this->cheapestProduct = $cheapestProduct;
+
+        return $this;
+    }
+
+    public function getReductionProductId(): ?ProductId
+    {
+        return $this->reductionProductId;
+    }
+
+    /**
+     * @throws ProductConstraintException
+     */
+    public function setReductionProductId(?int $reductionProductId): self
+    {
+        $this->reductionProductId = null !== $reductionProductId ? new ProductId($reductionProductId) : null;
 
         return $this;
     }

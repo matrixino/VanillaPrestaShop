@@ -283,6 +283,13 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             if (!empty($data['cheapest_product'])) {
                 $command->setCheapestProduct(PrimitiveUtils::castStringBooleanIntoBoolean($data['cheapest_product']));
             }
+            if (isset($data['reduction_product'])) {
+                if (empty($data['reduction_product'])) {
+                    $command->setReductionProductId(null);
+                } else {
+                    $command->setReductionProductId($this->referenceToId($data['reduction_product']));
+                }
+            }
         }
 
         if ($command->getDiscountType()->getValue() === DiscountType::FREE_GIFT) {
@@ -462,6 +469,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
 
         if (!empty($data['cheapest_product'])) {
             $command->setCheapestProduct(PrimitiveUtils::castStringBooleanIntoBoolean($data['cheapest_product']));
+        }
+
+        if (isset($data['reduction_product'])) {
+            if (empty($data['reduction_product'])) {
+                $command->setReductionProductId(null);
+            } else {
+                $command->setReductionProductId($this->referenceToId($data['reduction_product']));
+            }
         }
 
         if (!empty($data['gift_product'])) {
@@ -656,6 +671,13 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         }
         if (isset($expectedData['cheapest_product'])) {
             Assert::assertSame(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['cheapest_product']), $discountForEditing->getCheapestProduct(), 'Unexpected cheapest_product');
+        }
+        if (isset($expectedData['reduction_product'])) {
+            if (empty($expectedData['reduction_product'])) {
+                Assert::assertNull($discountForEditing->getReductionProductId(), 'Unexpected reduction product');
+            } else {
+                Assert::assertEquals($this->referenceToId($expectedData['reduction_product']), $discountForEditing->getReductionProductId(), 'Unexpected reduction product');
+            }
         }
         if (isset($expectedData['name'])) {
             Assert::assertSame($expectedData['name'], $discountForEditing->getLocalizedNames());

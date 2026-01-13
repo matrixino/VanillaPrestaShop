@@ -17,7 +17,7 @@ Feature: Update discount
     And language with iso code "en" is the default one
     And language "french" with locale "fr-FR" exists
 
-  Scenario: Create a complete cart level discount
+  Scenario: Create a complete product level discount
     When I create a "product_level" discount "updated_product_level_discount" with following properties:
       | name[en-US]       | Promotion                      |
       | name[fr-FR]       | Promotion_fr                   |
@@ -55,9 +55,44 @@ Feature: Update discount
       | code                       | updated_product_level_discount |
       | reduction_percent          | 15.0                           |
       | cheapest_product           | false                          |
+      | reduction_product          |                                |
       | productConditionQuantity   | 42                             |
       | productCondition[products] | product1                       |
-    # Switch back to cheapest product, no more product segment (partial update)
+    # Switch to a single product target instead, no more product segment (partial update)
+    Then I update discount "updated_product_level_discount" with the following properties:
+      | reduction_product | product1 |
+    Then discount "updated_product_level_discount" should have the following properties:
+      | name[en-US]              | Promotion                      |
+      | name[fr-FR]              | Promotion_fr                   |
+      | type                     | product_level                  |
+      | active                   | true                           |
+      | valid_from               | 2019-01-01 11:05:00            |
+      | valid_to                 | 2019-12-01 00:00:00            |
+      | code                     | updated_product_level_discount |
+      | reduction_percent        | 15.0                           |
+      | cheapest_product         | false                          |
+      | reduction_product        | product1                       |
+      | productConditionQuantity |                                |
+      | productCondition         |                                |
+    # Switch back to a product segment target instead, reduction_product should now be null (partial update)
+    Then I update discount "updated_product_level_discount" with the following properties:
+      | reduction_percent          | 15.0     |
+      | productConditionQuantity   | 42       |
+      | productCondition[products] | product1 |
+    Then discount "updated_product_level_discount" should have the following properties:
+      | name[en-US]                | Promotion                      |
+      | name[fr-FR]                | Promotion_fr                   |
+      | type                       | product_level                  |
+      | active                     | true                           |
+      | valid_from                 | 2019-01-01 11:05:00            |
+      | valid_to                   | 2019-12-01 00:00:00            |
+      | code                       | updated_product_level_discount |
+      | reduction_percent          | 15.0                           |
+      | cheapest_product           | false                          |
+      | reduction_product          |                                |
+      | productConditionQuantity   | 42                             |
+      | productCondition[products] | product1                       |
+    # Switch back to cheapest product, no more product segment, nor single product (partial update)
     When I update discount "updated_product_level_discount" with the following properties:
       | cheapest_product | true |
     Then discount "updated_product_level_discount" should have the following properties:
@@ -70,6 +105,7 @@ Feature: Update discount
       | code                     | updated_product_level_discount |
       | reduction_percent        | 15.0                           |
       | cheapest_product         | true                           |
+      | reduction_product        |                                |
       # Assert product conditions are empty
       | productConditionQuantity |                                |
       | productCondition         |                                |
@@ -166,6 +202,25 @@ Feature: Update discount
       | code              | valid_product_level |
       | reduction_percent | 10.0                |
       | cheapest_product  | true                |
+    # Now replace with single product, cheapest product becomes false
+    When I update discount "valid_product_level" with the following properties:
+      | reduction_product | product1 |
+    Then discount "valid_product_level" should have the following properties:
+      | name[en-US]              | Promotion           |
+      | name[fr-FR]              | Promotion_fr        |
+      | type                     | product_level       |
+      | active                   | true                |
+      | valid_from               | 2019-01-01 11:05:00 |
+      | valid_to                 | 2019-12-01 00:00:00 |
+      | code                     | valid_product_level |
+      | reduction_percent        | 10.0                |
+      | reduction_product        | product1            |
+      | cheapest_product         | false               |
+      | productConditionQuantity |                     |
+      | productCondition         |                     |
+    When I update discount "valid_product_level" with the following properties:
+      | reduction_product |  |
+    Then I should get an error that the discount target is missing
     # Now replace with a product segment, this is valid
     When I update discount "valid_product_level" with the following properties:
       | cheapest_product           | false    |

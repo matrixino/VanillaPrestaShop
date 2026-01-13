@@ -68,6 +68,7 @@ class UpdateDiscountCommand
     private ?ProductId $giftProductId = null;
     private ?CombinationId $giftCombinationId = null;
     private ?bool $cheapestProduct = null;
+    private ?ProductId $reductionProductId = null;
     private ?int $minimumProductQuantity = null;
     /**
      * @var ProductRuleGroup[]|null
@@ -380,6 +381,22 @@ class UpdateDiscountCommand
     {
         $this->cheapestProduct = $cheapestProduct;
         $this->markDirty('cheapestProduct');
+
+        return $this;
+    }
+
+    public function getReductionProductId(): ?ProductId
+    {
+        return $this->reductionProductId;
+    }
+
+    /**
+     * @throws ProductConstraintException
+     */
+    public function setReductionProductId(?int $reductionProductId): self
+    {
+        $this->reductionProductId = null !== $reductionProductId ? new ProductId($reductionProductId) : null;
+        $this->markDirty('reductionProductId');
 
         return $this;
     }

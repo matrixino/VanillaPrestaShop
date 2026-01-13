@@ -86,9 +86,13 @@ class DiscountBuilder
             $cartRule->gift_product_attribute = $command->getGiftCombinationId()?->getValue() ?? 0;
         }
 
-        if ($command->getDiscountType()->getValue() === DiscountType::PRODUCT_LEVEL && $command->getCheapestProduct()) {
-            // If cheapest product is enabled we set the specific value, if not we use 0 as the no target value
-            $cartRule->reduction_product = DiscountSettings::CHEAPEST_PRODUCT;
+        if ($command->getDiscountType()->getValue() === DiscountType::PRODUCT_LEVEL) {
+            if ($command->getCheapestProduct()) {
+                // If cheapest product is enabled we set the specific value
+                $cartRule->reduction_product = DiscountSettings::CHEAPEST_PRODUCT;
+            } elseif (null !== $command->getReductionProductId()) {
+                $cartRule->reduction_product = $command->getReductionProductId()->getValue();
+            }
         }
 
         if (null !== $command->getMinimumProductQuantity()) {

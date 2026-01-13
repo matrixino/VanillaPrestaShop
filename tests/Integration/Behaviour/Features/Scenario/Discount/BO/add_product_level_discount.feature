@@ -159,6 +159,31 @@ Feature: Add discount
       | productConditionQuantity |                           |
       | productCondition         |                           |
 
+  Scenario: Create a product level discount targeting single product
+    When I create a "product_level" discount "product_discount_single" with following properties:
+      | name[en-US]       | Promotion               |
+      | name[fr-FR]       | Promotion_fr            |
+      | active            | true                    |
+      | valid_from        | 2019-01-01 11:05:00     |
+      | valid_to          | 2019-12-01 00:00:00     |
+      | code              | product_discount_single |
+      | reduction_percent | 10.0                    |
+      | reduction_product | beer_product            |
+    And discount "product_discount_single" should have the following properties:
+      | name[en-US]              | Promotion               |
+      | name[fr-FR]              | Promotion_fr            |
+      | type                     | product_level           |
+      | active                   | true                    |
+      | valid_from               | 2019-01-01 11:05:00     |
+      | valid_to                 | 2019-12-01 00:00:00     |
+      | code                     | product_discount_single |
+      | reduction_percent        | 10.0                    |
+      | reduction_product        | beer_product            |
+      | cheapest_product         | false                   |
+      # This represents an empty set of rules
+      | productConditionQuantity |                         |
+      | productCondition         |                         |
+
   Scenario: Create a product level discount targeting cheapest product with amount
     When I create a "product_level" discount "product_discount_cheapest_amount" with following properties:
       | name[en-US]              | Promotion                        |
@@ -224,6 +249,33 @@ Feature: Add discount
       | cheapest_product           | true                                 |
       | productConditionQuantity   | 42                                   |
       | productCondition[products] | potato_chips_product, metal_tshirt   |
+    Then I should get an error that the discount targets are incompatible
+    # Try to set single product and product segment
+    When I create a "product_level" discount "product_discount_incompatible_target" with following properties:
+      | name[en-US]                | Promotion                            |
+      | name[fr-FR]                | Promotion_fr                         |
+      | active                     | true                                 |
+      | valid_from                 | 2019-01-01 11:05:00                  |
+      | valid_to                   | 2019-12-01 00:00:00                  |
+      | code                       | product_discount_incompatible_target |
+      | reduction_percent          | 5.0                                  |
+      | reduction_product          | potato_chips_product                 |
+      | productConditionQuantity   | 42                                   |
+      | productCondition[products] | potato_chips_product, metal_tshirt   |
+    Then I should get an error that the discount targets are incompatible
+    # Try to set single product and cheapest product is forbidden
+    When I create a "product_level" discount "product_discount_incompatible_target" with following properties:
+      | name[en-US]              | Promotion                            |
+      | name[fr-FR]              | Promotion_fr                         |
+      | active                   | true                                 |
+      | valid_from               | 2019-01-01 11:05:00                  |
+      | valid_to                 | 2019-12-01 00:00:00                  |
+      | code                     | product_discount_incompatible_target |
+      | reduction_percent        | 5.0                                  |
+      | reduction_product        | potato_chips_product                 |
+      | cheapest_product         | true                                 |
+      | productConditionQuantity |                                      |
+      | productCondition         |                                      |
     Then I should get an error that the discount targets are incompatible
     # Try to create a discount with no reduction (neither percent nor amount)
     When I create a "product_level" discount "product_discount_no_reduction" with following properties:

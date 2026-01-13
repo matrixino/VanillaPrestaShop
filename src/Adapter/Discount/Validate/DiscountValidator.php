@@ -221,21 +221,33 @@ class DiscountValidator extends AbstractObjectModelValidator
             case DiscountType::PRODUCT_LEVEL:
                 $segmentTargeted = false;
                 $discountCheapestProduct = $discount->reduction_product === DiscountSettings::CHEAPEST_PRODUCT;
+                $discountSingleProduct = $discount->reduction_product > 0;
+                $targetNumber = 0;
+                if ($discountCheapestProduct) {
+                    ++$targetNumber;
+                }
+                if ($discountSingleProduct) {
+                    ++$targetNumber;
+                }
 
                 // During update (so only for CartRule with existing ID)) When no value is updated, we use the current product rules or we would end up with
                 // an error that cart rule has no target
-                if (!$discountCheapestProduct && null === $productConditions && $discount->id) {
+                if (!$discountCheapestProduct && !$discountSingleProduct && null === $productConditions && $discount->id) {
                     $productConditions = $this->discountRepository->getProductRulesGroup(new DiscountId((int) $discount->id));
                 }
                 if (!empty($productConditions)) {
                     $segmentTargeted = $this->isSegmentTargeted($productConditions);
                 }
-                // At least one target must be selected, but never both
-                if (!$discountCheapestProduct && !$segmentTargeted) {
+                if ($segmentTargeted) {
+                    ++$targetNumber;
+                }
+
+                // At least one target must be selected, but not more
+                if ($targetNumber === 0) {
                     throw new DiscountConstraintException('Product discount must target at least one product.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_MISSING_TARGET);
                 }
-                if ($discountCheapestProduct && $segmentTargeted) {
-                    throw new DiscountConstraintException('You need to choose between cheapest product or product segment.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_INCOMPATIBLE_TARGETS);
+                if ($targetNumber > 1) {
+                    throw new DiscountConstraintException('You need to choose only one target, cheapest, single product or product segment.', DiscountConstraintException::INVALID_PRODUCT_DISCOUNT_INCOMPATIBLE_TARGETS);
                 }
 
                 // Either amount or percent discount must be defined, but never both

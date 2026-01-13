@@ -94,6 +94,14 @@ class DiscountFiller
             $cartRule->reduction_product = $command->getCheapestProduct() ? DiscountSettings::CHEAPEST_PRODUCT : 0;
             $updatableProperties[] = 'reduction_product';
         }
+        if ($command->isDirty('reductionProductId')) {
+            if (null === $command->getReductionProductId()) {
+                $cartRule->reduction_product = 0;
+            } else {
+                $cartRule->reduction_product = $command->getReductionProductId()->getValue();
+            }
+            $updatableProperties[] = 'reduction_product';
+        }
 
         // If a segment is being targeted we automatically update the reduction_product (or the validator will trigger
         // an error) but only if the command isn't modifying the cheapest product target as well, in which case reduction_product
