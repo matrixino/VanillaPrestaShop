@@ -265,7 +265,7 @@ jobs:
       - name: Create API client
         if: ${{ (startsWith(env.GH_BRANCH, '9.') || env.GH_BRANCH == 'develop') && env.TEST_CAMPAIGN == 'functional:API' }}
         run: |
-          docker exec vanillaprestashop-prestashop-git-1 php ./bin/console prestashop:api-client create ${{ env.CLIENT_ID_API }} --all-scopes --name='Test client' --description='Test client with all scopes' --timeout=3600 --secret=${{ env.CLIENT_SECRET_API }}
+          docker exec prestashop-prestashop-git-1 php ./bin/console prestashop:api-client create ${{ env.CLIENT_ID_API }} --all-scopes --name='Test client' --description='Test client with all scopes' --timeout=3600 --secret=${{ env.CLIENT_SECRET_API }}
 
       # Keycloak is only needed for API campaign
       - name: Setup Keycloak
