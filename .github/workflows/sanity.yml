@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir -p ./var/docker-logs
           docker logs prestashop-${{ matrix.db }}-1 > ./var/docker-logs/${{ matrix.db }}.log
-          docker logs prestashop-prestashop-git-1 > ./var/docker-logs/prestashop.log
+          docker logs vanillaprestashop-prestashop-git-1 > ./var/docker-logs/prestashop.log
 
       - name: Upload Screenshots and logs
         uses: actions/upload-artifact@v4
