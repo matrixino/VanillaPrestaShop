@@ -166,4 +166,4 @@ jobs:
       - name: Run Admin Security Attribute Linter (inside the docker so installed modules are also scanned)
         run: |
           echo Searching for routes without security
-          docker exec prestashop-prestashop-git-1 php bin/console prestashop:linter:security-attribute find-missing
+          docker exec vanillaprestashop-prestashop-git-1 php bin/console prestashop:linter:security-attribute find-missing
