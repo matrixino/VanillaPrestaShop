@@ -172,6 +172,7 @@ class AdminAPIController extends PrestaShopAdminController
         return $this->render('@PrestaShop/Admin/Configure/AdvancedParameters/AdminAPI/ApiClient/edit.html.twig', [
             'layoutTitle' => $this->trans('Editing API Client "%name%"', ['%name%' => $formData['client_name']], 'Admin.Navigation.Menu'),
             'apiClientForm' => $apiClientForm->createView(),
+            'apiClientId' => $apiClientId,
         ]);
     }
 

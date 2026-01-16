@@ -25,10 +25,34 @@
 
 import ApiClientMap from '@pages/api-client/api-client-map';
 import ConfirmModal from '@components/modal/confirm-modal';
+import textToLinkRewriteCopier from '@components/text-to-link-rewrite-copier';
 
 const {$} = window;
 
 $(() => {
+  // Auto-generate client_id from client_name (only for new clients)
+  textToLinkRewriteCopier({
+    sourceElementSelector: ApiClientMap.clientIdSource,
+    destinationElementSelector: ApiClientMap.clientIdDestination,
+  });
+
+  // Toggle all scopes enable/disable
+  document.querySelectorAll<HTMLButtonElement>(ApiClientMap.toggleAllScopes).forEach((button) => {
+    button.addEventListener('click', () => {
+      const {action} = button.dataset;
+      const targetValue = action === 'enable' ? '1' : '0';
+      const switches = document.querySelectorAll<HTMLElement>(ApiClientMap.scopesSwitches);
+
+      switches.forEach((switchElement) => {
+        const radioToSelect = switchElement.querySelector<HTMLInputElement>(`input[type="radio"][value="${targetValue}"]`);
+
+        if (radioToSelect && !radioToSelect.checked) {
+          radioToSelect.click();
+        }
+      });
+    });
+  });
+
   // Display a confirmation modal when regeneration link is clicked before submitting the regeneration
   document.querySelector<HTMLLinkElement>(ApiClientMap.generateSecretLink)?.addEventListener('click', (event) => {
     event.preventDefault();
