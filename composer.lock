@@ -5212,12 +5212,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jolelievre/ps_apiresources.git",
-                "reference": "e6f9edfde76d9d042261e930056436d936e60c97"
+                "reference": "1111632c0afb80990a8b7feaa921ed254e05e719"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jolelievre/ps_apiresources/zipball/e6f9edfde76d9d042261e930056436d936e60c97",
-                "reference": "e6f9edfde76d9d042261e930056436d936e60c97",
+                "url": "https://api.github.com/repos/jolelievre/ps_apiresources/zipball/1111632c0afb80990a8b7feaa921ed254e05e719",
+                "reference": "1111632c0afb80990a8b7feaa921ed254e05e719",
                 "shasum": ""
             },
             "require": {
@@ -5283,7 +5283,7 @@
             "support": {
                 "source": "https://github.com/jolelievre/ps_apiresources/tree/discount-refacto"
             },
-            "time": "2026-01-13T17:24:19+00:00"
+            "time": "2026-01-16T10:42:37+00:00"
         },
         {
             "name": "prestashop/ps_banner",
