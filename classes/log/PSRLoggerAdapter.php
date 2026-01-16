@@ -39,6 +39,12 @@ class PSRLoggerAdapter implements LoggerInterface
      */
     private $logger;
 
+    private bool $saveMessages = false;
+    /**
+     * @var array<string, string[]>
+     */
+    private array $savedMessages;
+
     public function __construct(PrestaShopLoggerInterface $logger)
     {
         $this->logger = $logger;
@@ -47,36 +53,43 @@ class PSRLoggerAdapter implements LoggerInterface
     public function emergency($message, array $context = []): void
     {
         $this->logger->logError($message);
+        $this->saveMessage(LogLevel::EMERGENCY, $message);
     }
 
     public function alert($message, array $context = []): void
     {
         $this->logger->logError($message);
+        $this->saveMessage(LogLevel::ALERT, $message);
     }
 
     public function critical($message, array $context = []): void
     {
         $this->logger->logError($message);
+        $this->saveMessage(LogLevel::CRITICAL, $message);
     }
 
     public function error($message, array $context = []): void
     {
         $this->logger->logError($message);
+        $this->saveMessage(LogLevel::ERROR, $message);
     }
 
     public function warning($message, array $context = []): void
     {
         $this->logger->logWarning($message);
+        $this->saveMessage(LogLevel::WARNING, $message);
     }
 
     public function notice($message, array $context = []): void
     {
         $this->logger->logInfo($message);
+        $this->saveMessage(LogLevel::NOTICE, $message);
     }
 
     public function info($message, array $context = []): void
     {
         $this->logger->logInfo($message);
+        $this->saveMessage(LogLevel::INFO, $message);
     }
 
     public function debug($message, array $context = []): void
@@ -106,5 +119,43 @@ class PSRLoggerAdapter implements LoggerInterface
                 break;
         }
         $this->logger->log($message, $legacyLevel);
+        if ($level == LogLevel::DEBUG) {
+            $this->saveMessage($level, $message);
+        }
+    }
+
+    /**
+     * All messages logged after this method is called are stored in a class field.
+     */
+    public function startSavingMessages(): void
+    {
+        $this->saveMessages = true;
+    }
+
+    /**
+     * Stop saving log records and clear the saved records.
+     */
+    public function stopSavingMessages(): void
+    {
+        $this->saveMessages = false;
+        $this->savedMessages = [];
+    }
+
+    public function getAllSavedMessages(): array
+    {
+        return $this->savedMessages;
+    }
+
+    public function getSavedMessages(string $level): array
+    {
+        return $this->savedMessages[$level] ?? [];
+    }
+
+    protected function saveMessage($level, $message): void
+    {
+        if (!$this->saveMessages) {
+            return;
+        }
+        $this->savedMessages[$level][] = $message;
     }
 }

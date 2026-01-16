@@ -297,6 +297,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, no need to disable it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName) && $moduleManager->isEnabled($moduleName)) {
                 $moduleManager->disable($moduleName);
             }
@@ -318,6 +324,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to enable it', $moduleName));
+                continue;
+            }
+
             if (!$moduleManager->isInstalled($moduleName)
                 && !$moduleManager->install($moduleName)
             ) {
@@ -344,6 +356,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to reset it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName)) {
                 $moduleManager->reset($moduleName);
             }
