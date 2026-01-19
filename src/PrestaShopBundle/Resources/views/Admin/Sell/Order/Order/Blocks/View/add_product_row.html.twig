@@ -53,6 +53,10 @@
   <td class="pr-2 add-product-quantity">
     {{ form_row(addProductRowForm.quantity, {type: 'number'}) }}
   </td>
+  <td colspan="2" id="pr-2 addProductShipment" class="cellProductShipment">
+      {{ form_label(addProductRowForm.addShipment) }}
+      {{ form_widget(addProductRowForm.addShipment) }}
+  </td>
   <td id="addProductLocation" class="cellProductLocation"></td>
   <td id="addProductRefunded" class="cellProductRefunded"></td>
   <td id="addProductAvailable"{% if not isAvailableQuantityDisplayed %} class="d-none"{% endif %}></td>

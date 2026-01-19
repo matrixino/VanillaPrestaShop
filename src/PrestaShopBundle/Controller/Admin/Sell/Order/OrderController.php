@@ -527,7 +527,10 @@ class OrderController extends PrestaShopAdminController
             'order_id' => $orderId,
             'currency_id' => $orderForViewing->getCurrencyId(),
             'symbol' => $orderCurrency->symbol,
+            'is_multishipment_is_enabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
+            'product_id' => 0
         ]);
+
         $editProductRowForm = $this->createForm(EditProductRowType::class, [], [
             'order_id' => $orderId,
             'symbol' => $orderCurrency->symbol,
@@ -1093,12 +1096,14 @@ class OrderController extends PrestaShopAdminController
         }
 
         $invoiceId = (int) $request->get('invoice_id');
+        $productId = (int) $request->get('product_id');
+
         try {
             if ($invoiceId > 0) {
                 $addProductCommand = AddProductToOrderCommand::toExistingInvoice(
                     $orderId,
                     $invoiceId,
-                    (int) $request->get('product_id'),
+                    $productId,
                     (int) $request->get('combination_id'),
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),
@@ -1111,7 +1116,7 @@ class OrderController extends PrestaShopAdminController
                 }
                 $addProductCommand = AddProductToOrderCommand::withNewInvoice(
                     $orderId,
-                    (int) $request->get('product_id'),
+                    $productId,
                     (int) $request->get('combination_id'),
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),

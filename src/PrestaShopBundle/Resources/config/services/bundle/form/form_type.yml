@@ -340,6 +340,7 @@ services:
   PrestaShopBundle\Form\Admin\Sell\Order\AddProductRowType:
     arguments:
       $orderInvoiceByIdChoiceProvider: '@prestashop.adapter.form.choice_provider.order_invoice_by_id'
+      $shipmentChoiceProvider: '@PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\AvailableShipmentForProductChoiceProvider'
 
   PrestaShopBundle\Form\Admin\Sell\Order\EditProductRowType:
     arguments:

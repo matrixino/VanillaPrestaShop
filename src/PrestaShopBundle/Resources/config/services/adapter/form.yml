@@ -115,6 +115,10 @@ services:
     autowire: true
     public: false
 
+  PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\AvailableShipmentForProductChoiceProvider:
+    autowire: true
+    public: false
+
   # deprecated
   prestashop.adapter.form.choice_provider.shop_tree_choice_provider:
     alias: PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\ShopTreeChoiceProvider

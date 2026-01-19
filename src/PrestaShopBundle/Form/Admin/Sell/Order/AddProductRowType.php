@@ -49,6 +49,11 @@ class AddProductRowType extends TranslatorAwareType
     private $orderInvoiceByIdChoiceProvider;
 
     /**
+     * @var ConfigurableFormChoiceProviderInterface
+     */
+    private $shipmentChoiceProvider;
+
+    /**
      * @var int
      */
     private $contextLangId;
@@ -57,11 +62,13 @@ class AddProductRowType extends TranslatorAwareType
         TranslatorInterface $translator,
         array $locales,
         ConfigurableFormChoiceProviderInterface $orderInvoiceByIdChoiceProvider,
+        ConfigurableFormChoiceProviderInterface $shipmentChoiceProvider,
         int $contextLangId
     ) {
         parent::__construct($translator, $locales);
 
         $this->orderInvoiceByIdChoiceProvider = $orderInvoiceByIdChoiceProvider;
+        $this->shipmentChoiceProvider = $shipmentChoiceProvider;
         $this->contextLangId = $contextLangId;
     }
 
@@ -77,8 +84,20 @@ class AddProductRowType extends TranslatorAwareType
                 'display_total' => false,
             ]) : [];
 
+        if ($options['is_multishipment_is_enabled'] === true) {
+            $builder->add('addShipment', ChoiceType::class, [
+                'label' => $this->trans('Select a shipment', 'Admin.Orderscustomers.Feature'),
+                'choices' => $this->shipmentChoiceProvider->getChoices([
+                    'order_id' => $options['order_id'],
+                    'product_id' => 3
+                ])
+            ]);
+        }
+
         $builder
-            ->add('product_id', HiddenType::class)
+            ->add('product_id', HiddenType::class, [
+                'mapped' => false
+            ])
             ->add('tax_rate', HiddenType::class)
             ->add('search', TextType::class, [
                 'label' => $this->trans('Add a product', 'Admin.Orderscustomers.Feature'),
@@ -163,9 +182,13 @@ class AddProductRowType extends TranslatorAwareType
             ->setDefaults([
                 'order_id' => null,
                 'currency_id' => null,
+                'is_multishipment_is_enabled' => false,
+                'product_id' => null,
             ])
             ->setAllowedTypes('order_id', ['int', 'null'])
             ->setAllowedTypes('currency_id', ['int', 'null'])
+            ->setAllowedTypes('product_id', ['int', 'null'])
+            ->setAllowedTypes('is_multishipment_is_enabled', ['bool'])
             ->setAllowedTypes('symbol', ['string'])
         ;
     }
