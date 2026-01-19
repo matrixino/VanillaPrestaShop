@@ -27,18 +27,11 @@
 namespace PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider;
 
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
-use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
-use PrestaShop\PrestaShop\Core\Domain\Carrier\Query\GetAvailableCarriers;
-use PrestaShop\PrestaShop\Core\Domain\Carrier\QueryResult\GetCarriersResult;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
-use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductQuantity;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipment;
 use PrestaShop\PrestaShop\Core\Form\ConfigurableFormChoiceProviderInterface;
 use PrestaShop\PrestaShop\Core\Form\FormChoiceFormatter;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
-use PrestaShopBundle\Entity\Shipment;
 use Product;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -47,8 +40,7 @@ final class AvailableShipmentForProductChoiceProvider implements ConfigurableFor
     public function __construct(
         private readonly CommandBusInterface $commandBus,
         private readonly ShipmentRepository $shipmentRepository,
-    )
-    {
+    ) {
     }
 
     /**
@@ -65,7 +57,7 @@ final class AvailableShipmentForProductChoiceProvider implements ConfigurableFor
         /** @var OrderShipment $orderShipments */
         $orderShipments = $this->commandBus->handle(new GetOrderShipments($orderId));
 
-        foreach($orderShipments as $shipment) {
+        foreach ($orderShipments as $shipment) {
             // productInstance->getCarriers() return empty array if product is handle by ALL carriers
             if (count($productInstance->getCarriers()) === 0) {
                 $availableShipmentsForProductSelected[] = $shipment;
@@ -75,10 +67,10 @@ final class AvailableShipmentForProductChoiceProvider implements ConfigurableFor
             }
         }
 
-        $formattedShipments = array_map(function($shipment) {
+        $formattedShipments = array_map(function ($shipment) {
             return [
                 'id' => $shipment->getId(),
-                'name' => 'Shipment ' . $shipment->getId()
+                'name' => 'Shipment ' . $shipment->getId(),
             ];
         }, $availableShipmentsForProductSelected);
 

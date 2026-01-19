@@ -85,6 +85,7 @@ use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductOutOfStockExcepti
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductSearchEmptyPhraseException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\SearchProducts;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\FoundProduct;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\AddProductToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\EditShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
@@ -528,7 +529,7 @@ class OrderController extends PrestaShopAdminController
             'currency_id' => $orderForViewing->getCurrencyId(),
             'symbol' => $orderCurrency->symbol,
             'is_multishipment_is_enabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
-            'product_id' => 0
+            'product_id' => 0,
         ]);
 
         $editProductRowForm = $this->createForm(EditProductRowType::class, [], [
@@ -1097,6 +1098,8 @@ class OrderController extends PrestaShopAdminController
 
         $invoiceId = (int) $request->get('invoice_id');
         $productId = (int) $request->get('product_id');
+        $shipmentId = (int) $request->get('shipment_id');
+        $combinationId = (int) $request->get('combination_id');
 
         try {
             if ($invoiceId > 0) {
@@ -1104,7 +1107,7 @@ class OrderController extends PrestaShopAdminController
                     $orderId,
                     $invoiceId,
                     $productId,
-                    (int) $request->get('combination_id'),
+                    $combinationId,
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),
                     (int) $request->get('quantity')
@@ -1117,7 +1120,7 @@ class OrderController extends PrestaShopAdminController
                 $addProductCommand = AddProductToOrderCommand::withNewInvoice(
                     $orderId,
                     $productId,
-                    (int) $request->get('combination_id'),
+                    $combinationId,
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),
                     (int) $request->get('quantity'),
@@ -1125,6 +1128,7 @@ class OrderController extends PrestaShopAdminController
                 );
             }
             $this->dispatchCommand($addProductCommand);
+            $this->dispatchCommand(new AddProductToShipment($shipmentId, $productId, $orderId, $combinationId));
         } catch (Exception $e) {
             return $this->json(
                 ['message' => $this->getErrorMessageForException($e, $this->getErrorMessages($e))],

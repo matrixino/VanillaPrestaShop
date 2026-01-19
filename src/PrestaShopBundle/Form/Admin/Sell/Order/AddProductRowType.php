@@ -89,14 +89,14 @@ class AddProductRowType extends TranslatorAwareType
                 'label' => $this->trans('Select a shipment', 'Admin.Orderscustomers.Feature'),
                 'choices' => $this->shipmentChoiceProvider->getChoices([
                     'order_id' => $options['order_id'],
-                    'product_id' => 3
-                ])
+                    'product_id' => 3,
+                ]),
             ]);
         }
 
         $builder
             ->add('product_id', HiddenType::class, [
-                'mapped' => false
+                'mapped' => false,
             ])
             ->add('tax_rate', HiddenType::class)
             ->add('search', TextType::class, [

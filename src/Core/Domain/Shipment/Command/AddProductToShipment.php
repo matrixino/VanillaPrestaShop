@@ -28,7 +28,9 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Shipment\Command;
 
-use PrestaShop\PrestaShop\Core\Domain\Shipment\ValueObject\OrderDetailId;
+use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\ValueObject\ShipmentId;
 
 class AddProductToShipment
@@ -36,13 +38,21 @@ class AddProductToShipment
     /** @var ShipmentId */
     private $shipmentId;
 
-    /** @var OrderDetailId */
-    private $orderDetailId;
+    /** @var ProductId */
+    private $productId;
 
-    public function __construct(int $shipmentId, int $orderDetailId)
+    /** @var OrderId */
+    private $orderId;
+
+    /** @var ?CombinationId */
+    private $combinationId;
+
+    public function __construct(int $shipmentId, int $productId, int $orderId, ?int $combinationId = null)
     {
         $this->shipmentId = new ShipmentId($shipmentId);
-        $this->orderDetailId = new OrderDetailId($orderDetailId);
+        $this->productId = new ProductId($productId);
+        $this->orderId = new OrderId($orderId);
+        $this->combinationId = new CombinationId($combinationId);
     }
 
     public function getShipmentId(): ShipmentId
@@ -50,8 +60,18 @@ class AddProductToShipment
         return $this->shipmentId;
     }
 
-    public function getOrderDetailId(): OrderDetailId
+    public function getProductId(): ProductId
     {
-        return $this->orderDetailId;
+        return $this->productId;
+    }
+
+    public function getOrderId(): OrderId
+    {
+        return $this->orderId;
+    }
+
+    public function getCombinationId(): ?CombinationId
+    {
+        return $this->combinationId;
     }
 }

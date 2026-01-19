@@ -26,14 +26,24 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Order\Repository;
 
+use Doctrine\DBAL\Connection;
 use OrderDetail;
 use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderDetailNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\ValueObject\OrderDetailId;
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShop\PrestaShop\Core\Repository\AbstractObjectModelRepository;
 
 class OrderDetailRepository extends AbstractObjectModelRepository
 {
+    public function __construct(
+        private readonly Connection $connection,
+        private string $dbPrefix
+    ) {
+    }
+
     /**
      * Gets legacy Order detail
      *
@@ -53,5 +63,37 @@ class OrderDetailRepository extends AbstractObjectModelRepository
         );
 
         return $orderDetail;
+    }
+
+    public function findByOrderIdAndProductId(
+        OrderId $orderId,
+        ProductId $productId,
+        ?CombinationId $combinationId
+    ): ?OrderDetail {
+        $qb = $this->connection->createQueryBuilder();
+
+        $qb
+            ->select('id_order_detail')
+            ->from($this->dbPrefix . 'order_detail')
+            ->where('id_order = :orderId')
+            ->andWhere('product_id = :productId')
+            ->setParameter('orderId', $orderId->getValue())
+            ->setParameter('productId', $productId->getValue());
+
+        if ($combinationId !== null) {
+            $qb
+                ->andWhere('product_attribute_id = :combinationId')
+                ->setParameter('combinationId', $combinationId->getValue());
+        }
+
+        $orderDetailId = $qb
+            ->execute()
+            ->fetchOne();
+
+        if ($orderDetailId === false) {
+            return null;
+        }
+
+        return $this->get(new OrderDetailId((int) $orderDetailId));
     }
 }

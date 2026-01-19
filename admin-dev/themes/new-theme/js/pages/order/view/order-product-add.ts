@@ -65,6 +65,8 @@ export default class OrderProductAdd {
 
   productAddMenuBtn: JQuery;
 
+  productShipmentSelect: JQuery;
+
   available: number | null;
 
   product: Record<string, any>;
@@ -103,6 +105,7 @@ export default class OrderProductAdd {
     this.invoiceSelect = $(OrderViewPageMap.productAddInvoiceSelect);
     this.freeShippingSelect = $(OrderViewPageMap.productAddFreeShippingSelect);
     this.productAddMenuBtn = $(OrderViewPageMap.productAddBtn);
+    this.productShipmentSelect = $(OrderViewPageMap.productAddShipment);
     this.available = null;
     this.setupListener();
     this.product = {};
@@ -309,6 +312,7 @@ export default class OrderProductAdd {
       quantity: this.quantityInput.val(),
       invoice_id: this.invoiceSelect.val(),
       free_shipping: this.freeShippingSelect.prop('checked'),
+      shipment_id: this.productShipmentSelect.val(),
     };
 
     $.ajax({
