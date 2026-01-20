@@ -101,13 +101,12 @@ class CommandProcessor implements ProcessorInterface
      */
     protected function denormalizeCommandResult(mixed $commandResult, Operation $operation, array $uriVariables): mixed
     {
+        $normalizedCommandResult = [];
         if (!empty($commandResult)) {
             $normalizedCommandResult = $this->domainSerializer->normalize($commandResult, null, [NormalizationMapper::NORMALIZATION_MAPPING => $this->getCQRSCommandMapping($operation)]);
-        } else {
-            // Use URI variables as fallback when the command returned no result as it probably contains the ID that will be needed to create the CQRS query
-            $normalizedCommandResult = $uriVariables;
         }
-        $normalizedCommandResult = array_merge($normalizedCommandResult, $this->contextParametersProvider->getContextParameters());
+        // Merge uri variables and normalized command result to have all needed data to create the CQRS query (it probably contains all the needed info to create the CQRS query)
+        $normalizedCommandResult = array_merge($uriVariables, $normalizedCommandResult, $this->contextParametersProvider->getContextParameters());
 
         $queryClass = $this->getCQRSQueryClass($operation);
         if (!$queryClass) {
