@@ -1214,14 +1214,15 @@ class ProductLazyArray extends AbstractLazyArray
      *
      * @return int Quantity of product requested by the customer, altered if needed, always a positive integer
      */
-    private function getQuantityWanted()
+    #[LazyArrayAttribute(arrayAccess: true)]
+    public function getQuantityWanted()
     {
         if (empty($this->product['quantity_wanted'])) {
             // Get the quantity wanted from the request
             $quantityWantedByTheCustomer = (int) Tools::getValue('quantity_wanted', 1);
 
             // Get minimal required quantity for purchase
-            $requiredQuantityForPurchase = $this->getRequiredQuantity();
+            $requiredQuantityForPurchase = $this->getQuantityRequired();
 
             if ($quantityWantedByTheCustomer < $requiredQuantityForPurchase) {
                 $quantityWantedByTheCustomer = $requiredQuantityForPurchase;
@@ -1239,7 +1240,8 @@ class ProductLazyArray extends AbstractLazyArray
      *
      * @return int Minimal quantity of product the customer buy right now, always a positive integer
      */
-    protected function getRequiredQuantity()
+    #[LazyArrayAttribute(arrayAccess: true)]
+    public function getQuantityRequired()
     {
         // For the required quantity, we will need to limit it by the minimal quantity on the low side.
         $requiredQuantityForPurchase = $this->getMinimalQuantity();
@@ -1267,7 +1269,8 @@ class ProductLazyArray extends AbstractLazyArray
      *
      * @return int Minimal quantity of product from it's settings, always a positive integer
      */
-    private function getMinimalQuantity()
+    #[LazyArrayAttribute(arrayAccess: true)]
+    public function getMinimalQuantity()
     {
         $minimalQuantity = (int) $this->product['minimal_quantity'];
 
