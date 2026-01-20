@@ -80,9 +80,10 @@ class CommandProcessor implements ProcessorInterface
             $command = $this->domainSerializer->denormalize($commandParameters, $CQRSCommandClass, null, [NormalizationMapper::NORMALIZATION_MAPPING => $this->getCQRSCommandMapping($operation)]);
         }
         $commandResult = $this->commandBus->handle($command);
+        $allowEmptyBody = $operation->getExtraProperties()['allowEmptyBody'] ?? null;
 
         // If no result is returned and no query is configured the API returns nothing
-        if (empty($commandResult) && empty($extraProperties['CQRSQuery'])) {
+        if ($commandResult === null && empty($extraProperties['CQRSQuery']) && ($allowEmptyBody === null || $allowEmptyBody === true)) {
             // If the command returns nothing (including void) we return null (because void can't be returned and its value is equivalent to null)
             return null;
         }
@@ -145,7 +146,7 @@ class CommandProcessor implements ProcessorInterface
         $CQRSQuery = $this->domainSerializer->denormalize($normalizedCommandResult, $CQRSQueryClass, null, [NormalizationMapper::NORMALIZATION_MAPPING => $this->getCQRSQueryMapping($operation)]);
         $CQRSQueryResult = $this->commandBus->handle($CQRSQuery);
 
-        return $this->denormalizeQueryResult($CQRSQueryResult, $operation);
+        return $this->denormalizeQueryResult($CQRSQueryResult, $operation, $normalizedCommandResult);
     }
 
     /**
