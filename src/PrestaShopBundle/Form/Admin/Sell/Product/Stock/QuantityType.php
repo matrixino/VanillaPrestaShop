@@ -31,6 +31,7 @@ namespace PrestaShopBundle\Form\Admin\Sell\Product\Stock;
 use PrestaShopBundle\Form\Admin\Type\DeltaQuantityType;
 use PrestaShopBundle\Form\Admin\Type\EntitySearchInputType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -105,6 +106,7 @@ class QuantityType extends TranslatorAwareType
                         'class' => 'stock-movement-list',
                     ],
                 ])
+                ->add('pack_quantity', HiddenType::class)
             ;
         }
 

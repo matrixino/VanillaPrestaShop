@@ -1627,6 +1627,7 @@ class ProductFormDataProviderTest extends TestCase
                         'delta' => 0,
                     ],
                     'stock_movements' => [],
+                    'pack_quantity' => null,
                     'minimal_quantity' => 0,
                 ],
                 'options' => [

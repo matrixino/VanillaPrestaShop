@@ -409,6 +409,7 @@ class ProductFormDataProvider implements FormDataProviderInterface
                     $productForEditing->getProductId(),
                     $shopConstraint
                 ),
+                'pack_quantity' => $productForEditing->getStockInformation()->getPackQuantity(),
                 'minimal_quantity' => $stockInformation->getMinimalQuantity(),
             ],
             'options' => [

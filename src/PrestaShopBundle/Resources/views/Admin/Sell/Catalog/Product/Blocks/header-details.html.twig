@@ -68,7 +68,12 @@
 
     {# Only display stock when Stock management is enabled #}
     {% if stockEnabled %}
-      {% set quantityData = productData.stock.quantities.delta_quantity.quantity %}
+      {% if productData.header.type == 'pack' and productData.stock.quantities.pack_quantity is not null %}
+        {% set quantityData = productData.stock.quantities.pack_quantity %}
+      {% else %}
+        {% set quantityData = productData.stock.quantities.delta_quantity.quantity %}
+      {% endif %}
+
       {% if productData.header.type != 'combinations' %}
         {% set lowStock = productData.stock.options.low_stock_threshold %}
       {% else %}
