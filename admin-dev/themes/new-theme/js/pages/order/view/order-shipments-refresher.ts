@@ -26,8 +26,6 @@
 import Router from '@components/router';
 import OrderViewPageMap from '@pages/order/OrderViewPageMap';
 
-const {$} = window;
-
 export default class OrderShipmentsRefresher {
   router: Router;
 
@@ -36,10 +34,24 @@ export default class OrderShipmentsRefresher {
   }
 
   refresh(orderId: number): void {
-    $.getJSON(this.router.generate('admin_orders_get_shipments', {orderId}))
+    fetch(this.router.generate('admin_orders_get_shipments', {orderId}))
       .then((response) => {
-        $(OrderViewPageMap.orderShipmentsTabCount).text(response.total);
-        $(OrderViewPageMap.orderShipmentsTabBody).html(response.html);
+        if (!response.ok) {
+          throw new Error(`Unable to retrieve shipments for order ${orderId}`);
+        }
+        return response.json();
+      })
+      .then((response) => {
+        const countElement = document.querySelector(OrderViewPageMap.orderShipmentsTabCount);
+
+        if (countElement) {
+          countElement.textContent = response.total;
+        }
+        const bodyElement = document.querySelector(OrderViewPageMap.orderShipmentsTabBody);
+
+        if (bodyElement) {
+          bodyElement.innerHTML = response.html;
+        }
       });
   }
 }

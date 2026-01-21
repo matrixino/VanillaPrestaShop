@@ -43,6 +43,7 @@ use PrestaShop\PrestaShop\Core\Domain\Order\Product\Command\DeleteProductFromOrd
 use PrestaShop\PrestaShop\Core\Domain\Order\Product\CommandHandler\DeleteProductFromOrderHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
+use PrestaShopBundle\Entity\Repository\ShipmentProductRepository;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use Shop;
 use Validate;
@@ -69,7 +70,8 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
     public function __construct(
         ContextStateManager $contextStateManager,
         OrderProductQuantityUpdater $orderProductQuantityUpdater,
-        private readonly ShipmentRepository $shipmentRepository
+        private readonly ShipmentRepository $shipmentRepository,
+        private readonly ShipmentProductRepository $shipmentProductRepository
     ) {
         $this->contextStateManager = $contextStateManager;
         $this->orderProductQuantityUpdater = $orderProductQuantityUpdater;
@@ -140,7 +142,8 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
         $orderDetailId = $command->getOrderDetailId();
 
         try {
-            $this->shipmentRepository->removeShipmentProductByOrderAndOrderDetail($orderId, $orderDetailId);
+            $this->shipmentProductRepository->deleteShipmentProductByOrderAndOrderDetail($orderId, $orderDetailId);
+            $this->shipmentRepository->deleteEmptyShipmentByOrder($orderId);
         } catch (Exception $e) {
             throw new ShipmentException(sprintf('Failed to delete shipment product from order with id "%s"', $orderId), 0, $e);
         }
