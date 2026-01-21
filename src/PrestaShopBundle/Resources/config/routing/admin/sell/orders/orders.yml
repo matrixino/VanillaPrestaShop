@@ -318,7 +318,7 @@ admin_orders_send_process_order_email:
   options:
     expose: true
 
-admin_orders_get_shipments:
+admin_orders_get_shipments_for_product:
   path: /orders/{orderId}/product/{productId}/shipments
   methods: [ POST ]
   defaults:

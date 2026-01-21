@@ -156,7 +156,7 @@ export default class OrderProductAutocomplete {
 
     this.selectShipment.prop('disabled', true);
 
-    fetch(this.router.generate('admin_orders_get_shipments', {orderId, productId}), {
+    fetch(this.router.generate('admin_orders_get_shipments_for_product', {orderId, productId}), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ export default class OrderProductAutocomplete {
         this.selectShipment.empty();
 
         data.shipments.forEach(
-          ({ id, name }: { id: number; name: string }) => {
+          ({id, name}: { id: number; name: string }) => {
             this.selectShipment.append(
               $('<option></option>').val(id).text(name),
             );
