@@ -3096,13 +3096,9 @@ CREATE TABLE `PREFIX_business_entity`
 (
   `id_business_entity`       INT UNSIGNED AUTO_INCREMENT                     NOT NULL,
   `enterprise_id`            VARCHAR(255)                                    NOT NULL,
-  `external_ref`             VARCHAR(255)                                             DEFAULT NULL,
+  `external_ref`             VARCHAR(255)                                    DEFAULT NULL,
   `name`                     VARCHAR(255)                                    NOT NULL,
-  `legal_name`               VARCHAR(255)                                             DEFAULT NULL,
-  `duns_number`              VARCHAR(32)                                              DEFAULT NULL,
-  `local_id_siret`           VARCHAR(32)                                              DEFAULT NULL,
-  `local_id_siren`           VARCHAR(32)                                              DEFAULT NULL,
-  `vat_number`               VARCHAR(64)                                              DEFAULT NULL,
+  `legal_name`               VARCHAR(255)                                    DEFAULT NULL,
   `flag_delivery_authorized` TINYINT(1)                                      NOT NULL DEFAULT 0,
   `status`                   ENUM ('pending','active','inactive','rejected') NOT NULL DEFAULT 'pending',
   `created_at`               DATETIME                                        NOT NULL,
@@ -3120,7 +3116,7 @@ CREATE TABLE `PREFIX_customer_b2b`
   `id_customer_b2b` INT UNSIGNED AUTO_INCREMENT         NOT NULL,
   `id_customer`     INT UNSIGNED                        NOT NULL,
   `status`          ENUM ('pending','active','refused') NOT NULL DEFAULT 'pending',
-#   `catalog_id`      INT UNSIGNED                                 DEFAULT NULL,
+  `external_ref`    VARCHAR(255)                        DEFAULT NULL,
   `created_at`      DATETIME                            NOT NULL,
   `updated_at`      DATETIME                            NOT NULL,
   UNIQUE INDEX `uniq_customer_b2b_customer` (`id_customer`),
@@ -3142,6 +3138,19 @@ CREATE TABLE `PREFIX_business_entity_customer_b2b`
   INDEX `becb2b_customer_idx` (`id_customer_b2b`),
   INDEX `becb2b_role_idx` (`id_role_b2b`),
   PRIMARY KEY (`id_business_entity_customer_b2b`)
+) ENGINE = ENGINE_TYPE
+  DEFAULT CHARSET = utf8mb4 COLLATION;
+
+CREATE TABLE `PREFIX_business_entity_domain`
+(
+  `id_domain`          INT UNSIGNED AUTO_INCREMENT        NOT NULL,
+  `id_business_entity` INT UNSIGNED                       NOT NULL,
+  `domain_type`        ENUM('siren','siret','vat')        NOT NULL,
+  `value`              VARCHAR(255)                       NOT NULL,
+  INDEX `bed_id_business_entity_idx` (`id_business_entity`),
+  INDEX `bed_domain_type_idx` (`domain_type`),
+  INDEX `bed_value_idx` (`value`),
+  PRIMARY KEY (`id_domain`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
 
@@ -3173,4 +3182,27 @@ CREATE TABLE `PREFIX_b2b_role_authorization_role`
   INDEX `b2b_auth_role_idx` (`id_authorization_role`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
+
+CREATE TABLE `PREFIX_carrier_b2b_profile`
+(
+  `id_carrier_b2b_profile` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `id_carrier`             INT UNSIGNED               NOT NULL,
+  `active_for_b2b`         TINYINT(1)                 NOT NULL DEFAULT 0,
+  INDEX `cbp_id_carrier_idx` (`id_carrier`),
+  UNIQUE KEY `cbp_id_carrier_uniq` (`id_carrier`),
+  PRIMARY KEY (`id_carrier_b2b_profile`)
+) ENGINE = ENGINE_TYPE
+  DEFAULT CHARSET = utf8mb4 COLLATION;
+
+CREATE TABLE `PREFIX_payment_module_b2b_profile`
+(
+  `id_payment_module_b2b_profile` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  `id_payment_module`             INT UNSIGNED               NOT NULL,
+  `active_for_b2b`                TINYINT(1)                 NOT NULL DEFAULT 0,
+  INDEX `pmbp_id_payment_module_idx` (`id_payment_module`),
+  UNIQUE KEY `pmbp_id_payment_module_uniq` (`id_payment_module`),
+  PRIMARY KEY (`id_payment_module_b2b_profile`)
+) ENGINE = ENGINE_TYPE
+  DEFAULT CHARSET = utf8mb4 COLLATION;
+
 # endregion
