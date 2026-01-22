@@ -213,7 +213,9 @@ class Profiler
     {
         // Including a lot of files uses memory
         foreach (get_included_files() as $file) {
-            $this->totalFilesize += filesize($file);
+            if (file_exists($file)) {
+                $this->totalFilesize += filesize($file);
+            }
         }
 
         foreach ($GLOBALS as $key => $value) {
