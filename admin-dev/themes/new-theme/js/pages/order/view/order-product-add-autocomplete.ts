@@ -142,7 +142,9 @@ export default class OrderProductAutocomplete {
 
     if (selectedProduct.length !== 0) {
       this.input.val(selectedProduct[0].name);
-      this.populateShipmentSelect(id);
+      if (this.selectShipment) {
+        this.populateShipmentSelect(id);
+      }
       this.onItemClickedCallback(selectedProduct[0]);
     }
   }
