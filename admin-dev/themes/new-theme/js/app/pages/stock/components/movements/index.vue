@@ -149,6 +149,7 @@
     product_name: string;
     product_reference: string;
     product_thumbnail: string;
+    product_url: string;
     sign: number;
     supplier_id: number;
     supplier_name: string;

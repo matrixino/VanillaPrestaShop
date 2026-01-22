@@ -34,7 +34,10 @@
           :thumbnail="thumbnail"
         >
           <p>
-            {{ product.product_name }}
+            <a
+              :href="product.product_url"
+              class="product-name-link"
+            >{{ product.product_name }}</a>
             <small v-if="hasCombination"><br>
               {{ product.combination_name }}
             </small>
@@ -107,3 +110,17 @@
     },
   });
 </script>
+
+<style lang="scss" scoped>
+@import '~@scss/config/_settings.scss';
+
+.product-name-link {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--#{$cdk}primary-500);
+    text-decoration: underline;
+  }
+}
+</style>
