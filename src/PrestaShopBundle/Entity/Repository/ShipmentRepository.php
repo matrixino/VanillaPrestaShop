@@ -118,6 +118,26 @@ class ShipmentRepository extends EntityRepository
         return $qb->executeQuery()->fetchAllAssociative();
     }
 
+    public function deleteShipmentProductByOrderAndOrderDetail(
+        int $orderId,
+        int $orderDetailId
+    ): void {
+        $conn = $this->getEntityManager()->getConnection();
+
+        // Delete shipment products
+        $conn->createQueryBuilder()
+            ->delete($this->tablePrefix . 'shipment_product')
+            ->where('id_order_detail = :orderDetailId')
+            ->andWhere(
+                'id_shipment IN (
+                    SELECT id_shipment FROM ' . $this->tablePrefix . 'shipment WHERE id_order = :orderId
+                )'
+            )
+            ->setParameter('orderDetailId', $orderDetailId)
+            ->setParameter('orderId', $orderId)
+            ->executeStatement();
+    }
+
     public function deleteEmptyShipmentByOrder(
         int $orderId,
     ): void {

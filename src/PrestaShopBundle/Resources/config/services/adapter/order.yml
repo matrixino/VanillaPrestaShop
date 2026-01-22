@@ -151,7 +151,6 @@ services:
       - '@prestashop.adapter.context_state_manager'
       - '@prestashop.adapter.order.product_quantity.updater'
       - '@PrestaShopBundle\Entity\Repository\ShipmentRepository'
-      - '@PrestaShopBundle\Entity\Repository\ShipmentProductRepository'
 
   prestashop.adapter.order.command_handler.bulk_change_order_status_handler:
     class: 'PrestaShop\PrestaShop\Adapter\Order\CommandHandler\BulkChangeOrderStatusHandler'

@@ -161,13 +161,6 @@ services:
     calls:
       - setTablePrefix: [ '%database_prefix%' ]
 
-  PrestaShopBundle\Entity\Repository\ShipmenProductRepository:
-    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
-    arguments:
-      - PrestaShopBundle\Entity\ShipmentProduct
-    calls:
-      - setTablePrefix: [ '%database_prefix%' ]
-
   PrestaShopBundle\Entity\Repository\MutationRepository:
     factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
     arguments:

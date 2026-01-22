@@ -43,7 +43,6 @@ use PrestaShop\PrestaShop\Core\Domain\Order\Product\Command\DeleteProductFromOrd
 use PrestaShop\PrestaShop\Core\Domain\Order\Product\CommandHandler\DeleteProductFromOrderHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
-use PrestaShopBundle\Entity\Repository\ShipmentProductRepository;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use Shop;
 use Validate;
@@ -70,8 +69,7 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
     public function __construct(
         ContextStateManager $contextStateManager,
         OrderProductQuantityUpdater $orderProductQuantityUpdater,
-        private readonly ShipmentRepository $shipmentRepository,
-        private readonly ShipmentProductRepository $shipmentProductRepository
+        private readonly ?ShipmentRepository $shipmentRepository = null,
     ) {
         $this->contextStateManager = $contextStateManager;
         $this->orderProductQuantityUpdater = $orderProductQuantityUpdater;
@@ -109,7 +107,11 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
             $this->contextStateManager->restorePreviousContext();
         }
 
-        $this->handleShipmentDeletion($command);
+        if ($this->shipmentRepository) {
+            $this->handleShipmentDeletion($command);
+        } else {
+            trigger_deprecation('prestashop/prestashop', '9.2', 'ShipmentRepository must be set.');
+        }
     }
 
     /**
@@ -142,7 +144,7 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
         $orderDetailId = $command->getOrderDetailId();
 
         try {
-            $this->shipmentProductRepository->deleteShipmentProductByOrderAndOrderDetail($orderId, $orderDetailId);
+            $this->shipmentRepository->deleteShipmentProductByOrderAndOrderDetail($orderId, $orderDetailId);
             $this->shipmentRepository->deleteEmptyShipmentByOrder($orderId);
         } catch (Exception $e) {
             throw new ShipmentException(sprintf('Failed to delete shipment product from order with id "%s"', $orderId), 0, $e);
