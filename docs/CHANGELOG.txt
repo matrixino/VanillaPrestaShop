@@ -32,6 +32,7 @@ Changelog for PrestaShop 9
     - #40517: Add some help boxes to product page (by @Hlavtox)
     - #39923: Improve wording of some settings, better explain the meaning of them (by @Hlavtox)
     - #40230: Adds help text to product page fields (by @Hlavtox)
+    - GHSA-67v7-3g49-mxh2 Protect users from time based email enumeration attacks (by @matthieu-rolland, vulnerability reported by Lam Yiu Tung)
   - Bug fix:
     - #40563: Admin API improvements for combination endpoints (by @jolelievre)
     - #40556: Fix: CsvFileReader service fails with "You have requested a non-existent service 'session'" (by @Codencode)
