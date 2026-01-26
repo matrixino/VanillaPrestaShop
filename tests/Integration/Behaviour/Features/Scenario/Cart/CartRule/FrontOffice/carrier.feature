@@ -68,7 +68,6 @@ Feature: Cart calculation with cart rules and different carriers
       | code                         | cartrule2              |
       | discount_percentage          | 50                     |
       | apply_to_discounted_products | true                   |
-      | discount_application_type    | order_without_shipping |
 
   # Issue #9540 part one fixed by #12965
   Scenario: free carrier in price range, voucher in percent set the price bellow range
@@ -90,7 +89,6 @@ Feature: Cart calculation with cart rules and different carriers
       | discount_currency            | usd                    |
       | discount_includes_tax        | false                  |
       | apply_to_discounted_products | true                   |
-      | discount_application_type    | order_without_shipping |
     When I add 1 item of product "product5" in my cart
     And I apply the voucher code "foo2"
     And I select address "address1" in my cart
@@ -186,7 +184,6 @@ Feature: Cart calculation with cart rules and different carriers
       | code                         | cartrule7              |
       | discount_percentage          | 50                     |
       | apply_to_discounted_products | true                   |
-      | discount_application_type    | order_without_shipping |
     And I restrict following carriers for cart rule cartrule7:
       | restricted carriers | carrier2 |
     And I save all the restrictions for cart rule cartrule7
@@ -201,7 +198,6 @@ Feature: Cart calculation with cart rules and different carriers
       | code                         | cartrule8              |
       | discount_percentage          | 50                     |
       | apply_to_discounted_products | true                   |
-      | discount_application_type    | order_without_shipping |
     And I restrict following carriers for cart rule cartrule8:
       | restricted carriers | carrier1 |
     And I save all the restrictions for cart rule cartrule8

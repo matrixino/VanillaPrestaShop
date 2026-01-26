@@ -272,6 +272,9 @@ default:
       paths:
         - "%paths.base%/Features/Scenario/CartRule"
       contexts:
+        - Tests\Integration\Behaviour\Features\Context\LegacyProductFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\CategoryFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\CartRuleFeatureContext
         - Tests\Integration\Behaviour\Features\Context\AttributeFeatureContext
         - Tests\Integration\Behaviour\Features\Context\AttributeGroupFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierFeatureContext

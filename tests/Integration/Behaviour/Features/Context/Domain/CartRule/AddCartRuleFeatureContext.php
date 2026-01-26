@@ -14,7 +14,6 @@ class AddCartRuleFeatureContext extends AbstractCartRuleFeatureContext
 {
     /**
      * @When I create cart rule :cartRuleReference with following properties:
-     * @When there is a cart rule :cartRuleReference with following properties:
      *
      * @param string $cartRuleReference
      * @param TableNode $node

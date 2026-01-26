@@ -165,7 +165,6 @@ Feature: Cart calculation with carrier specific cart rules
       | free_shipping                | false                  |
       | discount_percentage          | 55                     |
       | apply_to_discounted_products | true                   |
-      | discount_application_type    | order_without_shipping |
     And I restrict following carriers for cart rule cartrule3:
       | restricted carriers | carrier3 |
     And I save all the restrictions for cart rule cartrule3
