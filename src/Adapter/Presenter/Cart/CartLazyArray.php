@@ -493,9 +493,14 @@ class CartLazyArray extends AbstractLazyArray
 
     private function cartVoucherHasFreeShippingOnly(array $cartVoucher): bool
     {
+        /*
+         * Here, we cannot just use $cartVoucher['free_shipping'], because the rule can do multiple things.
+         * If it gives a money discount AND free shipping, we must still display a numeric value.
+         */
         return !$this->cartVoucherHasPercentReduction($cartVoucher)
             && !$this->cartVoucherHasAmountReduction($cartVoucher)
-            && !$this->cartVoucherHasGiftProductReduction($cartVoucher);
+            && !$this->cartVoucherHasGiftProductReduction($cartVoucher)
+            && $cartVoucher['free_shipping'];
     }
 
     private function cartVoucherHasPercentReduction(array $cartVoucher): bool
