@@ -91,6 +91,7 @@ class DiscountCustomerEligibilityChoiceType extends TranslatorAwareType
                 'layout' => EntitySearchInputType::LIST_LAYOUT,
                 'required' => false,
                 'disabling_switch' => false,
+                'exclude_guests' => true,
                 'constraints' => [
                     new When(
                         expression: sprintf(

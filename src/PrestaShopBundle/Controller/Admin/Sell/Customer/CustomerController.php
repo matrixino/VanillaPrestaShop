@@ -504,10 +504,13 @@ class CustomerController extends PrestaShopAdminController
             $shopConstraint = $shopId ? ShopConstraint::shop($shopId) : ShopConstraint::allShops();
         }
 
+        $excludeGuests = $request->query->getBoolean('exclude_guests', false);
+
         try {
             $customers = $this->dispatchQuery(new SearchCustomers(
                 $phrases,
-                $shopConstraint
+                $shopConstraint,
+                $excludeGuests
             ));
         } catch (Exception $e) {
             return $this->json(
