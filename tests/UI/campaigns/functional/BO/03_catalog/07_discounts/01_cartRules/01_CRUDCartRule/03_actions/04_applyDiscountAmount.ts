@@ -313,9 +313,8 @@ describe('BO - Cart rules - Actions : Apply a discount Amount', async () => {
       const priceATI = await foHummingbirdCartPage.getATIPrice(page);
       expect(priceATI.toFixed(2)).to.eq((dataProducts.demo_6.combinations[0].price).toFixed(2));
 
-      // @todo : https://github.com/PrestaShop/PrestaShop/issues/39109
-      // const isCartRuleNameVisible = await foHummingbirdCartPage.isCartRuleNameVisible(page);
-      // expect(isCartRuleNameVisible).to.equals(false);
+      const isCartRuleNameVisible = await foHummingbirdCartPage.isCartRuleNameVisible(page);
+      expect(isCartRuleNameVisible).to.equals(true);
     });
   });
 
