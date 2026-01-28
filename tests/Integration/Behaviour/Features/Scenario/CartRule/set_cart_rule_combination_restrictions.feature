@@ -12,7 +12,7 @@ Feature: Set cart rule combination restrictions in BO
     And there is a currency named "chf" with iso code "CHF" and exchange rate of 1.25
     And currency "usd" is the default one
     And language with iso code "en" is the default one
-    And there is a cart rule "rule_free_shipping_1" with following properties:
+    And I create cart rule "rule_free_shipping_1" with following properties:
       | name[en-US]       | free shipping 1      |
       | active            | true                 |
       | allow_partial_use | false                |
@@ -23,7 +23,7 @@ Feature: Set cart rule combination restrictions in BO
       | quantity_per_user | 10                   |
       | free_shipping     | true                 |
       | code              | rule_free_shipping_1 |
-    And there is a cart rule "rule_50_percent" with following properties:
+    And I create cart rule "rule_50_percent" with following properties:
       | name[en-US]                  | Half the price         |
       | active                       | true                   |
       | allow_partial_use            | true                   |
@@ -37,7 +37,7 @@ Feature: Set cart rule combination restrictions in BO
       | discount_percentage          | 50                     |
       | apply_to_discounted_products | false                  |
       | discount_application_type    | order_without_shipping |
-    And there is a cart rule "rule_70_percent" with following properties:
+    And I create cart rule "rule_70_percent" with following properties:
       | name[en-US]                  | Half the price         |
       | active                       | true                   |
       | allow_partial_use            | true                   |

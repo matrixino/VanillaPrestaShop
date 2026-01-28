@@ -49,7 +49,7 @@ Feature: Set cart rule country restrictions in BO
     And I add product "product3" with following information:
       | name[en-US] | Shirt - Dom & Jquery |
       | type        | standard             |
-    And there is a cart rule "rule_free_shipping_1" with following properties:
+    And I create cart rule "rule_free_shipping_1" with following properties:
       | name[en-US]          | free shipping 1      |
       | is_active            | true                 |
       | allow_partial_use    | false                |
@@ -61,7 +61,7 @@ Feature: Set cart rule country restrictions in BO
       | free_shipping        | true                 |
       | code                 | rule_free_shipping_1 |
       | restricted countries |                      |
-    And there is a cart rule "rule_50_percent" with following properties:
+    And I create cart rule "rule_50_percent" with following properties:
       | name[en-US]                  | Half the price         |
       | is_active                    | true                   |
       | allow_partial_use            | true                   |
