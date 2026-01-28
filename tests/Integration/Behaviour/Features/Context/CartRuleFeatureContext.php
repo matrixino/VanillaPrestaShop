@@ -18,10 +18,13 @@ use Db;
 use Exception;
 use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository;
 use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
+use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountId;
 use RuntimeException;
 use Tests\Integration\Behaviour\Features\Context\Util\PrimitiveUtils;
+use Tests\Resources\DatabaseDump;
 use Validate;
 
 class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
@@ -49,6 +52,18 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
      * @var CategoryFeatureContext
      */
     protected $categoryFeatureContext;
+
+    /**
+     * @BeforeScenario @restore-cart-rules-before-scenario
+     *
+     * @AfterScenario @restore-cart-rules-after-scenario
+     *
+     * @return void
+     */
+    public static function restoreCartRules(): void
+    {
+        DatabaseDump::restoreMatchingTables('^cart_rule.*^');
+    }
 
     /** @BeforeScenario */
     public function before(BeforeScenarioScope $scope)
@@ -136,6 +151,15 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
             if (!empty($cartRule->code)) {
                 $this->getSharedStorage()->set($cartRule->code, (int) $cartRule->id);
             }
+
+            if (isset($data['carriers'])) {
+                $carriersIds = $this->referencesToIds($data['carriers']);
+                $this->setCartRuleCarriers($cartRule, $carriersIds);
+            }
+            if (isset($data['countries'])) {
+                $countryIds = $this->referencesToIds($data['countries']);
+                $this->setCartRuleCountries($cartRule, $countryIds);
+            }
         } else {
             Assert::assertEquals($cartRule->name, $data['name'], 'Unexpected cart rule name');
             Assert::assertEquals($cartRule->description, $data['description'] ?? '', 'Unexpected cart rule description');
@@ -176,6 +200,18 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
                     Assert::assertEquals($cartRule->reduction_product, DiscountSettings::PRODUCTS_TOTAL, 'Unexpected cheapest product');
                 }
             }
+            if (isset($data['carriers'])) {
+                $expectedCarriersIds = $this->referencesToIds($data['carriers']);
+                $repository = CommonFeatureContext::getContainer()->get(DiscountRepository::class);
+                $carrierIds = $repository->getCarriersIds(new DiscountId((int) $cartRule->id));
+                Assert::assertEquals($expectedCarriersIds, $carrierIds, 'Unexpected carrier ids');
+            }
+            if (isset($data['countries'])) {
+                $expectedCountryIds = $this->referencesToIds($data['countries']);
+                $repository = CommonFeatureContext::getContainer()->get(DiscountRepository::class);
+                $countryIds = $repository->getCountriesIds(new DiscountId((int) $cartRule->id));
+                Assert::assertEquals($expectedCountryIds, $countryIds, 'Unexpected country ids');
+            }
         }
 
         // Check there is no field that was not handled by this step
@@ -183,10 +219,79 @@ class CartRuleFeatureContext extends AbstractPrestaShopFeatureContext
         unset($data['priority'], $data['total_quantity'], $data['quantity_per_user'], $data['code'], $data['free_shipping'], $data['allow_partial_use'], $data['active']);
         unset($data['valid_from'], $data['valid_to'], $data['apply_to_discounted_products'], $data['gift_product']);
         unset($data['minimum_amount'], $data['minimum_amount_currency'], $data['minimum_amount_tax_included'], $data['minimum_amount_shipping_included'], $data['discount_product']);
-        unset($data['quantity'], $data['cheapest_product']);
+        unset($data['quantity'], $data['cheapest_product'], $data['carriers'], $data['countries']);
         if (!empty($data)) {
             throw new RuntimeException(sprintf('There are fields that were not handled in cart rule creation: %s', implode(',', array_keys($data))));
         }
+    }
+
+    /**
+     * @When I update quantity for cart rule :cartRuleReference to :quantity
+     *
+     * @param string $cartRuleReference
+     * @param int $quantity
+     *
+     * @return void
+     */
+    public function setCartRuleQuantity(string $cartRuleReference, int $quantity): void
+    {
+        $cartRule = new CartRule($this->referenceToId($cartRuleReference));
+        $cartRule->quantity = $quantity;
+        $cartRule->save();
+    }
+
+    /**
+     * @When I restrict following carriers :carrierReferences for cart rule :cartRuleReference
+     *
+     * @param string $cartRuleReference
+     * @param string $carrierReferences
+     *
+     * @return void
+     */
+    public function setRestrictedCarriers(string $cartRuleReference, string $carrierReferences): void
+    {
+        $cartRule = new CartRule($this->referenceToId($cartRuleReference));
+        $this->setCartRuleCarriers($cartRule, $this->referencesToIds($carrierReferences));
+    }
+
+    protected function setCartRuleCarriers(CartRule $cartRule, array $carrierIds): void
+    {
+        // First clear existing associations
+        Db::getInstance()->execute(
+            'DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_carrier` WHERE `id_cart_rule` = ' . (int) $cartRule->id
+        );
+
+        // Now add the associations
+        if (!empty($carrierIds)) {
+            foreach ($carrierIds as $carrierId) {
+                Db::getInstance()->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'cart_rule_carrier` (`id_cart_rule`, `id_carrier`) ' .
+                    'VALUES (' . (int) $cartRule->id . ', ' . (int) $carrierId . ')'
+                );
+            }
+        }
+        $cartRule->carrier_restriction = !empty($carrierIds);
+        $cartRule->save();
+    }
+
+    protected function setCartRuleCountries(CartRule $cartRule, array $countryIds): void
+    {
+        // First clear existing associations
+        Db::getInstance()->execute(
+            'DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_country` WHERE `id_cart_rule` = ' . (int) $cartRule->id
+        );
+
+        // Now add the associations
+        if (!empty($countryIds)) {
+            foreach ($countryIds as $countryId) {
+                Db::getInstance()->execute(
+                    'INSERT INTO `' . _DB_PREFIX_ . 'cart_rule_country` (`id_cart_rule`, `id_country`) ' .
+                    'VALUES (' . (int) $cartRule->id . ', ' . (int) $countryId . ')'
+                );
+            }
+        }
+        $cartRule->country_restriction = !empty($countryIds);
+        $cartRule->save();
     }
 
     /**

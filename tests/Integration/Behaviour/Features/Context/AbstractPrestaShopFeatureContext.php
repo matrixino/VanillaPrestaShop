@@ -56,6 +56,31 @@ abstract class AbstractPrestaShopFeatureContext implements BehatContext
     }
 
     /**
+     * @param string $references
+     *
+     * @return int[]
+     */
+    protected function referencesToIds(string $references): array
+    {
+        if (empty($references)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach (explode(',', $references) as $reference) {
+            $reference = trim($reference);
+
+            if (!$this->getSharedStorage()->exists($reference)) {
+                throw new RuntimeException(sprintf('Reference %s does not exist in shared storage', $reference));
+            }
+
+            $ids[] = $this->getSharedStorage()->get($reference);
+        }
+
+        return $ids;
+    }
+
+    /**
      * @param TableNode $tableNode
      *
      * @return array

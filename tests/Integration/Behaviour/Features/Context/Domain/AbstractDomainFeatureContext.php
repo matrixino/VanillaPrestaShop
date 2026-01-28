@@ -9,7 +9,6 @@ namespace Tests\Integration\Behaviour\Features\Context\Domain;
 use Behat\Behat\Context\Context;
 use Currency;
 use PrestaShop\PrestaShop\Core\CommandBus\CommandBusInterface;
-use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Tests\Integration\Behaviour\Features\Context\AbstractPrestaShopFeatureContext;
 use Tests\Integration\Behaviour\Features\Context\CommonFeatureContext;
@@ -50,31 +49,6 @@ abstract class AbstractDomainFeatureContext extends AbstractPrestaShopFeatureCon
     protected function getMailDevClient(): MailDevClient
     {
         return $this->getContainer()->get(MailDevClient::class);
-    }
-
-    /**
-     * @param string $references
-     *
-     * @return int[]
-     */
-    protected function referencesToIds(string $references): array
-    {
-        if (empty($references)) {
-            return [];
-        }
-
-        $ids = [];
-        foreach (explode(',', $references) as $reference) {
-            $reference = trim($reference);
-
-            if (!$this->getSharedStorage()->exists($reference)) {
-                throw new RuntimeException(sprintf('Reference %s does not exist in shared storage', $reference));
-            }
-
-            $ids[] = $this->getSharedStorage()->get($reference);
-        }
-
-        return $ids;
     }
 
     protected function getDefaultCurrencyId(): int
