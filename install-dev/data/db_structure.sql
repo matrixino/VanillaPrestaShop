@@ -3090,23 +3090,19 @@ CREATE TABLE `PREFIX_shipment_product` (
   PRIMARY KEY (id_shipment_product)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8mb4 COLLATION;
 
-
-# region B2B mode
 CREATE TABLE `PREFIX_business_entity`
 (
   `id_business_entity`       INT UNSIGNED AUTO_INCREMENT                     NOT NULL,
-  `enterprise_id`            VARCHAR(255)                                    NOT NULL,
-  `external_ref`             VARCHAR(255)                                    DEFAULT NULL,
-  `name`                     VARCHAR(255)                                    NOT NULL,
-  `legal_name`               VARCHAR(255)                                    DEFAULT NULL,
+  `enterprise_id`            VARCHAR(255) NOT NULL,
+  `external_ref`             VARCHAR(255) DEFAULT NULL,
+  `name`                     VARCHAR(255) NOT NULL,
+  `legal_name`               VARCHAR(255) DEFAULT NULL,
   `flag_delivery_authorized` TINYINT(1)                                      NOT NULL DEFAULT 0,
   `status`                   ENUM ('pending','active','inactive','rejected') NOT NULL DEFAULT 'pending',
-  `created_at`               DATETIME                                        NOT NULL,
-  `updated_at`               DATETIME                                        NOT NULL,
-  `id_group`                 INT UNSIGNED                                    NOT NULL,
-  INDEX `be_enterprise_id_idx` (`enterprise_id`),
-  INDEX `be_external_ref_idx` (`external_ref`),
-  INDEX `be_id_group_idx` (`id_group`),
+  `created_at`               DATETIME     NOT NULL,
+  `updated_at`               DATETIME     NOT NULL,
+  INDEX                      `business_entity_enterprise_id_idx` (`enterprise_id`),
+  INDEX                      `business_entity_external_ref_idx` (`external_ref`),
   PRIMARY KEY (`id_business_entity`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
@@ -3116,11 +3112,10 @@ CREATE TABLE `PREFIX_customer_b2b`
   `id_customer_b2b` INT UNSIGNED AUTO_INCREMENT         NOT NULL,
   `id_customer`     INT UNSIGNED                        NOT NULL,
   `status`          ENUM ('pending','active','refused') NOT NULL DEFAULT 'pending',
-  `external_ref`    VARCHAR(255)                        DEFAULT NULL,
-  `created_at`      DATETIME                            NOT NULL,
-  `updated_at`      DATETIME                            NOT NULL,
+  `external_ref`    VARCHAR(255) DEFAULT NULL,
+  `created_at`      DATETIME NOT NULL,
+  `updated_at`      DATETIME NOT NULL,
   UNIQUE INDEX `uniq_customer_b2b_customer` (`id_customer`),
-#   INDEX `customer_b2b_catalog_idx` (`catalog_id`),
   PRIMARY KEY (`id_customer_b2b`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
@@ -3132,11 +3127,11 @@ CREATE TABLE `PREFIX_business_entity_customer_b2b`
   `id_customer_b2b`                 INT UNSIGNED                NOT NULL,
   `id_role_b2b`                     INT UNSIGNED                NOT NULL,
   `is_default`                      TINYINT(1)                  NOT NULL DEFAULT 0,
-  `created_at`                      DATETIME                    NOT NULL,
+  `created_at`                      DATETIME NOT NULL,
   UNIQUE INDEX `uniq_be_customer` (`id_business_entity`, `id_customer_b2b`),
-  INDEX `becb2b_be_idx` (`id_business_entity`),
-  INDEX `becb2b_customer_idx` (`id_customer_b2b`),
-  INDEX `becb2b_role_idx` (`id_role_b2b`),
+  INDEX                             `business_entity_customer_b2b_be_idx` (`id_business_entity`),
+  INDEX                             `business_entity_customer_b2b_customer_idx` (`id_customer_b2b`),
+  INDEX                             `business_entity_customer_b2b_role_idx` (`id_role_b2b`),
   PRIMARY KEY (`id_business_entity_customer_b2b`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
@@ -3145,12 +3140,23 @@ CREATE TABLE `PREFIX_business_entity_domain`
 (
   `id_domain`          INT UNSIGNED AUTO_INCREMENT        NOT NULL,
   `id_business_entity` INT UNSIGNED                       NOT NULL,
-  `domain_type`        ENUM('siren','siret','vat')        NOT NULL,
-  `value`              VARCHAR(255)                       NOT NULL,
-  INDEX `bed_id_business_entity_idx` (`id_business_entity`),
-  INDEX `bed_domain_type_idx` (`domain_type`),
-  INDEX `bed_value_idx` (`value`),
+  `id_domain_type`     INT UNSIGNED        NOT NULL,
+  `value`              VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id_domain`)
+    UNIQUE INDEX `uniq_business_entity_domain` (`id_business_entity`, `id_domain_type`),
+  INDEX                `business_entity_domain_id_business_entity_idx` (`id_business_entity`),
+  INDEX                `business_entity_domain_id_domain_type_idx` (`id_domain_type`),
+  INDEX                `business_entity_domain_value_idx` (`value`),
+  PRIMARY KEY (`id_domain`)
+) ENGINE = ENGINE_TYPE
+  DEFAULT CHARSET = utf8mb4 COLLATION;
+
+CREATE TABLE `PREFIX_domain_type`
+(
+  `id_domain_type` INT UNSIGNED AUTO_INCREMENT        NOT NULL,
+  `unremovable`    TINYINT(1)                 NOT NULL DEFAULT 0,
+  `deleted`        TINYINT(1)                 NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id_domain_type`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
 
@@ -3160,14 +3166,14 @@ CREATE TABLE `PREFIX_business_entity_address`
   `id_address`         INT UNSIGNED                       NOT NULL,
   `address_type`       ENUM ('both','invoice','delivery') NOT NULL DEFAULT 'both',
   PRIMARY KEY (`id_business_entity`, `id_address`),
-  INDEX `bea_address_idx` (`id_address`)
+  INDEX                `business_entity_address_address_idx` (`id_address`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
 
 CREATE TABLE `PREFIX_b2b_role`
 (
   `id_role` INT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `role`    VARCHAR(64)                 NOT NULL,
+  `role`    VARCHAR(64) NOT NULL,
   UNIQUE INDEX `uniq_b2b_role` (`role`),
   PRIMARY KEY (`id_role`)
 ) ENGINE = ENGINE_TYPE
@@ -3178,31 +3184,7 @@ CREATE TABLE `PREFIX_b2b_role_authorization_role`
   `id_role`               INT UNSIGNED NOT NULL,
   `id_authorization_role` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_role`, `id_authorization_role`),
-  INDEX `b2b_role_idx` (`id_role`),
-  INDEX `b2b_auth_role_idx` (`id_authorization_role`)
+  INDEX                   `b2b_role_authorization_role_role_idx` (`id_role`),
+  INDEX                   `b2b_role_authorization_role_auth_role_idx` (`id_authorization_role`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
-
-CREATE TABLE `PREFIX_carrier_b2b_profile`
-(
-  `id_carrier_b2b_profile` INT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `id_carrier`             INT UNSIGNED               NOT NULL,
-  `active_for_b2b`         TINYINT(1)                 NOT NULL DEFAULT 0,
-  INDEX `cbp_id_carrier_idx` (`id_carrier`),
-  UNIQUE KEY `cbp_id_carrier_uniq` (`id_carrier`),
-  PRIMARY KEY (`id_carrier_b2b_profile`)
-) ENGINE = ENGINE_TYPE
-  DEFAULT CHARSET = utf8mb4 COLLATION;
-
-CREATE TABLE `PREFIX_payment_module_b2b_profile`
-(
-  `id_payment_module_b2b_profile` INT UNSIGNED AUTO_INCREMENT NOT NULL,
-  `id_payment_module`             INT UNSIGNED               NOT NULL,
-  `active_for_b2b`                TINYINT(1)                 NOT NULL DEFAULT 0,
-  INDEX `pmbp_id_payment_module_idx` (`id_payment_module`),
-  UNIQUE KEY `pmbp_id_payment_module_uniq` (`id_payment_module`),
-  PRIMARY KEY (`id_payment_module_b2b_profile`)
-) ENGINE = ENGINE_TYPE
-  DEFAULT CHARSET = utf8mb4 COLLATION;
-
-# endregion
