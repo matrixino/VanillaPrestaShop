@@ -23,10 +23,10 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
+
 namespace PrestaShop\PrestaShop\Core\Feature;
 
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
 
 /**
  * Class B2BModeFeature checks manages B2c mode.
@@ -87,4 +87,3 @@ final class B2BModeFeature implements FeatureInterface
         $status ? $this->enable() : $this->disable();
     }
 }
-

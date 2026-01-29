@@ -20,8 +20,11 @@ enum SwitchContainer {
 
 class Preferences {
   private readonly b2cContainer: HTMLElement | null;
+
   private readonly b2bContainer: HTMLElement | null;
+
   private readonly b2cInputs: HTMLInputElement[];
+
   private readonly b2bInputs: HTMLInputElement[];
 
   constructor() {
@@ -50,10 +53,10 @@ class Preferences {
 
   private hasBothSwitches(): boolean {
     return (
-      this.b2cContainer !== null &&
-      this.b2bContainer !== null &&
-      this.b2cInputs.length > 0 &&
-      this.b2bInputs.length > 0
+      this.b2cContainer !== null
+      && this.b2bContainer !== null
+      && this.b2cInputs.length > 0
+      && this.b2bInputs.length > 0
     );
   }
 
@@ -76,25 +79,22 @@ class Preferences {
     inputs.forEach((input) => {
       input.checked = input.value === valueToCheck;
     });
-    inputs.forEach((input) => input.dispatchEvent(new Event('change', { bubbles: true })));
+    inputs.forEach((input) => input.dispatchEvent(new Event('change', {bubbles: true})));
   }
 
   private updateToggleStates(): void {
     const b2cEnabled = this.isEnabled(this.b2cInputs);
     const b2bEnabled = this.isEnabled(this.b2bInputs);
 
-    const lockB2c = b2cEnabled && !b2bEnabled;
-    const lockB2b = !b2cEnabled && b2bEnabled;
-
-    this.setToggleReadOnly(SwitchContainer.B2C, lockB2c);
-    this.setToggleReadOnly(SwitchContainer.B2B, lockB2b);
+    this.setToggleReadOnly(SwitchContainer.B2C);
+    this.setToggleReadOnly(SwitchContainer.B2B);
 
     if (!b2cEnabled && !b2bEnabled) {
       this.setEnabled(this.b2cInputs, true);
     }
   }
 
-  private setToggleReadOnly(switchContainer: SwitchContainer, disabled: boolean): void {
+  private setToggleReadOnly(switchContainer: SwitchContainer): void {
     let container: HTMLElement | null = null;
     let inputs: HTMLInputElement[] | null = null;
 
@@ -110,14 +110,11 @@ class Preferences {
       default:
         return;
     }
-
-    if (container === null || inputs === null) {
-      return;
-    }
   }
 
   private preventAllOffOnSubmit(): void {
     const form = document.getElementById('configuration_form') as HTMLFormElement | null;
+
     if (!form) {
       return;
     }

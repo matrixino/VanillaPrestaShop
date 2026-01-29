@@ -8,6 +8,7 @@ namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\General;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Order;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,7 +16,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 
 /**
  * Class returning the content of the form in the maintenance page.
@@ -48,7 +48,7 @@ class PreferencesType extends TranslatorAwareType
      * @var RequestStack
      */
     private $requestStack;
-    
+
     /**
      * @var bool
      */
@@ -89,9 +89,9 @@ class PreferencesType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $configuration = $this->configuration;
-        
+
         $showB2bToggles = $this->featureFlag->isEnabled('improved_b2b');
-        
+
         if ($this->requestStack->getCurrentRequest()->isSecure()) {
             $builder->add('enable_ssl', SwitchType::class, [
                 'label' => $this->trans('Enable SSL', 'Admin.Shopparameters.Feature'),
@@ -114,7 +114,7 @@ class PreferencesType extends TranslatorAwareType
                     'Admin.Shopparameters.Help'
                 ),
             ]);
-        
+
         if ($showB2bToggles) {
             $builder
                 ->add(self::ENABLE_B2C_MODE, SwitchType::class, [
@@ -132,7 +132,7 @@ class PreferencesType extends TranslatorAwareType
                     ),
                 ]);
         }
-        
+
         $builder
             ->add('allow_html_iframes', SwitchType::class, [
                 'label' => $this->trans(

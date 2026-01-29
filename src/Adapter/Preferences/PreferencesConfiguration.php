@@ -6,13 +6,15 @@
 
 namespace PrestaShop\PrestaShop\Adapter\Preferences;
 
+use DateTimeImmutable;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Http\CookieOptions;
 use PrestaShop\PrestaShop\Core\Context\EmployeeContext;
-use PrestaShop\PrestaShop\Core\Feature\B2CModeFeature;
 use PrestaShop\PrestaShop\Core\Feature\B2BModeFeature;
+use PrestaShop\PrestaShop\Core\Feature\B2CModeFeature;
+use PrestaShop\PrestaShop\Core\Http\CookieOptions;
 use PrestaShopBundle\Form\Admin\Configure\ShopParameters\General\PreferencesType;
+use PrestaShopLogger;
 
 /**
  * This class will provide Shop Preferences configuration.
@@ -22,12 +24,12 @@ class PreferencesConfiguration implements DataConfigurationInterface
     /**
      * @var Configuration
      */
-//    private $configuration;
-//    
-//    /**
-//     * @var EmployeeContext
-//     */
-//    private $employeeContext;
+    //    private $configuration;
+    //
+    //    /**
+    //     * @var EmployeeContext
+    //     */
+    //    private $employeeContext;
 
     public function __construct(
         Configuration $configuration,
@@ -85,7 +87,7 @@ class PreferencesConfiguration implements DataConfigurationInterface
 
         $newB2c = (bool) $configuration[PreferencesType::ENABLE_B2C_MODE];
         $newB2b = (bool) $configuration[PreferencesType::ENABLE_B2B_MODE];
-        
+
         if (!$newB2c && !$newB2b) {
             return [[
                 'key' => 'At least one mode must be enabled (B2C or B2B).',
@@ -93,7 +95,7 @@ class PreferencesConfiguration implements DataConfigurationInterface
                 'parameters' => [],
             ]];
         }
-        
+
         $oldB2c = $this->configuration->getBoolean(PreferencesType::ENABLE_B2C_MODE);
         $oldB2b = $this->configuration->getBoolean(PreferencesType::ENABLE_B2B_MODE);
 
@@ -106,7 +108,7 @@ class PreferencesConfiguration implements DataConfigurationInterface
 
             $payload = [
                 'employee_id' => $employeeId,
-                'datetime' => (new \DateTimeImmutable())->format(DATE_ATOM),
+                'datetime' => (new DateTimeImmutable())->format(DATE_ATOM),
                 'changes' => [],
             ];
 
@@ -117,7 +119,7 @@ class PreferencesConfiguration implements DataConfigurationInterface
                 $payload['changes'][PreferencesType::ENABLE_B2B_MODE] = ['old' => $oldB2b ? 1 : 0, 'new' => $newB2b ? 1 : 0];
             }
 
-            \PrestaShopLogger::addLog(
+            PrestaShopLogger::addLog(
                 'B2C/B2B modes updated: ' . json_encode($payload, JSON_UNESCAPED_UNICODE),
                 1,
                 null,

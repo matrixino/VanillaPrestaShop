@@ -30,7 +30,7 @@ final class PreferencesFormHandler implements FormHandlerInterface
      * @var Configuration
      */
     private $configuration;
-    
+
     public function __construct(
         FormFactoryInterface $formFactory,
         PreferencesFormDataProvider $formDataProvider,
