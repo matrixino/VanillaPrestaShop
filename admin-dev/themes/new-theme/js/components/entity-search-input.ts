@@ -124,7 +124,7 @@ export default class EntitySearchInput {
       return;
     }
 
-    values.forEach((index: number, value: any) => {
+    values.forEach((value: any) => {
       this.appendSelectedItem(value);
     });
   }
