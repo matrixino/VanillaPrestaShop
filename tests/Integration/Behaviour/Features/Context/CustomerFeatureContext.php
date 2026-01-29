@@ -66,6 +66,26 @@ class CustomerFeatureContext extends AbstractPrestaShopFeatureContext
     }
 
     /**
+     * @Given /^there is a guest customer named "(.+)" whose email is "(.+)"$/
+     */
+    public function createGuestCustomer($customerName, $customerEmail)
+    {
+        /** @var Hashing $crypto */
+        $crypto = ServiceLocator::get(Hashing::class);
+
+        $customer = new Customer();
+        $customer->firstname = 'fake';
+        $customer->lastname = 'fake';
+        $customer->passwd = $crypto->hash('Correct Horse Battery Staple');
+        $customer->email = $customerEmail;
+        $customer->is_guest = true;
+        $customer->id_shop = Context::getContext()->shop->id;
+        $customer->add();
+        $this->customers[$customerName] = $customer;
+        SharedStorage::getStorage()->set($customerName, $customer->id);
+    }
+
+    /**
      * @Given /^customer "(.+)" belongs to group "(.+)"$/
      */
     public function assignCustomerToGroup(string $customerReference, string $groupReference): void

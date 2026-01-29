@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Adapter\Discount\Validate;
 
 use CartRule;
+use Customer;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\AbstractObjectModelValidator;
 use PrestaShop\PrestaShop\Adapter\Attribute\Repository\AttributeRepository;
@@ -96,6 +97,7 @@ class DiscountValidator extends AbstractObjectModelValidator
     public function validate(CartRule $cartRule): void
     {
         $this->validateCartRuleProperty($cartRule, 'id_customer', DiscountConstraintException::INVALID_CUSTOMER_ID);
+        $this->assertCustomerIsNotGuest($cartRule);
         $this->validateCartRuleProperty($cartRule, 'date_from', DiscountConstraintException::INVALID_DATE_FROM);
         $this->validateCartRuleProperty($cartRule, 'date_to', DiscountConstraintException::INVALID_DATE_TO);
         $this->validateCartRuleProperty($cartRule, 'description', DiscountConstraintException::INVALID_DESCRIPTION);
@@ -316,6 +318,21 @@ class DiscountValidator extends AbstractObjectModelValidator
     {
         if ($cartrule->date_from > $cartrule->date_to) {
             throw new DiscountConstraintException('Date from cannot be greater than date to.', DiscountConstraintException::DATE_FROM_GREATER_THAN_DATE_TO);
+        }
+    }
+
+    private function assertCustomerIsNotGuest(CartRule $cartRule): void
+    {
+        if (empty($cartRule->id_customer)) {
+            return;
+        }
+
+        $customer = new Customer((int) $cartRule->id_customer);
+        if ($customer->isGuest()) {
+            throw new DiscountConstraintException(
+                sprintf('Cannot assign discount to guest customer with ID %d', $cartRule->id_customer),
+                DiscountConstraintException::INVALID_GUEST_CUSTOMER
+            );
         }
     }
 }

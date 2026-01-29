@@ -137,6 +137,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
+     * @Then I should get an error that discount cannot be assigned to guest customers
+     */
+    public function assertDiscountCannotBeAssignedToGuestCustomers(): void
+    {
+        $this->assertLastErrorIs(DiscountConstraintException::class, DiscountConstraintException::INVALID_GUEST_CUSTOMER);
+    }
+
+    /**
      * @Then discount :discountReference should have the following properties:
      *
      * @param string $discountReference
