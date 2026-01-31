@@ -221,7 +221,11 @@ class DebugMode
     {
         // Check custom defines file first
         if ($this->isCustomDefinesReadable()) {
-            return $this->updateDebugModeValueInCustomFile($value);
+            $result = $this->updateDebugModeValueInCustomFile($value);
+            // If the constant is not found in custom file, fallback to main file
+            if ($result !== self::DEBUG_MODE_ERROR_NO_DEFINITION_FOUND) {
+                return $result;
+            }
         }
 
         if ($this->isMainDefinesReadable()) {
