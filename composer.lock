@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a432fafce6e80f362185427cad5f4b8d",
+    "content-hash": "0fa229d7f982dd8d9c6019069e2294c9",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5208,16 +5208,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-add-discountType-resource",
+            "version": "dev-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_apiresources.git",
-                "reference": "f7d72022404d9c03691e3d63bde7ccae2f26a04a"
+                "reference": "b280a1a4c3105a3c43021156651c911a68e659d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/f7d72022404d9c03691e3d63bde7ccae2f26a04a",
-                "reference": "f7d72022404d9c03691e3d63bde7ccae2f26a04a",
+                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/b280a1a4c3105a3c43021156651c911a68e659d2",
+                "reference": "b280a1a4c3105a3c43021156651c911a68e659d2",
                 "shasum": ""
             },
             "require": {
@@ -5231,6 +5231,7 @@
                 "prestashop/php-dev-tools": "^4.3",
                 "rector/rector": "^2.0"
             },
+            "default-branch": true,
             "type": "prestashop-module",
             "autoload": {
                 "psr-4": {
@@ -5281,10 +5282,10 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_apiresources/tree/add-discountType-resource",
+                "source": "https://github.com/PrestaShop/ps_apiresources/tree/dev",
                 "issues": "https://github.com/PrestaShop/ps_apiresources/issues"
             },
-            "time": "2026-01-28T06:41:30+00:00"
+            "time": "2026-02-03T08:24:41+00:00"
         },
         {
             "name": "prestashop/ps_banner",
