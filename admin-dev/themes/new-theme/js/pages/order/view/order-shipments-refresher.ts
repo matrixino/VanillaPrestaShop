@@ -1,4 +1,3 @@
-<?php
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -24,23 +23,35 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
-namespace PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject;
+import Router from '@components/router';
+import OrderViewPageMap from '@pages/order/OrderViewPageMap';
 
-class GiftedProduct
-{
-    public function __construct(
-        private readonly int $productId,
-        private readonly ?int $combinationId = null,
-    ) {
-    }
+export default class OrderShipmentsRefresher {
+  router: Router;
 
-    public function getProductId(): int
-    {
-        return $this->productId;
-    }
+  constructor() {
+    this.router = new Router();
+  }
 
-    public function getCombinationId(): ?int
-    {
-        return $this->combinationId;
-    }
+  refresh(orderId: number): void {
+    fetch(this.router.generate('admin_orders_get_shipments', {orderId}))
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Unable to retrieve shipments for order ${orderId}`);
+        }
+        return response.json();
+      })
+      .then((response) => {
+        const countElement = document.querySelector(OrderViewPageMap.orderShipmentsTabCount);
+
+        if (countElement) {
+          countElement.textContent = response.total;
+        }
+        const bodyElement = document.querySelector(OrderViewPageMap.orderShipmentsTabBody);
+
+        if (bodyElement) {
+          bodyElement.innerHTML = response.html;
+        }
+      });
+  }
 }

@@ -181,6 +181,7 @@ class ThemeManager implements AddonManagerInterface
                 ->doEnableModules($theme->getModulesToEnable())
                 ->doResetModules($theme->get('global_settings.modules.to_reset', []))
                 ->doApplyImageTypes($theme->get('global_settings.image_types', []))
+                ->doUnhookModules($theme->get('global_settings.hooks.modules_to_unhook', []))
                 ->doHookModules($theme->get('global_settings.hooks.modules_to_hook', []));
 
             $theme->onEnable();
@@ -297,6 +298,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, no need to disable it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName) && $moduleManager->isEnabled($moduleName)) {
                 $moduleManager->disable($moduleName);
             }
@@ -318,6 +325,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to enable it', $moduleName));
+                continue;
+            }
+
             if (!$moduleManager->isInstalled($moduleName)
                 && !$moduleManager->install($moduleName)
             ) {
@@ -344,6 +357,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to reset it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName)) {
                 $moduleManager->reset($moduleName);
             }
@@ -360,6 +379,18 @@ class ThemeManager implements AddonManagerInterface
     private function doHookModules(array $hooks): self
     {
         $this->hookConfigurator->setHooksConfiguration($hooks);
+
+        return $this;
+    }
+
+    /**
+     * @param array $hooks
+     *
+     * @return self
+     */
+    private function doUnhookModules(array $hooks): self
+    {
+        $this->hookConfigurator->unhookModules($hooks);
 
         return $this;
     }

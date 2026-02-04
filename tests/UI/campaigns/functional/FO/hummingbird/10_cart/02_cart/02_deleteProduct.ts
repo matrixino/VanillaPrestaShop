@@ -1,8 +1,6 @@
 import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
-import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
-
 import {
   type BrowserContext,
   foHummingbirdCartPage,
@@ -18,9 +16,6 @@ const baseContext: string = 'functional_FO_hummingbird_cart_cart_deleteProduct';
 describe('FO - Cart : Delete product', async () => {
   let browserContext: BrowserContext;
   let page: Page;
-
-  // Pre-condition : Install Hummingbird
-  enableTheme('hummingbird', `${baseContext}_preTest`);
 
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
@@ -39,7 +34,7 @@ describe('FO - Cart : Delete product', async () => {
       await foHummingbirdHomePage.changeLanguage(page, 'en');
 
       const isHomePage = await foHummingbirdHomePage.isHomePage(page);
-      expect(isHomePage, 'Fail to open FO home page').to.equal(true);
+      expect(isHomePage).to.equal(true);
     });
 
     it('should add the first product to cart and proceed to checkout', async function () {
@@ -134,14 +129,11 @@ describe('FO - Cart : Delete product', async () => {
       expect(notificationsNumber).to.equal(0);
     });
 
-    it.skip('should check the message "There are no more items in your cart"', async function () {
+    it('should check the message "There are no more items in your cart"', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkNoItemMessage3', baseContext);
 
       const message = await foHummingbirdCartPage.getNoItemsInYourCartMessage(page);
       expect(message).to.equal(foHummingbirdCartPage.noItemsInYourCartMessage);
     });
   });
-
-  // Post-condition : Uninstall Hummingbird
-  disableTheme('hummingbird', `${baseContext}_postTest`);
 });

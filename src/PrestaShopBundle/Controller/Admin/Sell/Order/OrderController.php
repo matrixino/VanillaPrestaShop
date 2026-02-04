@@ -1249,6 +1249,23 @@ class OrderController extends PrestaShopAdminController
         ]);
     }
 
+    #[AdminSecurity("is_granted('read', 'AdminOrders')", message: 'You do not have permission to show this.')]
+    public function getShipmentsAction(
+        int $orderId,
+        #[Autowire(service: 'PrestaShop\PrestaShop\Core\Grid\Factory\ShipmentFactory')] GridFactoryInterface $shipmentGridFactory,
+        ShipmentFilters $filters
+    ) {
+        $filters = new ShipmentFilters(['filters' => ['order_id' => $orderId]] + $filters->all());
+        $shipmentsGrid = $shipmentGridFactory->getGrid($filters);
+
+        return $this->json([
+            'total' => $shipmentsGrid->getData()->getRecordsTotal(),
+            'html' => $this->render('@PrestaShop/Admin/Common/Grid/grid.html.twig', [
+                'grid' => $this->presentGrid($shipmentsGrid),
+            ])->getContent(),
+        ]);
+    }
+
     /**
      * @param int $orderId
      * @param Request $request

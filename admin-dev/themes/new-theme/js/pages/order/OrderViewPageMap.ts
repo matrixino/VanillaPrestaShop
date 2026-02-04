@@ -82,6 +82,8 @@ export default {
   orderDocumentsTabBody: '#orderDocumentsTabContent .card-body',
   orderShippingTabCount: '#orderShippingTab .count',
   orderShippingTabBody: '#orderShippingTabContent .card-body',
+  orderShipmentsTabBody: '#orderShipmentsTabContent',
+  orderShipmentsTabCount: '#orderShipmentsTab .count',
   allMessagesModal: '#view_all_messages_modal',
   allMessagesList: '#all-messages-list',
   openAllMessagesBtn: '.js-open-all-messages-btn',

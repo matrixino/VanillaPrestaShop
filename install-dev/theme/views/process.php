@@ -56,6 +56,10 @@
     </div>
 </div>
 
+<div id="warning_process">
+    <h3><?php echo $this->translator->trans('A warning was triggered during installation', [], 'Install'); ?></h3>
+</div>
+
 <div id="install_process_success">
     <div class="clearfix">
         <h2><?php echo $this->translator->trans('Your installation is finished!', [], 'Install'); ?></h2>
@@ -98,7 +102,7 @@
                 </a>
               </div>
           </div>
-  
+
           <div id="foBlock" class="blockInfoEnd last clearfix" onclick="window.open('../')">
               <img src="theme/img/visu_foBlock.png" alt="" />
               <div class="bo-infos">

@@ -49,7 +49,7 @@
 
 {% block content %}
   {% block api_client_form_block %}
-    {{ form_start(apiClientForm) }}
+    {{ form_start(apiClientForm, {attr: {'data-id': apiClientId|default(0)}}) }}
 
     <div class="card">
       <h3 class="card-header">

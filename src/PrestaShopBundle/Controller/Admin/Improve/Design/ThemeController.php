@@ -27,6 +27,7 @@
 namespace PrestaShopBundle\Controller\Admin\Improve\Design;
 
 use Exception;
+use Monolog\Logger;
 use PrestaShop\PrestaShop\Adapter\Language\RTL\InstalledLanguageChecker;
 use PrestaShop\PrestaShop\Core\Addon\Theme\ThemeExporter;
 use PrestaShop\PrestaShop\Core\Addon\Theme\ThemePageLayoutsCustomizer;
@@ -63,6 +64,7 @@ use PrestaShopBundle\Form\Admin\Improve\Design\Theme\ImportThemeType;
 use PrestaShopBundle\Form\Admin\Improve\Design\Theme\PageLayoutCustomizationFormFactory;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShopBundle\Security\Attribute\DemoRestricted;
+use PrestaShopBundle\Service\Log\LogHandler;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -245,9 +247,10 @@ class ThemeController extends PrestaShopAdminController
      */
     #[DemoRestricted(redirectRoute: 'admin_themes_index')]
     #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_themes_index', message: 'You do not have permission to edit this.')]
-    public function enableAction(string $themeName): RedirectResponse
+    public function enableAction(string $themeName, LogHandler $handler): RedirectResponse
     {
         try {
+            $handler->startSavingRecords();
             $this->dispatchCommand(new EnableThemeCommand(new ThemeName($themeName)));
             $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
         } catch (ThemeException $e) {
@@ -260,6 +263,15 @@ class ThemeController extends PrestaShopAdminController
             );
 
             return $this->redirectToRoute('admin_themes_index');
+        } finally {
+            $warnings = $handler->getSavedRecords(Logger::WARNING);
+            $handler->stopSavingRecords();
+            foreach ($warnings as $warning) {
+                $this->addFlash(
+                    'warning',
+                    $warning['message'],
+                );
+            }
         }
 
         return $this->redirectToRoute('admin_themes_index');
