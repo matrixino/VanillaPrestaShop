@@ -346,7 +346,7 @@ class ProductLazyArrayTest extends TestCase
 
         /*
          * If the product is out of stock and backorders are allowed, we should see delivery information
-         */    
+         */
         yield [
             array_merge(
                 $product,
