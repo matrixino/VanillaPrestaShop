@@ -310,6 +310,24 @@ class ProductLazyArray extends AbstractLazyArray
                     ),
                     'schema_url' => 'https://schema.org/RefurbishedCondition',
                 ];
+            case 'damaged':
+                return [
+                    'type' => 'damaged',
+                    'label' => $this->translator->trans('Damaged', [], 'Shop.Theme.Catalog'),
+                    'schema_url' => 'https://schema.org/DamagedCondition',
+                ];
+            case 'open_box':
+                return [
+                    'type' => 'open_box',
+                    'label' => $this->translator->trans('New, open box', [], 'Shop.Theme.Catalog'),
+                    'schema_url' => 'https://schema.org/NewCondition',
+                ];
+            case 'new_with_defects':
+                return [
+                    'type' => 'new_with_defects',
+                    'label' => $this->translator->trans('New, minor defects', [], 'Shop.Theme.Catalog'),
+                    'schema_url' => 'https://schema.org/NewCondition',
+                ];
             default:
                 return false;
         }
@@ -1514,7 +1532,7 @@ class ProductLazyArray extends AbstractLazyArray
      */
     protected function getProductAttributeWhitelist()
     {
-        return [
+        $whitelist = [
             'active',
             'add_to_cart_url',
             'additional_shipping_cost',
@@ -1620,6 +1638,12 @@ class ProductLazyArray extends AbstractLazyArray
             'visibility',
             'weight_unit',
         ];
+
+        if (empty($this->product['show_quantities'])) {
+            $whitelist = array_diff($whitelist, ['quantity', 'quantity_all_versions']);
+        }
+
+        return $whitelist;
     }
 
     /**

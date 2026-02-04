@@ -26,6 +26,7 @@
 
 namespace PrestaShopBundle\Translation\Provider;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use Symfony\Component\Translation\MessageCatalogue;
 
 /**
@@ -33,7 +34,10 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class FrontOfficeProvider extends AbstractProvider implements UseDefaultCatalogueInterface
 {
-    public const DEFAULT_THEME_NAME = 'classic';
+    /**
+     * @deprecated Should be removed in 10.0
+     */
+    public const DEFAULT_THEME_NAME = _PS_DEFAULT_THEME_NAME_;
 
     /**
      * {@inheritdoc}
@@ -73,7 +77,7 @@ class FrontOfficeProvider extends AbstractProvider implements UseDefaultCatalogu
     public function getDatabaseCatalogue($themeName = null)
     {
         if (null === $themeName) {
-            $themeName = self::DEFAULT_THEME_NAME;
+            $themeName = Theme::getDefaultTheme();
         }
 
         return parent::getDatabaseCatalogue($themeName);

@@ -79,6 +79,11 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
         return $carrier;
     }
 
+    public function assertCarrierExists(CarrierId $carrierId): void
+    {
+        $this->assertObjectModelExists($carrierId->getValue(), 'carrier', CarrierNotFoundException::class);
+    }
+
     public function add(Carrier $carrier, array $shopIds): CarrierId
     {
         $carrierId = $this->addObjectModelToShops(
@@ -333,14 +338,12 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
     {
         $qb = $this->connection->createQueryBuilder();
 
-        $count = $qb->select('COUNT(*)')
+        return (int) $qb->select('COUNT(*)')
             ->from($this->prefix . 'order_carrier', 'oc')
             ->where('oc.id_carrier = :carrierId')
             ->setParameter('carrierId', $carrierId->getValue())
             ->executeQuery()
             ->fetchOne();
-
-        return $count;
     }
 
     /**

@@ -895,14 +895,17 @@ class CustomerCore extends ObjectModel
      *
      * @throws PrestaShopDatabaseException
      */
-    public static function searchByName($query, $limit = null, ?ShopConstraint $shopConstraint = null)
+    public static function searchByName($query, $limit = null, ?ShopConstraint $shopConstraint = null, $ignoreGuest = false)
     {
         $sql = 'SELECT c.*,
                 GROUP_CONCAT(cg.id_group SEPARATOR \',\') AS group_ids
                 FROM `' . _DB_PREFIX_ . 'customer` c
                 LEFT JOIN `' . _DB_PREFIX_ . 'customer_group` cg ON c.id_customer = cg.id_customer
-                WHERE 1
-                AND c.is_guest = 0';
+                WHERE 1';
+
+        if ($ignoreGuest) {
+            $sql .= ' AND c.is_guest = 0';
+        }
 
         if ($shopConstraint) {
             if ($shopConstraint->getShopGroupId()) {

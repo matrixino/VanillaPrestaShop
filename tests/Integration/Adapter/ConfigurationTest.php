@@ -30,6 +30,7 @@ namespace Tests\Integration\Adapter;
 
 use Configuration as LegacyConfiguration;
 use PrestaShop\PrestaShop\Adapter\Configuration;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShopBundle\Entity\Shop;
 use PrestaShopBundle\Entity\ShopGroup;
@@ -487,7 +488,7 @@ class ConfigurationTest extends KernelTestCase
         $shop->setName('test_shop_2');
         $shop->setShopGroup($shopGroup);
         $shop->setColor('red');
-        $shop->setThemeName('classic');
+        $shop->setThemeName(Theme::getDefaultTheme());
         $shop->setDeleted(false);
 
         $entityManager->persist($shop);

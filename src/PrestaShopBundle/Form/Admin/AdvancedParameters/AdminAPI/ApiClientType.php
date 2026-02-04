@@ -52,6 +52,7 @@ class ApiClientType extends TranslatorAwareType
         $builder
             ->add('client_name', TextType::class, [
                 'label' => $this->trans('Client Name', 'Admin.Advparameters.Feature'),
+                'help' => $this->trans('A friendly name to identify this API client.', 'Admin.Advparameters.Help'),
                 'required' => !$isExternalApiClient,
                 'constraints' => [
                     new NotBlank(),
@@ -67,9 +68,13 @@ class ApiClientType extends TranslatorAwareType
                     ]),
                 ],
                 'disabled' => $isExternalApiClient,
+                'attr' => [
+                    'class' => 'js-client-id-source',
+                ],
             ])
             ->add('client_id', TextType::class, [
                 'label' => $this->trans('Client ID', 'Admin.Advparameters.Feature'),
+                'help' => $this->trans('The unique identifier for this client, used for API authentication. Only lowercase letters, numbers and hyphens are allowed.', 'Admin.Advparameters.Help'),
                 'required' => !$isExternalApiClient,
                 'constraints' => [
                     new NotBlank(),
@@ -85,9 +90,13 @@ class ApiClientType extends TranslatorAwareType
                     ]),
                 ],
                 'disabled' => $isExternalApiClient,
+                'attr' => [
+                    'class' => 'js-client-id-destination',
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => $this->trans('Description', 'Admin.Global'),
+                'help' => $this->trans('Optional description to help identify the purpose of this API client.', 'Admin.Advparameters.Help'),
                 'required' => false,
                 'empty_data' => '',
                 'constraints' => [
@@ -109,6 +118,8 @@ class ApiClientType extends TranslatorAwareType
             $builder
                 ->add('lifetime', IntegerType::class, [
                     'label' => $this->trans('Lifetime', 'Admin.Global'),
+                    'help' => $this->trans('The duration for which an access token remains valid.', 'Admin.Advparameters.Help'),
+                    'unit' => $this->trans('seconds', 'Admin.Advparameters.Feature'),
                     'required' => false,
                     'constraints' => [
                         new NotBlank(),

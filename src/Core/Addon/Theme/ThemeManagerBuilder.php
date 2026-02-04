@@ -31,6 +31,7 @@ use Db;
 use Employee;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\Hook\HookInformationProvider;
+use PrestaShop\PrestaShop\Core\Addon\Module\ModuleManagerBuilder;
 use PrestaShop\PrestaShop\Core\Context\ApiClientContext;
 use PrestaShop\PrestaShop\Core\Image\ImageTypeRepository;
 use PrestaShop\PrestaShop\Core\Module\HookConfigurator;
@@ -68,6 +69,9 @@ class ThemeManagerBuilder
             $this->context->employee = new Employee();
         }
 
+        $moduleManagerBuilder = ModuleManagerBuilder::getInstance();
+        $moduleManager = $moduleManagerBuilder->build();
+
         return new ThemeManager(
             $this->context->shop,
             $configuration,
@@ -81,7 +85,9 @@ class ThemeManagerBuilder
                     new HookInformationProvider(),
                     $this->context->shop,
                     $this->db
-                )
+                ),
+                $this->logger,
+                $moduleManager,
             ),
             $this->buildRepository($this->context->shop),
             new ImageTypeRepository($this->db),

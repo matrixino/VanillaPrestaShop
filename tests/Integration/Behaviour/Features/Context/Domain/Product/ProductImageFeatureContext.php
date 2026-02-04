@@ -71,16 +71,21 @@ class ProductImageFeatureContext extends AbstractProductFeatureContext
         /** @var ProductImageRepository $productImageRepository */
         $productImageRepository = $this->getContainer()->get(ProductImageRepository::class);
         $imageTypes = $productImageRepository->getProductImageTypes();
+        $imageTypesByNames = [];
+        foreach ($imageTypes as $imageType) {
+            $imageTypesByNames[$imageType->name] = $imageType;
+        }
 
-        Assert::assertEquals(
+        // Real image types count should be at least equal to provided list
+        Assert::assertGreaterThanOrEqual(
             count($dataRows),
             count($imageTypes),
-            'Expected and actual image types count does not match'
+            'Minimum image types count does not match'
         );
 
-        foreach ($dataRows as $key => $expectedType) {
-            $actualType = $imageTypes[$key];
-            Assert::assertEquals($expectedType['name'], $actualType->name, 'Unexpected image type name');
+        foreach ($dataRows as $expectedType) {
+            Assert::assertArrayHasKey($expectedType['name'], $imageTypesByNames, sprintf('Image type %s not found', $expectedType['name']));
+            $actualType = $imageTypesByNames[$expectedType['name']];
             Assert::assertEquals($expectedType['width'], $actualType->width, 'Unexpected image type width');
             Assert::assertEquals($expectedType['height'], $actualType->height, 'Unexpected image type height');
 

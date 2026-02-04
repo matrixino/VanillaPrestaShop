@@ -24,8 +24,10 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  */
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
+
 /* Theme URLs */
-define('_PS_DEFAULT_THEME_NAME_', 'classic');
+define('_PS_DEFAULT_THEME_NAME_', Theme::getDefaultTheme());
 define('_PS_THEME_DIR_', _PS_ROOT_DIR_.'/themes/'._THEME_NAME_.'/');
 define('_PS_THEME_URI_', __PS_BASE_URI__.'themes/'._THEME_NAME_.'/');
 

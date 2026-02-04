@@ -26,6 +26,7 @@
 
 use PrestaShopBundle\Install\Install;
 use PrestaShopBundle\Install\XmlLoader;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Context\ContextBuilderPreparer;
 
@@ -104,14 +105,14 @@ class InstallControllerHttpProcess extends InstallControllerHttp implements Http
             } elseif (Tools::getValue('configureShop') && !empty($this->session->process_validated['populateDatabase'])) {
                 Language::getRtlStylesheetProcessor()
                     ->setLanguageCode($this->session->lang)
-                    ->setProcessFOThemes(['classic'])
+                    ->setProcessFOThemes([Theme::getDefaultTheme()])
                     ->process();
                 $this->processConfigureShop();
-            } elseif (Tools::getValue('installTheme') && !empty($this->session->process_validated['configureShop'])) {
-                $this->processInstallTheme();
-            } elseif (Tools::getValue('installModules') && (!empty($this->session->process_validated['installTheme']) || !$validateFixturesInstallation)) {
+            } elseif (Tools::getValue('installModules') && (!empty($this->session->process_validated['configureShop']) || !$validateFixturesInstallation)) {
                 $this->processInstallModules();
-            } elseif (Tools::getValue('installFixtures') && !empty($this->session->process_validated['installModules'])) {
+            } elseif (Tools::getValue('installTheme') && !empty($this->session->process_validated['installModules'])) {
+                $this->processInstallTheme();
+            } elseif (Tools::getValue('installFixtures') && !empty($this->session->process_validated['installTheme'])) {
                 $this->processInstallFixtures();
             } elseif (Tools::getValue('postInstall') && (!$validateFixturesInstallation || $fixturesInstalled)) {
                 $this->processPostInstall();
@@ -316,7 +317,12 @@ class InstallControllerHttpProcess extends InstallControllerHttp implements Http
             $this->ajaxJsonAnswer(false, $this->model_install->getErrors());
         }
         $this->session->process_validated = array_merge($this->session->process_validated, ['installTheme' => true]);
-        $this->ajaxJsonAnswer(true);
+        $warning = '';
+        if (!empty($this->model_install->getWarnings())) {
+            $warning = implode('<br />', $this->model_install->getWarnings());
+            $this->model_install->resetWarnings();
+        }
+        $this->ajaxJsonAnswer(true, '', $warning);
     }
 
     /**
@@ -332,8 +338,9 @@ class InstallControllerHttpProcess extends InstallControllerHttp implements Http
         $this->process_steps[] = ['key' => 'populateDatabase', 'lang' => $this->translator->trans('Populate database tables', [], 'Install')];
         $this->process_steps[] = ['key' => 'configureShop', 'lang' => $this->translator->trans('Configure shop information', [], 'Install')];
 
-        $this->process_steps[] = ['key' => 'installTheme', 'lang' => $this->translator->trans('Install theme', [], 'Install')];
+        // We need to install modules first, then enable the theme which may in turn enable/disable some modules
         $this->process_steps[] = ['key' => 'installModules', 'lang' => $this->translator->trans('Install modules', [], 'Install')];
+        $this->process_steps[] = ['key' => 'installTheme', 'lang' => $this->translator->trans('Install theme', [], 'Install')];
 
         if ($this->session->content_install_fixtures) {
             $fixtures_step = ['key' => 'installFixtures', 'lang' => $this->translator->trans('Install demonstration data', [], 'Install')];

@@ -45,6 +45,10 @@ abstract class AbstractInstall
      * @var array List of errors
      */
     protected $errors = [];
+    /**
+     * @var array List of warnings
+     */
+    protected $warnings = [];
 
     /**
      * @var PrestaShopLoggerInterface|null
@@ -73,6 +77,25 @@ abstract class AbstractInstall
     public function resetErrors(): void
     {
         $this->errors = [];
+    }
+
+    public function setWarning($warnings): void
+    {
+        if (!is_array($warnings)) {
+            $warnings = [$warnings];
+        }
+
+        $this->warnings = array_merge($this->warnings, $warnings);
+    }
+
+    public function getWarnings(): array
+    {
+        return $this->warnings;
+    }
+
+    public function resetWarnings(): void
+    {
+        $this->warnings = [];
     }
 
     public function setTranslator($translator)

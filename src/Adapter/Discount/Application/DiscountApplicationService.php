@@ -209,7 +209,7 @@ class DiscountApplicationService
     /**
      * Get full discount information including type, priority field, and creation date
      *
-     * @return array|null Array with keys: 'id', 'type', 'priority', 'date_add'
+     * @return array|null Array with keys: 'id', 'discount_type', 'priority', 'date_add'
      */
     private function getDiscountInfo(int $discountId): ?array
     {
@@ -221,7 +221,7 @@ class DiscountApplicationService
      *
      * @param array<int> $discountIds
      *
-     * @return array Array of discount info arrays with keys: 'id', 'type', 'priority', 'date_add'
+     * @return array Array of discount info arrays with keys: 'id', 'discount_type', 'priority', 'date_add'
      */
     private function getDiscountsWithInfo(array $discountIds): array
     {
@@ -240,7 +240,7 @@ class DiscountApplicationService
     /**
      * Sort discounts by their full priority (type, priority field, creation date)
      *
-     * @param array $discounts Array of discount data with 'type', 'priority', 'date_add' keys
+     * @param array $discounts Array of discount data with 'discount_type', 'priority', 'date_add' keys
      *
      * @return array Sorted array of discounts
      */

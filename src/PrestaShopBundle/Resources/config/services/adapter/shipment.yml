@@ -23,3 +23,5 @@ services:
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\EditShipmentHandler:
 
   PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler\GetShipmentForEditingHandler:
+
+  PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\DeleteShipmentProductFromOrderHandler:

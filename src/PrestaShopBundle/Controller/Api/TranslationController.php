@@ -29,6 +29,7 @@ namespace PrestaShopBundle\Controller\Api;
 use Context;
 use Exception;
 use PrestaShop\PrestaShop\Adapter\EntityTranslation\EntityTranslatorFactory;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\CoreDomainProviderDefinition;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\ModuleProviderDefinition;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\OthersProviderDefinition;
@@ -95,8 +96,8 @@ class TranslationController extends ApiController
                 $providerDefinition = new ModuleProviderDefinition($module);
             } elseif (
                 !empty($theme)
-                // Default theme is not considered like other themes because its translations belong to the Core
-                && ThemeProviderDefinition::DEFAULT_THEME_NAME !== $theme
+                // Core themes are not considered like other themes because their translations belong to the Core
+                && in_array($theme, Theme::CORE_THEMES)
             ) {
                 $providerDefinition = new ThemeProviderDefinition($theme);
             } else {

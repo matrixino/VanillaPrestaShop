@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\PrestaShopBundle\Controller\Api;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use Tests\Integration\Utility\LoginTrait;
 
 class TranslationControllerTest extends ApiTestCase
@@ -127,7 +128,7 @@ class TranslationControllerTest extends ApiTestCase
                 [
                     'lang' => 'en',
                     'type' => 'frront', // syntax error wanted
-                    'selected' => 'classic',
+                    'selected' => Theme::getDefaultTheme(),
                 ],
             ],
         ];
@@ -150,7 +151,7 @@ class TranslationControllerTest extends ApiTestCase
                 [
                     'lang' => 'en',
                     'type' => 'front',
-                    'selected' => 'classic',
+                    'selected' => Theme::getDefaultTheme(),
                 ],
             ],
         ];
@@ -186,7 +187,7 @@ class TranslationControllerTest extends ApiTestCase
                     'domain' => 'AdminActions',
                     'default' => 'First message',
                     'edited' => 'First translation',
-                    'theme' => 'classic',
+                    'theme' => Theme::getDefaultTheme(),
                 ],
             ],
             [
@@ -226,7 +227,7 @@ class TranslationControllerTest extends ApiTestCase
                     'locale' => 'en-US',
                     'domain' => 'AdminActions',
                     'default' => 'First message',
-                    'theme' => 'classic',
+                    'theme' => Theme::getDefaultTheme(),
                 ],
             ],
             [
@@ -268,12 +269,12 @@ class TranslationControllerTest extends ApiTestCase
                 'domain' => 'AdminActions',
                 'defaultfoo' => 'foo',
                 'edited' => 'boo',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'default' => 'AdminActions',
                 'edited' => 'boo',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'locale' => 'en-US',
@@ -283,7 +284,7 @@ class TranslationControllerTest extends ApiTestCase
                 'domain' => 'AdminActions',
                 'default' => 'First message',
                 'edited' => 'First translation',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 
@@ -325,7 +326,7 @@ class TranslationControllerTest extends ApiTestCase
             ],
             [
                 'default' => 'foo',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'locale' => 'en-US',
@@ -335,7 +336,7 @@ class TranslationControllerTest extends ApiTestCase
                 'domain' => 'AdminActions',
                 'default' => 'First message',
                 'edited' => 'First translation',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 

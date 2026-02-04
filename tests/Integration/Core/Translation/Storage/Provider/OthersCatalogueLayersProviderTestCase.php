@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Core\Translation\Storage\Provider;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\CoreCatalogueLayersProvider;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\OthersProviderDefinition;
@@ -88,14 +89,14 @@ class OthersCatalogueLayersProviderTestCase extends AbstractCatalogueLayersProvi
                 'key' => 'Uninstall',
                 'translation' => 'Uninstall Traduction customisée',
                 'domain' => 'messages',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Install',
                 'translation' => 'Install Traduction customisée',
                 'domain' => 'messages',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 
@@ -109,7 +110,7 @@ class OthersCatalogueLayersProviderTestCase extends AbstractCatalogueLayersProvi
         $domains = $catalogue->getDomains();
         sort($domains);
 
-        // If the theme name is null, the translations which have theme = 'classic' are taken
+        // If the theme name is null, the translations which have theme = Theme::getDefaultTheme() are taken
         $this->assertEmpty($domains);
         $this->assertEmpty($messages);
     }
@@ -136,14 +137,14 @@ class OthersCatalogueLayersProviderTestCase extends AbstractCatalogueLayersProvi
                 'key' => 'Some made up text 1',
                 'translation' => 'Un texte inventé 1',
                 'domain' => 'AdminActions',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Some made up text 2',
                 'translation' => 'Un texte inventé 2',
                 'domain' => 'ModuleWirepaymentShop',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 

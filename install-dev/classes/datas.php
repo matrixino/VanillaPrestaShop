@@ -52,7 +52,6 @@
  * @property string $fixtures
  * @property array $xml_loader_ids
  * @property string|array $modules
- * @property string $theme
  */
 class Datas
 {
@@ -235,7 +234,7 @@ class Datas
 
         $args_ok = [];
         foreach ($argv as $arg) {
-            if (!preg_match('/^--([^=\'"><|`]+)(?:=([^=><|`]+)|(?!license))/i', trim($arg), $res)) {
+            if (!preg_match('/^--([^=\'"><|`]+)(?:=([^=|`]+)|(?!license))/i', trim($arg), $res)) {
                 continue;
             }
 

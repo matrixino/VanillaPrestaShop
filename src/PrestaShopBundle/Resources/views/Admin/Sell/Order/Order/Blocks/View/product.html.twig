@@ -51,7 +51,7 @@
           {{ product.supplierReference }}
         </p>
       {% endif %}
-      {% if isImprovedShipmentFeatureFlagEnabled and product.shipmentIds is not empty %}
+      {% if isImprovedShipmentFeatureFlagEnabled is defined and isImprovedShipmentFeatureFlagEnabled and product.shipmentIds is not empty %}
         <p class="mb-0 productShipmentNumber">
           {{ 'Shipment number: %shipment_id%'|trans({
               '%shipment_id%': product.shipmentIds|join(', ')

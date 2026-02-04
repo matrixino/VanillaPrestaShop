@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Core\Translation\Storage\Provider;
 
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\CoreCatalogueLayersProvider;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\FrontofficeProviderDefinition;
@@ -124,21 +125,21 @@ class FrontofficeCatalogueLayersProviderTestCase extends AbstractCatalogueLayers
                 'key' => 'Uninstall',
                 'translation' => 'Uninstall Traduction customisée',
                 'domain' => 'ShopNotificationsWarning',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Install',
                 'translation' => 'Install Traduction customisée',
                 'domain' => 'ModulesWirepaymentShop',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Some made up text 1',
                 'translation' => 'Un texte inventé 1',
                 'domain' => 'AdminActions',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
@@ -159,7 +160,7 @@ class FrontofficeCatalogueLayersProviderTestCase extends AbstractCatalogueLayers
         $domains = $catalogue->getDomains();
         sort($domains);
 
-        // If the theme name is null, the translations which have theme = 'classic' are taken
+        // If the theme name is null, the translations which have theme = Theme::getDefaultTheme() are taken
         $this->assertEmpty($domains);
         $this->assertEmpty($messages);
     }

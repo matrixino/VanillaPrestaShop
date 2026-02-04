@@ -119,7 +119,8 @@ class OrderProductRemover
             null,
             true,
             false,
-            false // Do not preserve gift removal
+            false, // Do not preserve gift removal
+            true
         );
     }
 

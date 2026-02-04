@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Core\Translation\Storage\Provider;
 
 use PHPUnit\Framework\MockObject\MockObject;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Extractor\LegacyModuleExtractor;
 use PrestaShop\PrestaShop\Core\Translation\Storage\Extractor\LegacyModuleExtractorInterface;
@@ -309,14 +310,14 @@ class ModuleCatalogueLayersProviderTest extends KernelTestCase
                 'key' => 'Uninstall',
                 'translation' => 'Uninstall Traduction customisée',
                 'domain' => 'ModulesCheckpaymentAdmin',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Install',
                 'translation' => 'Install Traduction customisée',
                 'domain' => 'ModulesCheckpaymentShop',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 
@@ -330,7 +331,7 @@ class ModuleCatalogueLayersProviderTest extends KernelTestCase
         $domains = $catalogue->getDomains();
         sort($domains);
 
-        // If the theme name is null, the translations which have theme = 'classic' are taken
+        // If the theme name is null, the translations which have theme = Theme::getDefaultTheme() are taken
         $this->assertEmpty($domains);
         $this->assertEmpty($messages);
     }
@@ -357,14 +358,14 @@ class ModuleCatalogueLayersProviderTest extends KernelTestCase
                 'key' => 'Some made up text 1',
                 'translation' => 'Un texte inventé 1',
                 'domain' => 'AdminActions',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
             [
                 'lang' => 'fr-FR',
                 'key' => 'Some made up text 2',
                 'translation' => 'Un texte inventé 2',
                 'domain' => 'ModulesCheckpaymentAdmin',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 

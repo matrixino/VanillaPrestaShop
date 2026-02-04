@@ -91,7 +91,7 @@ class Calculator
      * @param int|null $computePrecision
      * @param int|null $orderId
      */
-    public function __construct(CartCore $cart, $carrierId, ?FeatureFlagStateCheckerInterface $featureFlagManager = null, ?int $computePrecision = null, ?int $orderId = null)
+    public function __construct(CartCore $cart, $carrierId, ?int $computePrecision = null, ?int $orderId = null, ?FeatureFlagStateCheckerInterface $featureFlagManager = null)
     {
         $this->setCart($cart);
         $this->setCarrierId($carrierId);

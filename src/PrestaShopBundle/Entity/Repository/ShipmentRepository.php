@@ -30,9 +30,7 @@ declare(strict_types=1);
 namespace PrestaShopBundle\Entity\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
 use PrestaShopBundle\Entity\Shipment;
-use PrestaShopBundle\Entity\ShipmentProduct;
 
 class ShipmentRepository extends EntityRepository
 {
@@ -86,42 +84,6 @@ class ShipmentRepository extends EntityRepository
     }
 
     /**
-     * @param Shipment $source
-     * @param Shipment $target
-     * @param ShipmentProduct[] $shipmentProducts
-     */
-    public function mergeProductsToShipment(Shipment $source, Shipment $target, array $shipmentProducts): void
-    {
-        $sourceProductsByOrderDetailId = $this->getShipmentProductByOrderDetailId($source);
-        $targetProductsByOrderDetailId = $this->getShipmentProductByOrderDetailId($target);
-
-        foreach ($shipmentProducts as $shipmentProduct) {
-            if (empty($sourceProductsByOrderDetailId[$shipmentProduct->getOrderDetailId()])) {
-                throw new ShipmentException(sprintf('Order detail with id %d does not exist in source shipment', $shipmentProduct->getOrderDetailId()));
-            }
-            if (empty($targetProductsByOrderDetailId[$shipmentProduct->getOrderDetailId()])) {
-                $target->addShipmentProduct($shipmentProduct);
-            } else {
-                $targetProduct = $targetProductsByOrderDetailId[$shipmentProduct->getOrderDetailId()];
-                $newQuantity = $targetProduct->getQuantity() + $shipmentProduct->getQuantity();
-                $targetProduct->setQuantity($newQuantity);
-            }
-            $sourceProduct = $sourceProductsByOrderDetailId[$shipmentProduct->getOrderDetailId()];
-            $newQuantity = $sourceProduct->getQuantity() - $shipmentProduct->getQuantity();
-            if ($newQuantity <= 0) {
-                $source->removeProduct($sourceProduct);
-            } else {
-                $sourceProduct->setQuantity($newQuantity);
-            }
-        }
-        $this->getEntityManager()->flush();
-
-        if ($source->getProducts()->isEmpty()) {
-            $this->delete($source);
-        }
-    }
-
-    /**
      * @return array<int, array{
      *     id_shipment: int,
      *     id_order: int,
@@ -156,65 +118,41 @@ class ShipmentRepository extends EntityRepository
         return $qb->executeQuery()->fetchAllAssociative();
     }
 
-    private function getShipmentProductByOrderDetailId(Shipment $shipment): array
-    {
-        return array_reduce($shipment->getProducts()->toArray(), function ($carry, ShipmentProduct $product) {
-            $carry[$product->getOrderDetailId()] = $product;
+    public function deleteShipmentProductByOrderAndOrderDetail(
+        int $orderId,
+        int $orderDetailId
+    ): void {
+        $conn = $this->getEntityManager()->getConnection();
 
-            return $carry;
-        }, []);
+        // Delete shipment products
+        $conn->createQueryBuilder()
+            ->delete($this->tablePrefix . 'shipment_product')
+            ->where('id_order_detail = :orderDetailId')
+            ->andWhere(
+                'id_shipment IN (
+                    SELECT id_shipment FROM ' . $this->tablePrefix . 'shipment WHERE id_order = :orderId
+                )'
+            )
+            ->setParameter('orderDetailId', $orderDetailId)
+            ->setParameter('orderId', $orderId)
+            ->executeStatement();
     }
 
-    /**
-     * @param int $carrierId
-     * @param Shipment $shipmentToRemoveProduct
-     * @param ShipmentProduct[] $shipmentProductsToMove
-     */
-    public function splitShipment(int $carrierId, Shipment $shipmentToRemoveProduct, array $shipmentProductsToMove): void
-    {
-        $shipmentProductsByOrderDetailId = array_reduce($shipmentToRemoveProduct->getProducts()->toArray(), function ($carry, ShipmentProduct $product) {
-            $carry[$product->getOrderDetailId()] = $product;
+    public function deleteEmptyShipmentByOrder(
+        int $orderId,
+    ): void {
+        $conn = $this->getEntityManager()->getConnection();
 
-            return $carry;
-        }, []);
-
-        $shipmentProducts = [];
-
-        $newShipment = new Shipment();
-        $newShipment->setCarrierId($carrierId);
-        $newShipment->setOrderId($shipmentToRemoveProduct->getOrderId());
-        $newShipment->setTrackingNumber(null);
-        $newShipment->setAddressId($shipmentToRemoveProduct->getAddressId());
-        $newShipment->setShippingCostTaxExcluded($shipmentToRemoveProduct->getShippingCostTaxExcluded());
-        $newShipment->setShippingCostTaxIncluded($shipmentToRemoveProduct->getShippingCostTaxIncluded());
-
-        foreach ($shipmentProductsToMove as $shipmentProductToMove) {
-            $orderDetailId = $shipmentProductToMove->getOrderDetailId();
-            $quantity = $shipmentProductToMove->getQuantity();
-            $existingProduct = $shipmentProductsByOrderDetailId[$orderDetailId] ?? null;
-            if ($existingProduct) {
-                $remainingQty = $existingProduct->getQuantity() - $quantity;
-                if ($remainingQty <= 0) {
-                    $shipmentToRemoveProduct->removeProduct($existingProduct);
-                } else {
-                    $existingProduct->setQuantity($remainingQty);
-                }
-            } else {
-                throw new ShipmentException(sprintf('Cannot find product with order detail id %s', $orderDetailId));
-            }
-            $shipmentProducts[] = (new ShipmentProduct())
-                ->setOrderDetailId($orderDetailId)
-                ->setQuantity($quantity)
-                ->setShipment($newShipment);
-        }
-
-        foreach ($shipmentProducts as $shipmentProduct) {
-            $newShipment->addShipmentProduct($shipmentProduct);
-        }
-        $this->save($newShipment);
-
-        if ($shipmentToRemoveProduct->getProducts()->isEmpty()) {
-            $this->delete($shipmentToRemoveProduct);
-        }
+        // Delete empty shipments
+        $conn->createQueryBuilder()
+            ->delete($this->tablePrefix . 'shipment')
+            ->where('id_order = :orderId')
+            ->andWhere(
+                'id_shipment NOT IN (
+                    SELECT DISTINCT id_shipment FROM ' . $this->tablePrefix . 'shipment_product
+                )'
+            )
+            ->setParameter('orderId', $orderId)
+            ->executeStatement();
     }
 }

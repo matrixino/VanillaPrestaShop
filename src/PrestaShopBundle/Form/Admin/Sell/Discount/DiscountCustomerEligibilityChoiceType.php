@@ -90,6 +90,8 @@ class DiscountCustomerEligibilityChoiceType extends TranslatorAwareType
                 'label' => $this->trans('Single customer', 'Admin.Catalog.Feature'),
                 'layout' => EntitySearchInputType::LIST_LAYOUT,
                 'required' => false,
+                'disabling_switch' => false,
+                'exclude_guests' => true,
                 'constraints' => [
                     new When(
                         expression: sprintf(

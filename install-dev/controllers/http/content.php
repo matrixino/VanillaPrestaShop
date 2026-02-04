@@ -27,6 +27,7 @@
 declare(strict_types=1);
 
 use PrestaShopBundle\Install\Install;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use Symfony\Component\Yaml\Yaml;
 use PrestaShop\PrestaShop\Core\Util\ArrayFinder;
 use PrestaShop\PrestaShop\Core\Util\File\YamlParser;
@@ -119,7 +120,7 @@ class InstallControllerHttpContent extends InstallControllerHttp implements Http
     {
         if ($this->session->content_theme === null) {
             foreach ($this->themes as $theme) {
-                if ($theme->get('name') === Install::DEFAULT_THEME) {
+                if ($theme->get('name') === Theme::getDefaultTheme()) {
                     $this->session->content_theme = $theme->get('name');
                     break;
                 }
