@@ -68,6 +68,10 @@ function process_install(step) {
     success: function(json) {
       // No error during this step
       if (json && json.success === true) {
+        if (json.warning && json.warning !== '') {
+          install_warning(json.warning);
+        }
+
         $('#process_step_'+step.key).addClass('success');
         current_step++;
         if (current_step >= process_steps.length) {
@@ -125,6 +129,10 @@ function process_install_subtask(step, current_subtask) {
         $('#progress_bar .total .progress').animate({'width': '+='+subtask_process_pixel+'px'}, 500);
         $('#progress_bar .total span').html(Math.ceil((current_step * (100 / process_steps.length)) + Math.ceil(current_subtask * ((100 / process_steps.length) / step.subtasks.length)))+'%');
 
+        if (json.warning && json.warning !== '') {
+          install_warning(json.warning);
+        }
+
         if (current_subtask >= step.subtasks.length) {
           current_step++;
           $('#process_step_'+step.key).show().addClass('success');
@@ -146,6 +154,12 @@ function process_install_subtask(step, current_subtask) {
       install_error(step, errorMsg);
     }
   });
+}
+
+function install_warning(warning) {
+  console.log('install_warning', warning);
+  $('#warning_process').show();
+  $('#warning_process').append('<p>' + warning + '</p>');
 }
 
 function install_error(step, errors) {

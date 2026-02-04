@@ -1,9 +1,5 @@
-// Import utils
 import testContext from '@utils/testContext';
 import {expect} from 'chai';
-
-// Import common tests
-import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 import {
   type BrowserContext,
@@ -17,22 +13,15 @@ import {
 const baseContext: string = 'functional_FO_hummingbird_homePage_displaySomeProducts';
 
 /*
-Pre-condition:
-- Install hummingbird theme
 Scenario:
 - Go to FO
 - Check the block of popular products
 - Check the banner and the custom text block
 - Check the block of new products
-Post-condition:
-- Uninstall hummingbird theme
  */
 describe('FO - Home Page : Display some products', async () => {
   let browserContext: BrowserContext;
   let page: Page;
-
-  // Pre-condition : Install Hummingbird
-  enableTheme('hummingbird', `${baseContext}_preTest`);
 
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
@@ -128,7 +117,4 @@ describe('FO - Home Page : Display some products', async () => {
       expect(pageTitle).to.equal(foHummingbirdNewProductsPage.pageTitle);
     });
   });
-
-  // Post-condition : Uninstall Hummingbird
-  disableTheme('hummingbird', `${baseContext}_postTest`);
 });

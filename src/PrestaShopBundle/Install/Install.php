@@ -68,6 +68,7 @@ use PrestaShopBundle\Cache\LocalizationWarmer;
 use PrestaShopException;
 use PrestashopInstallerException;
 use PrestaShopLoggerInterface;
+use Psr\Log\LogLevel;
 use PSRLoggerAdapter;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -303,7 +304,7 @@ class Install extends AbstractInstall
      */
     public function installDatabase($clear_database = false)
     {
-        $this->getLogger()->log('Installing database');
+        $this->getLogger()->logInfo('Installing database');
 
         // Clear database (only tables with same prefix)
         require_once _PS_ROOT_DIR_ . '/' . $this->bootstrapFile;
@@ -347,7 +348,7 @@ class Install extends AbstractInstall
      */
     public function clearDatabase($truncate = false)
     {
-        $this->getLogger()->log($truncate ? 'Truncating database' : 'Dropping database tables');
+        $this->getLogger()->logInfo($truncate ? 'Truncating database' : 'Dropping database tables');
 
         $instance = Db::getInstance();
         $instance->execute('SET FOREIGN_KEY_CHECKS=0');
@@ -366,7 +367,7 @@ class Install extends AbstractInstall
      */
     public function initializeTestContext()
     {
-        $this->getLogger()->log('Initializing test context');
+        $this->getLogger()->logInfo('Initializing test context');
 
         $smarty = null;
         // Clean all cache values
@@ -429,7 +430,7 @@ class Install extends AbstractInstall
      */
     public function installDefaultData($shop_name, $iso_country = false, $all_languages = false, $clear_database = false)
     {
-        $this->getLogger()->log('Installing default data');
+        $this->getLogger()->logInfo('Installing default data');
 
         if ($clear_database) {
             $this->clearDatabase(true);
@@ -489,7 +490,7 @@ class Install extends AbstractInstall
      */
     public function populateDatabase($entity = null)
     {
-        $this->getLogger()->log('Populating database');
+        $this->getLogger()->logInfo('Populating database');
 
         $languages = [];
         foreach (EntityLanguage::getLanguages(true) as $lang) {
@@ -551,7 +552,7 @@ class Install extends AbstractInstall
 
     public function createShop($shop_name)
     {
-        $this->getLogger()->log('Creating shop');
+        $this->getLogger()->logInfo('Creating shop');
 
         // Create default group shop
         $shop_group = new ShopGroup();
@@ -609,7 +610,7 @@ class Install extends AbstractInstall
         if ($languages_list === null || (is_array($languages_list) && !count($languages_list))) {
             $languages_list = $this->language->getIsoList();
         }
-        $this->getLogger()->log('Installing languages: ' . implode(', ', $languages_list));
+        $this->getLogger()->logInfo('Installing languages: ' . implode(', ', $languages_list));
 
         $languages_list = array_unique($languages_list);
 
@@ -748,7 +749,7 @@ class Install extends AbstractInstall
      */
     public function configureShop(array $data = [])
     {
-        $this->getLogger()->log('Configuring shop');
+        $this->getLogger()->logInfo('Configuring shop');
 
         // clear image cache in tmp folder
         if (file_exists(_PS_TMP_IMG_DIR_)) {
@@ -997,7 +998,7 @@ class Install extends AbstractInstall
      */
     public function installModules(array $modules): bool
     {
-        $this->getLogger()->log('Installing modules on disk');
+        $this->getLogger()->logInfo('Installing modules on disk');
 
         ModuleEntity::updateTranslationsAfterInstall(false);
 
@@ -1098,7 +1099,7 @@ class Install extends AbstractInstall
      */
     public function installFixtures($entity = null, array $data = [])
     {
-        $this->getLogger()->log('Installing fixtures');
+        $this->getLogger()->logInfo('Installing fixtures');
 
         $fixtures_path = _PS_INSTALL_FIXTURES_PATH_ . 'fashion/';
         $fixtures_name = 'fashion';
@@ -1179,13 +1180,15 @@ class Install extends AbstractInstall
     public function installTheme(?string $themeName = null): bool
     {
         $themeName = $themeName ?: _THEME_NAME_;
-        $this->getLogger()->log('Installing theme ' . $themeName);
+        $this->getLogger()->logInfo('Installing theme ' . $themeName);
 
+        $logger = new PSRLoggerAdapter($this->getLogger());
+        $logger->startSavingMessages();
         $builder = new ThemeManagerBuilder(
             Context::getContext(),
             Db::getInstance(),
             null,
-            new PSRLoggerAdapter($this->getLogger())
+            $logger,
         );
 
         $theme_manager = $builder->build();
@@ -1195,6 +1198,12 @@ class Install extends AbstractInstall
             $this->setError($theme_manager->getErrors($themeName));
 
             return false;
+        }
+
+        $warnings = $logger->getSavedMessages(LogLevel::WARNING);
+        $logger->stopSavingMessages();
+        if (!empty($warnings)) {
+            $this->setWarning($warnings);
         }
 
         /*
@@ -1226,7 +1235,7 @@ class Install extends AbstractInstall
             // rename folder
             if (@rename(_PS_ROOT_DIR_ . '/admin/', _PS_ROOT_DIR_ . '/' . $randomizedAdminFolderName)) {
                 $successLogMessage = sprintf('The admin folder was renamed into %s', $randomizedAdminFolderName);
-                $this->getLogger()->log($successLogMessage);
+                $this->getLogger()->logInfo($successLogMessage);
                 $this->clearCache();
             } else {
                 $this->setError($this->translator->trans('The admin folder could not be renamed into %folderName%', ['%folderName%' => $randomizedAdminFolderName], 'Install'));
@@ -1246,7 +1255,7 @@ class Install extends AbstractInstall
         Context::getContext()->link = new Link();
         $adminUrl = rtrim(Context::getContext()->link->getAdminBaseLink(), '/') . '/' . $adminFolder;
 
-        $this->getLogger()->log(sprintf('You can now access your backoffice at %s.', $adminUrl));
+        $this->getLogger()->logInfo(sprintf('You can now access your backoffice at %s.', $adminUrl));
 
         return true;
     }

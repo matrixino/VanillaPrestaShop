@@ -29,6 +29,7 @@ namespace PrestaShop\PrestaShop\Adapter\Order\CommandHandler;
 use Cart;
 use Currency;
 use Customer;
+use Exception;
 use Hook;
 use Order;
 use OrderDetail;
@@ -41,6 +42,8 @@ use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Order\Product\Command\DeleteProductFromOrderCommand;
 use PrestaShop\PrestaShop\Core\Domain\Order\Product\CommandHandler\DeleteProductFromOrderHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use Shop;
 use Validate;
 
@@ -65,7 +68,8 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
      */
     public function __construct(
         ContextStateManager $contextStateManager,
-        OrderProductQuantityUpdater $orderProductQuantityUpdater
+        OrderProductQuantityUpdater $orderProductQuantityUpdater,
+        private readonly ?ShipmentRepository $shipmentRepository = null,
     ) {
         $this->contextStateManager = $contextStateManager;
         $this->orderProductQuantityUpdater = $orderProductQuantityUpdater;
@@ -102,6 +106,12 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
         } finally {
             $this->contextStateManager->restorePreviousContext();
         }
+
+        if ($this->shipmentRepository) {
+            $this->handleShipmentDeletion($command);
+        } else {
+            trigger_deprecation('prestashop/prestashop', '9.2', 'ShipmentRepository must be set.');
+        }
     }
 
     /**
@@ -125,6 +135,19 @@ final class DeleteProductFromOrderHandler extends AbstractOrderCommandHandler im
         // We can't edit a delivered order
         if ($order->hasBeenDelivered()) {
             throw new OrderException('Delivered order cannot be modified.');
+        }
+    }
+
+    private function handleShipmentDeletion(DeleteProductFromOrderCommand $command): void
+    {
+        $orderId = $command->getOrderId()->getValue();
+        $orderDetailId = $command->getOrderDetailId();
+
+        try {
+            $this->shipmentRepository->deleteShipmentProductByOrderAndOrderDetail($orderId, $orderDetailId);
+            $this->shipmentRepository->deleteEmptyShipmentByOrder($orderId);
+        } catch (Exception $e) {
+            throw new ShipmentException(sprintf('Failed to delete shipment product from order with id "%s"', $orderId), 0, $e);
         }
     }
 }
