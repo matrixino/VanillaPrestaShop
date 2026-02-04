@@ -63,10 +63,26 @@ class CustomerSearchType extends EntitySearchInputType
             'disabled_value' => function ($data) {
                 return empty($data[0]['id_customer']);
             },
-            'remote_url' => $this->router->generate('admin_customers_search', ['customer_search' => '__QUERY__']),
             'placeholder' => $this->trans('Search customer', 'Admin.Actions'),
             'suggestion_field' => 'fullname_and_email',
             'required' => false,
+            'exclude_guests' => false,
         ]);
+
+        $resolver->setAllowedTypes('exclude_guests', 'bool');
+
+        $resolver->setNormalizer('remote_url', function ($options) {
+            return $this->buildSearchUrl($options['exclude_guests']);
+        });
+    }
+
+    private function buildSearchUrl(bool $excludeGuests): string
+    {
+        $params = [
+            'customer_search' => '__QUERY__',
+            'exclude_guests' => (int) $excludeGuests,
+        ];
+
+        return $this->router->generate('admin_customers_search', $params);
     }
 }

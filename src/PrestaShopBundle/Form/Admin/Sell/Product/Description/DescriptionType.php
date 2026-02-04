@@ -101,6 +101,7 @@ class DescriptionType extends TranslatorAwareType
             ->add('description_short', TranslatableType::class, [
                 'required' => false,
                 'label' => $this->trans('Summary', 'Admin.Global'),
+                'label_help_box' => $this->trans('Short description of the product. We recommend two to three sentences or a few clear phrases that describe the item. It\'s displayed near the product name, used in the meta description, and shown in several other places. Avoid duplicating this text across different products.', 'Admin.Catalog.Help'),
                 'type' => FormattedTextareaType::class,
                 'options' => [
                     'limit' => $shortDescriptionLimit,
@@ -114,6 +115,7 @@ class DescriptionType extends TranslatorAwareType
             ->add('description', TranslatableType::class, [
                 'required' => false,
                 'label' => $this->trans('Description', 'Admin.Global'),
+                'label_help_box' => $this->trans('Optional detailed information about the product, such as its features, specifications, images, videos, or package contents. Use this field when you need to provide more details beyond the short summary.', 'Admin.Catalog.Help'),
                 'type' => FormattedTextareaType::class,
                 'options' => [
                     'limit' => ProductSettings::MAX_DESCRIPTION_LENGTH,
@@ -131,6 +133,7 @@ class DescriptionType extends TranslatorAwareType
                 'include_combinations' => false,
                 'label' => $this->trans('Related products', 'Admin.Catalog.Feature'),
                 'label_tag_name' => 'h3',
+                'label_help_box' => $this->trans('Products closely connected to this item, such as accessories or complementary goods. Adding them helps customers discover relevant items and improves product navigation.', 'Admin.Catalog.Help'),
                 'entry_options' => [
                     'block_prefix' => 'related_product',
                 ],

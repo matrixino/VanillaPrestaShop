@@ -507,7 +507,7 @@ class ShopCore extends ObjectModel
         $themeManagerBuilder = new ThemeManagerBuilder(Context::getContext(), Db::getInstance());
         $themeRepository = $themeManagerBuilder->buildRepository($this instanceof Shop ? $this : null);
         if (empty($this->theme_name)) {
-            $this->theme_name = 'classic';
+            $this->theme_name = Theme::getDefaultTheme();
         }
         $this->theme = $themeRepository->getInstanceByName($this->theme_name);
     }

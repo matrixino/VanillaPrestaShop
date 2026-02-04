@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Improve\International\Translations;
 
-use PrestaShop\PrestaShop\Core\Translation\Storage\Provider\Definition\ThemeProviderDefinition;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShopBundle\Form\Admin\Type\LocaleChoiceType;
 use PrestaShopBundle\Form\Admin\Type\RadioWithChoiceChildrenType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
@@ -102,7 +102,7 @@ class ExportCataloguesType extends TranslatorAwareType
             'child_choice' => [
                 'name' => 'selected_value',
                 'empty' => $this->trans('Select a theme', 'Admin.International.Feature'),
-                'choices' => $this->excludeDefaultThemeFromChoices($this->themeChoices),
+                'choices' => $this->excludeCoreThemesFromChoices($this->themeChoices),
                 'label' => false,
                 'multiple' => false,
             ],
@@ -129,9 +129,13 @@ class ExportCataloguesType extends TranslatorAwareType
      *
      * @return array
      */
-    private function excludeDefaultThemeFromChoices(array $themeChoices): array
+    private function excludeCoreThemesFromChoices(array $themeChoices): array
     {
-        unset($themeChoices[ThemeProviderDefinition::DEFAULT_THEME_NAME]);
+        foreach (Theme::CORE_THEMES as $coreTheme) {
+            if (isset($themeChoices[$coreTheme])) {
+                unset($themeChoices[$coreTheme]);
+            }
+        }
 
         return $themeChoices;
     }

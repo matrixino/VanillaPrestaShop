@@ -106,7 +106,7 @@ class DotEnvLayer implements TypeLayerInterface
     private function locateDotEnvFile(string $featureFlagName): string
     {
         $env = $this->environment->getName();
-        $filesToCheck = [".env.$env.local", ".env.$env", '.env'];
+        $filesToCheck = [".env.$env.local", ".env.$env", '.env', '.env.dist'];
 
         foreach ($filesToCheck as $file) {
             $path = $this->rootDir . '/' . $file;

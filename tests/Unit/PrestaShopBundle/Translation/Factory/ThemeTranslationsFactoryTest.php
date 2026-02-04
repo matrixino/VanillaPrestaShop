@@ -28,6 +28,7 @@ namespace Tests\Unit\PrestaShopBundle\Translation\Factory;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShopBundle\Translation\Factory\ThemeTranslationsFactory;
 use PrestaShopBundle\Translation\Provider\FrontOfficeProvider;
 use PrestaShopBundle\Translation\Provider\ThemeProvider;
@@ -36,8 +37,6 @@ use Symfony\Component\Translation\MessageCatalogue;
 class ThemeTranslationsFactoryTest extends TestCase
 {
     private const TEST_LOCALE = 'ab-CD';
-
-    private const TEST_THEME = 'classic';
 
     /**
      * @var ThemeTranslationsFactory
@@ -95,7 +94,7 @@ class ThemeTranslationsFactoryTest extends TestCase
     {
         return [
             [
-                self::TEST_THEME,
+                Theme::getDefaultTheme(),
                 self::TEST_LOCALE,
             ],
         ];

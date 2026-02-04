@@ -321,6 +321,11 @@ class ModuleManager implements ModuleManagerInterface
         return $this->moduleDataProvider->isEnabled($name);
     }
 
+    public function isOnDisk(string $name): bool
+    {
+        return $this->moduleDataProvider->isOnDisk($name);
+    }
+
     public function getError(string $name): string
     {
         $module = $this->moduleRepository->getModule($name);

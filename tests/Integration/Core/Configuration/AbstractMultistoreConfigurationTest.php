@@ -33,6 +33,7 @@ use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Feature\FeatureInterface;
 use PrestaShopBundle\Service\Form\MultistoreCheckboxEnabler;
@@ -271,7 +272,7 @@ class AbstractMultistoreConfigurationTest extends AbstractConfigurationTestCase
         $newShop->name = 'test_shop_2';
         $newShop->id_shop_group = 1;
         $newShop->color = 'red';
-        $newShop->theme_name = 'classic';
+        $newShop->theme_name = Theme::getDefaultTheme();
         $newShop->deleted = false;
         $newShop->add();
         $this->newShop = $newShop;

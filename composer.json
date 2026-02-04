@@ -67,11 +67,11 @@
         "prestashop/decimal": "^1.4",
         "prestashop/graphnvd3": "^2",
         "prestashop/gridhtml": "^2",
-        "prestashop/gsitemap": "^4",
-        "prestashop/hummingbird": "^1.0.1",
-        "prestashop/pagesnotfound": "^2",
-        "prestashop/productcomments": "^7.0",
-        "prestashop/ps_apiresources": "dev-attribute-position",
+        "prestashop/gsitemap": "^5",
+        "prestashop/hummingbird": "^2.0",
+        "prestashop/pagesnotfound": "^3",
+        "prestashop/productcomments": "^8.0",
+        "prestashop/ps_apiresources": "dev-add-combinations-endpoint",
         "prestashop/ps_banner": "^2",
         "prestashop/ps_bestsellers": "^1.0",
         "prestashop/ps_brandlist": "^1.0",
@@ -212,7 +212,7 @@
         },
         "ps_apiresources": {
             "type": "vcs",
-            "url": "https://github.com/jolelievre/ps_apiresources"
+            "url": "https://github.com/sebajps/ps_apiresources"
         }
     },
     "minimum-stability": "dev",
@@ -247,9 +247,6 @@
             "phpunit/phpunit": true,
             "symfony/phpunit-bridge": true
         },
-        "audit": {
-            "block-insecure": false
-        },
         "platform": {
             "php": "8.1.0"
         },
@@ -271,6 +268,11 @@
             "@composer create-test-db",
             "@composer dump-autoload --dev --working-dir=modules/ps_apiresources",
             "@php -d date.timezone=UTC ./vendor/phpunit/phpunit/phpunit -c modules/ps_apiresources/tests/Integration/phpunit-ci.xml"
+        ],
+        "api-module-tests-local": [
+            "@composer create-test-db",
+            "@composer dump-autoload --dev --working-dir=modules/ps_apiresources",
+            "@composer run-api-module-tests-local"
         ],
         "create-release": "@php tools/build/CreateRelease.php",
         "create-test-db": [
@@ -300,6 +302,9 @@
         ],
         "restore-test-tables": [
             "@php ./tests/bin/restore-test-tables.php"
+        ],
+        "run-api-module-tests-local": [
+            "_PS_ROOT_DIR_=`pwd` php -d date.timezone=UTC ./vendor/phpunit/phpunit/phpunit -c modules/ps_apiresources/tests/Integration/phpunit-local.xml"
         ],
         "test-all": [
             "@composer unit-tests",

@@ -46,16 +46,25 @@ class SearchCustomers
     private $shopConstraint;
 
     /**
+     * @var bool
+     */
+    private $excludeGuests;
+
+    /**
      * @param string[] $phrases
+     * @param ShopConstraint|null $shopConstraint
+     * @param bool $excludeGuests
      */
     public function __construct(
         array $phrases,
-        ?ShopConstraint $shopConstraint = null
+        ?ShopConstraint $shopConstraint = null,
+        bool $excludeGuests = false
     ) {
         $this->assertPhrasesAreNotEmpty($phrases);
         $this->assertShopConstraintIsSupported($shopConstraint);
         $this->phrases = $phrases;
         $this->shopConstraint = $shopConstraint;
+        $this->excludeGuests = $excludeGuests;
     }
 
     /**
@@ -72,6 +81,14 @@ class SearchCustomers
     public function getShopConstraint(): ?ShopConstraint
     {
         return $this->shopConstraint;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getExcludeGuests(): bool
+    {
+        return $this->excludeGuests;
     }
 
     /**

@@ -88,11 +88,21 @@ describe('API : Check endpoints', async () => {
         // @todo: add tests
         '/addresses/bulk-delete: DELETE',
         // @todo: add tests
+        '/addresses/carts/{cartId}: PATCH',
+        // @todo: add tests
         '/addresses/customers/{addressId}: GET',
         // @todo: add tests
         '/addresses/customers/{addressId}: PATCH',
         // @todo: add tests
         '/addresses/customers: POST',
+        // @todo: add tests
+        '/addresses/manufacturers/{addressId}: GET',
+        // @todo: add tests
+        '/addresses/manufacturers/{addressId}: PATCH',
+        // @todo: add tests
+        '/addresses/manufacturers: POST',
+        // @todo: add tests
+        '/addresses/orders/{orderId}: PATCH',
         // @todo: add tests
         '/addresses/{addressId}: DELETE',
         // @todo: add tests
@@ -165,6 +175,12 @@ describe('API : Check endpoints', async () => {
         '/contacts: GET',
         // @todo: add tests
         '/contacts: POST',
+        // @todo: add tests
+        '/customers/bulk-delete: DELETE',
+        // @todo: add tests
+        '/customers/bulk-disable: PUT',
+        // @todo: add tests
+        '/customers/bulk-enable: PUT',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/01_deleteCustomerGroupsId.ts
         '/customers/groups/{customerGroupId}: DELETE',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/02_getCustomerGroupsId.ts
@@ -175,10 +191,24 @@ describe('API : Check endpoints', async () => {
         '/customers/groups: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/04_customerGroup/04_postCustomersGroup.ts
         '/customers/groups: POST',
-        // @todo : https://github.com/PrestaShop/PrestaShop/issues/39682
-        '/discounts/{discountId}/conditions: GET',
-        // @todo : https://github.com/PrestaShop/PrestaShop/issues/39682
-        '/discounts/{discountId}/conditions: PATCH',
+        // @todo: add tests
+        '/customers/search: GET',
+        // @todo: add tests
+        '/customers/{customerId}/details: GET',
+        // @todo: add tests
+        '/customers/{customerId}: DELETE',
+        // @todo: add tests
+        '/customers/{customerId}: GET',
+        // @todo: add tests
+        '/customers/{customerId}: PATCH',
+        // @todo: add tests
+        '/customers: POST',
+        // @todo: add tests
+        '/discounts/bulk-delete: DELETE',
+        // @todo: add tests
+        '/discounts/bulk-update-status: PATCH',
+        // @todo: add tests
+        '/discounts/{discountId}/duplicate: POST',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/38784
         '/discounts/{discountId}: DELETE',
         // @todo : https://github.com/PrestaShop/PrestaShop/issues/38647
@@ -245,6 +275,8 @@ describe('API : Check endpoints', async () => {
         '/modules/{technicalName}: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/07_module/11_getModules.ts
         '/modules: GET',
+        // @todo: add tests
+        '/products/combinations/{combinationId}: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/08_product/01_deleteProductImageId.ts
         '/products/images/{imageId}: DELETE',
         // tests/UI/campaigns/functional/API/02_endpoints/08_product/02_getProductImageId.ts
@@ -253,6 +285,12 @@ describe('API : Check endpoints', async () => {
         '/products/images/{imageId}: POST',
         // tests/UI/campaigns/functional/API/02_endpoints/08_product/11_getProductsSearch.ts
         '/products/search: GET',
+        // @todo: add tests
+        '/products/{productId}/combination-ids: GET',
+        // @todo: add tests
+        '/products/{productId}/combinations: GET',
+        // @todo: add tests
+        '/products/{productId}/generate-combinations: POST',
         // tests/UI/campaigns/functional/API/02_endpoints/08_product/05_getProductIdImages.ts
         '/products/{productId}/images: GET',
         // tests/UI/campaigns/functional/API/02_endpoints/08_product/04_postProductIdImage.ts

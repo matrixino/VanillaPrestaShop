@@ -194,7 +194,7 @@ class ThemeCatalogueLayersProviderTestCase extends AbstractCatalogueLayersProvid
                 'key' => 'Install',
                 'translation' => 'Install Traduction customisée',
                 'domain' => 'ShopThemeActions',
-                'theme' => 'classic',
+                'theme' => Theme::getDefaultTheme(),
             ],
         ];
 

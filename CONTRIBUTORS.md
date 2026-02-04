@@ -159,6 +159,7 @@ GitHub contributors:
 - Charly Caillon
 - Chedly Farhani
 - Chen.Zhidong
+- ChillCode
 - Chris
 - Chris Gurk
 - Christian Kubitza
@@ -458,15 +459,18 @@ GitHub contributors:
 - Jónatan Núñez
 - Jonathan Danse
 - Jonathan Lelievre
+- Jonathan Reimer
 - Jonathan Renard
 - Jonathan SAHM
 - Jonathan Vollebregt
 - jordiweblidera
+- Jordi Martin
 - Jorge Vargas
 - Joris Hart
 - Jory Hogeveen
 - Jose Cruz
 - joseantgv
+- josecarlosphp
 - Joshua Bemenderfer
 - jtogrul
 - Juan G. Jordán
@@ -475,7 +479,9 @@ GitHub contributors:
 - Julian Eberius
 - Julie Varisellaz
 - Julien Bouchez
+- Julien Bonvarlet
 - Julien Bourdeau
+- Julien Boyer
 - Julien Deniau
 - Julien Fenaille
 - Julien Gissinger
@@ -560,6 +566,7 @@ GitHub contributors:
 - Manfredi Petruso
 - maniT4c
 - Manuel Jose Pulgar Anguita
+- Manuel Valentin
 - manuelbcd
 - Marc González Majoral
 - Marcin Kurek
@@ -578,6 +585,7 @@ GitHub contributors:
 - Mark Wienk
 - MarkC
 - Markus
+- Markus Gurkcity
 - Markus Staab
 - Martin Finkenflügel
 - Martin Fojtík
@@ -616,6 +624,7 @@ GitHub contributors:
 - Maxime Morel-Bailly
 - Maxime Vasse
 - Maxime Poulain
+- Maxime Sieczkowski
 - mchelh
 - mchojnacki
 - mdomenjoud
@@ -638,6 +647,7 @@ GitHub contributors:
 - Michal Špaček
 - Michel Antoine
 - Michel Courtade
+- Michell Hoduń
 - Mickael ANDRIEU
 - Mickaël Andrieu
 - Mickael Desgranges
@@ -956,6 +966,7 @@ GitHub contributors:
 - Threef
 - tiledcode
 - timactive
+- Timo Tijhof
 - timsit
 - tleon
 - tmackay
@@ -993,6 +1004,7 @@ GitHub contributors:
 - Vincent Beudez
 - Vincent Garcia
 - Vincent Hadjedj
+- Vincent Le Quec
 - Vincent Schoener
 - Vincent Terenti
 - Vincent Van den Brink
@@ -1027,6 +1039,7 @@ GitHub contributors:
 - Yannick Armand
 - Yneet
 - yo7hli
+- Yoan Ballesteros
 - Yohann Tilotti
 - Yolandavdvegt
 - Yoozio
@@ -1074,3 +1087,4 @@ SVN contributors:
 - vChabot
 - vKham
 - vSchoener
+- zelarg

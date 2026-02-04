@@ -33,6 +33,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PrestaShop\PrestaShop\Adapter\ContextStateManager;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Adapter\Shop\Repository\ShopRepository;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
 use ReflectionProperty;
 use Shop;
@@ -93,7 +94,7 @@ abstract class ContextEventListenerTestCase extends KernelTestCase
         $fakeShop->id = $expectedShopId;
         $fakeShop->name = 'Fake shop';
         $fakeShop->active = true;
-        $fakeShop->theme_name = 'classic';
+        $fakeShop->theme_name = Theme::getDefaultTheme();
         $fakeShop->color = 'red';
         $fakeShop->physical_uri = $fakeShop->virtual_uri = $fakeShop->domain = $fakeShop->domain_ssl = '';
 

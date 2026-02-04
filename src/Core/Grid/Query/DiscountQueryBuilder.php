@@ -58,7 +58,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
             ->select(
                 'cr.id_cart_rule AS id_discount,
                 crl.name,
-                crt.type,
+                crt.discount_type,
                 cr.code,
                 cr.date_from,
                 cr.date_to,
@@ -129,11 +129,11 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
             'id_discount' => 'cr.id_cart_rule',
             'name' => 'crl.name',
             'code' => 'cr.code',
-            'type' => 'crt.type',
+            'discount_type' => 'crt.discount_type',
             'active' => 'cr.active',
         ];
 
-        $exactMatchFilters = ['id_discount', 'type', 'active'];
+        $exactMatchFilters = ['id_discount', 'discount_type', 'active'];
 
         $now = new DateTimeImmutable();
 

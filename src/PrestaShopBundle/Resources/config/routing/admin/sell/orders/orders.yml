@@ -418,6 +418,16 @@ admin_orders_get_shipping:
   options:
     expose: true
 
+admin_orders_get_shipments:
+  path: /{orderId}/shipments
+  methods: [ GET ]
+  defaults:
+    _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getShipmentsAction
+  requirements:
+    orderId: \d+
+  options:
+    expose: true
+
 admin_orders_cancellation:
   path: /{orderId}/cancellation
   methods: [ POST ]

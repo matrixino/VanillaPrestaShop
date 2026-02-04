@@ -378,7 +378,7 @@ class InstallControllerHttp
      * @param bool $success
      * @param string $message
      */
-    public function ajaxJsonAnswer(bool $success, $message = ''): void
+    public function ajaxJsonAnswer(bool $success, $message = '', $warning = ''): void
     {
         if (!$success && empty($message)) {
             $message = print_r(@error_get_last(), true);
@@ -387,6 +387,7 @@ class InstallControllerHttp
         die(json_encode([
             'success' => (bool) $success,
             'message' => $message,
+            'warning' => $warning,
         ]));
     }
 

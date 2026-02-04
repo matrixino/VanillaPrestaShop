@@ -36,6 +36,7 @@ import Router from '@components/router';
 import OrderInvoicesRefresher from './order-invoices-refresher';
 import OrderProductCancel from './order-product-cancel';
 import OrderDocumentsRefresher from './order-documents-refresher';
+import OrderShipmentsRefresher from './order-shipments-refresher';
 
 const {$} = window;
 
@@ -52,6 +53,8 @@ export default class OrderViewPage {
 
   orderShippingRefresher: OrderShippingRefresher;
 
+  orderShipmentsRefresher: OrderShipmentsRefresher;
+
   orderDocumentsRefresher: OrderDocumentsRefresher;
 
   orderInvoicesRefresher: OrderInvoicesRefresher;
@@ -67,6 +70,7 @@ export default class OrderViewPage {
     this.orderPricesRefresher = new OrderPricesRefresher();
     this.orderPaymentsRefresher = new OrderPaymentsRefresher();
     this.orderShippingRefresher = new OrderShippingRefresher();
+    this.orderShipmentsRefresher = new OrderShipmentsRefresher();
     this.orderDocumentsRefresher = new OrderDocumentsRefresher();
     this.orderInvoicesRefresher = new OrderInvoicesRefresher();
     this.orderProductCancel = new OrderProductCancel();
@@ -93,6 +97,7 @@ export default class OrderViewPage {
       this.orderDiscountsRefresher.refresh(event.orderId);
       this.orderDocumentsRefresher.refresh(event.orderId);
       this.orderShippingRefresher.refresh(event.orderId);
+      this.orderShipmentsRefresher.refresh(event.orderId);
     });
 
     EventEmitter.on(OrderViewEventMap.productEditionCanceled, (event) => {

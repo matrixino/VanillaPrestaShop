@@ -305,6 +305,9 @@ class OrderProductQuantityUpdater
          *
          * Here we are editing an order, not a cart, so what has been ordered
          * has already been substracted from the stock.
+         *
+         * Also, we need to make sure to call this method with $useOrderPrices
+         * enabled, so it properly behaves the update for an finished order.
          */
         $updateQuantityResult = $cart->updateQty(
             abs($deltaQuantity),
@@ -314,6 +317,8 @@ class OrderProductQuantityUpdater
             $deltaQuantity < 0 ? 'down' : 'up',
             0,
             new Shop($cart->id_shop),
+            true,
+            true,
             true,
             true
         );

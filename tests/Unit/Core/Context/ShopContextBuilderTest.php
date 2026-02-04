@@ -33,6 +33,7 @@ use PHPUnit\Framework\TestCase;
 use PrestaShop\PrestaShop\Adapter\ContextStateManager;
 use PrestaShop\PrestaShop\Adapter\Feature\MultistoreFeature;
 use PrestaShop\PrestaShop\Adapter\Shop\Repository\ShopRepository;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use PrestaShop\PrestaShop\Core\Context\ShopContextBuilder;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
@@ -130,7 +131,7 @@ class ShopContextBuilderTest extends TestCase
         $shop->name = 'Shop name';
         $shop->id_shop_group = 51;
         $shop->id_category = 69;
-        $shop->theme_name = 'classic';
+        $shop->theme_name = Theme::getDefaultTheme();
         $shop->color = 'red';
         $shop->physical_uri = 'http://localhost';
         $shop->virtual_uri = '/virtual';
