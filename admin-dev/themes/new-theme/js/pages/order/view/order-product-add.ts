@@ -85,6 +85,8 @@ export default class OrderProductAdd {
 
   taxIncluded: number | null;
 
+  isMultishipmentIsEnabled: boolean;
+
   constructor() {
     this.router = new Router();
     this.productAddActionBtn = $(OrderViewPageMap.productAddActionBtn);
@@ -105,8 +107,9 @@ export default class OrderProductAdd {
     this.invoiceSelect = $(OrderViewPageMap.productAddInvoiceSelect);
     this.freeShippingSelect = $(OrderViewPageMap.productAddFreeShippingSelect);
     this.productAddMenuBtn = $(OrderViewPageMap.productAddBtn);
-    this.productShipmentSelect = $(OrderViewPageMap.productAddShipment);
+    this.productShipmentSelect = $(OrderViewPageMap.selectAddShipment);
     this.available = null;
+    this.isMultishipmentIsEnabled = Boolean(Number($(OrderViewPageMap.productsTable).data('multishipmentEnabled')));
     this.setupListener();
     this.product = {};
     this.currencyPrecision = $(OrderViewPageMap.productsTable).data(
@@ -121,6 +124,25 @@ export default class OrderProductAdd {
   }
 
   setupListener(): void {
+    if (this.isMultishipmentIsEnabled) {
+      const confirmCheckbox = document.querySelector<HTMLInputElement>(OrderViewPageMap.addProductConfirmNewInvoiceCheckbox);
+
+      if (confirmCheckbox) {
+        confirmCheckbox.addEventListener('change', () => {
+          const invoiceId = parseInt(<string> this.invoiceSelect.val(), 10);
+
+          if (invoiceId === 0) {
+            this.productAddActionBtn.prop('disabled', !confirmCheckbox.checked);
+          }
+        });
+      }
+
+      this.productShipmentSelect.on('change', () => {
+        const shipmentId = this.productShipmentSelect.val();
+        const hasShipmentSelected = Boolean(shipmentId);
+        this.productAddActionBtn.prop('disabled', !hasShipmentSelected);
+      });
+    }
     this.combinationsSelect.on('change', (event) => {
       const taxExcluded = window.ps_round(
         $(event.currentTarget)
@@ -248,8 +270,20 @@ export default class OrderProductAdd {
 
     this.productAddActionBtn.on('click', (event: JQueryEventObject) => this.confirmNewInvoice(event),
     );
-    this.invoiceSelect.on('change', () => this.orderProductRenderer.toggleProductAddNewInvoiceInfo(),
-    );
+    this.invoiceSelect.on('change', () => {
+      this.orderProductRenderer.toggleProductAddNewInvoiceInfo();
+
+      if (this.isMultishipmentIsEnabled) {
+        const confirmCheckbox = document.querySelector<HTMLInputElement>(OrderViewPageMap.addProductConfirmNewInvoiceCheckbox);
+        const invoiceId = parseInt(<string> this.invoiceSelect.val(), 10);
+
+        if (invoiceId === 0 && confirmCheckbox) {
+          this.productAddActionBtn.prop('disabled', !confirmCheckbox.checked);
+        } else {
+          this.productAddActionBtn.prop('disabled', false);
+        }
+      }
+    });
   }
 
   setProduct(product: Record<string, any> | undefined): void {
@@ -312,7 +346,9 @@ export default class OrderProductAdd {
       quantity: this.quantityInput.val(),
       invoice_id: this.invoiceSelect.val(),
       free_shipping: this.freeShippingSelect.prop('checked'),
-      shipment_id: this.productShipmentSelect.val(),
+      ...(this.isMultishipmentIsEnabled && {
+        shipment_id: this.productShipmentSelect.val(),
+      }),
     };
 
     $.ajax({
@@ -321,6 +357,9 @@ export default class OrderProductAdd {
       data: params,
     }).then(
       (response) => {
+        if (this.isMultishipmentIsEnabled) {
+          $(OrderViewPageMap.productAddModal).modal('hide');
+        }
         EventEmitter.emit(OrderViewEventMap.productAddedToOrder, {
           orderId,
           orderProductId: params.product_id,
@@ -345,23 +384,28 @@ export default class OrderProductAdd {
 
   confirmNewInvoice(event: JQueryEventObject): void {
     const invoiceId = parseInt(<string> this.invoiceSelect.val(), 10);
-    const orderId = $(event.currentTarget).data('orderId');
+    const target = event.currentTarget as HTMLElement;
+    const orderId = Number(target.dataset.orderId);
 
     // Explicit 0 value is used when we the user selected New Invoice
     if (invoiceId === 0) {
-      const modal = new ConfirmModal(
-        {
-          id: 'modal-confirm-new-invoice',
-          confirmTitle: this.invoiceSelect.data('modal-title'),
-          confirmMessage: this.invoiceSelect.data('modal-body'),
-          confirmButtonLabel: this.invoiceSelect.data('modal-apply'),
-          closeButtonLabel: this.invoiceSelect.data('modal-cancel'),
-        },
-        () => {
-          this.confirmNewPrice(orderId, invoiceId);
-        },
-      );
-      modal.show();
+      if (!this.isMultishipmentIsEnabled) {
+        const modal = new ConfirmModal(
+          {
+            id: 'modal-confirm-new-invoice',
+            confirmTitle: this.invoiceSelect.data('modal-title'),
+            confirmMessage: this.invoiceSelect.data('modal-body'),
+            confirmButtonLabel: this.invoiceSelect.data('modal-apply'),
+            closeButtonLabel: this.invoiceSelect.data('modal-cancel'),
+          },
+          () => {
+            this.confirmNewPrice(orderId, invoiceId);
+          },
+        );
+        modal.show();
+      } else {
+        this.confirmNewPrice(orderId, invoiceId);
+      }
     } else {
       // Last case is Nan, the selector is not even present, we simply add product and let the BO handle it
       this.addProduct(orderId);

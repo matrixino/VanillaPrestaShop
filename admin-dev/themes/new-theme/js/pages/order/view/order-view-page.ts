@@ -33,6 +33,8 @@ import OrderPricesRefresher from '@pages/order/view/order-prices-refresher';
 import OrderPaymentsRefresher from '@pages/order/view/order-payments-refresher';
 import OrderShippingRefresher from '@pages/order/view/order-shipping-refresher';
 import Router from '@components/router';
+import OrderProductAutocomplete from '@pages/order/view/order-product-add-autocomplete';
+import OrderProductAdd from '@pages/order/view/order-product-add';
 import OrderInvoicesRefresher from './order-invoices-refresher';
 import OrderProductCancel from './order-product-cancel';
 import OrderDocumentsRefresher from './order-documents-refresher';
@@ -63,6 +65,8 @@ export default class OrderViewPage {
 
   router: Router;
 
+  isMultishipmentIsEnabled: boolean;
+
   constructor() {
     this.orderDiscountsRefresher = new OrderDiscountsRefresher();
     this.orderProductManager = new OrderProductManager();
@@ -75,6 +79,7 @@ export default class OrderViewPage {
     this.orderInvoicesRefresher = new OrderInvoicesRefresher();
     this.orderProductCancel = new OrderProductCancel();
     this.router = new Router();
+    this.isMultishipmentIsEnabled = Boolean(Number($(OrderViewPageMap.productsTable).data('multishipmentEnabled')));
     this.listenToEvents();
   }
 
@@ -133,7 +138,9 @@ export default class OrderViewPage {
     });
 
     EventEmitter.on(OrderViewEventMap.productAddedToOrder, (event) => {
-      this.orderProductRenderer.resetAddRow();
+      if (!this.isMultishipmentIsEnabled) {
+        this.orderProductRenderer.resetAddRow();
+      }
       this.orderPricesRefresher.refreshProductPrices(event.orderId);
       this.orderPricesRefresher.refresh(event.orderId);
       this.refreshProductsList(event.orderId);
@@ -217,7 +224,11 @@ export default class OrderViewPage {
       'click',
       () => {
         this.orderProductRenderer.toggleProductAddNewInvoiceInfo();
-        this.orderProductRenderer.moveProductsPanelToModificationPosition(OrderViewPageMap.productSearchInput);
+        if (!this.isMultishipmentIsEnabled) {
+          this.orderProductRenderer.moveProductsPanelToModificationPosition(OrderViewPageMap.productSearchInput);
+        } else {
+          this.getAddProductForm();
+        }
       },
     );
     $(OrderViewPageMap.productCancelAddBtn).on(
@@ -391,5 +402,45 @@ export default class OrderViewPage {
           message: 'Failed to reload the products list. Please reload the page',
         });
       });
+  }
+
+  private get modal(): HTMLDivElement {
+    const modal = document.querySelector(OrderViewPageMap.productAddModal) as HTMLDivElement;
+
+    if (!modal) {
+      throw new Error('Add product modal not found');
+    }
+    return modal;
+  }
+
+  async getAddProductForm(): Promise<void> {
+    this.modal.dataset.state = 'loading';
+    const orderId = Number(this.modal.dataset.orderId);
+
+    try {
+      const response = await fetch(this.router.generate('admin_orders_get_add_product_form', {
+        orderId,
+      }), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      const formContainer = document.querySelector(OrderViewPageMap.addProductModalContainer) as HTMLElement;
+      formContainer!.innerHTML = await response.text();
+
+      const orderAddAutocomplete = new OrderProductAutocomplete($(OrderViewPageMap.productSearchInput));
+      const orderAdd = new OrderProductAdd();
+
+      orderAddAutocomplete.listenForSearch();
+      orderAddAutocomplete.onItemClickedCallback = (p: Record<string, any> | undefined): void => orderAdd.setProduct(p);
+      this.modal.dataset.state = 'loaded';
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

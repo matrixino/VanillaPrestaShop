@@ -52,6 +52,8 @@ export default class OrderProductAutocomplete {
 
   onItemClickedCallback: (product?: Record<string, any> | undefined) => void;
 
+  isMultishipmentIsEnabled: boolean;
+
   constructor(input: JQuery) {
     this.activeSearchRequest = null;
     this.router = new Router();
@@ -59,7 +61,13 @@ export default class OrderProductAutocomplete {
     this.results = [];
     this.searchTimeoutId = undefined;
     this.selectShipment = document.querySelector<HTMLSelectElement>(OrderViewPageMap.selectAddShipment)!;
-    this.dropdownMenu = $(OrderViewPageMap.productSearchInputAutocompleteMenu);
+    this.isMultishipmentIsEnabled = Boolean(Number($(OrderViewPageMap.productsTable).data('multishipmentEnabled')));
+
+    if (this.isMultishipmentIsEnabled) {
+      this.dropdownMenu = $(OrderViewPageMap.productSearchInputAutocompleteMenuOnModale);
+    } else {
+      this.dropdownMenu = $(OrderViewPageMap.productSearchInputAutocompleteMenu);
+    }
     /**
      * Permit to link to each value of dropdown a callback after item is clicked
      */
@@ -79,7 +87,6 @@ export default class OrderProductAutocomplete {
 
   delaySearch(input: HTMLInputElement): void {
     clearTimeout(<number> this.searchTimeoutId);
-
     // Search only if the search phrase length is greater than 2 characters
     if (input.value.length < 2) {
       return;

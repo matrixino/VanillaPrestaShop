@@ -40,12 +40,14 @@
     </div>
   </td>
   <td class="pr-2">
-   <div class="row add-product-inputs">
+   <div class="row">
      <div class="col-sm-6">
+      {{ form_label(addProductRowForm.price_tax_excluded) }}
       {{ form_widget(addProductRowForm.price_tax_excluded) }}
      </div>
 
      <div class="col-sm-6">
+      {{ form_label(addProductRowForm.price_tax_included) }}
       {{ form_widget(addProductRowForm.price_tax_included) }}
      </div>
    </div>
@@ -53,12 +55,6 @@
   <td class="pr-2 add-product-quantity">
     {{ form_row(addProductRowForm.quantity, {type: 'number'}) }}
   </td>
-  {% if isImprovedShipmentFeatureFlagEnabled %}
-    <td colspan="2" id="addProductShipment" class="pr-2 cellProductShipment">
-        {{ form_label(addProductRowForm.addShipment) }}
-        {{ form_widget(addProductRowForm.addShipment) }}
-    </td>
-  {% endif %}
   <td id="addProductLocation" class="cellProductLocation"></td>
   <td id="addProductRefunded" class="cellProductRefunded"></td>
   <td id="addProductAvailable"{% if not isAvailableQuantityDisplayed %} class="d-none"{% endif %}></td>

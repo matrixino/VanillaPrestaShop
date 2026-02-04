@@ -527,9 +527,7 @@ class OrderController extends PrestaShopAdminController
 
         $addProductRowForm = $this->createForm(AddProductRowType::class, [], [
             'order_id' => $orderId,
-            'currency_id' => $orderForViewing->getCurrencyId(),
-            'symbol' => $orderCurrency->symbol,
-            'is_multishipment_is_enabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
+            'currency' => $orderCurrency,
         ]);
 
         $editProductRowForm = $this->createForm(EditProductRowType::class, [], [
@@ -657,6 +655,29 @@ class OrderController extends PrestaShopAdminController
             'shipmentId' => $shipmentId,
             'products' => $formData['products'],
             'isShipped' => $isShipped,
+        ]);
+    }
+
+    #[AdminSecurity("is_granted('update', 'AdminOrders')", redirectRoute: 'admin_orders_view', redirectQueryParamsToKeep: ['orderId'], message: 'You do not have permission to edit this.')]
+    public function getAddProductForm(
+        int $orderId,
+        CurrencyDataProvider $currencyDataProvider,
+        FeatureFlagStateCheckerInterface $featureFlagStateChecker
+    ): Response {
+        $orderForViewing = $this->dispatchQuery(new GetOrderForViewing($orderId, QuerySorting::DESC));
+        $currency = $currencyDataProvider->getCurrencyById($orderForViewing->getCurrencyId());
+
+        $form = $this->createForm(AddProductRowType::class, [], [
+            'order_id' => $orderId,
+            'currency' => $currency,
+            'is_multishipment_is_enabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
+        ]);
+
+        return $this->render('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/add_product_form.html.twig', [
+            'addProductForm' => $form->createView(),
+            'orderForViewing' => $orderForViewing,
+            'isMultishipmentIsEnabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
+            'orderId' => $orderId,
         ]);
     }
 
@@ -1099,7 +1120,8 @@ class OrderController extends PrestaShopAdminController
         int $orderId,
         Request $request,
         #[Autowire(service: 'prestashop.core.form.identifiable_object.builder.cancel_product_form_builder')] FormBuilderInterface $formBuilder,
-        CurrencyDataProvider $currencyDataProvider
+        CurrencyDataProvider $currencyDataProvider,
+        FeatureFlagStateCheckerInterface $featureFlagStateChecker,
     ): Response {
         /** @var OrderForViewing $orderForViewing */
         $orderForViewing = $this->dispatchQuery(new GetOrderForViewing($orderId, QuerySorting::DESC));
@@ -1111,7 +1133,6 @@ class OrderController extends PrestaShopAdminController
 
         $invoiceId = (int) $request->get('invoice_id');
         $productId = (int) $request->get('product_id');
-        $shipmentId = (int) $request->get('shipment_id');
         $combinationId = (int) $request->get('combination_id');
 
         try {
@@ -1142,7 +1163,10 @@ class OrderController extends PrestaShopAdminController
             }
 
             $this->dispatchCommand($addProductCommand);
-            $this->dispatchCommand(new AddProductToShipment($shipmentId, $productId, $orderId, $combinationId));
+            if ($featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT)) {
+                $shipmentId = (int) $request->get('shipment_id');
+                $this->dispatchCommand(new AddProductToShipment($shipmentId, $productId, $orderId, $combinationId));
+            }
         } catch (Exception $e) {
             return $this->json(
                 ['message' => $this->getErrorMessageForException($e, $this->getErrorMessages($e))],

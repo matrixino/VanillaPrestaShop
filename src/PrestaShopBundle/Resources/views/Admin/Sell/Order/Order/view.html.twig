@@ -89,6 +89,9 @@
 
     {{ renderhook('displayAdminOrder', {id_order: orderForViewing.id}) }}
 
+    {% if isImprovedShipmentFeatureFlagEnabled is defined and isImprovedShipmentFeatureFlagEnabled == true %}
+      {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/add_product_modal.html.twig') }}
+    {% endif %}
     {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/add_order_discount_modal.html.twig') }}
     {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/update_shipping_modal.html.twig') }}
     {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/split_shipment_modal.html.twig') }}
