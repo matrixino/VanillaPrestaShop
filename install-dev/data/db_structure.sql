@@ -3138,24 +3138,24 @@ CREATE TABLE `PREFIX_business_entity_customer_b2b`
 
 CREATE TABLE `PREFIX_business_entity_domain`
 (
-  `id_domain`          INT UNSIGNED AUTO_INCREMENT        NOT NULL,
-  `id_business_entity` INT UNSIGNED                       NOT NULL,
-  `id_domain_type`     INT UNSIGNED        NOT NULL,
+  `id_domain`                  INT UNSIGNED AUTO_INCREMENT        NOT NULL,
+  `id_business_entity`         INT UNSIGNED                       NOT NULL,
+  `id_business_identifier`     INT UNSIGNED                       NOT NULL,
   `value`              VARCHAR(255) NOT NULL,
-  UNIQUE INDEX `uniq_business_entity_domain` (`id_business_entity`, `id_domain_type`),
+  UNIQUE INDEX `uniq_business_entity_domain` (`id_business_entity`, `id_business_identifier`),
   INDEX                `business_entity_domain_id_business_entity_idx` (`id_business_entity`),
-  INDEX                `business_entity_domain_id_domain_type_idx` (`id_domain_type`),
+  INDEX                `business_entity_domain_id_business_identifier_idx` (`id_business_identifier`),
   INDEX                `business_entity_domain_value_idx` (`value`),
   PRIMARY KEY (`id_domain`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
 
-CREATE TABLE `PREFIX_domain_type`
+CREATE TABLE `PREFIX_business_identifier`
 (
-  `id_domain_type` INT UNSIGNED AUTO_INCREMENT        NOT NULL,
-  `unremovable`    TINYINT(1)                 NOT NULL DEFAULT 0,
-  `deleted`        TINYINT(1)                 NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id_domain_type`)
+  `id_business_identifier` INT UNSIGNED AUTO_INCREMENT        NOT NULL,
+  `unremovable`    TINYINT(1)                                 NOT NULL DEFAULT 0,
+  `deleted`        TINYINT(1)                                 NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id_business_identifier`)
 ) ENGINE = ENGINE_TYPE
   DEFAULT CHARSET = utf8mb4 COLLATION;
 
