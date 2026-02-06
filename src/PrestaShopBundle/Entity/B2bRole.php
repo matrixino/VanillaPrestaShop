@@ -68,7 +68,7 @@ class B2bRole
     public function __construct()
     {
         $this->businessEntityCustomerB2bs = new ArrayCollection();
-        $this->b2bRoleAuthorizationRoles = new ArrayCollection(); // Initialisation de la collection
+        $this->b2bRoleAuthorizationRoles = new ArrayCollection();
     }
 
     public function getIdRole(): int
@@ -114,8 +114,6 @@ class B2bRole
 
         return $this;
     }
-
-    // Gestion de la relation OneToMany avec B2bRoleAuthorizationRole
 
     public function getB2bRoleAuthorizationRoles(): Collection
     {
