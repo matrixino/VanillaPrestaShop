@@ -10,4 +10,4 @@ concurrency:
 jobs:
   convention-check:
     name: Validate PR Metadata
-    uses: PrestaShop/.github/.github/workflows/validate-pr-metadata.yml@master
+    uses: PrestaShop/.github/.github/actions/validate-pr-metadata@master
