@@ -3859,10 +3859,10 @@ class CartCore extends ObjectModel
         }
 
         /*
-         * Allow modules to override the free shipping price and return their custom value, for example
-         * to specify it by zone or other criteria.
+         * Allow modules to override the free shipping price and return their custom value, for example to specify
+         * it by zone or other criteria. Make sure to convert it to the currency of the cart if needed.
          */
-        Hook::exec('actionOverrideShippingFreePrice', ['shippingFreePrice' => &$shippingFreePrice, 'id_zone' => $id_zone]);
+        Hook::exec('actionOverrideShippingFreePrice', ['shippingFreePrice' => &$shippingFreePrice, 'id_zone' => $id_zone, 'id_currency' => $this->id_currency]);
 
         $orderTotalwithDiscounts = $this->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING, null, null, false);
         if ($orderTotalwithDiscounts >= (float) $shippingFreePrice && (float) $shippingFreePrice > 0) {
@@ -3896,10 +3896,10 @@ class CartCore extends ObjectModel
         $shippingFreeWeight = (float) Configuration::get('PS_SHIPPING_FREE_WEIGHT');
 
         /*
-         * Allow modules to override the free shipping weight and return their custom value, for example
-         * to specify it by zone or other criteria.
+         * Allow modules to override the free shipping weight and return their custom value, for example to specify
+         * it by zone or other criteria. Make sure to convert it to the currency of the cart if needed.
          */
-        Hook::exec('actionOverrideShippingFreeWeight', ['shippingFreeWeight' => &$shippingFreeWeight, 'id_zone' => $id_zone]);
+        Hook::exec('actionOverrideShippingFreeWeight', ['shippingFreeWeight' => &$shippingFreeWeight, 'id_zone' => $id_zone, 'id_currency' => $this->id_currency]);
 
         if (!empty($shippingFreeWeight)
             && $this->getTotalWeight() >= (float) $shippingFreeWeight
