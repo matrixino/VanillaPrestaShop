@@ -37,7 +37,7 @@
 	<tr>
 		<td colspan="12">
 
-			{if $is_multishipment_enabled && count($products_by_shipment) > 0}
+			{if $has_shipment}
 				{foreach $products_by_shipment['physical_products'] item=$shipment name="shipments_loop"}
 					{include file="./invoice.shipment-tab.tpl" shipment=$shipment current=$smarty.foreach.shipments_loop.iteration totalShipment=$smarty.foreach.shipments_loop.total}
 				{/foreach}
@@ -81,7 +81,7 @@
 		<td colspan="12" height="10">&nbsp;</td>
 	</tr>
 
-	{if $cart_rules}
+	{if $cart_rules && $has_shipment}
 		<tr>
 			<td colspan="6" class="left">
 

@@ -227,18 +227,19 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $featureFlagManager = $containerFinder->getContainer()->get(FeatureFlagStateCheckerInterface::class);
         $isMultishipmentEnabled = $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT);
 
+        $queryBus = $containerFinder->getContainer()->get('prestashop.core.query_bus');
+
+        /** @var \PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentWithProducts[] $shipmentsWithProducts */
+        $shipmentsWithProducts = $queryBus->handle(new GetOrderShipmentsWithProducts($this->order->id));
+        $orderHasShipment = !empty($shipmentsWithProducts);
+
         $productsByShipment = [];
 
         // Sort products by Reference ID (and if equals (like combination) by Supplier Reference)
         $sorter = new Sorter();
         $order_details = $sorter->natural($order_details, Sorter::ORDER_DESC, 'product_reference', 'product_supplier_reference');
 
-        if ($isMultishipmentEnabled) {
-            $queryBus = $containerFinder->getContainer()->get('prestashop.core.query_bus');
-
-            /** @var \PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentWithProducts[] $shipmentsWithProducts */
-            $shipmentsWithProducts = $queryBus->handle(new GetOrderShipmentsWithProducts($this->order->id));
-
+        if ($orderHasShipment) {
             $orderDetailToShipmentId = [];
             foreach ($shipmentsWithProducts as $shipmentWithProducts) {
                 $shipmentId = $shipmentWithProducts->getShipmentId();
@@ -372,6 +373,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
         $data = [
             'is_multishipment_enabled' => $isMultishipmentEnabled,
+            'has_shipment' => $orderHasShipment,
             'products_by_shipment' => $productsByShipment,
             'order' => $this->order,
             'order_invoice' => $this->order_invoice,
