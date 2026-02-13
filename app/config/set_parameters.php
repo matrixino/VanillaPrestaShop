@@ -3,9 +3,6 @@
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
-
-use PrestaShopBundle\Install\Upgrade;
-
 $parametersFilepath = __DIR__ . '/parameters.php';
 if (file_exists($parametersFilepath)) {
     $parameters = require $parametersFilepath;
