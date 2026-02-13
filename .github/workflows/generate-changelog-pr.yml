@@ -55,7 +55,7 @@ jobs:
 
       - name: Generate changelog
         id: changelog
-        uses: boherm/ps.github/.github/actions/generate-changelog@master
+        uses: boherm/ps.github/.github/actions/generate-changelog@generate-changelog-action
         with:
           github_token: ${{ github.token }}
           repository: ${{ github.repository }}
