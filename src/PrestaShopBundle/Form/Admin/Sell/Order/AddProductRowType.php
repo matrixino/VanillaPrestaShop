@@ -32,8 +32,8 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -124,10 +124,9 @@ class AddProductRowType extends TranslatorAwareType
                 'label' => $this->trans('tax incl.', 'Admin.Global'),
                 'currency' => $options['currency']->iso_code,
             ])
-            ->add('quantity', NumberType::class, [
+            ->add('quantity', IntegerType::class, [
                 'label' => false,
                 'data' => 1,
-                'scale' => 0,
                 'attr' => [
                     'min' => 1,
                 ],

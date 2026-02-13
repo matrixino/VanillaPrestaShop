@@ -71,7 +71,7 @@ class ListAvailableShipmentsForProductHandler implements ListAvailableShipmentsF
 
         foreach ($getShipmentsFromOrder as $shipment) {
             // productInstance->getCarriers() return empty array if product is handle by ALL carriers
-            if (count($productInstance->getCarriers()) === 0 || in_array($shipment->getCarrierId(), $productInstance->getCarriers())) {
+            if (count($productInstance->getCarriers()) === 0 || in_array($shipment->getCarrierId(), array_column($productInstance->getCarriers(), 'id_carrier'))) {
                 $availableShipmentsForProductSelected[] = new ShipmentsForProduct($shipment->getId(), $this->translator->trans('Shipment ', [], 'Shop.Forms.Labels') . $shipment->getId());
             }
         }
