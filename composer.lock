@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6c694081f0f120fb589575c9614c80c",
+    "content-hash": "b948a50b8fb50c7f805caabaf23f38c9",
     "packages": [
         {
             "name": "api-platform/core",
@@ -16718,16 +16718,16 @@
         },
         {
             "name": "prestashop/header-stamp",
-            "version": "dev-improve-header-stamp",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jolelievre/header-stamp.git",
-                "reference": "731d3b1f9c09dc562ea57621c2222032f4a3e43a"
+                "url": "https://github.com/PrestaShopCorp/header-stamp.git",
+                "reference": "60af59faee76bcc26ee9fc9e367ae899661b28ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jolelievre/header-stamp/zipball/731d3b1f9c09dc562ea57621c2222032f4a3e43a",
-                "reference": "731d3b1f9c09dc562ea57621c2222032f4a3e43a",
+                "url": "https://api.github.com/repos/PrestaShopCorp/header-stamp/zipball/60af59faee76bcc26ee9fc9e367ae899661b28ce",
+                "reference": "60af59faee76bcc26ee9fc9e367ae899661b28ce",
                 "shasum": ""
             },
             "require": {
@@ -16751,23 +16751,7 @@
                     "PrestaShop\\HeaderStamp\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Tests\\Integration\\": "tests/Integration",
-                    "Tests\\Unit\\": "tests/Unit"
-                }
-            },
-            "scripts": {
-                "cs-fixer": [
-                    "@php -d date.timezone=UTC ./vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --diff-format udiff"
-                ],
-                "integration-tests": [
-                    "@php -d date.timezone=UTC ./vendor/phpunit/phpunit/phpunit -c tests/Integration/phpunit.xml"
-                ],
-                "unit-tests": [
-                    "@php -d date.timezone=UTC ./vendor/phpunit/phpunit/phpunit -c tests/Unit/phpunit.xml"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "AFL-3.0"
             ],
@@ -16780,9 +16764,10 @@
             "description": "Rewrite your file headers to add the license or to make them up-to-date",
             "homepage": "https://github.com/PrestaShopCorp/header-stamp",
             "support": {
-                "source": "https://github.com/jolelievre/header-stamp/tree/improve-header-stamp"
+                "issues": "https://github.com/PrestaShopCorp/header-stamp/issues",
+                "source": "https://github.com/PrestaShopCorp/header-stamp/tree/v3.0.0"
             },
-            "time": "2026-02-11T19:01:45+00:00"
+            "time": "2026-02-13T12:19:40+00:00"
         },
         {
             "name": "rector/rector",
@@ -18320,7 +18305,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "prestashop/header-stamp": 20,
         "prestashop/ps_apiresources": 20
     },
     "prefer-stable": true,
