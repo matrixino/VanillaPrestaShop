@@ -53,6 +53,15 @@ jobs:
       - name: Fetch tags
         run: git fetch --tags
 
+      - name: Display parameters
+        run: |
+          echo Generating changelog with following parameters:
+          echo repository: ${{ github.repository }}
+          echo previous_ref: ${{ inputs.previous_ref }}
+          echo target_ref: ${{ inputs.target_ref || inputs.base_branch }}
+          echo next_version: ${{ inputs.next_version }}
+          echo release_date: ${{ inputs.release_date }}
+
       - name: Generate changelog
         id: changelog
         uses: boherm/ps.github/.github/actions/generate-changelog@generate-changelog-action
@@ -60,7 +69,7 @@ jobs:
           github_token: ${{ github.token }}
           repository: ${{ github.repository }}
           previous_ref: ${{ inputs.previous_ref }}
-          target_ref: ${{ inputs.target_ref != '' && inputs.target_ref || inputs.base-branch }}
+          target_ref: ${{ inputs.target_ref || inputs.base_branch }}
           next_version: ${{ inputs.next_version }}
           release_date: ${{ inputs.release_date }}
 
