@@ -60,7 +60,7 @@ jobs:
           github_token: ${{ github.token }}
           repository: ${{ github.repository }}
           previous_ref: ${{ inputs.previous_ref }}
-          target_ref: ${{ inputs.target_ref != '' && inputs.target_ref || input.base-branch }}
+          target_ref: ${{ inputs.target_ref != '' && inputs.target_ref || inputs.base-branch }}
           next_version: ${{ inputs.next_version }}
           release_date: ${{ inputs.release_date }}
 
