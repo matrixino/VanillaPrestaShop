@@ -3,6 +3,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
+import FormFieldToggler, {ToggleType} from '@components/form/form-field-toggler';
 import PriceReductionManager from '@components/form/price-reduction-manager';
 import DiscountMap from '@pages/discount/discount-map';
 import CreateFreeGiftDiscount from '@pages/discount/form/create-free-gift-discount';
@@ -74,6 +75,14 @@ $(() => {
   } else {
     $(DiscountMap.quantityPerCustomerInput).parents('.form-group').show();
   }
+
+  new FormFieldToggler({
+    disablingInputSelector: DiscountMap.periodNeverExpiresCheckbox,
+    matchingValue: '1',
+    disableOnMatch: true,
+    targetSelector: DiscountMap.periodExpiryDateFormGroup,
+    toggleType: ToggleType.visibility,
+  });
 
   $(DiscountMap.countriesSelect).select2({
     templateResult: formatOption,

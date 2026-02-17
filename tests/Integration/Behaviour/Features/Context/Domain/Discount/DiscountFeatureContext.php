@@ -9,9 +9,7 @@ namespace Tests\Integration\Behaviour\Features\Context\Domain\Discount;
 use Behat\Gherkin\Node\TableNode;
 use Cart;
 use CartRule;
-use DateTime;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Exception;
 use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
@@ -202,11 +200,8 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         if (isset($data['valid_from'])) {
             $validFrom = new DateTimeImmutable($data['valid_from']);
 
-            // Check if "never expires" is set
             if (isset($data['period_never_expires']) && PrimitiveUtils::castStringBooleanIntoBoolean($data['period_never_expires'])) {
-                // Set expiration date to 100 years in the future
-                $validTo = (new DateTime())->modify('+100 years')->setTime(23, 59, 59);
-                $validTo = DateTimeImmutable::createFromMutable($validTo);
+                $validTo = null;
             } elseif (!empty($data['valid_to'])) {
                 $validTo = new DateTimeImmutable($data['valid_to']);
             } else {
@@ -380,17 +375,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             $command->setActive(PrimitiveUtils::castStringBooleanIntoBoolean($data['active']));
         }
         if (isset($data['period_never_expires']) && PrimitiveUtils::castStringBooleanIntoBoolean($data['period_never_expires'])) {
-            // When "never expires" is set, use 100 years in the future
             if (isset($data['valid_from'])) {
                 $validFrom = new DateTimeImmutable($data['valid_from']);
             } else {
                 $validFrom = new DateTimeImmutable();
             }
-            $validTo = (new DateTime())->modify('+100 years')->setTime(23, 59, 59);
-            $validTo = DateTimeImmutable::createFromMutable($validTo);
 
             try {
-                $command->setValidityDateRange($validFrom, $validTo);
+                $command->setValidityDateRange($validFrom, null);
             } catch (DiscountConstraintException $e) {
                 $this->setLastException($e);
             }
@@ -718,7 +710,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
             Assert::assertSame($this->referencesToIds($expectedData['countries']), $discountForEditing->getCountryIds(), 'Unexpected countries');
         }
         if (isset($expectedData['period_never_expires'])) {
-            $neverExpires = $this->isPeriodNeverExpires($discountForEditing->getValidTo());
+            $neverExpires = $discountForEditing->getValidTo() === null;
             Assert::assertSame(
                 PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['period_never_expires']),
                 $neverExpires,
@@ -731,40 +723,15 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
-     * @Then discount :discountReference expiration date should be more than :years years in the future
+     * @Then discount :discountReference should have no expiration date
      */
-    public function assertExpirationDateIsFarInFuture(string $discountReference, int $years = 50): void
+    public function assertDiscountHasNoExpirationDate(string $discountReference): void
     {
         $discountForEditing = $this->getDiscountForEditing($discountReference);
-        $validTo = $discountForEditing->getValidTo();
-
-        Assert::assertNotNull($validTo, 'Expiration date should not be null');
-
-        $now = new DateTime();
-        $threshold = $now->modify('+' . $years . ' years');
-
-        Assert::assertGreaterThan(
-            $threshold,
-            $validTo,
-            sprintf('Expiration date should be more than %d years in the future', $years)
+        Assert::assertNull(
+            $discountForEditing->getValidTo(),
+            'Discount should have no expiration date (period never expires)'
         );
-    }
-
-    /**
-     * Check if the discount period is set to "never expires" (100 years in the future).
-     */
-    private function isPeriodNeverExpires(?DateTimeInterface $validTo): bool
-    {
-        if ($validTo === null) {
-            return false;
-        }
-
-        // Check if the expiration date is more than 50 years in the future
-        // (we use 50 years as a threshold to detect "never expires" dates set to 100 years)
-        $now = new DateTime();
-        $threshold = $now->modify('+50 years');
-
-        return $validTo > $threshold;
     }
 
     protected function getDiscountForEditing(string $discountReference): DiscountForEditing

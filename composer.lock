@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d093436d510292d38939f8f83b18d79d",
+    "content-hash": "e84fc033e547231cc577e5f8ceb7ec1d",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5208,16 +5208,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "v0.5.0",
+            "version": "dev-change-validto",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PrestaShop/ps_apiresources.git",
-                "reference": "9521020fbdbc3b8791b077f1af148e007a99dce1"
+                "reference": "c74a019fc74aa0df82b5b5a8187ca17c1fbfe9bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/9521020fbdbc3b8791b077f1af148e007a99dce1",
-                "reference": "9521020fbdbc3b8791b077f1af148e007a99dce1",
+                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/c74a019fc74aa0df82b5b5a8187ca17c1fbfe9bc",
+                "reference": "c74a019fc74aa0df82b5b5a8187ca17c1fbfe9bc",
                 "shasum": ""
             },
             "require": {
@@ -5281,10 +5281,10 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/PrestaShop/ps_apiresources/tree/v0.5.0",
+                "source": "https://github.com/PrestaShop/ps_apiresources/tree/change-validto",
                 "issues": "https://github.com/PrestaShop/ps_apiresources/issues"
             },
-            "time": "2026-02-18T13:38:08+00:00"
+            "time": "2026-02-24T15:00:54+00:00"
         },
         {
             "name": "prestashop/ps_banner",
@@ -18303,7 +18303,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "prestashop/ps_apiresources": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

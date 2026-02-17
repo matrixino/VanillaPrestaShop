@@ -128,13 +128,12 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
 
             $neverExpires = !empty($data['period']['period_never_expires']);
             if ($neverExpires) {
-                $validTo = (new DateTime())->modify('+100 years')->setTime(23, 59, 59);
-                $validTo = DateTimeImmutable::createFromMutable($validTo);
+                $validTo = null;
             } else {
                 $validTo = $this->parseDateWithDefaultTime($dateRange['to'] ?? null, '23:59');
             }
 
-            if ($validFrom && $validTo) {
+            if ($validFrom) {
                 $command->setValidityDateRange($validFrom, $validTo);
             }
         }
