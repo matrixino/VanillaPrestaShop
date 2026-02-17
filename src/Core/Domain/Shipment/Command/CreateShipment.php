@@ -30,6 +30,7 @@ namespace PrestaShop\PrestaShop\Core\Domain\Shipment\Command;
 
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 
 class CreateShipment
 {
@@ -39,10 +40,17 @@ class CreateShipment
     /** @var CarrierId */
     private $carrierId;
 
-    public function __construct(int $orderId, int $carrierId)
+    /** @var ProductId */
+    private $productId;
+
+    private int $quantity;
+
+    public function __construct(int $orderId, int $carrierId, int $productId, int $quantity)
     {
         $this->orderId = new OrderId($orderId);
         $this->carrierId = new CarrierId($carrierId);
+        $this->productId = new ProductId($productId);
+        $this->quantity = $quantity;
     }
 
     public function getOrderId(): OrderId
@@ -53,5 +61,15 @@ class CreateShipment
     public function getCarrierId(): CarrierId
     {
         return $this->carrierId;
+    }
+
+    public function getProductId(): ProductId
+    {
+        return $this->productId;
+    }
+
+    public function getQuantity(): int
+    {
+        return $this->quantity;
     }
 }

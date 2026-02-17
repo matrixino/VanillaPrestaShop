@@ -1168,7 +1168,7 @@ class OrderController extends PrestaShopAdminController
                 }
                 if ($shipmentId === 0) {
                     $carrierId = (int) $request->get('carrier_id');
-                    $shipmentId = $this->dispatchCommand(new CreateShipment($orderId, $carrierId));
+                    $shipmentId = $this->dispatchCommand(new CreateShipment($orderId, $carrierId, $productId, (int) $request->get('quantity')));
                 }
             }
         } catch (Exception $e) {

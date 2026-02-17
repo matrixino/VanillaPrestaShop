@@ -31,3 +31,8 @@ services:
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\AddProductToShipmentHandler:
 
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\CreateShipmentHandler:
+
+  PrestaShop\PrestaShop\Adapter\Shipping\ShippingCostCalculator:
+
+  PrestaShop\PrestaShop\Adapter\Shipping\ShippingCostCalculatorInterface:
+    alias: PrestaShop\PrestaShop\Adapter\Shipping\ShippingCostCalculator
