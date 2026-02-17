@@ -42,6 +42,10 @@ $releaseOptions = [
         'description' => 'Keep tests folder in the release. Default: false.',
         'longopt' => 'keep-tests',
     ],
+    'distribution' => [
+        'description' => 'Distribution type for app/metadata.json (e.g. open_source). When set, metadata file is generated.',
+        'longopt' => 'distribution::',
+    ],
     'help' => [
         'description' => 'Show help',
         'opt' => 'h',
@@ -75,6 +79,7 @@ if (isset($userOptions['h'])
 $destinationDir = '';
 $useZip = $useInstaller = true;
 $keepTests = false;
+$distribution = '';
 
 if (isset($userOptions['version'])) {
     $version = $userOptions['version'];
@@ -98,8 +103,12 @@ if (isset($userOptions['keep-tests'])) {
     $keepTests = true;
 }
 
+if (isset($userOptions['distribution'])) {
+    $distribution = $userOptions['distribution'];
+}
+
 try {
-    $releaseCreator = new ReleaseCreator($version, $useInstaller, $useZip, $destinationDir, $keepTests);
+    $releaseCreator = new ReleaseCreator($version, $useInstaller, $useZip, $destinationDir, $keepTests, $distribution);
     $releaseCreator->createRelease();
 } catch (Exception $e) {
     $consoleWrite->displayText(
