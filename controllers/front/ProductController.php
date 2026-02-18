@@ -285,7 +285,7 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
         }
 
         // Load category and store it in cookie
-        $this->category = new Category((int) $id_category, (int) $this->context->cookie->id_lang);
+        $this->category = new Category((int) $id_category, (int) $this->context->language->id);
         $this->context->cookie->last_visited_category = (int) $this->category->id_category;
     }
 
@@ -529,24 +529,24 @@ class ProductControllerCore extends ProductPresentingFrontControllerCore
     protected function assignPriceAndTax(): void
     {
         $id_customer = (isset($this->context->customer) ? (int) $this->context->customer->id : 0);
-        $id_group = (int) Group::getCurrent()->id;
         $id_country = $id_customer ? (int) Customer::getCurrentCountry($id_customer) : (int) Tools::getCountry();
 
         // Tax
         $tax = (float) $this->product->getTaxesRate(new Address((int) $this->context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')}));
         $this->context->smarty->assign('tax_rate', $tax);
 
-        $product_price_with_tax = Product::getPriceStatic($this->product->id, true, null, 6);
-        if (Product::$_taxCalculationMethod == PS_TAX_INC) {
-            $product_price_with_tax = Tools::ps_round($product_price_with_tax, 2);
-        }
-
-        $id_currency = (int) $this->context->cookie->id_currency;
-        $id_product = (int) $this->product->id;
         $id_product_attribute = $this->getIdProductAttributeByGroupOrRequestOrDefault();
-        $id_shop = $this->context->shop->id;
 
-        $quantity_discounts = SpecificPrice::getQuantityDiscounts($id_product, $id_shop, $id_currency, $id_country, $id_group, $id_product_attribute, false, (int) $this->context->customer->id);
+        $quantity_discounts = SpecificPrice::getQuantityDiscounts(
+            (int) $this->product->id,
+            (int) $this->context->shop->id,
+            (int) $this->context->currency->id,
+            $id_country,
+            (int) Group::getCurrent()->id,
+            $id_product_attribute,
+            false,
+            (int) $this->context->customer->id
+        );
         foreach ($quantity_discounts as &$quantity_discount) {
             if ($quantity_discount['id_product_attribute']) {
                 $combination = new Combination((int) $quantity_discount['id_product_attribute']);

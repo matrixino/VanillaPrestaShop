@@ -300,7 +300,7 @@ abstract class PaymentModuleCore extends Module
             if (Validate::isLoadedObject($rule)) {
                 if ($error = $rule->checkValidity($this->context, true, true)) {
                     $this->context->cart->removeCartRule((int) $rule->id);
-                    if (isset($this->context->cookie, $this->context->cookie->id_customer) && $this->context->cookie->id_customer && !empty($rule->code)) {
+                    if (!empty($this->context->customer->id) && !empty($rule->code)) {
                         Tools::redirect($this->context->link->getPageLink(
                             'order',
                             null,
