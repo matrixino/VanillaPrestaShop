@@ -8,10 +8,12 @@ namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\General;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Order;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Core\Feature\Enum\ShopModeEnum;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -113,19 +115,8 @@ class PreferencesType extends TranslatorAwareType
 
         if ($showB2bShopMode) {
             $builder
-                ->add(self::SHOP_MODE, ChoiceType::class, [
-                    'placeholder' => false,
-                    'choices' => [
-                        $this->trans(
-                            'B2C only',
-                            'Admin.Shopparameters.Feature') => self::SHOP_MODE_B2C_ONLY,
-                        $this->trans(
-                            'B2B only',
-                            'Admin.Shopparameters.Feature') => self::SHOP_MODE_B2B_ONLY,
-                        $this->trans(
-                            'B2B and B2C',
-                            'Admin.Shopparameters.Feature') => self::SHOP_MODE_B2B_AND_B2C,
-                    ],
+                ->add(self::SHOP_MODE, EnumType::class, [
+                    'class' => ShopModeEnum::class,
                     'label' => $this->trans(
                         'Shop mode',
                         'Admin.Shopparameters.Feature'),

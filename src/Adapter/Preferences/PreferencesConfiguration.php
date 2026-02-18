@@ -8,8 +8,8 @@ namespace PrestaShop\PrestaShop\Adapter\Preferences;
 
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Core\Configuration\DataConfigurationInterface;
-use PrestaShop\PrestaShop\Core\Feature\B2BModeFeature;
-use PrestaShop\PrestaShop\Core\Feature\B2CModeFeature;
+use PrestaShop\PrestaShop\Core\Feature\Enum\ShopModeEnum;
+use PrestaShop\PrestaShop\Core\Feature\ShopModeFeature;
 use PrestaShop\PrestaShop\Core\Http\CookieOptions;
 use PrestaShopBundle\Form\Admin\Configure\ShopParameters\General\PreferencesType;
 use PrestaShopLogger;
@@ -35,14 +35,11 @@ class PreferencesConfiguration implements DataConfigurationInterface
      */
     public function getConfiguration()
     {
-        $b2cEnabled = $this->configuration->getBoolean(B2CModeFeature::CONFIGURATION_NAME);
-        $b2bEnabled = $this->configuration->getBoolean(B2BModeFeature::CONFIGURATION_NAME);
-
-        $shopMode = match (true) {
-            $b2cEnabled && $b2bEnabled => PreferencesType::SHOP_MODE_B2B_AND_B2C,
-            $b2bEnabled => PreferencesType::SHOP_MODE_B2B_ONLY,
-            default => PreferencesType::SHOP_MODE_B2C_ONLY,
-        };
+        $shopMode = $this->configuration->getEnum(
+            ShopModeFeature::CONFIGURATION_NAME,
+            ShopModeEnum::class,
+            ShopModeFeature::DEFAULT_SHOP_MODE
+        );
 
         return [
             'enable_ssl' => $this->configuration->getBoolean('PS_SSL_ENABLED'),
@@ -84,49 +81,19 @@ class PreferencesConfiguration implements DataConfigurationInterface
             ];
         }
 
-        $shopMode = (string) $configuration[PreferencesType::SHOP_MODE];
+        /** @var ShopModeEnum $newShopModeValue */
+        $newShopModeValue = $configuration[PreferencesType::SHOP_MODE];
 
-        switch ($shopMode) {
-            case PreferencesType::SHOP_MODE_B2C_ONLY:
-                $newB2cModeValue = true;
-                $newB2bModeValue = false;
-                break;
+        /** @var ShopModeEnum $oldShopModeValue */
+        $oldShopModeValue = $this->configuration->getEnum(
+            ShopModeFeature::CONFIGURATION_NAME,
+            ShopModeEnum::class,
+            ShopModeFeature::DEFAULT_SHOP_MODE
+        );
 
-            case PreferencesType::SHOP_MODE_B2B_ONLY:
-                $newB2cModeValue = false;
-                $newB2bModeValue = true;
-                break;
-
-            case PreferencesType::SHOP_MODE_B2B_AND_B2C:
-                $newB2cModeValue = true;
-                $newB2bModeValue = true;
-                break;
-
-            default:
-                return [[
-                    'key' => 'Invalid shop mode value.',
-                    'domain' => 'Admin.Notifications.Warning',
-                    'parameters' => [],
-                ]];
-        }
-
-        $oldB2cModeValue = $this->configuration->getBoolean(B2CModeFeature::CONFIGURATION_NAME);
-        $oldB2bModeValue = $this->configuration->getBoolean(B2BModeFeature::CONFIGURATION_NAME);
-
-        if ($oldB2cModeValue !== $newB2cModeValue) {
+        if ($oldShopModeValue !== $newShopModeValue) {
             PrestaShopLogger::addLog(
-                sprintf('B2C mode updated: from %s to %s', $oldB2cModeValue ? '1' : '0', $newB2cModeValue ? '1' : '0'),
-                1,
-                null,
-                'Configuration',
-                0,
-                true
-            );
-        }
-
-        if ($oldB2bModeValue !== $newB2bModeValue) {
-            PrestaShopLogger::addLog(
-                sprintf('B2B mode updated: from %s to %s', $oldB2bModeValue ? '1' : '0', $newB2bModeValue ? '1' : '0'),
+                sprintf('Shop mode updated: from "%s" to "%s"', $oldShopModeValue->value, $newShopModeValue->value),
                 1,
                 null,
                 'Configuration',
@@ -137,8 +104,7 @@ class PreferencesConfiguration implements DataConfigurationInterface
 
         $this->configuration->set('PS_SSL_ENABLED', $configuration['enable_ssl']);
         $this->configuration->set('PS_TOKEN_ENABLE', $configuration['enable_token']);
-        $this->configuration->set(B2CModeFeature::CONFIGURATION_NAME, $newB2cModeValue);
-        $this->configuration->set(B2BModeFeature::CONFIGURATION_NAME, $newB2bModeValue);
+        $this->configuration->set(ShopModeFeature::CONFIGURATION_NAME, $newShopModeValue->value);
         $this->configuration->set('PS_ALLOW_HTML_IFRAME', $configuration['allow_html_iframes']);
         $this->configuration->set('PS_USE_HTMLPURIFIER', $configuration['use_htmlpurifier']);
         $this->configuration->set('PS_PRICE_ROUND_MODE', $configuration['price_round_mode']);
