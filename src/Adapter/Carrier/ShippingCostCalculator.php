@@ -18,6 +18,7 @@ use PrestaShop\PrestaShop\Adapter\Currency\Repository\CurrencyRepository;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Adapter\Tools;
 use PrestaShop\PrestaShop\Core\Context\CurrencyContext;
+use PrestaShop\PrestaShop\Core\Domain\Address\Exception\AddressNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\ShippingCalculationRequest;
@@ -119,6 +120,7 @@ class ShippingCostCalculator
                     new AddressId($request->getAddressId())
                 );
             } catch (Exception $e) {
+                throw new AddressNotFoundException(sprintf('An error occured while retrieving address with %s', $request->getAddressId()), 400);
             }
         }
 
@@ -190,18 +192,18 @@ class ShippingCostCalculator
         $shippingMethod = $carrier->getShippingMethod();
 
         if ($carrier->range_behavior) {
-            if ($shippingMethod == Carrier::SHIPPING_METHOD_WEIGHT) {
+            if ($shippingMethod === Carrier::SHIPPING_METHOD_WEIGHT) {
                 if (Carrier::checkDeliveryPriceByWeight($carrier->id, $totalWeight, $zoneId) === false) {
                     return new DecimalNumber('0');
                 }
-            } elseif ($shippingMethod == Carrier::SHIPPING_METHOD_PRICE) {
+            } elseif ($shippingMethod === Carrier::SHIPPING_METHOD_PRICE) {
                 if (Carrier::checkDeliveryPriceByPrice($carrier->id, $orderTotal, $zoneId, $currencyId) === false) {
                     return new DecimalNumber('0');
                 }
             }
         }
 
-        if ($shippingMethod == Carrier::SHIPPING_METHOD_WEIGHT) {
+        if ($shippingMethod === Carrier::SHIPPING_METHOD_WEIGHT) {
             $cost = $carrier->getDeliveryPriceByWeight($totalWeight, $zoneId);
         } else {
             $cost = $carrier->getDeliveryPriceByPrice($orderTotal, $zoneId, $currencyId);
@@ -220,8 +222,11 @@ class ShippingCostCalculator
             }
 
             if (isset($product['additional_shipping_cost']) && $product['additional_shipping_cost'] > 0) {
+                $productShippingCost = (float) $product['additional_shipping_cost'];
+                $productQuantity = (int) $product['quantity'];
+
                 $productCost = new DecimalNumber(
-                    (string) ((float) $product['additional_shipping_cost'] * (int) $product['quantity'])
+                    (string) ($productShippingCost * $productQuantity)
                 );
                 $additionalCost = $additionalCost->plus($productCost);
             }
@@ -232,9 +237,11 @@ class ShippingCostCalculator
 
     private function convertCurrency(DecimalNumber $amount, int $currencyId): DecimalNumber
     {
+        $currency = $this->currencyRepository->get(new CurrencyId($currencyId));
+
         $converted = $this->tools->convertPrice(
             (float) (string) $amount,
-            $this->currencyRepository->get(new CurrencyId($currencyId))
+            $currency
         );
 
         return new DecimalNumber((string) $converted);
