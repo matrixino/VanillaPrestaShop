@@ -221,7 +221,7 @@ class ShippingCostCalculator
 
             if (isset($product['additional_shipping_cost']) && $product['additional_shipping_cost'] > 0) {
                 $productCost = new DecimalNumber(
-                    (string) ((float) $product['additional_shipping_cost'] * (int) $product['quantity'])
+                    (string) ($product['additional_shipping_cost'] * $product['quantity'])
                 );
                 $additionalCost = $additionalCost->plus($productCost);
             }
@@ -233,7 +233,7 @@ class ShippingCostCalculator
     private function convertCurrency(DecimalNumber $amount, int $currencyId): DecimalNumber
     {
         $converted = $this->tools->convertPrice(
-            (float) (string) $amount,
+            (float) $amount,
             $this->currencyRepository->get(new CurrencyId($currencyId))
         );
 
@@ -259,10 +259,10 @@ class ShippingCostCalculator
         }
 
         $taxExcludedRounded = new DecimalNumber(
-            (string) $this->tools->round((float) (string) $taxExcluded, $precision)
+            (string) $this->tools->round((float) $taxExcluded, $precision)
         );
         $taxIncludedRounded = new DecimalNumber(
-            (string) $this->tools->round((float) (string) $taxIncluded, $precision)
+            (string) $this->tools->round((float) $taxIncluded, $precision)
         );
 
         return new ShippingCostResult(
