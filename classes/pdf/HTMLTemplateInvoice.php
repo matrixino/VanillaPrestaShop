@@ -1,4 +1,5 @@
 <?php
+
 /**
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
@@ -223,10 +224,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
         $containerFinder = new ContainerFinder(Context::getContext());
 
-        /** @var FeatureFlagStateCheckerInterface $featureFlagManager */
-        $featureFlagManager = $containerFinder->getContainer()->get(FeatureFlagStateCheckerInterface::class);
-        $isMultishipmentEnabled = $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT);
-
         $queryBus = $containerFinder->getContainer()->get('prestashop.core.query_bus');
 
         /** @var \PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipmentWithProducts[] $shipmentsWithProducts */
@@ -372,7 +369,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         }
 
         $data = [
-            'is_multishipment_enabled' => $isMultishipmentEnabled,
             'has_shipment' => $orderHasShipment,
             'products_by_shipment' => $productsByShipment,
             'order' => $this->order,

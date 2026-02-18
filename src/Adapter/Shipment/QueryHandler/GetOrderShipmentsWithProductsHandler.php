@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -71,20 +70,14 @@ class GetOrderShipmentsWithProductsHandler implements GetOrderShipmentsWithProdu
         foreach ($shipments as $shipment) {
             $shipmentId = $shipment->getId();
 
-            try {
-                $carrier = $this->carrierRepository->get(new CarrierId($shipment->getCarrierId()));
-                $carrierName = $carrier->name;
-            } catch (Throwable $e) {
-                // Fallback if carrier not found
-                $carrierName = '';
-            }
+            $carrier = $this->carrierRepository->get(new CarrierId($shipment->getCarrierId()));
 
             $orderDetailIds = $shipmentProductMapping[$shipmentId] ?? [];
 
             $result[] = new OrderShipmentWithProducts(
                 $shipmentId,
                 $orderDetailIds,
-                $carrierName,
+                $carrier->name,
                 $shipment->getTrackingNumber()
             );
         }

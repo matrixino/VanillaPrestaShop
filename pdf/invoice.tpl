@@ -101,7 +101,7 @@
 		<td colspan="1">&nbsp;</td>
 	</tr>
 
-	{if !$is_multishipment_enabled}
+	{if !$has_shipment}
 		<tr>
 			<td colspan="6" class="left">
 
