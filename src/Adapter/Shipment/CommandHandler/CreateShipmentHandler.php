@@ -22,6 +22,7 @@ use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\ShippingCalculationRequest;
 use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 use PrestaShop\PrestaShop\Core\Domain\Currency\ValueObject\CurrencyId;
+use PrestaShop\PrestaShop\Core\Domain\Product\Combination\ValueObject\CombinationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\CreateShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\CommandHandler\CreateShipmentHandlerInterface;
@@ -53,6 +54,7 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
             $carrierId = $command->getCarrierId()->getValue();
             $productId = $command->getProductId();
             $quantity = $command->getQuantity();
+            $combinationId = $command->getProductCombinationId();
 
             $shipment = new Shipment();
             $shipment->setOrderId((int) $order->id);
@@ -60,7 +62,7 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
             $shipment->setAddressId((int) $order->id_address_delivery);
             $shipment->setTrackingNumber(null);
 
-            $shippingCosts = $this->calculateShippingCosts($order, $carrierId, $productId, $quantity);
+            $shippingCosts = $this->calculateShippingCosts($order, $carrierId, $productId, $quantity, $combinationId);
             $shipment->setShippingCostTaxExcluded($shippingCosts['tax_excluded']);
             $shipment->setShippingCostTaxIncluded($shippingCosts['tax_included']);
 
@@ -77,14 +79,14 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
     /**
      * @return array{tax_excluded: float, tax_included: float}
      */
-    private function calculateShippingCosts(Order $order, int $carrierId, ProductId $productId, int $quantity): array
+    private function calculateShippingCosts(Order $order, int $carrierId, ProductId $productId, int $quantity, ?CombinationId $combinationId): array
     {
         try {
             $product = $this->productRepository->get($productId, new ShopId($this->shopContext->getContextShopID()));
 
             $productArray = [
                 'id_product' => (int) $product->id,
-                'id_product_attribute' => 0,
+                'id_product_attribute' => $combinationId->getValue() ?? 0,
                 'quantity' => $quantity,
                 'weight' => (float) $product->weight,
                 'weight_attribute' => null,

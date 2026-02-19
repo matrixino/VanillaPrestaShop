@@ -1165,7 +1165,7 @@ class OrderController extends PrestaShopAdminController
 
                 if ($shipmentId === 0 && !$isVirtual) {
                     $carrierId = (int) $request->get('carrier_id');
-                    $shipmentId = $this->dispatchCommand(new CreateShipment($orderId, $carrierId, $productId, (int) $request->get('quantity')));
+                    $shipmentId = $this->dispatchCommand(new CreateShipment($orderId, $carrierId, $productId, (int) $request->get('quantity'), $combinationId));
                 }
                 if (!$isVirtual) {
                     $this->dispatchCommand(new AddProductToShipment($shipmentId, $productId, $orderId, $combinationId));
