@@ -18,6 +18,7 @@ use PrestaShop\PrestaShop\Core\Grid\Action\Row\Type\SubmitRowAction;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollectionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BadgeColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\BulkActionColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DiscountUsageColumn;
@@ -25,6 +26,7 @@ use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollectionInterface;
+use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountTypeChoiceType;
 use PrestaShopBundle\Form\Admin\Type\DateRangeType;
 use PrestaShopBundle\Form\Admin\Type\FilterLinkFilterType;
 use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
@@ -93,10 +95,12 @@ final class DiscountGridDefinitionFactory extends AbstractGridDefinitionFactory 
                     ])
             )
             ->add(
-                (new DataColumn('discount_type'))
+                (new BadgeColumn('discount_type'))
                     ->setName($this->trans('Type', [], 'Admin.Catalog.Feature'))
                     ->setOptions([
-                        'field' => 'discount_type',
+                        'field' => 'discount_type_name',
+                        'alignment' => 'left',
+                        // 'badge_type' => 'info',
                     ])
             )
             ->add(
@@ -209,6 +213,10 @@ final class DiscountGridDefinitionFactory extends AbstractGridDefinitionFactory 
                         ],
                     ])
                     ->setAssociatedColumn('name')
+            )
+            ->add(
+                (new Filter('discount_type', DiscountTypeChoiceType::class))
+                    ->setAssociatedColumn('discount_type')
             )
             ->add(
                 (new Filter('active', ChoiceType::class))

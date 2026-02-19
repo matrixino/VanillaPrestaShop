@@ -436,6 +436,9 @@ services:
     class: 'PrestaShopBundle\Form\Admin\Sell\Discount\DiscountFeaturesType'
     arguments:
       $featuresChoiceProvider: '@prestashop.adapter.form.choice_provider.features_choice_provider'
+  PrestaShopBundle\Form\Admin\Sell\Discount\DiscountTypeChoiceType:
+    arguments:
+      $choiceProvider: '@PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\DiscountTypeChoiceProvider'
 
   PrestaShopBundle\Form\Admin\Sell\Discount\DiscountCustomerEligibilityChoiceType:
     arguments:

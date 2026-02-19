@@ -54,6 +54,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
                 'cr.id_cart_rule AS id_discount,
                 crl.name,
                 crt.discount_type,
+                crtl.name AS discount_type_name,
                 cr.code,
                 ' . $quantityUsedSubquery . ' AS quantity_used,
                 cr.total_quantity,
@@ -108,6 +109,12 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
                 'crt',
                 'cr.id_cart_rule_type = crt.id_cart_rule_type'
             )
+            ->leftJoin(
+                'crt',
+                $this->dbPrefix . 'cart_rule_type_lang',
+                'crtl',
+                'crt.id_cart_rule_type = crtl.id_cart_rule_type AND crtl.id_lang = :contextLangId'
+            )
             ->setParameter('contextLangId', $this->languageContext->getId())
         ;
 
@@ -126,7 +133,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
             'id_discount' => 'cr.id_cart_rule',
             'name' => 'crl.name',
             'code' => 'cr.code',
-            'discount_type' => 'crt.discount_type',
+            'discount_type' => 'crt.id_cart_rule_type',
             'active' => 'cr.active',
         ];
 
@@ -184,7 +191,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
 
     private function applyPeriodFilter(QueryBuilder $qb, mixed $value, DateTimeImmutable $now): void
     {
-        if (!is_string($value) || $value === '' || $value === DiscountSettings::PERIOD_FILTER_ALL) {
+        if (!is_string($value) || empty($value) || $value === DiscountSettings::PERIOD_FILTER_ALL) {
             return;
         }
 

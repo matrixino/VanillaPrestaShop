@@ -858,7 +858,7 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
         if (!$this->getSharedStorage()->exists(self::DISCOUNT_TYPE_PREFIX . $discountType)) {
             /** @var DiscountTypeRepository $repository */
             $repository = $this->getContainer()->get(DiscountTypeRepository::class);
-            $activeTypes = $repository->getAllActiveTypes();
+            $activeTypes = $repository->getAllActiveTypes($this->getDefaultLangId());
 
             // Cache all existing discount types in shared storage for future references
             foreach ($activeTypes as $activeType) {
