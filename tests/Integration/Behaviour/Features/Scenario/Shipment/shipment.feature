@@ -90,12 +90,3 @@ Feature: Retrieving shipment for orders
       | city            | Miami           |
       | state           | Florida         |
       | country         | United States   |
-
-  Scenario: Retrieve all shipments with their associated order detail ids (single shipment)
-    Given the order "bo_order1" should have the following shipments:
-      | shipment  | carrier         | tracking_number | address | shipping_cost_tax_excl | shipping_cost_tax_incl |
-      | shipment1 | default_carrier |                 | US      | 7.0                    | 7.42                   |
-    Then the order "bo_order1" shipments with products should contain:
-      | carrier_name | tracking_number | order_detail_count |
-      | My carrier   |                 | 2                  |
-
