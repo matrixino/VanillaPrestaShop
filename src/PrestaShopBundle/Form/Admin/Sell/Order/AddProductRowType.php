@@ -51,14 +51,16 @@ class AddProductRowType extends TranslatorAwareType
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $invoices = $builder->getData()['order_id'] ?
+        $data = $builder->getData();
+
+        $invoices = $data['order_id'] ?
             $this->orderInvoiceByIdChoiceProvider->getChoices([
-                'id_order' => $builder->getData()['order_id'],
+                'id_order' => $data['order_id'],
                 'id_lang' => $this->contextLangId,
                 'display_total' => false,
             ]) : [];
 
-        if ($builder->getData()['is_multishipment_is_enabled'] === true) {
+        if ($data['is_multishipment_is_enabled'] === true) {
             $builder
                 ->add('addShipment', ChoiceType::class, [
                     'label' => $this->trans('Select a shipment', 'Admin.Orderscustomers.Feature'),
@@ -87,8 +89,8 @@ class AddProductRowType extends TranslatorAwareType
                     'class' => 'col-sm-12',
                     'autocomplete' => 'off',
                     'placeholder' => $this->trans('Search for a product', 'Admin.Orderscustomers.Feature'),
-                    'data-currency' => $builder->getData()['currency']->id,
-                    'data-order' => $builder->getData()['order_id'],
+                    'data-currency' => $data['currency']->id,
+                    'data-order' => $data['order_id'],
                 ],
             ])
             ->add('addProductCombinations', ChoiceType::class, [
@@ -98,11 +100,11 @@ class AddProductRowType extends TranslatorAwareType
             ])
             ->add('price_tax_excluded', MoneyType::class, [
                 'label' => $this->trans('tax excl.', 'Admin.Global'),
-                'currency' => $builder->getData()['currency']->iso_code,
+                'currency' => $data['currency']->iso_code,
             ])
             ->add('price_tax_included', MoneyType::class, [
                 'label' => $this->trans('tax incl.', 'Admin.Global'),
-                'currency' => $builder->getData()['currency']->iso_code,
+                'currency' => $data['currency']->iso_code,
             ])
             ->add('quantity', IntegerType::class, [
                 'label' => false,
@@ -141,7 +143,7 @@ class AddProductRowType extends TranslatorAwareType
                 'disabled' => true,
                 'attr' => [
                     'class' => 'btn btn-sm btn-primary js-product-add-action-btn mt-2 mb-2',
-                    'data-order-id' => $builder->getData()['order_id'],
+                    'data-order-id' => $data['order_id'],
                 ],
             ])
         ;
