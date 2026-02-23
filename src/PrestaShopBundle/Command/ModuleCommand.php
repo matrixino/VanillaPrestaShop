@@ -6,6 +6,7 @@
 
 namespace PrestaShopBundle\Command;
 
+use Configuration;
 use Employee;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 use PrestaShop\PrestaShop\Adapter\Module\AdminModuleDataProvider;
@@ -13,7 +14,6 @@ use PrestaShop\PrestaShop\Adapter\Module\Configuration\ModuleSelfConfigurator;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Context\ContextBuilderPreparer;
 use PrestaShop\PrestaShop\Core\Module\ModuleManager;
-use PrestaShop\PrestaShop\Core\TemporaryConfigurationInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -52,7 +52,6 @@ class ModuleCommand extends Command
         protected readonly ModuleManager $moduleManager,
         protected readonly ContextBuilderPreparer $contextBuilderPreparer,
         protected readonly ConfigurationInterface $configuration,
-        protected readonly ?TemporaryConfigurationInterface $temporaryConfiguration = null,
     ) {
         parent::__construct();
     }
@@ -108,7 +107,7 @@ class ModuleCommand extends Command
 
         if ($skipOverrides) {
             $disableModuleOriginaleValue = $this->configuration->get('PS_DISABLE_MODULE_OVERRIDES');
-            $this->temporaryConfiguration?->setTemporary('PS_DISABLE_MODULE_OVERRIDES', 1);
+            Configuration::set('PS_DISABLE_MODULE_OVERRIDES', 1);
         }
 
         try {
@@ -119,7 +118,7 @@ class ModuleCommand extends Command
             }
         } finally {
             if ($skipOverrides) {
-                $this->temporaryConfiguration?->setTemporary('PS_DISABLE_MODULE_OVERRIDES', $disableModuleOriginaleValue);
+                Configuration::set('PS_DISABLE_MODULE_OVERRIDES', $disableModuleOriginaleValue);
             }
         }
 

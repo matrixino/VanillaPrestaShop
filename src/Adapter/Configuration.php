@@ -16,7 +16,6 @@ use LogicException;
 use PrestaShop\PrestaShop\Core\Domain\Configuration\ShopConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Domain\Shop\Exception\ShopException;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
-use PrestaShop\PrestaShop\Core\TemporaryConfigurationInterface;
 use PrestaShopBundle\Exception\NotImplementedException;
 use Shop;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -24,7 +23,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 /**
  * Adapter of Configuration ObjectModel.
  */
-class Configuration extends ParameterBag implements ShopConfigurationInterface, TemporaryConfigurationInterface
+class Configuration extends ParameterBag implements ShopConfigurationInterface
 {
     /**
      * @var Shop
@@ -270,14 +269,6 @@ class Configuration extends ParameterBag implements ShopConfigurationInterface, 
     public function delete($key)
     {
         $this->remove($key);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setTemporary(string $key, $value): void
-    {
-        ConfigurationLegacy::set($key, $value);
     }
 
     /**
