@@ -6,8 +6,6 @@ services:
 
   PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler\GetOrderShipmentsHandler:
 
-  PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler\GetOrderShipmentsWithProductsHandler:
-
   PrestaShop\PrestaShop\Adapter\Shipment\QueryHandler\GetShipmentProductsHandler:
 
   PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler\SwitchShipmentCarrierHandler:
