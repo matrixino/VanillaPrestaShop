@@ -4,7 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-namespace PrestaShopBundle\Entity;
+namespace PrestaShopBundle\Entity\B2B;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
