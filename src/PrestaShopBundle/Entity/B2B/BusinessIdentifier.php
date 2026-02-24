@@ -4,7 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-namespace PrestaShopBundle\Entity;
+namespace PrestaShopBundle\Entity\B2B;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -39,7 +39,7 @@ class BusinessIdentifier
     private bool $deleted = false;
 
     /**
-     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\BusinessEntityIdentifier", mappedBy="businessIdentifier")
+     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityIdentifier", mappedBy="businessIdentifier")
      */
     private Collection $businessEntityIdentifiers;
 

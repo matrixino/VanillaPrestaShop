@@ -4,7 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-namespace PrestaShopBundle\Entity;
+namespace PrestaShopBundle\Entity\B2B;
 
 use Doctrine\ORM\Mapping as ORM;
 use PrestaShopBundle\Entity\Employee\AuthorizationRole;
@@ -27,7 +27,7 @@ class B2bRoleAuthorizationRole
     /**
      * @ORM\Id
      *
-     * @ORM\ManyToOne(targetEntity="PrestaShopBundle\Entity\B2bRole", inversedBy="b2bRoleAuthorizationRoles")
+     * @ORM\ManyToOne(targetEntity="PrestaShopBundle\Entity\B2B\B2bRole", inversedBy="b2bRoleAuthorizationRoles")
      *
      * @ORM\JoinColumn(name="id_role", referencedColumnName="id_role", nullable=false)
      */

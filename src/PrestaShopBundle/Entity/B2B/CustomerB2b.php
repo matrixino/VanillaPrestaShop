@@ -4,7 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-namespace PrestaShopBundle\Entity;
+namespace PrestaShopBundle\Entity\B2B;
 
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -68,7 +68,7 @@ class CustomerB2b
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity="PrestaShopBundle\Entity\BusinessEntityCustomerB2b",
+     *     targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityCustomerB2b",
      *     mappedBy="customerB2b",
      *     cascade={"persist"}
      * )

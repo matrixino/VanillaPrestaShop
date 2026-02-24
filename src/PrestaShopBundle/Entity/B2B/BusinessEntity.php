@@ -4,7 +4,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
-namespace PrestaShopBundle\Entity;
+namespace PrestaShopBundle\Entity\B2B;
 
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -79,18 +79,18 @@ class BusinessEntity
     private DateTime $updatedAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\BusinessEntityAddress", mappedBy="businessEntity")
+     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityAddress", mappedBy="businessEntity")
      */
     private Collection $businessEntityAddresses;
 
     /**
-     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\BusinessEntityIdentifier", mappedBy="businessEntity")
+     * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityIdentifier", mappedBy="businessEntity")
      */
     private Collection $businessEntityIdentifiers;
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity="PrestaShopBundle\Entity\BusinessEntityCustomerB2b",
+     *     targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityCustomerB2b",
      *     mappedBy="businessEntity",
      *     orphanRemoval=true,
      *     cascade={"persist","remove"}
