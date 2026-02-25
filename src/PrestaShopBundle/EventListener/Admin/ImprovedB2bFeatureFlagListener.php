@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace PrestaShopBundle\EventListener\Admin;
 
 use Doctrine\ORM\Event\PostUpdateEventArgs;
-use PrestaShop\PrestaShop\Core\FeatureFlag\B2b\ImprovedB2bTabsToggler;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShopBundle\Entity\FeatureFlag;
+use PrestaShopBundle\Service\Form\ImprovedB2bTabsToggler;
 
 final class ImprovedB2bFeatureFlagListener
 {
@@ -20,15 +20,9 @@ final class ImprovedB2bFeatureFlagListener
     ) {
     }
 
-    public function postUpdate(PostUpdateEventArgs $event): void
+    public function postUpdate(FeatureFlag $featureFlag, PostUpdateEventArgs $event): void
     {
-        $entity = $event->getObject();
-
-        if (!$entity instanceof FeatureFlag) {
-            return;
-        }
-
-        if ($entity->getName() !== FeatureFlagSettings::FEATURE_FLAG_IMPROVED_B2B) {
+        if ($featureFlag->getName() !== FeatureFlagSettings::FEATURE_FLAG_IMPROVED_B2B) {
             return;
         }
 

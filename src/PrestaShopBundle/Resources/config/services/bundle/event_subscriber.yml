@@ -1,0 +1,6 @@
+services:
+  _defaults:
+    public: true
+    autowire: true
+
+  PrestaShopBundle\EventSubscriber\UpdateShopModeFieldListener: ~

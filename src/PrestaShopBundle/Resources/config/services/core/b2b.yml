@@ -1,6 +1,7 @@
 services:
   _defaults:
     public: true
+    autowire: true
 
   PrestaShop\PrestaShop\Core\B2b\B2bFeature:
     public: false
@@ -13,20 +14,9 @@ services:
     deprecated:
       package: PrestaShop\PrestaShop
       version: 9.0
-  
+
   PrestaShop\PrestaShop\Core\Feature\ShopModeFeature:
     public: false
-    arguments:
-      $configuration: '@prestashop.adapter.legacy.configuration'
-   
-  PrestaShop\PrestaShop\Core\FeatureFlag\B2b\ImprovedB2bTabsToggler:
-    public: false
-    arguments:
-      $connection: '@doctrine.dbal.default_connection'
-      $featureFlagChecker: '@PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface'
-      $shopModeFeature: '@PrestaShop\PrestaShop\Core\Feature\ShopModeFeature'
-      $dbPrefix: '%database_prefix%'
 
-  prestashop.core.feature_flag.b2b.improved_b2b_tabs_toggler:
-    alias: 'PrestaShop\PrestaShop\Core\FeatureFlag\B2b\ImprovedB2bTabsToggler'
-    public: true
+  PrestaShopBundle\Service\Form\ImprovedB2bTabsToggler:
+    public: false

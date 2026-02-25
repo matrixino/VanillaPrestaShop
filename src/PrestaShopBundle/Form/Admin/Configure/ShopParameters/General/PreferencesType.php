@@ -11,6 +11,7 @@ use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Feature\Enum\ShopModeEnum;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
+use PrestaShopBundle\EventSubscriber\UpdateShopModeFieldListener;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -60,6 +61,7 @@ class PreferencesType extends TranslatorAwareType
      * @param bool $isSingleShopContext
      * @param bool $isAllShopContext
      * @param ?FeatureFlagStateCheckerInterface $featureFlagStateChecker
+     * @param ?UpdateShopModeFieldListener $updateShopModeFieldListener
      */
     public function __construct(
         RequestStack $requestStack,
@@ -70,6 +72,7 @@ class PreferencesType extends TranslatorAwareType
         bool $isSingleShopContext,
         bool $isAllShopContext,
         private readonly ?FeatureFlagStateCheckerInterface $featureFlagStateChecker,
+        private readonly ?UpdateShopModeFieldListener $updateShopModeFieldListener,
     ) {
         parent::__construct($translator, $locales);
 
@@ -111,7 +114,6 @@ class PreferencesType extends TranslatorAwareType
                     'Admin.Shopparameters.Help'
                 ),
             ]);
-
         if ($showB2bShopMode) {
             $builder
                 ->add(self::SHOP_MODE, EnumType::class, [
@@ -124,6 +126,10 @@ class PreferencesType extends TranslatorAwareType
                         'Admin.Shopparameters.Help'
                     ),
                 ]);
+
+            if (null !== $this->updateShopModeFieldListener) {
+                $builder->addEventSubscriber($this->updateShopModeFieldListener);
+            }
         }
 
         $builder
