@@ -30,3 +30,10 @@ services:
       - '@logger'
     tags:
       - { name: kernel.event_subscriber }
+      
+  prestashop.bundle.event_listener.admin.improved_b2b_feature_flag:
+    class: PrestaShopBundle\EventListener\Admin\ImprovedB2bFeatureFlagListener
+    arguments:
+      - '@PrestaShop\PrestaShop\Core\FeatureFlag\B2b\ImprovedB2bTabsToggler'
+    tags:
+      - { name: doctrine.event_listener, event: postUpdate }

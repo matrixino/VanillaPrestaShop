@@ -19,7 +19,8 @@ class BusinessEntitiesController extends PrestaShopAdminController
      * @return Response
      */
     #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
-    public function listAction(): Response {
+    public function listAction(): Response
+    {
         return $this->render('@PrestaShop/Admin/Sell/BusinessEntity/list.html.twig');
     }
 }
