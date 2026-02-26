@@ -102,7 +102,7 @@ describe('BO - Shop Parameters - Search : Create, update and delete tag in BO', 
       await boTagsPage.gotoEditTagPage(page, 1);
 
       const pageTitle = await boTagsCreatePage.getPageTitle(page);
-      expect(pageTitle).to.contains(boTagsCreatePage.pageTitleEdit);
+      expect(pageTitle).to.contains(boTagsCreatePage.pageTitleEdit(createTagData.name));
     });
 
     it('should update tag', async function () {
