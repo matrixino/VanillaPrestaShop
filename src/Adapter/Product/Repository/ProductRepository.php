@@ -969,7 +969,10 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
         return [$shopConstraint->getShopId()];
     }
 
-    public function getCarriers(ProductId $productId, ShopId $shopId): array
+    /**
+     * @return array<int, int|string>
+     */
+    public function getCarriersByProductId(ProductId $productId, ShopId $shopId): array
     {
         $hasRestrictions = $this->hasCarrierRestrictions($productId->getValue(), $shopId->getValue());
 
@@ -996,6 +999,9 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
         return $count > 0;
     }
 
+    /**
+     * @return array<int, int|string>
+     */
     private function getAllActiveCarriers(int $shopId): array
     {
         $qb = $this->connection->createQueryBuilder();
@@ -1013,6 +1019,9 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
             ->fetchAllAssociative();
     }
 
+    /**
+     * @return array<int, int|string>
+     */
     private function getRestrictedCarriers(int $productId, int $shopId): array
     {
         $qb = $this->connection->createQueryBuilder();

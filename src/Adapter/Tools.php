@@ -170,11 +170,6 @@ class Tools
         return LegacyTools::getAdminImageUrl($fileName, $escapeHtmlEntities);
     }
 
-    public function convertPrice($price, $currency = null, $to_currency = true): ?float
-    {
-        return LegacyTools::convertPrice($price, $currency, $to_currency);
-    }
-
     /**
      * @see LegacyTools::displayDate()
      *
