@@ -483,7 +483,7 @@ class CarrierFeatureContext extends AbstractDomainFeatureContext
         $carriers = $this->getQueryBus()->handle(new GetCarriersForProduct($productId));
 
         $expectedCarrierNames = array_column($table->getColumnsHash(), 'name');
-        $actualCarrierNames = array_map(fn($c) => $c->getName(), $carriers);
+        $actualCarrierNames = array_map(fn ($c) => $c->getName(), $carriers);
 
         Assert::assertEqualsCanonicalizing($expectedCarrierNames, $actualCarrierNames);
     }

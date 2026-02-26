@@ -18,6 +18,7 @@ use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CannotUpdateCarrierExcep
 use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CarrierNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierConstraints;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ValueObject\ProductId;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopGroupId;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopId;
@@ -450,6 +451,21 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
             ->fetchAllAssociative();
     }
 
+    /**
+     * @return array<int, array{id_carrier: int|string, name: string}>
+     */
+    public function getCarriersByProductId(ProductId $productId, ShopId $shopId): array
+    {
+        if (!$this->hasCarrierRestrictions($productId->getValue(), $shopId->getValue())) {
+            return $this->getAllActiveCarriers();
+        }
+
+        return $this->getRestrictedCarriers($productId->getValue(), $shopId->getValue());
+    }
+
+    /**
+     * @return array<int, array{id_carrier: int|string, name: string}>
+     */
     private function getAllActiveCarriers(): array
     {
         return $this->connection->createQueryBuilder()
@@ -457,6 +473,49 @@ class CarrierRepository extends AbstractMultiShopObjectModelRepository
             ->from($this->prefix . 'carrier')
             ->where('deleted = 0')
             ->andWhere('active = 1')
+            ->orderBy('name', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
+    private function hasCarrierRestrictions(int $productId, int $shopId): bool
+    {
+        $qb = $this->connection->createQueryBuilder();
+
+        $count = $qb->select('COUNT(*)')
+            ->from($this->prefix . 'product_carrier', 'pc')
+            ->where('pc.id_product = :productId')
+            ->andWhere('pc.id_shop = :shopId')
+            ->setParameter('productId', $productId)
+            ->setParameter('shopId', $shopId)
+            ->executeQuery()
+            ->fetchOne();
+
+        return $count > 0;
+    }
+
+    /**
+     * @return array<int, array{id_carrier: int|string, name: string}>
+     */
+    private function getRestrictedCarriers(int $productId, int $shopId): array
+    {
+        $qb = $this->connection->createQueryBuilder();
+
+        return $qb->select('c.id_carrier', 'c.name')
+            ->from($this->prefix . 'product_carrier', 'pc')
+            ->innerJoin(
+                'pc',
+                $this->prefix . 'carrier',
+                'c',
+                'pc.id_carrier_reference = c.id_reference'
+            )
+            ->where('pc.id_product = :productId')
+            ->andWhere('pc.id_shop = :shopId')
+            ->andWhere('c.deleted = 0')
+            ->andWhere('c.active = 1')
+            ->orderBy('c.name', 'ASC')
+            ->setParameter('productId', $productId)
+            ->setParameter('shopId', $shopId)
             ->executeQuery()
             ->fetchAllAssociative();
     }
