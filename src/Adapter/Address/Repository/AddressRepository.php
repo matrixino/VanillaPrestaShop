@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Adapter\Address\Repository;
 
 use Address;
-use Doctrine\DBAL\Connection;
 use PrestaShop\PrestaShop\Core\Domain\Address\Exception\AddressNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
 use PrestaShop\PrestaShop\Core\Domain\AttributeGroup\Attribute\Exception\AttributeNotFoundException;
@@ -21,12 +20,6 @@ use PrestaShop\PrestaShop\Core\Repository\AbstractMultiShopObjectModelRepository
  */
 class AddressRepository extends AbstractMultiShopObjectModelRepository
 {
-    public function __construct(
-        private readonly Connection $connection,
-        private string $dbPrefix,
-    ) {
-    }
-
     /**
      * @param AddressId $addressId
      *

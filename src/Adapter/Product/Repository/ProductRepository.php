@@ -970,7 +970,7 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
     }
 
     /**
-     * @return array<int, int|string>
+     * @return array<int, array{id_carrier: int|string, name: string}>
      */
     public function getCarriersByProductId(ProductId $productId, ShopId $shopId): array
     {
@@ -1000,7 +1000,7 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
     }
 
     /**
-     * @return array<int, int|string>
+     * @return array<int, array{id_carrier: int|string, name: string}>
      */
     private function getAllActiveCarriers(int $shopId): array
     {
@@ -1020,7 +1020,7 @@ class ProductRepository extends AbstractMultiShopObjectModelRepository
     }
 
     /**
-     * @return array<int, int|string>
+     * @return array<int, array{id_carrier: int|string, name: string}>
      */
     private function getRestrictedCarriers(int $productId, int $shopId): array
     {
