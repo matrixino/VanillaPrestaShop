@@ -14,6 +14,7 @@ use Exception;
 use Order;
 use OrderDetail;
 use PHPUnit\Framework\Assert;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\CreateShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\DeleteProductFromShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
@@ -28,6 +29,30 @@ use Tests\Integration\Behaviour\Features\Context\SharedStorage;
 
 class ShipmentFeatureContext extends AbstractDomainFeatureContext
 {
+    /**
+     * @When I create a shipment for order :orderReference with carrier :carrierReference and product :productName with quantity :quantity
+     */
+    public function createShipment(string $orderReference, string $carrierReference, string $productName, int $quantity): void
+    {
+        $orderId = $this->referenceToId($orderReference);
+        $carrierId = $this->referenceToId($carrierReference);
+
+        $productId = 0;
+        $order = new Order($orderId);
+        foreach ($order->getOrderDetailList() as $orderDetail) {
+            if ($orderDetail['product_name'] === $productName) {
+                $productId = (int) $orderDetail['product_id'];
+                break;
+            }
+        }
+
+        $shipmentId = $this->getCommandBus()->handle(
+            new CreateShipment($orderId, $carrierId, $productId, $quantity)
+        );
+
+        SharedStorage::getStorage()->set('new_shipment', $shipmentId);
+    }
+
     /**
      * @When I switch the carrier for shipment :shipmentReference to :carrierReference
      */
