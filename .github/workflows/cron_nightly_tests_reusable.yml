@@ -193,6 +193,7 @@ jobs:
         env:
           CLIENT_ID_API: ${{ env.CLIENT_ID_API }}
           CLIENT_SECRET_API: ${{ env.CLIENT_SECRET_API }}
+          PS_VERSION: ${{ env.GH_BRANCH }}
 
       - name: Clean environment variable
         run: echo "TEST_CAMPAIGN_ARTIFACT=$( echo -e '${{ env.TEST_CAMPAIGN }}' | tr ':' '-' )" >> $GITHUB_ENV
