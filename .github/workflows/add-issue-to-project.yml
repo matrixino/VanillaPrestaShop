@@ -6,10 +6,8 @@ on:
 
 jobs:
   add-to-project:
-    name: Add issue to project
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/add-to-project@v1
-        with:
-          project-url: https://github.com/orgs/PrestaShop/projects/48
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+    uses: PrestaShop/.github/.github/workflows/reusable-add-to-project.yml@master
+    with:
+      project-number: 48
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.JARVIS_TOKEN }}
