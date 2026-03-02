@@ -141,10 +141,13 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
     {
         $shipmentId = SharedStorage::getStorage()->get($shipmentReference);
 
+        $getShipmentDeleted = $this->getQueryBus()->handle(new GetShipmentForViewing($shipmentId));
+
         $shipmentProducts = $this->getQueryBus()->handle(
             new GetShipmentProducts($shipmentId)
         );
 
+        Assert::assertTrue($getShipmentDeleted->isDeleted());
         Assert::assertEmpty($shipmentProducts);
     }
 
