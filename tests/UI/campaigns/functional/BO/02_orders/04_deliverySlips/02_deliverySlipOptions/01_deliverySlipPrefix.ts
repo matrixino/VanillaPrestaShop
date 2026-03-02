@@ -109,7 +109,7 @@ describe('BO - Orders - Delivery slips : Update delivery slip prefix and check t
       await testContext.addContextItem(this, 'testIdentifier', 'checkDocumentNamePrefix', baseContext);
 
       // Get delivery slips filename
-      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 3);
+      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 2);
       expect(fileName).to.contains(deliverySlipData.prefix.replace('#', '').trim());
     });
   });

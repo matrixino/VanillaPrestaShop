@@ -230,7 +230,7 @@ describe('FO - Consult credit slip list & View PDF Credit slip & View order', as
         await testContext.addContextItem(this, 'testIdentifier', 'checkCreditSlipDocument', baseContext);
 
         // Get document name
-        const documentType = await boOrdersViewBlockTabListPage.getDocumentType(page, 3);
+        const documentType = await boOrdersViewBlockTabListPage.getDocumentType(page, 2);
         expect(documentType).to.be.equal('Credit slip');
       });
 
@@ -246,11 +246,11 @@ describe('FO - Consult credit slip list & View PDF Credit slip & View order', as
         await testContext.addContextItem(this, 'testIdentifier', 'getIdentifierDateIssued', baseContext);
 
         // Get Credit Slip ID
-        creditSlipID = await boOrdersViewBlockTabListPage.getFileName(page, 3);
+        creditSlipID = await boOrdersViewBlockTabListPage.getFileName(page, 2);
         expect(creditSlipID).is.not.equal('');
 
         // Get Date Issued
-        dateIssued = await boOrdersViewBlockTabListPage.getDocumentDate(page, 3);
+        dateIssued = await boOrdersViewBlockTabListPage.getDocumentDate(page, 2);
         expect(dateIssued).is.not.equal('');
       });
     });
