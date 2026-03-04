@@ -138,6 +138,20 @@ describe('BO - Orders - Credit slips: Credit slip options', async () => {
       expect(pageTitle).to.contains(boOrdersViewBlockTabListPage.pageTitle);
     });
 
+    it('should check documents', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkCreditSlipDocumentNameBefore', baseContext);
+
+      const numDocuments = await boOrdersViewBlockTabListPage.getNumberOfDocuments(page);
+      expect(numDocuments).to.be.equals(0);
+
+      const countDocuments = await boOrdersViewBlockTabListPage.countDocumentsType(page);
+      expect(countDocuments).to.be.deep.equal({
+        creditSlips: 0,
+        deliverySlips: 0,
+        invoices: 0,
+      });
+    });
+
     it(`should change the order status to '${dataOrderStatuses.shipped.name}' and check it`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'updateOrderStatus', baseContext);
 
@@ -155,18 +169,24 @@ describe('BO - Orders - Credit slips: Credit slip options', async () => {
     });
 
     it('should check the existence of the Credit slip document', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkCreditSlipDocument', baseContext);
+      await testContext.addContextItem(this, 'testIdentifier', 'checkCreditSlipDocumentNameAfter', baseContext);
 
-      // Get document name
-      const documentType = await boOrdersViewBlockTabListPage.getDocumentType(page, 4);
-      expect(documentType).to.be.equal('Credit slip');
+      const numDocuments = await boOrdersViewBlockTabListPage.getNumberOfDocuments(page);
+      expect(numDocuments).to.be.equals(3);
+
+      const countDocuments = await boOrdersViewBlockTabListPage.countDocumentsType(page);
+      expect(countDocuments).to.be.deep.equal({
+        creditSlips: 1,
+        deliverySlips: 1,
+        invoices: 1,
+      });
     });
 
     it(`should check that the credit slip file name contain the prefix '${prefixToEdit}'`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkUpdatedPrefixOnFileName', baseContext);
 
       // Get file name
-      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 4);
+      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 3);
       expect(fileName).to.contains(prefixToEdit);
     });
   });
@@ -221,7 +241,7 @@ describe('BO - Orders - Credit slips: Credit slip options', async () => {
     it('should check the credit slip file name', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkDeletedPrefix', baseContext);
 
-      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 4);
+      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 3);
       expect(fileName, 'Credit slip file name is not changed to default!').to.not.contains(prefixToEdit);
     });
   });
