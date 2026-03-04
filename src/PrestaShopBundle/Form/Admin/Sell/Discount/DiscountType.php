@@ -32,7 +32,6 @@ class DiscountType extends TranslatorAwareType
         $builder
             ->add('information', DiscountInformationType::class, [
                 'discount_type' => $discountType,
-                'available_discount_types' => $options['available_discount_types'] ?? [],
             ])
             ->add('period', DiscountPeriodType::class)
             ->add('customer_eligibility', DiscountCustomerEligibilityType::class)

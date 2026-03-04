@@ -6,14 +6,12 @@
 
 namespace PrestaShop\PrestaShop\Core\Form\IdentifiableObject\OptionProvider;
 
-use PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountTypeRepository;
-use PrestaShop\PrestaShop\Core\Context\LanguageContext;
+use PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\DiscountTypeChoiceProvider;
 
 class DiscountFormOptionsProvider implements FormOptionsProviderInterface
 {
     public function __construct(
-        private readonly DiscountTypeRepository $discountTypeRepository,
-        private readonly LanguageContext $languageContext,
+        private readonly DiscountTypeChoiceProvider $discountTypeChoiceProvider,
     ) {
     }
 
@@ -21,14 +19,14 @@ class DiscountFormOptionsProvider implements FormOptionsProviderInterface
     {
         return [
             'discount_type' => $data['information']['discount_type'] ?? '',
-            'available_discount_types' => $this->discountTypeRepository->getAllActiveTypes($this->languageContext->getId()),
+            'available_discount_types' => $this->discountTypeChoiceProvider->getChoices(),
         ];
     }
 
     public function getDefaultOptions(array $data): array
     {
         return [
-            'available_discount_types' => $this->discountTypeRepository->getAllActiveTypes($this->languageContext->getId()),
+            'available_discount_types' => $this->discountTypeChoiceProvider->getChoices(),
         ];
     }
 }

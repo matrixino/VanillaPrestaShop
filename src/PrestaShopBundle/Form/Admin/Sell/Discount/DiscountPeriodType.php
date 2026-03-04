@@ -23,8 +23,6 @@ class DiscountPeriodType extends TranslatorAwareType
         $builder
             ->add('valid_date_range', DateRangeType::class, [
                 'label' => false,
-                'label_from' => $this->trans('Start date', 'Admin.Catalog.Feature'),
-                'label_to' => $this->trans('Expiry date', 'Admin.Catalog.Feature'),
                 'required' => false,
                 'date_format' => DateRangeType::DEFAULT_DATE_TIME_FORMAT,
                 'placeholder' => DateRangeType::DEFAULT_DATE_TIME_FORMAT,
@@ -55,7 +53,7 @@ class DiscountPeriodType extends TranslatorAwareType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'label' => $this->trans('Select a period', 'Admin.Catalog.Feature'),
+            'label' => $this->trans('Select period', 'Admin.Catalog.Feature'),
             'required' => false,
         ]);
     }

@@ -218,6 +218,28 @@ class DiscountTypeRepository
     }
 
     /**
+     * Get discount type by type string
+     *
+     * @param string $discountType
+     *
+     * @return array|null
+     */
+    public function getByDiscountType(string $discountType, int $languageId): ?array
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('crt.*, crtl.*')
+            ->from($this->dbPrefix . 'cart_rule_type', 'crt')
+            ->leftJoin('crt', $this->dbPrefix . 'cart_rule_type_lang', 'crtl', 'crt.id_cart_rule_type = crtl.id_cart_rule_type AND crtl.id_lang = :languageId')
+            ->where('crt.discount_type = :discountType')
+            ->setParameter('discountType', $discountType)
+            ->setParameter('languageId', $languageId)
+        ;
+
+        return $qb->executeQuery()->fetchAssociative() ?: null;
+    }
+
+    /**
      * Get discount type for a discount
      *
      * @param int $discountId

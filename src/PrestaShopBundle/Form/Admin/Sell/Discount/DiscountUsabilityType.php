@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace PrestaShopBundle\Form\Admin\Sell\Discount;
 
-use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType as DiscountTypeVO;
 use PrestaShopBundle\Form\Admin\Type\CardType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -21,13 +20,6 @@ class DiscountUsabilityType extends TranslatorAwareType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $discountTypeChoices = [];
-        foreach ($options['available_discount_types'] as $discountType) {
-            if ($discountType['name'] === DiscountTypeVO::ORDER_LEVEL) {
-                continue;
-            }
-            $discountTypeChoices[$discountType['name']] = $discountType['id_cart_rule_type'];
-        }
         $builder
             ->add('mode', DiscountUsabilityModeType::class, [
                 'label' => $this->trans('Specifiy discount mode', 'Admin.Catalog.Feature'),
@@ -92,7 +84,7 @@ class DiscountUsabilityType extends TranslatorAwareType
                 'label_tag_name' => 'h3',
                 'label' => $this->trans('Compatible with discounts', 'Admin.Catalog.Feature'),
                 'label_help_box' => $this->trans('Select which discount types this discount is compatible with.', 'Admin.Catalog.Help'),
-                'choices' => $discountTypeChoices,
+                'choices' => $options['available_discount_types'],
                 'multiple' => true,
                 'expanded' => true,
                 'required' => false,

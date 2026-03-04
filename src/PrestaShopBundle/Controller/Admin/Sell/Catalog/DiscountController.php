@@ -20,15 +20,18 @@ use PrestaShop\PrestaShop\Core\Domain\Discount\Query\GetDiscountForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Discount\QueryResult\DiscountForEditing;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface;
+use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\DiscountGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use PrestaShop\PrestaShop\Core\Search\Filters\DiscountFilters;
 use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
 use PrestaShopBundle\Controller\BulkActionsTrait;
+use PrestaShopBundle\Entity\Repository\AdminFilterRepository;
 use PrestaShopBundle\Form\Admin\Sell\Discount\DiscountTypeSelectorType;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShopBundle\Security\Attribute\DemoRestricted;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,6 +72,41 @@ class DiscountController extends PrestaShopAdminController
             ],
             'discountTypeForm' => $discountTypeForm->createView(),
         ]);
+    }
+
+    /**
+     * Custom reset action, we don't use the CommonController one because the reset must keep the
+     * period filter, and resets all other filters.
+     *
+     * @return JsonResponse
+     */
+    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
+    public function resetSearchAction(AdminFilterRepository $adminFiltersRepository): JsonResponse
+    {
+        $employeeId = $this->getEmployeeContext()->getEmployee()->getId();
+        $shopId = $this->getShopContext()->getId();
+        $adminFilter = $adminFiltersRepository->findByEmployeeAndFilterId($employeeId, $shopId, DiscountGridDefinitionFactory::GRID_ID);
+
+        if (isset($adminFilter)) {
+            $currentFilters = json_decode($adminFilter->getFilter(), true);
+            // Reset offset to show first page of list after filters resetting
+            $currentFilters['offset'] = 0;
+
+            // If no period_filter is selected we can unset all filters
+            if (empty($currentFilters['filters']['period_filter'])) {
+                unset($currentFilters['filters']);
+            } else {
+                // If period_filter ise set we only keep period_filter as a filter
+                $selectedPeriod = $currentFilters['filters']['period_filter'];
+                $currentFilters['filters'] = [
+                    'period_filter' => $selectedPeriod,
+                ];
+            }
+            $adminFilter->setFilter(json_encode($currentFilters));
+            $adminFiltersRepository->updateFilter($adminFilter);
+        }
+
+        return new JsonResponse();
     }
 
     #[DemoRestricted(redirectRoute: 'admin_discounts_index')]
