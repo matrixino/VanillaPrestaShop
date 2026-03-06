@@ -69,7 +69,7 @@
 
     {{ renderhook('displayAdminOrder', {id_order: orderForViewing.id}) }}
 
-    {% if isImprovedShipmentFeatureFlagEnabled is defined and isImprovedShipmentFeatureFlagEnabled == true and orderHasShipment == true %}
+    {% if orderHasShipment == true %}
       {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/add_product_modal.html.twig') }}
       {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/Modal/edit_product_modal.html.twig') }}
     {% endif %}

@@ -72,7 +72,7 @@
     <td class="text-right cellProductActions">
       <button
         type="button"
-        {% if isImprovedShipmentFeatureFlagEnabled is defined and isImprovedShipmentFeatureFlagEnabled == true and orderHasShipment == true %} data-toggle="modal" data-target="#editOrderProductModal" {% endif %}
+        {% if orderHasShipment == true %} data-toggle="modal" data-target="#editOrderProductModal" {% endif %}
         class="btn tooltip-link js-order-product-edit-btn"
         data-toggle="pstooltip"
         data-placement="top"

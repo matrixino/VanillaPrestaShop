@@ -116,10 +116,15 @@ export default class OrderProductEdit {
     this.productEditImage = null;
     this.productEditName = null;
     this.locationText = null;
-    this.modalContainer = document.querySelector(OrderViewPageMap.editProductModalContainer)!;
-    this.shipmentQtyCounter = this.modalContainer.querySelector<HTMLElement>(OrderViewPageMap.productModalShipmentQtyHeader)!;
-    // eslint-disable-next-line max-len
-    this.shipmentInputs = Array.from(this.modalContainer.querySelectorAll<HTMLInputElement>(OrderViewPageMap.productModalShipmentQuantityInput));
+    this.modalContainer = null!;
+    this.shipmentQtyCounter = null!;
+    this.shipmentInputs = [];
+    if (this.isMultishipmentIsEnabled) {
+      this.modalContainer = document.querySelector(OrderViewPageMap.editProductModalContainer)!;
+      this.shipmentQtyCounter = this.modalContainer.querySelector<HTMLElement>(OrderViewPageMap.productModalShipmentQtyHeader)!;
+      // eslint-disable-next-line max-len
+      this.shipmentInputs = Array.from(this.modalContainer.querySelectorAll<HTMLInputElement>(OrderViewPageMap.productModalShipmentQuantityInput));
+    }
     this.boundHandleShipment = this.handleShipmentQty.bind(this);
   }
 

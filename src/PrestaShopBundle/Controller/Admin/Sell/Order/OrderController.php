@@ -1369,6 +1369,7 @@ class OrderController extends PrestaShopAdminController
             'orderCurrency' => $orderCurrency,
             'orderForViewing' => $orderForViewing,
             'product' => $product,
+            'orderHasShipment' => $this->orderHasShipment($orderId)
         ]);
     }
 

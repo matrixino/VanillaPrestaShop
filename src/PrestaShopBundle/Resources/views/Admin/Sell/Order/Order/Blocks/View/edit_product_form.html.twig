@@ -66,6 +66,8 @@
       </label>
       {{ form_widget(editProductForm.invoice) }}
     </div>
+  {% else %}
+    {% do editProductForm.invoice.setRendered() %}
   {% endif %}
 
   {% if shipments is not empty %}
