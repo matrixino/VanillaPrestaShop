@@ -186,7 +186,7 @@ describe('BO - Orders - Credit slips: Credit slip options', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'checkUpdatedPrefixOnFileName', baseContext);
 
       const document = await boOrdersViewBlockTabListPage.getDocument(page, 1, 'Credit slip');
-      expect(document.type).to.equals('Credit slip')
+      expect(document.type).to.equals('Credit slip');
       expect(document.number).to.contains(prefixToEdit);
     });
   });
