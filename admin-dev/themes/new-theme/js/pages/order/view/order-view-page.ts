@@ -427,6 +427,14 @@ export default class OrderViewPage {
       }
       const formContainer = document.querySelector(OrderViewPageMap.addProductModalContainer) as HTMLElement;
       formContainer!.innerHTML = await response.text();
+
+      const orderAddAutocomplete = new OrderProductAutocomplete($(OrderViewPageMap.productSearchInput));
+      const orderAdd = new OrderProductAdd();
+
+      orderAddAutocomplete.listenForSearch();
+      orderAddAutocomplete.onItemClickedCallback = (p: Record<string, any> | undefined): void => orderAdd.setProduct(p);
+
+      modal.addEventListener('hidden.bs.modal', () => orderAddAutocomplete.removeListener(), {once: true});
       modal.dataset.state = 'loaded';
     } catch (error) {
       console.error(error);
@@ -453,14 +461,6 @@ export default class OrderViewPage {
       }
       const formContainer = document.querySelector(OrderViewPageMap.editProductModalContainer) as HTMLElement;
       formContainer!.innerHTML = await response.text();
-
-      const orderAddAutocomplete = new OrderProductAutocomplete($(OrderViewPageMap.productSearchInput));
-      const orderAdd = new OrderProductAdd();
-
-      orderAddAutocomplete.listenForSearch();
-      orderAddAutocomplete.onItemClickedCallback = (p: Record<string, any> | undefined): void => orderAdd.setProduct(p);
-
-      modal.addEventListener('hidden.bs.modal', () => orderAddAutocomplete.removeListener(), {once: true});
       modal.dataset.state = 'loaded';
     } catch (error) {
       console.error(error);

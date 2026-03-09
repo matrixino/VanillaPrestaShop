@@ -5,40 +5,52 @@
 
 <div class="skeleton-edit-product-form skeleton-shipment-modal">
 
-  <div class="form-group">
-    <div class="skeleton skeleton--1/4 skeleton--sm mb-2"></div>
-    <div class="skeleton skeleton--line skeleton--lg"></div>
+  <div class="mb-3 d-flex align-items-center p-2 bg-light rounded border">
+    <div class="skeleton skeleton--square skeleton--lg mr-3"></div>
+    <div class="skeleton skeleton--1/3 skeleton--sm"></div>
   </div>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-sm-4">
       <div class="form-group">
-        <div class="skeleton skeleton--1/3 skeleton--sm mb-2"></div>
+        <div class="skeleton skeleton--1/2 skeleton--sm mb-2"></div>
         <div class="skeleton skeleton--line skeleton--lg"></div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-sm-4">
       <div class="form-group">
-        <div class="skeleton skeleton--1/3 skeleton--sm mb-2"></div>
+        <div class="skeleton skeleton--1/2 skeleton--sm mb-2"></div>
+        <div class="skeleton skeleton--line skeleton--lg"></div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <div class="skeleton skeleton--1/2 skeleton--sm mb-2"></div>
         <div class="skeleton skeleton--line skeleton--lg"></div>
       </div>
     </div>
   </div>
-
-  <div class="form-group">
-    <div class="skeleton skeleton--1/4 skeleton--sm mb-2"></div>
-    <div class="skeleton skeleton--line skeleton--lg"></div>
-  </div>
-
-    <div class="form-group">
-      <div class="skeleton skeleton--1/3 skeleton--sm mb-2"></div>
-      <div class="skeleton skeleton--line skeleton--lg"></div>
-    </div>
 
   {% if orderForViewing.hasInvoice() %}
-    <div class="form-group">
+    <div class="form-group mb-0">
       <div class="skeleton skeleton--1/4 skeleton--sm mb-2"></div>
       <div class="skeleton skeleton--line skeleton--lg mb-0"></div>
     </div>
   {% endif %}
+
+  <table class="table mt-4">
+    <thead>
+      <tr>
+        <th><div class="skeleton skeleton--1/4 skeleton--sm"></div></th>
+        <th class="text-right"><div class="skeleton skeleton--1/4 skeleton--sm"></div></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="w-100"><div class="skeleton skeleton--1/3 skeleton--sm"></div></td>
+        <td class="text-right"><div class="skeleton skeleton--line skeleton--lg"></div></td>
+      </tr>
+    </tbody>
+  </table>
+
 </div>
