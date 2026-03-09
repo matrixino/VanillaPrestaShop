@@ -72,9 +72,13 @@
     <td class="text-right cellProductActions">
       <button
         type="button"
-        {% if orderHasShipment == true %} data-toggle="modal" data-target="#editOrderProductModal" {% endif %}
+        {% if orderHasShipment == true %}
+          data-toggle="modal"
+          data-target="#editOrderProductModal"
+        {% else %}
+          data-toggle="pstooltip"
+        {% endif %}
         class="btn tooltip-link js-order-product-edit-btn"
-        data-toggle="pstooltip"
         data-placement="top"
         data-original-title="{{ 'Edit'|trans({}, 'Admin.Actions') }}"
         data-order-detail-id="{{ product.orderDetailId }}"

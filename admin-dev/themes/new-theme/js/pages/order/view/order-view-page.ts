@@ -133,6 +133,9 @@ export default class OrderViewPage {
       this.orderShipmentsRefresher.refresh(event.orderId);
       this.orderProductRenderer.moveProductPanelToOriginalPosition();
     });
+
+    // Initialize tooltips
+    $(OrderViewPageMap.productEditButtons).pstooltip();
   }
 
   listenForProductDelete(): void {

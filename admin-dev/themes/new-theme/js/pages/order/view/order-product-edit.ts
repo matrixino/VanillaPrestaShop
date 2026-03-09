@@ -135,6 +135,7 @@ export default class OrderProductEdit {
     });
     this.shipmentInputs = [];
 
+    $(OrderViewPageMap.productEditButtons).remove();
     $(OrderViewPageMap.productEditModal).modal('hide');
   }
 
