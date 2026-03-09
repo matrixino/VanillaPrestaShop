@@ -108,9 +108,9 @@ describe('BO - Orders - Delivery slips : Update delivery slip prefix and check t
     it(`should check that the delivery slip file name contain '${deliverySlipData.prefix}'`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkDocumentNamePrefix', baseContext);
 
-      // Get delivery slips filename
-      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 2);
-      expect(fileName).to.contains(deliverySlipData.prefix.replace('#', '').trim());
+      const document = await boOrdersViewBlockTabListPage.getDocument(page, 1, 'Delivery slip');
+      expect(document.type).to.equals('Credit slip')
+      expect(document.number).to.contains(deliverySlipData.prefix);
     });
   });
 

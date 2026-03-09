@@ -185,9 +185,9 @@ describe('BO - Orders - Credit slips: Credit slip options', async () => {
     it(`should check that the credit slip file name contain the prefix '${prefixToEdit}'`, async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkUpdatedPrefixOnFileName', baseContext);
 
-      // Get file name
-      fileName = await boOrdersViewBlockTabListPage.getFileName(page, 3);
-      expect(fileName).to.contains(prefixToEdit);
+      const document = await boOrdersViewBlockTabListPage.getDocument(page, 1, 'Credit slip');
+      expect(document.type).to.equals('Credit slip')
+      expect(document.number).to.contains(prefixToEdit);
     });
   });
 
