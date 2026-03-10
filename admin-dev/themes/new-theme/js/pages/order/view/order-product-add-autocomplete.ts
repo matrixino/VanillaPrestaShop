@@ -147,9 +147,9 @@ export default class OrderProductAutocomplete {
 
     if (selectedProduct.length !== 0) {
       this.input.val(selectedProduct[0].name);
-      this.resetShipmentAndCarrierSelects();
 
       if (this.selectShipment) {
+        this.resetShipmentAndCarrierSelects();
         const shipmentSelectorContainer = document.querySelector<HTMLElement>(OrderViewPageMap.selectAddShipmentContainer)!;
         shipmentSelectorContainer.classList.toggle('d-none', selectedProduct[0].virtual === true);
 
