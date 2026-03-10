@@ -652,17 +652,6 @@ class OrderController extends PrestaShopAdminController
         $orderForViewing = $this->dispatchQuery(new GetOrderForViewing($orderId, QuerySorting::DESC));
         $form = $orderProductFormBuilder->getFormFor($orderId);
         $orderCurrency = $currencyDataProvider->getCurrencyById($orderForViewing->getCurrencyId());
-        // actually it will be removed when the query is ready.
-        $shipments = [
-            [
-                'id' => '1',
-                'quantity' => 1,
-            ],
-            [
-                'id' => '2',
-                'quantity' => 1,
-            ],
-        ];
 
         return $this->render('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/edit_product_form.html.twig', [
             'editProductForm' => $form->createView(),
@@ -670,7 +659,6 @@ class OrderController extends PrestaShopAdminController
             'orderHasShipment' => $this->orderHasShipment($orderForViewing->getId()),
             'isMultishipmentIsEnabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
             'orderId' => $orderId,
-            'shipments' => $shipments,
             'currencySymbol' => $orderCurrency->symbol,
         ]);
     }
@@ -1370,7 +1358,7 @@ class OrderController extends PrestaShopAdminController
             'orderCurrency' => $orderCurrency,
             'orderForViewing' => $orderForViewing,
             'product' => $product,
-            'orderHasShipment' => $this->orderHasShipment($orderId)
+            'orderHasShipment' => $this->orderHasShipment($orderId),
         ]);
     }
 

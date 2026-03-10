@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <div class="form-group d-none">
+  <div class="form-group">
     {{ form_widget(editProductForm.quantity) }}
   </div>
 
@@ -70,7 +70,7 @@
     {% do editProductForm.invoice.setRendered() %}
   {% endif %}
 
-  {% if shipments is not empty %}
+  {#{% if shipments is not empty %}
     <table class="table mt-4">
       <thead>
         <tr>
@@ -89,7 +89,7 @@
         {% endfor %}
       </tbody>
     </table>
-  {% endif %}
+  {% endif %} #}
 
   {% do editProductForm.cancel.setRendered() %}
   {% do editProductForm.save.setRendered() %}
