@@ -89,7 +89,7 @@
 						selected="selected"
 					{/if}
 					>
-						{$currency.iso_code}
+						{$currency.iso_code|escape:'html':'UTF-8'}
 					</option>
 				{/foreach}
 				</select>

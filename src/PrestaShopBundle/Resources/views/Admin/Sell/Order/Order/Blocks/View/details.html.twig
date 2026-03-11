@@ -56,7 +56,7 @@
     <li class="nav-item">
       <a class="nav-link" id="orderShippingTab" data-toggle="tab" href="#orderShippingTabContent" role="tab" aria-controls="orderShippingTabContent" aria-expanded="true" aria-selected="false">
         <i class="material-icons">local_shipping</i>
-        {{ carriersTitle }}
+        {{ carriersTitle|raw_purified }}
       </a>
     </li>
     {% if merchandiseReturnEnabled %}
@@ -93,7 +93,7 @@
     <div class="tab-pane d-print-block fade" id="orderShippingTabContent" role="tabpanel" aria-labelledby="orderShippingTab">
       {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}
         {% block header %}
-          {{ carriersTitle }}
+          {{ carriersTitle|raw_purified }}
         {% endblock %}
         {% block body %}
           {% include '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/shipping.html.twig' %}
