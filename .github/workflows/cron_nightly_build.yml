@@ -3,7 +3,7 @@ name: Nightly Build
 
 on:
   schedule:
-    - cron: '30 22 * * *'
+    - cron: '30 23 * * *'
   workflow_dispatch:
 
 permissions:
