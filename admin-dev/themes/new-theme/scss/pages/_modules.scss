@@ -632,9 +632,17 @@ form#importDropzone {
 
 #modules-position-selection-panel {
   position: sticky;
-  top: 0;
+  top: calc(var(--#{$cdk}header-height) + #{$size-header-toolbar-height});
   z-index: 1;
   display: none;
+
+  @include media-breakpoint-down(sm) {
+    position: fixed;
+    top: calc(var(--#{$cdk}header-height) + #{$size-header-toolbar-height});
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
 
   .btn {
     white-space: normal;
