@@ -458,18 +458,22 @@ class CartRuleCore extends ObjectModel
          * Remove cart rule that does not match the customer groups.
          * Even if empty $id_customer was provided, we will still get
          * a visitor group.
+         * When the groups feature is inactive the restriction is ignored dynamically
+         * (handled in checkValidity), so we keep all rules here.
          */
-        $customerGroups = Customer::getGroupsStatic($id_customer);
+        if (Group::isFeatureActive()) {
+            $customerGroups = Customer::getGroupsStatic($id_customer);
 
-        foreach ($result as $key => $cart_rule) {
-            if ($cart_rule['group_restriction']) {
-                $cartRuleGroups = Db::getInstance()->executeS('SELECT id_group FROM ' . _DB_PREFIX_ . 'cart_rule_group WHERE id_cart_rule = ' . (int) $cart_rule['id_cart_rule']);
-                foreach ($cartRuleGroups as $cartRuleGroup) {
-                    if (in_array($cartRuleGroup['id_group'], $customerGroups)) {
-                        continue 2;
+            foreach ($result as $key => $cart_rule) {
+                if ($cart_rule['group_restriction']) {
+                    $cartRuleGroups = Db::getInstance()->executeS('SELECT id_group FROM ' . _DB_PREFIX_ . 'cart_rule_group WHERE id_cart_rule = ' . (int) $cart_rule['id_cart_rule']);
+                    foreach ($cartRuleGroups as $cartRuleGroup) {
+                        if (in_array($cartRuleGroup['id_group'], $customerGroups)) {
+                            continue 2;
+                        }
                     }
+                    unset($result[$key]);
                 }
-                unset($result[$key]);
             }
         }
 
@@ -834,6 +838,9 @@ class CartRuleCore extends ObjectModel
 
         // Get an intersection of the customer groups and the cart rule groups (if the customer is not logged in, the default group is Visitors)
         if ($this->group_restriction) {
+            if (!Group::isFeatureActive()) {
+                return (!$display_error) ? false : $this->trans('You cannot use this voucher', [], 'Shop.Notifications.Error');
+            }
             $id_cart_rule = (int) Db::getInstance()->getValue('
 			SELECT crg.id_cart_rule
 			FROM ' . _DB_PREFIX_ . 'cart_rule_group crg
@@ -2012,7 +2019,7 @@ class CartRuleCore extends ObjectModel
 		)
 		AND (
 			cr.`group_restriction` = 0
-			' . (Validate::isLoadedObject($context->customer) ? 'OR EXISTS (
+			' . (Group::isFeatureActive() && Validate::isLoadedObject($context->customer) ? 'OR EXISTS (
 				SELECT 1
 				FROM `' . _DB_PREFIX_ . 'customer_group` cg
 				INNER JOIN `' . _DB_PREFIX_ . 'cart_rule_group` crg ON cg.id_group = crg.id_group

@@ -136,12 +136,20 @@
 {%- endblock -%}
 
 {% block searched_customer_row %}
-  {% set attr = attr|merge({class: (attr.class|default('') ~ ' media entity-item')|trim}) %}
+  {%- set attr = attr|merge({
+    class: (attr.class|default('') ~ ' media entity-item')|trim,
+    'data-customer-active': form.active.vars.value,
+    'data-customer-guest': form.is_guest.vars.value
+  }) -%}
   <li {{ block('widget_container_attributes') }}>
+    <span class="customer-guest-badge badge badge-pill badge-secondary">{{ 'Guest'|trans({}, 'Admin.Shopparameters.Feature') }}</span>
     <div class="media-body media-middle">
       {{ form_widget(form.fullname_and_email) }}
-      <i class="material-icons entity-item-delete">clear</i>
     </div>
+    <span class="customer-disabled-badge badge badge-pill badge-secondary">{{ 'Disabled'|trans({}, 'Admin.Global') }}</span>
+    <i class="material-icons entity-item-delete">clear</i>
     {{ form_widget(form.id_customer) }}
+    {{ form_widget(form.active) }}
+    {{ form_widget(form.is_guest) }}
   </li>
 {% endblock %}
