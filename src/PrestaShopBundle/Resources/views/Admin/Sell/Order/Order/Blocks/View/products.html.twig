@@ -243,7 +243,7 @@
           '%tax_method%': orderForViewing.taxMethod,
           '[1]': '<strong>',
           '[/1]': '</strong>'
-        }, 'Admin.Orderscustomers.Notification')|raw }}.
+        }, 'Admin.Orderscustomers.Notification')|raw_purified }}.
 
         {% if not configuration('PS_ORDER_RETURN') %}
           <strong>{{ 'Merchandise returns are disabled'|trans({}, 'Admin.Orderscustomers.Notification') }}</strong>

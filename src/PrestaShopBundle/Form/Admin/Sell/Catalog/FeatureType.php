@@ -26,6 +26,8 @@
 
 namespace PrestaShopBundle\Form\Admin\Sell\Catalog;
 
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CleanHtml;
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\TypedRegex;
 use PrestaShopBundle\Form\Admin\Type\ShopChoiceTreeType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
@@ -61,13 +63,20 @@ class FeatureType extends AbstractType
     {
         $builder->add('name', TranslatableType::class, [
             'type' => TextType::class,
+            'constraints' => [
+                new DefaultLanguage(),
+            ],
             'options' => [
                 'constraints' => [
+                    new CleanHtml([
+                        'message' => $this->trans('%s is invalid.', [], 'Admin.Notifications.Error'),
+                    ]),
                     new TypedRegex([
                         'type' => 'generic_name',
                     ]),
                 ],
             ],
+            'help' => $this->trans('Invalid characters: %chars%', ['%chars%' => '<>{}'], 'Admin.Notifications.Info'),
         ]);
 
         if ($this->isMultistoreFeatureActive) {
