@@ -29,9 +29,19 @@ class ShipmentRepository extends EntityRepository
      *
      * @return Shipment[]
      */
-    public function findByOrderId(int $orderId, bool $deleted = false)
+    public function findByOrderId(int $orderId)
     {
-        return $this->findBy(['orderId' => $orderId, 'deleted' => $deleted]);
+        return $this->findBy(['orderId' => $orderId, 'deleted' => false]);
+    }
+
+    /**
+     * @param int $orderId
+     *
+     * @return Shipment[]
+     */
+    public function getAllShipments(int $orderId)
+    {
+        return $this->findBy(['orderId' => $orderId]);
     }
 
     /**
@@ -60,6 +70,7 @@ class ShipmentRepository extends EntityRepository
             )
             ->where('sp.id_order_detail = :orderDetailId')
             ->andWhere('s.id_order = :orderId')
+            ->andWhere('s.deleted = false')
             ->groupBy('sp.id_shipment')
             ->setParameter('orderDetailId', $orderDetailId)
             ->setParameter('orderId', $orderId);
@@ -67,19 +78,19 @@ class ShipmentRepository extends EntityRepository
         return $qb->executeQuery()->fetchAllAssociative();
     }
 
-    public function findByOrderAndShipmentId(int $orderId, int $shipmentId, bool $deleted = false): ?Shipment
+    public function findByOrderAndShipmentId(int $orderId, int $shipmentId): ?Shipment
     {
-        return $this->findOneBy(['orderId' => $orderId, 'id' => $shipmentId, 'deleted' => $deleted]);
+        return $this->findOneBy(['orderId' => $orderId, 'id' => $shipmentId, 'deleted' => false]);
     }
 
-    public function findById(int $shipmentId, bool $deleted = false): ?Shipment
+    public function findById(int $shipmentId): ?Shipment
     {
-        return $this->findOneBy(['id' => $shipmentId, 'deleted' => $deleted]);
+        return $this->findOneBy(['id' => $shipmentId, 'deleted' => false]);
     }
 
-    public function findByCarrierId(int $carrierId, bool $deleted = false): array
+    public function findByCarrierId(int $carrierId): array
     {
-        return $this->findBy(['carrierId' => $carrierId, 'deleted' => $deleted]);
+        return $this->findBy(['carrierId' => $carrierId, 'deleted' => false]);
     }
 
     public function save(Shipment $shipment): int
@@ -115,7 +126,7 @@ class ShipmentRepository extends EntityRepository
      *     carrier_name: string|null
      * }>
      */
-    public function getShipmentWithWeightByOrderId(int $orderId, bool $deleted = false): array
+    public function getShipmentWithWeightByOrderId(int $orderId): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
@@ -126,9 +137,8 @@ class ShipmentRepository extends EntityRepository
             ->leftJoin('sp', $this->tablePrefix . 'order_detail', 'od', 'sp.id_order_detail = od.id_order_detail')
             ->leftJoin('s', $this->tablePrefix . 'carrier', 'c', 's.id_carrier = c.id_carrier')
             ->where('s.id_order = :orderId')
-            ->andWhere('s.deleted = :deleted')
+            ->andWhere('s.deleted = false')
             ->setParameter('orderId', $orderId)
-            ->setParameter('deleted', $deleted)
             ->groupBy('s.id_shipment');
 
         return $qb->executeQuery()->fetchAllAssociative();
