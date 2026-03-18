@@ -232,11 +232,12 @@ export default class OrderProductEdit {
   handleShipmentQty(): void {
     const total = this.shipmentInputs.reduce((sum, input) => sum + Number(input.value), 0);
     const availableQuantity = parseInt(this.quantityInput.data('availableQuantity'), 10);
+    const hasAtLeastOneQty = this.shipmentInputs.some((input) => Number(input.value) > 0);
     this.quantity = total;
     this.quantityInput.val(total);
     this.updateShipmentQtyCounter(total);
     this.updateTotal();
-    this.productEditSaveBtn.prop('disabled', total <= 0 || total > availableQuantity);
+    this.productEditSaveBtn.prop('disabled', !hasAtLeastOneQty || total > availableQuantity);
   }
 
   updateShipmentQtyCounter(total: number): void {

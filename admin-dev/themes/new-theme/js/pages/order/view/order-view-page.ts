@@ -153,7 +153,7 @@ export default class OrderViewPage {
       const $btn = $(event.currentTarget);
 
       if (this.isMultishipmentIsEnabled) {
-        await this.getEditProductForm();
+        await this.getEditProductForm(Number($btn.data('orderDetailId')));
       } else {
         this.orderProductRenderer.moveProductsPanelToModificationPosition();
       }
@@ -443,7 +443,7 @@ export default class OrderViewPage {
     }
   }
 
-  async getEditProductForm(): Promise<void> {
+  async getEditProductForm(orderDetailId: number): Promise<void> {
     const modal = this.modal('edit');
     modal.dataset.state = 'loading';
     const orderId = Number(modal.dataset.orderId);
@@ -451,6 +451,7 @@ export default class OrderViewPage {
     try {
       const response = await fetch(this.router.generate('admin_orders_get_edit_product_form', {
         orderId,
+        orderDetailId,
       }), {
         method: 'GET',
         headers: {
