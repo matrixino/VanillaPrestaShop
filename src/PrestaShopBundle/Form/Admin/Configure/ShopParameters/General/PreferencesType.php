@@ -8,9 +8,13 @@ namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\General;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Order;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Core\Feature\Enum\ShopModeEnum;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,6 +26,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class PreferencesType extends TranslatorAwareType
 {
+    public const SHOP_MODE = 'shop_mode';
+
     /**
      * @var bool
      */
@@ -53,6 +59,7 @@ class PreferencesType extends TranslatorAwareType
      * @param bool $isShopFeatureEnabled
      * @param bool $isSingleShopContext
      * @param bool $isAllShopContext
+     * @param ?FeatureFlagStateCheckerInterface $featureFlagStateChecker
      */
     public function __construct(
         RequestStack $requestStack,
@@ -61,7 +68,8 @@ class PreferencesType extends TranslatorAwareType
         ConfigurationInterface $configuration,
         bool $isShopFeatureEnabled,
         bool $isSingleShopContext,
-        bool $isAllShopContext
+        bool $isAllShopContext,
+        private readonly ?FeatureFlagStateCheckerInterface $featureFlagStateChecker,
     ) {
         parent::__construct($translator, $locales);
 
@@ -78,6 +86,8 @@ class PreferencesType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $configuration = $this->configuration;
+
+        $showB2bShopMode = $this->featureFlagStateChecker?->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_B2B) ?? false;
 
         if ($this->requestStack->getCurrentRequest()->isSecure()) {
             $builder->add('enable_ssl', SwitchType::class, [
@@ -100,7 +110,23 @@ class PreferencesType extends TranslatorAwareType
                     'Enable or disable token in the Front Office to improve PrestaShop\'s security.',
                     'Admin.Shopparameters.Help'
                 ),
-            ])
+            ]);
+
+        if ($showB2bShopMode) {
+            $builder
+                ->add(self::SHOP_MODE, EnumType::class, [
+                    'class' => ShopModeEnum::class,
+                    'label' => $this->trans(
+                        'Shop mode',
+                        'Admin.Shopparameters.Feature'),
+                    'help' => $this->trans(
+                        'Choose which features are enabled in your shop: B2C only, B2B only, or both.',
+                        'Admin.Shopparameters.Help'
+                    ),
+                ]);
+        }
+
+        $builder
             ->add('allow_html_iframes', SwitchType::class, [
                 'label' => $this->trans(
                     'Allow iframes on HTML fields',
