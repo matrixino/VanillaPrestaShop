@@ -7,7 +7,6 @@
 use PrestaShop\PrestaShop\Adapter\Order\Checkout\CheckoutProcessProviderResolver;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Shipment\DeliveryOptionsProvider;
-use PrestaShop\PrestaShop\Core\Checkout\OnePageCheckoutAvailabilityCheckerInterface;
 use PrestaShop\PrestaShop\Core\Checkout\TermsAndConditions;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
@@ -304,7 +303,6 @@ class OrderControllerCore extends FrontController
             'checkout_steps' => $this->checkoutProcess->getCheckoutStepsForTemplate(),
             'display_transaction_updated_info' => Tools::getIsset('updatedTransaction'),
             'tos_cms' => $this->getDefaultTermsAndConditions(),
-            'is_one_page_checkout_enabled' => $this->checkoutProcess->isOnePageCheckoutEnabled(),
         ]);
 
         parent::initContent();
@@ -392,9 +390,6 @@ class OrderControllerCore extends FrontController
             $this->context,
             $session
         );
-        /** @var OnePageCheckoutAvailabilityCheckerInterface $onePageCheckoutAvailabilityChecker */
-        $onePageCheckoutAvailabilityChecker = $this->get(OnePageCheckoutAvailabilityCheckerInterface::class);
-        $checkoutProcess->setOnePageCheckoutAvailabilityChecker($onePageCheckoutAvailabilityChecker);
 
         $checkoutProcess
             ->addStep(new CheckoutPersonalInformationStep(

@@ -36,7 +36,6 @@ class FeatureFlagSettings
     public const FEATURE_FLAG_IMPROVED_SHIPMENT = 'improved_shipment';
     public const FEATURE_FLAG_DISCOUNT = 'discount';
     public const FEATURE_FLAG_IMPROVED_B2B = 'improved_b2b';
-    public const FEATURE_FLAG_ONE_PAGE_CHECKOUT = 'one_page_checkout';
     public const FEATURE_FLAG_NEW_PRICING = 'new_pricing';
     public const FEATURE_FLAG_EMAIL_BODY_TRANSLATION = 'email_body_translation';
 }
