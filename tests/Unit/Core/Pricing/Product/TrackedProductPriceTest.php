@@ -19,7 +19,7 @@ class TrackedProductPriceTest extends TestCase
     public function testSetUnitPriceRecordsModification(): void
     {
         $price = TrackedProductPrice::create(1, 0);
-        $price->setUnitPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
+        $price->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
         $breakdown = $price->getBreakdown();
         $this->assertSame(1, $breakdown->count());
@@ -33,7 +33,7 @@ class TrackedProductPriceTest extends TestCase
     public function testSetOriginalPriceRecordsModification(): void
     {
         $price = TrackedProductPrice::create(1, 0);
-        $price->setOriginalPrice(new TaxablePrice(new DecimalNumber('39.99'), TaxRate::zero()));
+        $price->setOriginalPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('39.99'), TaxRate::zero()));
 
         $breakdown = $price->getBreakdown();
         $this->assertSame(1, $breakdown->count());
@@ -45,8 +45,8 @@ class TrackedProductPriceTest extends TestCase
     public function testMultipleModificationsAreTracked(): void
     {
         $price = TrackedProductPrice::create(1, 0);
-        $price->setUnitPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
-        $price->setOriginalPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
+        $price->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
+        $price->setOriginalPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
         $this->assertSame(2, $price->getBreakdown()->count());
     }
@@ -54,7 +54,7 @@ class TrackedProductPriceTest extends TestCase
     public function testCallerClassIsCaptured(): void
     {
         $price = TrackedProductPrice::create(1, 0);
-        $price->setUnitPrice(new TaxablePrice(new DecimalNumber('10'), TaxRate::zero()));
+        $price->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('10'), TaxRate::zero()));
 
         $step = $price->getBreakdown()->getSteps()[0];
         $this->assertSame(self::class, $step->getCallerClass());

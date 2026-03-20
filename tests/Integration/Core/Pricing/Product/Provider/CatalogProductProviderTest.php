@@ -10,6 +10,7 @@ namespace Tests\Integration\Core\Pricing\Product\Provider;
 
 use Doctrine\DBAL\Connection;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Pricing\Exception\ProductPriceNotFoundException;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\CatalogProductProvider;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\ProductPriceData;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -36,24 +37,20 @@ class CatalogProductProviderTest extends KernelTestCase
         $priceData = $this->provider->getProductPriceData(1, 0);
 
         $this->assertInstanceOf(ProductPriceData::class, $priceData);
-        $this->assertInstanceOf(DecimalNumber::class, $priceData->getPrice());
-        $this->assertInstanceOf(DecimalNumber::class, $priceData->getUnitPrice());
-        $this->assertFalse($priceData->getPrice()->isNegative());
+        $this->assertInstanceOf(DecimalNumber::class, $priceData->getPriceTaxExcluded());
+        $this->assertInstanceOf(DecimalNumber::class, $priceData->getUnitPriceTaxExcluded());
+        $this->assertFalse($priceData->getPriceTaxExcluded()->isNegative());
     }
 
-    public function testGetProductPriceDataForNonExistentProduct(): void
+    public function testThrowsForNonExistentProduct(): void
     {
-        $priceData = $this->provider->getProductPriceData(999999, 0);
-
-        $this->assertTrue($priceData->getPrice()->equalsZero());
-        $this->assertTrue($priceData->getUnitPrice()->equalsZero());
+        $this->expectException(ProductPriceNotFoundException::class);
+        $this->provider->getProductPriceData(999999, 0);
     }
 
-    public function testGetProductPriceDataForNonExistentCombination(): void
+    public function testThrowsForNonExistentCombination(): void
     {
-        $priceData = $this->provider->getProductPriceData(999999, 999999);
-
-        $this->assertTrue($priceData->getPrice()->equalsZero());
-        $this->assertTrue($priceData->getUnitPrice()->equalsZero());
+        $this->expectException(ProductPriceNotFoundException::class);
+        $this->provider->getProductPriceData(999999, 999999);
     }
 }

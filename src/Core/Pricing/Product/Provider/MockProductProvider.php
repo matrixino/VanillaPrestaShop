@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Pricing\Product\Provider;
 
-use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Pricing\Exception\ProductPriceNotFoundException;
 
 /**
  * In-memory product provider for unit tests. Accepts pre-configured arrays of
@@ -28,11 +28,10 @@ class MockProductProvider implements ProductProviderInterface
     {
         $key = $combinationId > 0 ? $productId . '-' . $combinationId : (string) $productId;
 
-        return $this->priceDataMap[$key] ?? new ProductPriceData(
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
-        );
+        if (!isset($this->priceDataMap[$key])) {
+            throw new ProductPriceNotFoundException(sprintf('Product %d not found', $productId));
+        }
+
+        return $this->priceDataMap[$key];
     }
 }

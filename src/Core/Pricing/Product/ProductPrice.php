@@ -9,14 +9,15 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Pricing\Product;
 
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
+use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePriceInterface;
 
 /**
  * Lightweight ProductPrice DTO with no tracking overhead. Setters simply assign values.
  */
 class ProductPrice implements ProductPriceInterface
 {
-    protected TaxablePrice $unitPrice;
-    protected TaxablePrice $originalPrice;
+    protected TaxablePriceInterface $unitPrice;
+    protected TaxablePriceInterface $originalPrice;
 
     protected function __construct(
         protected readonly int $productId,
@@ -47,22 +48,22 @@ class ProductPrice implements ProductPriceInterface
         return $this->quantity;
     }
 
-    public function getUnitPrice(): TaxablePrice
+    public function getUnitPrice(): TaxablePriceInterface
     {
         return $this->unitPrice;
     }
 
-    public function setUnitPrice(TaxablePrice $unitPrice): void
+    public function setUnitPrice(TaxablePriceInterface $unitPrice): void
     {
         $this->unitPrice = $unitPrice;
     }
 
-    public function getOriginalPrice(): TaxablePrice
+    public function getOriginalPrice(): TaxablePriceInterface
     {
         return $this->originalPrice;
     }
 
-    public function setOriginalPrice(TaxablePrice $originalPrice): void
+    public function setOriginalPrice(TaxablePriceInterface $originalPrice): void
     {
         $this->originalPrice = $originalPrice;
     }

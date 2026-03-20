@@ -10,11 +10,14 @@ namespace PrestaShop\PrestaShop\Core\Pricing\Product\Calculator;
 
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPriceInterface;
 use PrestaShop\PrestaShop\Core\Pricing\Rounding\RoundingServiceInterface;
-use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
+use PrestaShop\PrestaShop\Core\Pricing\ValueObject\ImmutableTaxablePrice;
+use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePriceInterface;
 
 /**
  * Last calculator in the pipeline: applies final rounding to all price fields.
  * This is the only place where rounding occurs — all prior calculators work at full precision.
+ * Produces ImmutableTaxablePrice instances where both tax-excluded and tax-included are
+ * independently rounded and will not be recomputed from one another.
  */
 class RoundingCalculator implements ProductCalculatorInterface
 {
@@ -25,19 +28,20 @@ class RoundingCalculator implements ProductCalculatorInterface
 
     public function compute(ProductPriceInterface $productPrice): void
     {
-        $productPrice->setUnitPrice($this->roundTaxablePrice($productPrice->getUnitPrice()));
-        $productPrice->setOriginalPrice($this->roundTaxablePrice($productPrice->getOriginalPrice()));
+        $productPrice->setUnitPrice($this->roundPrice($productPrice->getUnitPrice()));
+        $productPrice->setOriginalPrice($this->roundPrice($productPrice->getOriginalPrice()));
     }
 
-    protected function roundTaxablePrice(TaxablePrice $price): TaxablePrice
+    protected function roundPrice(TaxablePriceInterface $price): ImmutableTaxablePrice
     {
-        $roundedTaxExcluded = $this->roundingService->round($price->getTaxExcluded());
-        $roundedTaxIncluded = $this->roundingService->round($price->getTaxIncluded());
+        $roundedExcl = $this->roundingService->round($price->getTaxExcluded());
+        $roundedIncl = $this->roundingService->round($price->getTaxIncluded());
 
-        $rounded = new TaxablePrice($roundedTaxExcluded, $price->getTaxRate());
-        // Override the computed tax-included with independently rounded value
-        $rounded->setTaxIncluded($roundedTaxIncluded);
-
-        return $rounded;
+        return new ImmutableTaxablePrice(
+            $roundedExcl,
+            $roundedIncl,
+            $roundedIncl->minus($roundedExcl),
+            $price->getTaxRate(),
+        );
     }
 }

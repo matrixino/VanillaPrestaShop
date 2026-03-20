@@ -10,6 +10,7 @@ namespace PrestaShop\PrestaShop\Core\Pricing\Product\Provider;
 
 use Doctrine\DBAL\Connection;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Pricing\Exception\ProductPriceNotFoundException;
 
 /**
  * Reads raw product pricing data from the catalog tables (ps_product, ps_product_attribute)
@@ -32,6 +33,9 @@ class CatalogProductProvider implements ProductProviderInterface
         return $this->fetchProduct($productId);
     }
 
+    /**
+     * @throws ProductPriceNotFoundException when the product does not exist
+     */
     protected function fetchProduct(int $productId): ProductPriceData
     {
         $sql = 'SELECT p.price, p.unit_price'
@@ -41,7 +45,7 @@ class CatalogProductProvider implements ProductProviderInterface
         $row = $this->connection->fetchAssociative($sql, ['productId' => $productId]);
 
         if ($row === false) {
-            return $this->emptyPriceData();
+            throw new ProductPriceNotFoundException(sprintf('Product %d not found', $productId));
         }
 
         return new ProductPriceData(
@@ -52,6 +56,9 @@ class CatalogProductProvider implements ProductProviderInterface
         );
     }
 
+    /**
+     * @throws ProductPriceNotFoundException when the product does not exist
+     */
     protected function fetchProductWithCombination(int $productId, int $combinationId): ProductPriceData
     {
         $sql = 'SELECT p.price, p.unit_price, pa.price AS combination_impact, pa.unit_price_impact'
@@ -66,7 +73,11 @@ class CatalogProductProvider implements ProductProviderInterface
         ]);
 
         if ($row === false) {
-            return $this->emptyPriceData();
+            throw new ProductPriceNotFoundException(sprintf(
+                'Product %d with combination %d not found',
+                $productId,
+                $combinationId
+            ));
         }
 
         return new ProductPriceData(
@@ -74,16 +85,6 @@ class CatalogProductProvider implements ProductProviderInterface
             new DecimalNumber((string) $row['unit_price']),
             new DecimalNumber((string) ($row['combination_impact'] ?? '0')),
             new DecimalNumber((string) ($row['unit_price_impact'] ?? '0')),
-        );
-    }
-
-    protected function emptyPriceData(): ProductPriceData
-    {
-        return new ProductPriceData(
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
-            new DecimalNumber('0'),
         );
     }
 }

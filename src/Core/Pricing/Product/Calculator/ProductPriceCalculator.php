@@ -11,10 +11,12 @@ namespace PrestaShop\PrestaShop\Core\Pricing\Product\Calculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPriceInterface;
 
 /**
- * Iterates over a priority-sorted list of product calculators and applies each one
- * sequentially to the given ProductPrice DTO.
+ * Main entry point for computing a product price. Named ProductPriceCalculator rather than
+ * ProductCalculatorOrchestrator because callers simply want to calculate a product price —
+ * the fact that it delegates to a priority-sorted pipeline of ProductCalculatorInterface
+ * steps is an internal implementation detail.
  */
-class ProductCalculatorOrchestrator
+class ProductPriceCalculator implements ProductCalculatorInterface
 {
     /**
      * @param iterable<ProductCalculatorInterface> $calculators Tagged iterator, priority-sorted
@@ -24,12 +26,10 @@ class ProductCalculatorOrchestrator
     ) {
     }
 
-    public function compute(ProductPriceInterface $productPrice): ProductPriceInterface
+    public function compute(ProductPriceInterface $productPrice): void
     {
         foreach ($this->calculators as $calculator) {
             $calculator->compute($productPrice);
         }
-
-        return $productPrice;
     }
 }

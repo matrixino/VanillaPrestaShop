@@ -39,7 +39,7 @@ class PricingHistoryDisplayerTest extends TestCase
     {
         $displayer = new PricingHistoryDisplayer();
         $productPrice = TrackedProductPrice::create(1, 0);
-        $productPrice->setUnitPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
+        $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
         $output = $displayer->formatAsString($productPrice);
 
@@ -52,7 +52,7 @@ class PricingHistoryDisplayerTest extends TestCase
     {
         $displayer = new PricingHistoryDisplayer();
         $productPrice = TrackedProductPrice::create(1, 0);
-        $productPrice->setUnitPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
+        $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
         $result = $displayer->formatAsArray($productPrice);
 

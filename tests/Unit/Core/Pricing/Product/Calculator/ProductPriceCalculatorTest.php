@@ -8,16 +8,17 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Core\Pricing\Product\Calculator;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculatorInterface;
-use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculatorOrchestrator;
+use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductPriceCalculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPrice;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPriceInterface;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxRate;
 
-class ProductCalculatorOrchestratorTest extends TestCase
+class ProductPriceCalculatorTest extends TestCase
 {
     public function testIteratesCalculatorsInOrder(): void
     {
@@ -30,7 +31,7 @@ class ProductCalculatorOrchestratorTest extends TestCase
             $executionOrder[] = 'second';
         });
 
-        $orchestrator = new ProductCalculatorOrchestrator([$calculator1, $calculator2]);
+        $orchestrator = new ProductPriceCalculator([$calculator1, $calculator2]);
         $productPrice = ProductPrice::create(1, 0);
 
         $orchestrator->compute($productPrice);
@@ -38,23 +39,23 @@ class ProductCalculatorOrchestratorTest extends TestCase
         $this->assertSame(['first', 'second'], $executionOrder);
     }
 
-    public function testReturnsTheSameProductPrice(): void
+    public function testEmptyPipelineLeavesProductPriceUnchanged(): void
     {
-        $orchestrator = new ProductCalculatorOrchestrator([]);
+        $calculator = new ProductPriceCalculator([]);
         $productPrice = ProductPrice::create(1, 0);
 
-        $result = $orchestrator->compute($productPrice);
+        $calculator->compute($productPrice);
 
-        $this->assertSame($productPrice, $result);
+        $this->assertTrue($productPrice->getUnitPrice()->getTaxExcluded()->equalsZero());
     }
 
     public function testCalculatorsMutateProductPrice(): void
     {
         $calculator = $this->createCalculator(function (ProductPriceInterface $pp) {
-            $pp->setUnitPrice(new TaxablePrice(new DecimalNumber('42'), TaxRate::zero()));
+            $pp->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('42'), TaxRate::zero()));
         });
 
-        $orchestrator = new ProductCalculatorOrchestrator([$calculator]);
+        $orchestrator = new ProductPriceCalculator([$calculator]);
         $productPrice = ProductPrice::create(1, 0);
 
         $orchestrator->compute($productPrice);
@@ -65,7 +66,7 @@ class ProductCalculatorOrchestratorTest extends TestCase
     private function createCalculator(callable $callback): ProductCalculatorInterface
     {
         return new class($callback) implements ProductCalculatorInterface {
-            public function __construct(private readonly \Closure $callback)
+            public function __construct(private readonly Closure $callback)
             {
             }
 

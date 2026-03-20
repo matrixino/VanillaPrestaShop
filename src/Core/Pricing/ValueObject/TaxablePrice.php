@@ -9,25 +9,20 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Pricing\ValueObject;
 
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\PrestaShop\Core\Pricing\Exception\TaxRateMismatchException;
 use PrestaShop\PrestaShop\Core\Pricing\PricingConstants;
 
 /**
  * Mutable price that automatically keeps tax-excluded, tax-included and tax-amount in sync
- * through its associated TaxRate. Supports arithmetic operations between prices sharing the
- * same tax rate.
+ * through its associated TaxRate.
  */
-class TaxablePrice
+class TaxablePrice implements TaxablePriceInterface
 {
     protected DecimalNumber $taxExcluded;
     protected DecimalNumber $taxIncluded;
     protected DecimalNumber $taxAmount;
     protected TaxRate $taxRate;
 
-    /**
-     * Primary constructor: derives taxIncluded from taxExcluded * taxRate multiplier.
-     */
-    public function __construct(DecimalNumber $taxExcluded, TaxRate $taxRate)
+    protected function __construct(DecimalNumber $taxExcluded, TaxRate $taxRate)
     {
         $this->taxExcluded = $taxExcluded;
         $this->taxRate = $taxRate;
@@ -35,7 +30,15 @@ class TaxablePrice
     }
 
     /**
-     * Reverse constructor: derives taxExcluded from taxIncluded / taxRate multiplier.
+     * Builds from a tax-excluded value: derives taxIncluded from taxExcluded * taxRate multiplier.
+     */
+    public static function fromTaxExcluded(DecimalNumber $taxExcluded, TaxRate $taxRate): self
+    {
+        return new self($taxExcluded, $taxRate);
+    }
+
+    /**
+     * Builds from a tax-included value: derives taxExcluded from taxIncluded / taxRate multiplier.
      */
     public static function fromTaxIncluded(DecimalNumber $taxIncluded, TaxRate $taxRate): self
     {
@@ -102,57 +105,6 @@ class TaxablePrice
     }
 
     /**
-     * Computes the tax amount for this price: taxExcluded * rate / 100.
-     */
-    public function computeTaxAmount(): DecimalNumber
-    {
-        return $this->taxExcluded->times($this->taxRate->getRate())
-            ->dividedBy(new DecimalNumber('100'), PricingConstants::INTERMEDIATE_PRECISION);
-    }
-
-    /**
-     * Adds another TaxablePrice to this one. Both must share the same tax rate.
-     *
-     * @throws TaxRateMismatchException when tax rates differ
-     */
-    public function plus(self $other): void
-    {
-        $this->assertSameTaxRate($other);
-        $this->taxExcluded = $this->taxExcluded->plus($other->taxExcluded);
-        $this->syncFromTaxExcluded();
-    }
-
-    /**
-     * Subtracts another TaxablePrice from this one. Both must share the same tax rate.
-     *
-     * @throws TaxRateMismatchException when tax rates differ
-     */
-    public function minus(self $other): void
-    {
-        $this->assertSameTaxRate($other);
-        $this->taxExcluded = $this->taxExcluded->minus($other->taxExcluded);
-        $this->syncFromTaxExcluded();
-    }
-
-    /**
-     * Multiplies this price by a scalar value and resyncs all internal values.
-     */
-    public function times(DecimalNumber $factor): void
-    {
-        $this->taxExcluded = $this->taxExcluded->times($factor);
-        $this->syncFromTaxExcluded();
-    }
-
-    /**
-     * Divides this price by a scalar value and resyncs all internal values.
-     */
-    public function dividedBy(DecimalNumber $divisor): void
-    {
-        $this->taxExcluded = $this->taxExcluded->dividedBy($divisor, PricingConstants::INTERMEDIATE_PRECISION);
-        $this->syncFromTaxExcluded();
-    }
-
-    /**
      * Recomputes taxIncluded and taxAmount from taxExcluded (source of truth).
      */
     protected function syncFromTaxExcluded(): void
@@ -160,19 +112,5 @@ class TaxablePrice
         $this->taxAmount = $this->taxExcluded->times($this->taxRate->getRate())
             ->dividedBy(new DecimalNumber('100'), PricingConstants::INTERMEDIATE_PRECISION);
         $this->taxIncluded = $this->taxExcluded->times($this->taxRate->getMultiplier());
-    }
-
-    /**
-     * @throws TaxRateMismatchException when the other price has a different tax rate
-     */
-    protected function assertSameTaxRate(self $other): void
-    {
-        if (!$this->taxRate->equals($other->taxRate)) {
-            throw new TaxRateMismatchException(sprintf(
-                'Cannot combine TaxablePrice instances with different tax rates (%s%% vs %s%%)',
-                $this->taxRate->getRate(),
-                $other->taxRate->getRate()
-            ));
-        }
     }
 }

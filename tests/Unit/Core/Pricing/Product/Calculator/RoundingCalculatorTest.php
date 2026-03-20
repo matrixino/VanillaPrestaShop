@@ -24,8 +24,8 @@ class RoundingCalculatorTest extends TestCase
         $calculator = new RoundingCalculator($roundingService);
 
         $productPrice = ProductPrice::create(1, 0);
-        $productPrice->setUnitPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
-        $productPrice->setOriginalPrice(new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero()));
+        $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
+        $productPrice->setOriginalPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
         $calculator->compute($productPrice);
 
@@ -44,8 +44,8 @@ class RoundingCalculatorTest extends TestCase
         $calculator = new RoundingCalculator($roundingService);
 
         $productPrice = ProductPrice::create(1, 0);
-        $productPrice->setUnitPrice(new TaxablePrice(new DecimalNumber('29.49'), TaxRate::zero()));
-        $productPrice->setOriginalPrice(new TaxablePrice(new DecimalNumber('29.49'), TaxRate::zero()));
+        $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.49'), TaxRate::zero()));
+        $productPrice->setOriginalPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.49'), TaxRate::zero()));
 
         $calculator->compute($productPrice);
 

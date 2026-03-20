@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\BaseProductCalculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPrice;
+use PrestaShop\PrestaShop\Core\Pricing\Exception\ProductPriceNotFoundException;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\MockProductProvider;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\ProductPriceData;
 
@@ -65,16 +66,14 @@ class BaseProductCalculatorTest extends TestCase
         );
     }
 
-    public function testUnknownProductReturnsZero(): void
+    public function testUnknownProductThrowsException(): void
     {
         $provider = new MockProductProvider();
         $calculator = new BaseProductCalculator($provider);
         $productPrice = ProductPrice::create(999, 0);
 
+        $this->expectException(ProductPriceNotFoundException::class);
         $calculator->compute($productPrice);
-
-        $this->assertTrue($productPrice->getOriginalPrice()->getTaxExcluded()->equalsZero());
-        $this->assertTrue($productPrice->getUnitPrice()->getTaxExcluded()->equalsZero());
     }
 
     public function testNoCombinationMeansZeroImpacts(): void

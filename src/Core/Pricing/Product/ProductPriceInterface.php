@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Pricing\Product;
 
-use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
+use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePriceInterface;
 
 /**
  * Mutable DTO carrying the computed prices for a single product (or combination).
@@ -22,11 +22,11 @@ interface ProductPriceInterface
 
     public function getQuantity(): int;
 
-    public function getUnitPrice(): TaxablePrice;
+    public function getUnitPrice(): TaxablePriceInterface;
 
-    public function setUnitPrice(TaxablePrice $unitPrice): void;
+    public function setUnitPrice(TaxablePriceInterface $unitPrice): void;
 
-    public function getOriginalPrice(): TaxablePrice;
+    public function getOriginalPrice(): TaxablePriceInterface;
 
-    public function setOriginalPrice(TaxablePrice $originalPrice): void;
+    public function setOriginalPrice(TaxablePriceInterface $originalPrice): void;
 }

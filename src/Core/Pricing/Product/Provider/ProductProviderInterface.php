@@ -15,8 +15,9 @@ namespace PrestaShop\PrestaShop\Core\Pricing\Product\Provider;
 interface ProductProviderInterface
 {
     /**
-     * Returns the pricing data for a product and optionally its combination in a single query.
-     * When combinationId > 0 the returned values already include the combination impacts.
+     * Returns the raw pricing data for a product and optionally its combination.
+     *
+     * @throws \PrestaShop\PrestaShop\Core\Pricing\Exception\ProductPriceNotFoundException when the product does not exist
      */
     public function getProductPriceData(int $productId, int $combinationId): ProductPriceData;
 }

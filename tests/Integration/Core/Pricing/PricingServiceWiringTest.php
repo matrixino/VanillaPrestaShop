@@ -10,7 +10,7 @@ namespace Tests\Integration\Core\Pricing;
 
 use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingHistoryDisplayer;
 use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingRegistry;
-use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculatorOrchestrator;
+use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductPriceCalculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\CatalogProductProvider;
 use PrestaShop\PrestaShop\Core\Pricing\Rounding\RoundingService;
 use PrestaShop\PrestaShop\Core\Pricing\Rounding\RoundingServiceInterface;
@@ -44,14 +44,14 @@ class PricingServiceWiringTest extends KernelTestCase
 
     public function testCartOrchestratorIsRegistered(): void
     {
-        $orchestrator = self::getContainer()->get('prestashop.pricing.cart.product_calculator_orchestrator');
-        $this->assertInstanceOf(ProductCalculatorOrchestrator::class, $orchestrator);
+        $orchestrator = self::getContainer()->get('prestashop.pricing.cart.product_price_calculator');
+        $this->assertInstanceOf(ProductPriceCalculator::class, $orchestrator);
     }
 
     public function testOrderOrchestratorIsRegistered(): void
     {
-        $orchestrator = self::getContainer()->get('prestashop.pricing.order.product_calculator_orchestrator');
-        $this->assertInstanceOf(ProductCalculatorOrchestrator::class, $orchestrator);
+        $orchestrator = self::getContainer()->get('prestashop.pricing.order.product_price_calculator');
+        $this->assertInstanceOf(ProductPriceCalculator::class, $orchestrator);
     }
 
     public function testPricingRegistryIsRegistered(): void

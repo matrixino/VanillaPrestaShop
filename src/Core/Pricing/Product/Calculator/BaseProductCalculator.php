@@ -31,16 +31,13 @@ class BaseProductCalculator implements ProductCalculatorInterface
             $productPrice->getCombinationId()
         );
 
-        $originalPrice = new TaxablePrice(
-            $priceData->getPrice()->plus($priceData->getCombinationImpact()),
+        $productPrice->setOriginalPrice(TaxablePrice::fromTaxExcluded(
+            $priceData->getPriceTaxExcluded()->plus($priceData->getCombinationImpactTaxExcluded()),
             TaxRate::zero()
-        );
-        $unitPrice = new TaxablePrice(
-            $priceData->getUnitPrice()->plus($priceData->getCombinationUnitPriceImpact()),
+        ));
+        $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(
+            $priceData->getUnitPriceTaxExcluded()->plus($priceData->getCombinationUnitPriceImpactTaxExcluded()),
             TaxRate::zero()
-        );
-
-        $productPrice->setOriginalPrice($originalPrice);
-        $productPrice->setUnitPrice($unitPrice);
+        ));
     }
 }

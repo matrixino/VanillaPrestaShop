@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Core\Pricing\Exception;
 
 /**
- * Thrown when attempting to combine TaxablePrice instances with different tax rates.
+ * Thrown when no pricing data can be found for a given product (or combination).
  */
-class TaxRateMismatchException extends PricingException
+class ProductPriceNotFoundException extends PricingException
 {
 }

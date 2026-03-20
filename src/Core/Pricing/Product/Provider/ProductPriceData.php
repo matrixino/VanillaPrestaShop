@@ -27,7 +27,7 @@ class ProductPriceData
     /**
      * ps_product.price — the base catalog price.
      */
-    public function getPrice(): DecimalNumber
+    public function getPriceTaxExcluded(): DecimalNumber
     {
         return $this->price;
     }
@@ -35,7 +35,7 @@ class ProductPriceData
     /**
      * ps_product.unit_price — the base unit price.
      */
-    public function getUnitPrice(): DecimalNumber
+    public function getUnitPriceTaxExcluded(): DecimalNumber
     {
         return $this->unitPrice;
     }
@@ -43,7 +43,7 @@ class ProductPriceData
     /**
      * ps_product_attribute.price — the combination impact on catalog price (0 when no combination).
      */
-    public function getCombinationImpact(): DecimalNumber
+    public function getCombinationImpactTaxExcluded(): DecimalNumber
     {
         return $this->combinationImpact;
     }
@@ -51,7 +51,7 @@ class ProductPriceData
     /**
      * ps_product_attribute.unit_price_impact — the combination unit price impact (0 when no combination).
      */
-    public function getCombinationUnitPriceImpact(): DecimalNumber
+    public function getCombinationUnitPriceImpactTaxExcluded(): DecimalNumber
     {
         return $this->combinationUnitPriceImpact;
     }

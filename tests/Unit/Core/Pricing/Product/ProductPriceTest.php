@@ -42,7 +42,7 @@ class ProductPriceTest extends TestCase
     public function testSetUnitPrice(): void
     {
         $price = ProductPrice::create(1, 0);
-        $unitPrice = new TaxablePrice(new DecimalNumber('29.99'), TaxRate::zero());
+        $unitPrice = TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero());
 
         $price->setUnitPrice($unitPrice);
 
@@ -52,7 +52,7 @@ class ProductPriceTest extends TestCase
     public function testSetOriginalPrice(): void
     {
         $price = ProductPrice::create(1, 0);
-        $originalPrice = new TaxablePrice(new DecimalNumber('39.99'), TaxRate::zero());
+        $originalPrice = TaxablePrice::fromTaxExcluded(new DecimalNumber('39.99'), TaxRate::zero());
 
         $price->setOriginalPrice($originalPrice);
 

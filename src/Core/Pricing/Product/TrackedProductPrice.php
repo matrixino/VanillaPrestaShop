@@ -11,6 +11,7 @@ namespace PrestaShop\PrestaShop\Core\Pricing\Product;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\PriceBreakdown;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\PriceModification;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
+use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePriceInterface;
 
 /**
  * Debug-aware ProductPrice that auto-records every setter call as a PriceModification
@@ -19,8 +20,8 @@ use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
  */
 class TrackedProductPrice implements ProductPriceInterface
 {
-    protected TaxablePrice $unitPrice;
-    protected TaxablePrice $originalPrice;
+    protected TaxablePriceInterface $unitPrice;
+    protected TaxablePriceInterface $originalPrice;
     protected PriceBreakdown $breakdown;
 
     protected function __construct(
@@ -53,23 +54,23 @@ class TrackedProductPrice implements ProductPriceInterface
         return $this->quantity;
     }
 
-    public function getUnitPrice(): TaxablePrice
+    public function getUnitPrice(): TaxablePriceInterface
     {
         return $this->unitPrice;
     }
 
-    public function setUnitPrice(TaxablePrice $unitPrice): void
+    public function setUnitPrice(TaxablePriceInterface $unitPrice): void
     {
         $this->recordModification('unitPrice', $this->unitPrice, $unitPrice);
         $this->unitPrice = $unitPrice;
     }
 
-    public function getOriginalPrice(): TaxablePrice
+    public function getOriginalPrice(): TaxablePriceInterface
     {
         return $this->originalPrice;
     }
 
-    public function setOriginalPrice(TaxablePrice $originalPrice): void
+    public function setOriginalPrice(TaxablePriceInterface $originalPrice): void
     {
         $this->recordModification('originalPrice', $this->originalPrice, $originalPrice);
         $this->originalPrice = $originalPrice;
@@ -80,7 +81,7 @@ class TrackedProductPrice implements ProductPriceInterface
         return $this->breakdown;
     }
 
-    protected function recordModification(string $property, TaxablePrice $previous, TaxablePrice $new): void
+    protected function recordModification(string $property, TaxablePriceInterface $previous, TaxablePriceInterface $new): void
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $caller = $trace[2] ?? [];

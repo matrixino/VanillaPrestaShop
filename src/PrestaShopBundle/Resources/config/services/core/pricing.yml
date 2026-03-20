@@ -30,14 +30,14 @@ services:
             - { name: 'prestashop.pricing.order.product_calculator', priority: 10 }
 
     # Cart Orchestrator
-    prestashop.pricing.cart.product_calculator_orchestrator:
-        class: PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculatorOrchestrator
+    prestashop.pricing.cart.product_price_calculator:
+        class: PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductPriceCalculator
         arguments:
             $calculators: !tagged_iterator { tag: 'prestashop.pricing.cart.product_calculator' }
 
     # Order Orchestrator
-    prestashop.pricing.order.product_calculator_orchestrator:
-        class: PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculatorOrchestrator
+    prestashop.pricing.order.product_price_calculator:
+        class: PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductPriceCalculator
         arguments:
             $calculators: !tagged_iterator { tag: 'prestashop.pricing.order.product_calculator' }
 
