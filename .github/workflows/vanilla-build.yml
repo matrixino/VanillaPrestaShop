@@ -40,6 +40,7 @@ jobs:
             php: 8.4
           - TAG: 9.0.1
             node: 20
+            php: 8.4
           - TAG: 9.0.0
             node: 20
             php: 8.4
