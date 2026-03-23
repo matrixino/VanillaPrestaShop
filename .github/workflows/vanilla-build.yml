@@ -1,0 +1,114 @@
+name: Vanilla Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        TAG:
+          - 9.1.0
+          - 9.0.3
+          - 9.0.2
+          - 9.0.1
+          - 9.0.0
+          - 8.2.5
+          - 8.2.4
+          - 8.2.3
+          - 8.2.2
+          - 8.1.7
+          - 8.0.5
+          - 1.7.8.11
+        include:
+          - TAG: 9.1.0
+            node: 20
+            php: 8.5
+          - TAG: 9.0.3
+            node: 20
+            php: 8.4
+          - TAG: 9.0.2
+            node: 20
+            php: 8.4
+          - TAG: 9.0.1
+            node: 20
+          - TAG: 9.0.0
+            node: 20
+            php: 8.4
+          - TAG: 8.2.5
+            node: 16
+            php: 8.1
+          - TAG: 8.2.4
+            node: 16
+            php: 8.1
+          - TAG: 8.2.3
+            node: 16
+            php: 8.1
+          - TAG: 8.2.2
+            node: 16
+            php: 8.1
+          - TAG: 8.1.7
+            node: 16
+            php: 8.1
+          - TAG: 8.0.5
+            node: 14
+            php: 7.4
+          - TAG: 1.7.8.11
+            node: 14
+            php: 7.4
+
+    env:
+      PHP_VERSION: ${{ matrix.php }}'
+      NODE_VERSION: ${{ matrix.node }}
+      RELEASE_DIR: '/tmp/ps-release'
+      GH_TAG: ${{ matrix.TAG }}
+      ZIP_FILE: ${{ format('vanilla_prestashop_{0}.zip', matrix.TAG) }}
+      XML_FILE: ${{ format('vanilla_prestashop_{0}.xml', matrix.TAG) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GH_TAG }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, intl, gd, xml, dom, json, fileinfo, curl, zip, iconv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Create Release directory
+        run: mkdir -p ${{ env.RELEASE_DIR }}
+
+      - name: Create build
+        run: php tools/build/CreateRelease.php --destination-dir=${{ env.RELEASE_DIR }}
+
+      - name: Rename ZIP file
+        run: |
+          cp prestashop_${{ env.GH_TAG }}.zip ${{ env.ZIP_FILE }}
+          cp prestashop_${{ env.GH_TAG }}.xml ${{ env.XML_FILE }}
+        working-directory: ${{ env.RELEASE_DIR }}
+
+      - name: release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.GH_TAG }}
+          allowUpdates: true
+          artifacts: "${{ env.RELEASE_DIR }}/${{ env.ZIP_FILE }},${{ env.RELEASE_DIR }}/${{ env.XML_FILE }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
