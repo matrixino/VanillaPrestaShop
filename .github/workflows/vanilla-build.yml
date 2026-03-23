@@ -16,10 +16,12 @@ jobs:
       fail-fast: false
       matrix:
         TAG:
+          - 9.1.0
           - 9.0.3
           - 9.0.2
           - 9.0.1
           - 9.0.0
+          - 8.2.5
           - 8.2.4
           - 8.2.3
           - 8.2.2
@@ -27,29 +29,44 @@ jobs:
           - 8.0.5
           - 1.7.8.11
         include:
-          - TAG: 9.0.2
+          - TAG: 9.1.0
             node: 20
+            php: 8.5
           - TAG: 9.0.3
             node: 20
+            php: 8.4
+          - TAG: 9.0.2
+            node: 20
+            php: 8.4
           - TAG: 9.0.1
             node: 20
           - TAG: 9.0.0
             node: 20
+            php: 8.4
+          - TAG: 8.2.5
+            node: 16
+            php: 8.1
           - TAG: 8.2.4
             node: 16
+            php: 8.1
           - TAG: 8.2.3
             node: 16
+            php: 8.1
           - TAG: 8.2.2
             node: 16
+            php: 8.1
           - TAG: 8.1.7
             node: 16
+            php: 8.1
           - TAG: 8.0.5
             node: 14
+            php: 7.4
           - TAG: 1.7.8.11
             node: 14
+            php: 7.4
 
     env:
-      PHP_VERSION: '7.4'
+      PHP_VERSION: ${{ matrix.php }}'
       NODE_VERSION: ${{ matrix.node }}
       RELEASE_DIR: '/tmp/ps-release'
       GH_TAG: ${{ matrix.TAG }}
