@@ -183,35 +183,50 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
     it('should create a discount without name and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_1', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountWithoutName);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountWithoutName);
+      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'name');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageNameRequired);
     });
 
     it('should create a discount with a minimum purchase value = 0 euro and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_2', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountZero);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountZero);
+      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageMinPurchaseAmount);
     });
 
     it('should create a discount with a minimum purchase value < 0 and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_3', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountNegative);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountNegative);
+      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageMinPurchaseAmount);
     });
 
     it('should create a discount with a minimum purchase value = asefr and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_4', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountText);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountText);
+      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageMinPurchaseAmountNotnumber);
     });
 
     it('should create a discount with a discount value < 0 and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_5', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountValueNegative);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountValueNegative);
+      expect(errorMessage).to.contains(errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'value');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageDiscountValue(
         discountValueNegative.discountValue.toString()));
     });
@@ -219,7 +234,10 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
     it('should create a discount with a discount value = 0 and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_6', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, discountValueZero);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountValueZero);
+      expect(errorMessage).to.contains(errorMessage);
+
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'value');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageDiscountValue('0'));
     });
 
