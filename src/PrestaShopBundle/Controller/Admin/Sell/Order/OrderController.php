@@ -2055,7 +2055,7 @@ class OrderController extends PrestaShopAdminController
         $internalNoteForm = $this->createForm(InternalNoteType::class);
         $internalNoteForm->handleRequest($request);
 
-        if ($internalNoteForm->isSubmitted()) {
+        if ($internalNoteForm->isSubmitted() && $internalNoteForm->isValid()) {
             $data = $internalNoteForm->getData();
 
             try {
@@ -2077,6 +2077,10 @@ class OrderController extends PrestaShopAdminController
                     'error',
                     $this->getErrorMessageForException($e, $this->getErrorMessages($e))
                 );
+            }
+        } else {
+            foreach ($internalNoteForm->getErrors(true) as $error) {
+                $this->addFlash('error', htmlentities($error->getMessage()));
             }
         }
 
