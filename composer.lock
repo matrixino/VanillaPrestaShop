@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c37c613f9eeab7c56d7f8d701142033",
+    "content-hash": "b948a50b8fb50c7f805caabaf23f38c9",
     "packages": [
         {
             "name": "api-platform/core",
@@ -5208,16 +5208,16 @@
         },
         {
             "name": "prestashop/ps_apiresources",
-            "version": "dev-fix-bulk-error-status-code",
+            "version": "dev-dev",
             "source": {
                 "type": "git",
-                "url": "https://github.com/boherm/ps_apiresources.git",
-                "reference": "51be59ee995aa61dda4c0fe309c352da4c407221"
+                "url": "https://github.com/PrestaShop/ps_apiresources.git",
+                "reference": "e66d804f272e96699336481d6307ca1d84ed32c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/boherm/ps_apiresources/zipball/51be59ee995aa61dda4c0fe309c352da4c407221",
-                "reference": "51be59ee995aa61dda4c0fe309c352da4c407221",
+                "url": "https://api.github.com/repos/PrestaShop/ps_apiresources/zipball/e66d804f272e96699336481d6307ca1d84ed32c6",
+                "reference": "e66d804f272e96699336481d6307ca1d84ed32c6",
                 "shasum": ""
             },
             "require": {
@@ -5231,6 +5231,7 @@
                 "prestashop/php-dev-tools": "^4.3",
                 "rector/rector": "^2.0"
             },
+            "default-branch": true,
             "type": "prestashop-module",
             "autoload": {
                 "psr-4": {
@@ -5296,9 +5297,10 @@
             "description": "PrestaShop - API Resources",
             "homepage": "https://github.com/PrestaShop/ps_apiresources",
             "support": {
-                "source": "https://github.com/boherm/ps_apiresources/tree/fix-bulk-error-status-code"
+                "source": "https://github.com/PrestaShop/ps_apiresources/tree/dev",
+                "issues": "https://github.com/PrestaShop/ps_apiresources/issues"
             },
-            "time": "2026-03-18T09:54:23+00:00"
+            "time": "2026-03-24T08:35:07+00:00"
         },
         {
             "name": "prestashop/ps_banner",
@@ -18430,5 +18432,5 @@
     "platform-overrides": {
         "php": "8.1.0"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
