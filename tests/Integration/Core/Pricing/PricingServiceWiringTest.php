@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Core\Pricing;
 
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Calculator\CartCalculator;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\CartProductProviderInterface;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\DatabaseCartProductProvider;
 use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingHistoryDisplayer;
 use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingRegistry;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculator;
@@ -64,5 +67,23 @@ class PricingServiceWiringTest extends KernelTestCase
     {
         $displayer = self::getContainer()->get(PricingHistoryDisplayer::class);
         $this->assertInstanceOf(PricingHistoryDisplayer::class, $displayer);
+    }
+
+    public function testDatabaseCartProductProviderIsRegistered(): void
+    {
+        $service = self::getContainer()->get(DatabaseCartProductProvider::class);
+        $this->assertInstanceOf(DatabaseCartProductProvider::class, $service);
+    }
+
+    public function testCartProductProviderInterfaceAlias(): void
+    {
+        $service = self::getContainer()->get(CartProductProviderInterface::class);
+        $this->assertInstanceOf(DatabaseCartProductProvider::class, $service);
+    }
+
+    public function testCartCalculatorIsRegistered(): void
+    {
+        $calculator = self::getContainer()->get('prestashop.pricing.cart.cart_calculator');
+        $this->assertInstanceOf(CartCalculator::class, $calculator);
     }
 }
