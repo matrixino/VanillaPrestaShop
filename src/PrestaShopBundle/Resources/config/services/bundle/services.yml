@@ -52,6 +52,7 @@ services:
     class: PrestaShopBundle\Service\TranslationService
     properties:
       container: "@service_container"
+      validator: "@prestashop.core.validation.validator"
 
   # Interfaced services to decorate
   prestashop.core.data_provider.stock_interface:

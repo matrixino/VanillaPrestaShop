@@ -24,6 +24,23 @@ needs please refer to https://devdocs.prestashop.com/ for more information.
 Changelog for PrestaShop 8
 
 ####################################
+#   v8.2.5 - (2026-03-13)
+####################################
+
+- Front Office
+  - Improvement:
+    - GHSA-35pf-37c6-jxjv Prevent xss exploitation via unprotected variables in template
+    - GHSA-283w-xf3q-788v Fix improper use of validation framework
+
+####################################
+#   v8.2.4 - (2026-01-23)
+####################################
+
+- Front Office
+  - Improvement:
+    - GHSA-67v7-3g49-mxh2 Protect users from time based email enumeration attacks (by @matthieu-rolland, vulnerability reported by Lam Yiu Tung)
+
+####################################
 #   v8.2.3 - (2025-08-28)
 ####################################
 

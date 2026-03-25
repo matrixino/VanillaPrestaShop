@@ -477,6 +477,10 @@ class CustomerCore extends ObjectModel
         $sql->where('c.`deleted` = 0');
 
         $passwordHash = Db::getInstance()->getValue($sql);
+        if (!$passwordHash) {
+            // Create fake password hash to make sure computing time does not allow email enumeration
+            $passwordHash = '123456';
+        }
 
         try {
             /** @var \PrestaShop\PrestaShop\Core\Crypto\Hashing $crypto */
@@ -505,9 +509,9 @@ class CustomerCore extends ObjectModel
         $sql->where('c.`deleted` = 0');
 
         $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->getRow($sql);
-
         if (!$result) {
-            return false;
+            // Create fake result to make sure computing time does not allow email enumeration
+            $result = ['passwd' => '123456', 'id_customer' => 0];
         }
 
         $this->id = $result['id_customer'];
@@ -520,6 +524,10 @@ class CustomerCore extends ObjectModel
         if ($shouldCheckPassword && !$crypto->isFirstHash($plaintextPassword, $passwordHash)) {
             $this->passwd = $crypto->hash($plaintextPassword);
             $this->update();
+        }
+
+        if ($this->id == 0) {
+            return false;
         }
 
         return $this;

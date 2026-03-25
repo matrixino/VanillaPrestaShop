@@ -25,7 +25,7 @@
 <div id="login-panel">
 	<div id="login-header">
 		<h1 class="text-center">
-			<img id="logo" src="{$img_dir}prestashop@2x.png" width="123px" height="24px" alt="PrestaShop" />
+			<img id="logo" src="{$img_dir|escape:'html':'UTF-8'}prestashop@2x.png" width="123px" height="24px" alt="PrestaShop" />
 		</h1>
 		<div id="error" class="hide alert alert-danger">
 		{if isset($errors)}
@@ -38,24 +38,24 @@
 			</h4>
 			<ol>
 				{foreach from=$errors item="error"}
-				<li>{$error}</li>
+				<li>{$error|escape:'html':'UTF-8'}</li>
 				{/foreach}
 			</ol>
 		{/if}
 		</div>
 
 		{if isset($warningSslMessage)}
-		<div class="alert alert-warning">{$warningSslMessage}</div>
+		<div class="alert alert-warning">{$warningSslMessage|escape:'html':'UTF-8'}</div>
 		{/if}
 	</div>
-	<div id="shop-img"><img src="{$img_dir}preston-login@2x.png" alt="{$shop_name}" width="69.5px" height="118.5px" /></div>
+	<div id="shop-img"><img src="{$img_dir|escape:'html':'UTF-8'}preston-login@2x.png" alt="{$shop_name|escape:'html':'UTF-8'}" width="69.5px" height="118.5px" /></div>
 	<div class="flip-container">
 		<div class="flipper">
 			<div class="front front_login panel" {if isset($reset_token) && isset($id_employee)}style="display:none;"{/if}>
-				<h4 id="shop_name">{$shop_name}</h4>
+				<h4 id="shop_name">{$shop_name|escape:'html':'UTF-8'}c</h4>
 				{if !isset($wrong_folder_name) && !isset($wrong_install_name)}
 				<form action="#" id="login_form" method="post">
-					<input type="hidden" name="redirect" id="redirect" value="{$redirect}"/>
+					<input type="hidden" name="redirect" id="redirect" value="{$redirect|escape:'html':'UTF-8'}"/>
 					<div class="form-group">
 						<label class="control-label" for="email">{l s='Email address' d='Admin.Global'}</label>
 						<input name="email" type="email" id="email" class="form-control" value="{if isset($email)}{$email|escape:'html':'UTF-8'}{/if}" autofocus="autofocus" tabindex="1" placeholder="&#xf0e0 test@example.com" />
@@ -164,7 +164,7 @@
 		{/if}
 	</div>
 
-  <a class='login-back' href='{$homeUrl}'><i class="material-icons rtl-flip">arrow_back</i> <span>{l s='Back to' d='Admin.Actions'}</span> <span class="login-back-shop">{$shop_name}</span></a>
+  <a class='login-back' href='{$homeUrl|escape:'html':'UTF-8'}'><i class="material-icons rtl-flip">arrow_back</i> <span>{l s='Back to' d='Admin.Actions'}</span> <span class="login-back-shop">{$shop_name|escape:'html':'UTF-8'}</span></a>
 
 	{hook h="displayAdminLogin"}
 
