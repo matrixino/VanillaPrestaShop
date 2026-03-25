@@ -65,8 +65,6 @@ use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductOutOfStockExcepti
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductSearchEmptyPhraseException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\SearchProducts;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\FoundProduct;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\AddProductToShipment;
-use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\CreateShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\EditShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\MergeProductsToShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
@@ -1016,6 +1014,9 @@ class OrderController extends PrestaShopAdminController
         $invoiceId = (int) $request->get('invoice_id');
         $productId = (int) $request->get('product_id');
         $combinationId = (int) $request->get('combination_id');
+        $shipmentId = (int) $request->get('shipment_id', null);
+        $carrierId = (int) $request->get('carrier_id', null);
+        $isVirtual = (bool) $request->get('virtual', false);
 
         try {
             if ($invoiceId > 0) {
@@ -1026,7 +1027,10 @@ class OrderController extends PrestaShopAdminController
                     $combinationId,
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),
-                    (int) $request->get('quantity')
+                    (int) $request->get('quantity'),
+                    $shipmentId,
+                    $carrierId,
+                    $isVirtual
                 );
             } else {
                 $hasFreeShipping = null;
@@ -1040,23 +1044,14 @@ class OrderController extends PrestaShopAdminController
                     $request->get('price_tax_incl'),
                     $request->get('price_tax_excl'),
                     (int) $request->get('quantity'),
-                    $hasFreeShipping
+                    $hasFreeShipping,
+                    $shipmentId,
+                    $carrierId,
+                    $isVirtual
                 );
             }
 
             $this->dispatchCommand($addProductCommand);
-            if ($featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT) && $this->orderHasShipment($orderForViewing->getId()) === true) {
-                $shipmentId = (int) $request->get('shipment_id');
-                $isVirtual = (bool) $request->get('virtual');
-
-                if ($shipmentId === 0 && !$isVirtual) {
-                    $carrierId = (int) $request->get('carrier_id');
-                    $shipmentId = $this->dispatchCommand(new CreateShipment($orderId, $carrierId, $productId, (int) $request->get('quantity'), $combinationId));
-                }
-                if (!$isVirtual) {
-                    $this->dispatchCommand(new AddProductToShipment($shipmentId, $productId, $orderId, $combinationId));
-                }
-            }
         } catch (Exception $e) {
             return $this->json(
                 ['message' => $this->getErrorMessageForException($e, $this->getErrorMessages($e))],

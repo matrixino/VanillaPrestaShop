@@ -1,0 +1,58 @@
+<?php
+/**
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace PrestaShop\PrestaShop\Adapter\Shipment;
+
+use Order;
+use OrderDetail;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
+use PrestaShopBundle\Entity\Repository\ShipmentRepository;
+use PrestaShopBundle\Entity\Shipment;
+use PrestaShopBundle\Entity\ShipmentProduct;
+
+class ShipmentProductAssigner
+{
+    public function __construct(private ShipmentRepository $shipmentRepository)
+    {
+    }
+
+    /**
+     * @param int|null $shipmentId
+     * @param Order $order
+     * @param OrderDetail
+     * @param int $carrierId
+     */
+    public function assign(?int $shipmentId, Order $order, OrderDetail $orderDetail, int $carrierId): void
+    {
+        if (empty($shipmentId)) {
+            $shipment = new Shipment();
+            $shipment->setOrderId((int) $order->id);
+            $shipment->setCarrierId($carrierId);
+            $shipment->setAddressId((int) $order->id_address_delivery);
+            $shipment->setTrackingNumber(null);
+            $shipment->setShippingCostTaxExcluded(0.00);
+            $shipment->setShippingCostTaxIncluded(0.00);
+            $shipment->setDeliveredAt(null);
+            $shipment->setShippedAt(null);
+            $shipment->setCancelledAt(null);
+        } else {
+            $shipment = $this->shipmentRepository->findById($shipmentId);
+
+            if ($shipment === null) {
+                throw new ShipmentNotFoundException(sprintf('No shipment with id %d found', $shipmentId));
+            }
+        }
+
+        $shipmentProduct = new ShipmentProduct();
+        $shipmentProduct->setOrderDetailId((int) $orderDetail->id_order_detail);
+        $shipmentProduct->setQuantity((int) $orderDetail->product_quantity);
+        $shipment->addShipmentProduct($shipmentProduct);
+
+        $this->shipmentRepository->save($shipment);
+    }
+}
