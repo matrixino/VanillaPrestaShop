@@ -423,7 +423,8 @@ export default class OrderProductEdit {
         orderDetailId,
       }),
       method: 'POST',
-      data: params,
+      contentType: 'application/json',
+      data: JSON.stringify(params),
     }).then(
       () => {
         this.removeShipmentListeners();
