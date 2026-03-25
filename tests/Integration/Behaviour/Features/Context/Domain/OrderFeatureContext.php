@@ -206,6 +206,14 @@ class OrderFeatureContext extends AbstractDomainFeatureContext
             if (isset($data['free_shipping'])) {
                 $hasFreeShipping = PrimitiveUtils::castStringBooleanIntoBoolean($data['free_shipping']);
             }
+            $shipmentId = null;
+            if (!empty($data['shipment_id'])) {
+                $shipmentId = (int) SharedStorage::getStorage()->get($data['shipment_id']);
+            }
+            $carrierId = null;
+            if (!empty($data['carrier_id'])) {
+                $carrierId = (int) SharedStorage::getStorage()->get($data['carrier_id']);
+            }
             $this->getCommandBus()->handle(
                 AddProductToOrderCommand::withNewInvoice(
                     $orderId,
@@ -214,7 +222,9 @@ class OrderFeatureContext extends AbstractDomainFeatureContext
                     $data['price_tax_incl'],
                     $data['price'],
                     (int) $data['amount'],
-                    $hasFreeShipping
+                    $hasFreeShipping,
+                    $shipmentId,
+                    $carrierId
                 )
             );
         } catch (InvalidProductQuantityException $e) {

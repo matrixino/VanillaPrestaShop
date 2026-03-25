@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Shipment;
 
+use Exception;
 use Order;
 use OrderDetail;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentNotFoundException;
@@ -25,11 +26,14 @@ class ShipmentProductAssigner
      * @param int|null $shipmentId
      * @param Order $order
      * @param OrderDetail
-     * @param int $carrierId
+     * @param int|null $carrierId
      */
-    public function assign(?int $shipmentId, Order $order, OrderDetail $orderDetail, int $carrierId): void
+    public function assign(?int $shipmentId, Order $order, OrderDetail $orderDetail, ?int $carrierId = null): void
     {
         if (empty($shipmentId)) {
+            if (empty($carrierId)) {
+                throw new Exception('A carrier ID is required to create a new shipment');
+            }
             $shipment = new Shipment();
             $shipment->setOrderId((int) $order->id);
             $shipment->setCarrierId($carrierId);
