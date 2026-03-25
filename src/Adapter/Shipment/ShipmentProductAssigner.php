@@ -25,7 +25,7 @@ class ShipmentProductAssigner
     /**
      * @param int|null $shipmentId
      * @param Order $order
-     * @param OrderDetail
+     * @param OrderDetail $orderDetail
      * @param int|null $carrierId
      */
     public function assign(?int $shipmentId, Order $order, OrderDetail $orderDetail, ?int $carrierId = null): void
