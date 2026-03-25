@@ -25,6 +25,7 @@ on:
         type: string
 
 permissions:
+  actions: write
   issues: write
   contents: read
 
@@ -39,5 +40,5 @@ jobs:
         with:
           days-before-stale: ${{ github.event.inputs.days-before-stale || '547' }}
           days-before-close: ${{ github.event.inputs.days-before-close || '30' }}
-          exempt-issue-labels: "Critical, Security, Major, Good first issue, EPIC, Topwatchers, Blocked, Must-have, Waiting for dev, Waiting for QA, Waiting for QA by Community, Waiting for PM, Waiting for UX, Waiting for rebase, Waiting for wording, Release"
+          exempt-issue-labels: "Critical, Security, Major, Good first issue, EPIC, Topwatchers, Blocked, Must-have, Waiting for dev, Waiting for QA, Waiting for QA by Community, Waiting for PM, Waiting for UX, Waiting for rebase, Waiting for wording, Release, Detected by TE, 9.1.x"
           debug-only: ${{ github.event.inputs.debug-only || 'false' }}
