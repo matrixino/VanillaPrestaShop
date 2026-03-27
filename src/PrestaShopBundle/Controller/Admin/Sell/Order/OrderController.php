@@ -73,6 +73,7 @@ use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\SplitShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\CannotEditShipmentShippedException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetOrderShipments;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentForEditing;
+use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\GetShipmentsForOrderDetail;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Query\ListAvailableShipmentsForProduct;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\QueryResult\OrderShipment;
 use PrestaShop\PrestaShop\Core\Domain\ValueObject\QuerySorting;
@@ -645,6 +646,7 @@ class OrderController extends PrestaShopAdminController
     #[AdminSecurity("is_granted('update', 'AdminOrders')", redirectRoute: 'admin_orders_view', redirectQueryParamsToKeep: ['orderId'], message: 'You do not have permission to edit this.')]
     public function getEditProductForm(
         int $orderId,
+        int $orderDetailId,
         #[Autowire(service: 'prestashop.core.form.identifiable_object.builder.edit_order_product_form_builder')] FormBuilderInterface $orderProductFormBuilder,
         FeatureFlagStateCheckerInterface $featureFlagStateChecker,
         CurrencyDataProvider $currencyDataProvider
@@ -652,6 +654,7 @@ class OrderController extends PrestaShopAdminController
         $orderForViewing = $this->dispatchQuery(new GetOrderForViewing($orderId, QuerySorting::DESC));
         $form = $orderProductFormBuilder->getFormFor($orderId);
         $orderCurrency = $currencyDataProvider->getCurrencyById($orderForViewing->getCurrencyId());
+        $shipments = $this->dispatchQuery(new GetShipmentsForOrderDetail($orderId, $orderDetailId));
 
         return $this->render('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/edit_product_form.html.twig', [
             'editProductForm' => $form->createView(),
@@ -660,6 +663,7 @@ class OrderController extends PrestaShopAdminController
             'isMultishipmentIsEnabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
             'orderId' => $orderId,
             'currencySymbol' => $orderCurrency->symbol,
+            'shipments' => $shipments,
         ]);
     }
 
@@ -1316,14 +1320,17 @@ class OrderController extends PrestaShopAdminController
         CurrencyDataProvider $currencyDataProvider
     ): Response {
         try {
+            $data = json_decode($request->getContent(), true);
+
             $this->dispatchCommand(
                 new UpdateProductInOrderCommand(
                     $orderId,
                     $orderDetailId,
-                    $request->get('price_tax_incl'),
-                    $request->get('price_tax_excl'),
-                    (int) $request->get('quantity'),
-                    (int) $request->get('invoice')
+                    $data['price_tax_incl'],
+                    $data['price_tax_excl'],
+                    (int) $data['quantity'],
+                    (int) $data['invoice'],
+                    $data['shipmentProducts'] ?? null
                 )
             );
         } catch (Exception $e) {
