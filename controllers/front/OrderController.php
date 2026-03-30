@@ -299,6 +299,7 @@ class OrderControllerCore extends FrontController
 
         $this->context->smarty->assign([
             'checkout_process' => new RenderableProxy($this->checkoutProcess),
+            'checkout_steps' => $this->checkoutProcess->getCheckoutStepsForTemplate(),
             'display_transaction_updated_info' => Tools::getIsset('updatedTransaction'),
             'tos_cms' => $this->getDefaultTermsAndConditions(),
         ]);
