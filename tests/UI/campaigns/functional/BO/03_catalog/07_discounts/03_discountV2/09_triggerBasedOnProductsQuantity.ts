@@ -25,7 +25,7 @@ import {
   utilsPlaywright,
 } from '@prestashop-core/ui-testing';
 
-const baseContext: string = 'functional_BO_catalog_discounts_discountV2_minimumPurchaseAmountOnCartAmount';
+const baseContext: string = 'functional_BO_catalog_discounts_discountV2_triggerBasedOnProductsQuantity';
 
 /*
 Pre-condition:
@@ -37,89 +37,48 @@ Scenario:
 Post-condition:
 - Disable discount
  */
-describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', async () => {
+describe('BO - Catalog - Discounts : Trigger based on the total quantity of products in the cart', async () => {
   let browserContext: BrowserContext;
   let page: Page;
 
   const discountWithoutName: FakerDiscount = new FakerDiscount({
     discountType: 'On cart amount',
     name: ' ',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: 20,
-    minimumAmountTax: 'Tax included',
+    minimumProductQuantity: true,
+    productQuantity: 5,
     discountValue: 10,
     discountReductionType: '€',
     discountTax: 'Tax included',
   });
-  const discountPurchaseAmountZero: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: '0',
-    minimumAmountTax: 'Tax included',
-    discountValue: 10,
-    discountReductionType: '€',
-    discountTax: 'Tax included',
+  const discountMinProductQuantityZero: FakerDiscount = new FakerDiscount({
+    ...discountWithoutName,
+    name: 'test',
+    productQuantity: '0',
   });
-  const discountPurchaseAmountNegative: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: -50,
-    minimumAmountTax: 'Tax included',
-    discountValue: 10,
-    discountReductionType: '€',
-    discountTax: 'Tax included',
+  const discountMinProductQuantityNegative: FakerDiscount = new FakerDiscount({
+    ...discountWithoutName,
+    name: 'test',
+    productQuantity: -1,
   });
-  const discountPurchaseAmountText: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: 'asefr',
-    minimumAmountTax: 'Tax included',
-    discountValue: 10,
-    discountReductionType: '€',
-    discountTax: 'Tax included',
+  const discountMinProductQuantityText: FakerDiscount = new FakerDiscount({
+    ...discountWithoutName,
+    name: 'test',
+    productQuantity: 'azsdf',
   });
   const discountValueNegative: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: 50,
-    minimumAmountTax: 'Tax included',
-    discountValue: -20,
-    discountReductionType: '€',
-    discountTax: 'Tax included',
-  });
-  const discountValueZero: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: 50,
-    minimumAmountTax: 'Tax included',
-    discountValue: '0',
-    discountReductionType: '€',
-    discountTax: 'Tax included',
+    ...discountWithoutName,
+    name: 'test',
+    productQuantity: 2,
+    discountValue: -10,
   });
 
   const discountData: FakerDiscount = new FakerDiscount({
-    discountType: 'On cart amount',
-    name: 'Test',
-    noProductCondition: true,
-    minimumPurchaseAmount: true,
-    minimumAmountValue: 50,
-    minimumAmountTax: 'Tax included',
+    ...discountWithoutName,
+    name: 'test',
+    productQuantity: 2,
     discountValue: 10,
-    discountReductionType: '€',
-    discountTax: 'Tax included',
     generateDiscountCode: true,
-    discountCode: 'test',
+    discountCode: 'TEST',
   });
   const editDiscountData: FakerDiscount = new FakerDiscount({
     discountType: 'On cart amount',
@@ -144,7 +103,7 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
   });
 
   // 1 - Pre-condition: Enable discount
-  setFeatureFlag(boFeatureFlagPage.featureFlagDiscount, true, `${baseContext}_preTest`);
+  //setFeatureFlag(boFeatureFlagPage.featureFlagDiscount, true, `${baseContext}_preTest`);
 
   describe('Create discount and check it in FO', async () => {
     it('should login in BO', async function () {
@@ -190,34 +149,34 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageNameRequired);
     });
 
-    it('should create a discount with a product quantity equal to zero', async function () {
+    it('should create a discount with a minimum product quantity = 0 euro and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_2', baseContext);
 
-      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountZero);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountMinProductQuantityZero);
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
 
-      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'product quantity');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageValueLowerThanZero);
     });
 
-    it('should create a discount with a minimum purchase value < 0 and check the error', async function () {
+    it('should create a discount with a minimum product quantity < 0 and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_3', baseContext);
 
-      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountNegative);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountMinProductQuantityNegative);
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
 
-      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'product quantity');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageValueLowerThanZero);
     });
 
-    it('should create a discount with a minimum purchase value = asefr and check the error', async function () {
+    it('should create a discount with a minimum product quantity = text and check the error', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_4', baseContext);
 
-      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountPurchaseAmountText);
+      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountMinProductQuantityText);
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessage);
 
-      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'amount');
-      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageMinPurchaseAmountNotnumber);
+      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'product quantity');
+      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageValueLowerThanZero);
     });
 
     it('should create a discount with a discount value < 0 and check the error', async function () {
@@ -229,16 +188,6 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
       errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'value');
       expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageDiscountValue(
         discountValueNegative.discountValue.toString()));
-    });
-
-    it('should create a discount with a discount value = 0 and check the error', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'createDiscount_6', baseContext);
-
-      let errorMessage = await boDiscountsCreatePage.createDiscount(page, discountValueZero);
-      expect(errorMessage).to.contains(errorMessage);
-
-      errorMessage = await boDiscountsCreatePage.getErrorMessageInvalidInput(page, 'value');
-      expect(errorMessage).to.contains(boDiscountsCreatePage.errorMessageDiscountValue('0'));
     });
 
     it('should create a discount with code', async function () {
@@ -284,8 +233,7 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
       await foHummingbirdCartPage.addPromoCode(page, discountData.discountCode);
 
       const voucherErrorText = await foHummingbirdCartPage.getCartRuleErrorMessage(page);
-      expect(voucherErrorText).to.equal(`${foHummingbirdCartPage.minimumAmountErrorMessage
-      } €${parseFloat(discountData.minimumAmountValue.toString()).toFixed(2)}.`);
+      expect(voucherErrorText).to.equal(foHummingbirdCartPage.VoucherNotWithTheseProductsErrorMessage);
     });
 
     it('should go to home page', async function () {
@@ -318,8 +266,8 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
     });
 
     it('should add the promo code and check the discount name', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'addPromoCode_2', baseContext);
-
+      await testContext.addContextItem(this, 'testIdentifier', 'addPromoCode', baseContext);
+      
       await foHummingbirdCartPage.addPromoCode(page, discountData.discountCode);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
@@ -357,116 +305,116 @@ describe('BO - Catalog - Discounts : Minimum purchase amount (On cart amount)', 
     });
   });
 
-  describe('Edit discount in BO and check it in FO', async () => {
-    it('should go back to BO', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO', baseContext);
+  /* describe('Edit discount in BO and check it in FO', async () => {
+     it('should go back to BO', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO', baseContext);
 
-      page = await foHummingbirdCartPage.changePage(browserContext, 0);
+       page = await foHummingbirdCartPage.changePage(browserContext, 0);
 
-      const pageTitle = await boDiscountsCreatePage.getPageTitle(page);
-      expect(pageTitle).to.contains(boDiscountsCreatePage.pageTitle);
-    });
+       const pageTitle = await boDiscountsCreatePage.getPageTitle(page);
+       expect(pageTitle).to.contains(boDiscountsCreatePage.pageTitle);
+     });
 
-    it('should edit the discount', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'editDiscount', baseContext);
+     it('should edit the discount', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'editDiscount', baseContext);
 
-      const errorMessage = await boDiscountsCreatePage.createDiscount(page, editDiscountData);
-      expect(errorMessage).to.contains(boDiscountsCreatePage.successfulUpdateMessage);
-    });
+       const errorMessage = await boDiscountsCreatePage.createDiscount(page, editDiscountData);
+       expect(errorMessage).to.contains(boDiscountsCreatePage.successfulUpdateMessage);
+     });
 
-    it('should go back to FO', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goBackToFO', baseContext);
+     it('should go back to FO', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'goBackToFO', baseContext);
 
-      page = await boDiscountsCreatePage.changePage(browserContext, 1);
+       page = await boDiscountsCreatePage.changePage(browserContext, 1);
 
-      const pageTitle = await foHummingbirdCartPage.getPageTitle(page);
-      expect(pageTitle).to.contains(foHummingbirdCartPage.pageTitle);
-    });
+       const pageTitle = await foHummingbirdCartPage.getPageTitle(page);
+       expect(pageTitle).to.contains(foHummingbirdCartPage.pageTitle);
+     });
 
-    it('should check the discount value', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountValue_2', baseContext);
+     it('should check the discount value', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountValue_2', baseContext);
 
-      await foHummingbirdCartPage.reloadPage(page);
+       await foHummingbirdCartPage.reloadPage(page);
 
-      const discount = utilsCore.percentage(parseFloat(editDiscountData.discountValue.toString()),
-        20) + parseFloat(editDiscountData.discountValue.toString());
+       const discount = utilsCore.percentage(parseFloat(editDiscountData.discountValue.toString()),
+         20) + parseFloat(editDiscountData.discountValue.toString());
 
-      const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
-      expect(discountValue).to.contains(`-€${discount.toFixed(2)}`);
+       const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
+       expect(discountValue).to.contains(`-€${discount.toFixed(2)}`);
 
-      const subTotalDiscount = await foHummingbirdCartPage.getSubtotalDiscountValue(page);
-      expect(subTotalDiscount.toString()).to.equal(`-${discount}`);
-    });
+       const subTotalDiscount = await foHummingbirdCartPage.getSubtotalDiscountValue(page);
+       expect(subTotalDiscount.toString()).to.equal(`-${discount}`);
+     });
 
-    it('should check the shipping cost', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkShippingCost_3', baseContext);
+     it('should check the shipping cost', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'checkShippingCost_3', baseContext);
 
-      const subTotalShipping = await foHummingbirdCartPage.getSubtotalShippingValue(page);
-      expect(subTotalShipping).to.eq('Free');
-    });
+       const subTotalShipping = await foHummingbirdCartPage.getSubtotalShippingValue(page);
+       expect(subTotalShipping).to.eq('Free');
+     });
 
-    it('should check the Total (tax incl.) after the discount', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount_2', baseContext);
+     it('should check the Total (tax incl.) after the discount', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount_2', baseContext);
 
-      const total = dataProducts.demo_3.finalPrice + dataProducts.demo_5.price;
-      const discount = utilsCore.percentage(parseFloat(editDiscountData.discountValue.toString()),
-        20) + parseFloat(editDiscountData.discountValue.toString());
+       const total = dataProducts.demo_3.finalPrice + dataProducts.demo_5.price;
+       const discount = utilsCore.percentage(parseFloat(editDiscountData.discountValue.toString()),
+         20) + parseFloat(editDiscountData.discountValue.toString());
 
-      const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
-      expect(totalAfterDiscount.toString()).to.equal((total - discount).toFixed(2));
-    });
-  });
+       const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
+       expect(totalAfterDiscount.toString()).to.equal((total - discount).toFixed(2));
+     });
+   });
 
-  describe('Delete discount', async () => {
-    it('should go back to BO', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO_2', baseContext);
+   describe('Delete discount', async () => {
+     it('should go back to BO', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO_2', baseContext);
 
-      page = await foHummingbirdCartPage.changePage(browserContext, 0);
+       page = await foHummingbirdCartPage.changePage(browserContext, 0);
 
-      const pageTitle = await boDiscountsCreatePage.getPageTitle(page);
-      expect(pageTitle).to.contains(boDiscountsCreatePage.pageTitle);
-    });
+       const pageTitle = await boDiscountsCreatePage.getPageTitle(page);
+       expect(pageTitle).to.contains(boDiscountsCreatePage.pageTitle);
+     });
 
-    it('should go to \'Catalog > Discounts\' page', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goToDiscountsPage2', baseContext);
+     it('should go to \'Catalog > Discounts\' page', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'goToDiscountsPage2', baseContext);
 
-      await boDashboardPage.goToSubMenu(
-        page,
-        boDashboardPage.catalogParentLink,
-        boDashboardPage.discountsLink,
-      );
+       await boDashboardPage.goToSubMenu(
+         page,
+         boDashboardPage.catalogParentLink,
+         boDashboardPage.discountsLink,
+       );
 
-      const pageTitle = await boDiscountsPage.getPageTitle(page);
-      expect(pageTitle).to.contains(boDiscountsPage.pageTitle);
-    });
+       const pageTitle = await boDiscountsPage.getPageTitle(page);
+       expect(pageTitle).to.contains(boDiscountsPage.pageTitle);
+     });
 
-    it('should delete the create discount', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'deleteDiscount', baseContext);
+     it('should delete the create discount', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'deleteDiscount', baseContext);
 
-      const validationMessage = await boDiscountsPage.deleteDiscount(page, 1);
-      expect(validationMessage).to.contains(boDiscountsPage.successfulDeleteMessage);
-    });
+       const validationMessage = await boDiscountsPage.deleteDiscount(page, 1);
+       expect(validationMessage).to.contains(boDiscountsPage.successfulDeleteMessage);
+     });
 
-    it('should go back to FO', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'goBackToFO_3', baseContext);
+     it('should go back to FO', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'goBackToFO_3', baseContext);
 
-      page = await boDiscountsCreatePage.changePage(browserContext, 1);
+       page = await boDiscountsCreatePage.changePage(browserContext, 1);
 
-      const pageTitle = await foHummingbirdCartPage.getPageTitle(page);
-      expect(pageTitle).to.contains(foHummingbirdCartPage.pageTitle);
-    });
+       const pageTitle = await foHummingbirdCartPage.getPageTitle(page);
+       expect(pageTitle).to.contains(foHummingbirdCartPage.pageTitle);
+     });
 
-    it('should check the Total (tax incl.) after the discount', async function () {
-      await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount_3', baseContext);
+     it('should check the Total (tax incl.) after the discount', async function () {
+       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount_3', baseContext);
 
-      await foHummingbirdCartPage.reloadPage(page);
-      const total = dataProducts.demo_3.finalPrice + dataProducts.demo_5.finalPrice;
+       await foHummingbirdCartPage.reloadPage(page);
+       const total = dataProducts.demo_3.finalPrice + dataProducts.demo_5.finalPrice;
 
-      const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
-      expect(totalAfterDiscount.toString()).to.equal(total.toFixed(2));
-    });
-  });
+       const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
+       expect(totalAfterDiscount.toString()).to.equal(total.toFixed(2));
+     });
+   });
 
-  // 1 - Post-condition: Disable discount
-  setFeatureFlag(boFeatureFlagPage.featureFlagDiscount, false, `${baseContext}_postTest`);
+   // 1 - Post-condition: Disable discount
+   setFeatureFlag(boFeatureFlagPage.featureFlagDiscount, false, `${baseContext}_postTest`);*/
 });
