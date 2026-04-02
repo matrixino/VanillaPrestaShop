@@ -599,7 +599,7 @@ describe('BO - Catalog - Discounts : Trigger based on the total quantity of prod
       await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountTable', baseContext);
 
       await boOrdersViewBlockProductsPage.reloadPage(page);
-      
+
       const isVisible = await boOrdersViewBlockProductsPage.isDiscountListTableVisible(page);
       expect(isVisible, 'Discount list table is visible').to.eq(false);
     });
