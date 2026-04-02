@@ -619,7 +619,7 @@ describe('BO - Catalog - Discounts : Trigger based on the total quantity of prod
       expect(pageTitle).to.contains(boDiscountsPage.pageTitle);
     });
 
-    it('should delete the create discount', async function () {
+    it('should delete the created discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'deleteDiscount', baseContext);
 
       const validationMessage = await boDiscountsPage.deleteDiscount(page, 1);
