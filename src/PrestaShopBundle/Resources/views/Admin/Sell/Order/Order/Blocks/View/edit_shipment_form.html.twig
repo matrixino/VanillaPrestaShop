@@ -4,6 +4,7 @@
  #}
 
  {{ form_start(editShipmentForm, {
+  method: 'PUT',
   action: path('admin_orders_edit_shipment', {
     orderId: orderId,
     shipmentId: shipmentId
