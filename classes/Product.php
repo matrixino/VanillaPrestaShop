@@ -2481,7 +2481,7 @@ class ProductCore extends ObjectModel
 
         $combinationIds = array_keys($combinations);
 
-        $lang = Db::getInstance()->executeS('SELECT pac.id_product_attribute, GROUP_CONCAT(agl.`name`, \'' . pSQL($attribute_value_separator) . '\',al.`name` ORDER BY agl.`id_attribute_group` SEPARATOR \'' . pSQL($attribute_separator) . '\') as attribute_designation
+        $lang = Db::getInstance()->executeS('SELECT pac.id_product_attribute, GROUP_CONCAT(agl.`name`, \'' . pSQL($attribute_value_separator) . '\',al.`name` ORDER BY ag.`position`, a.`position` SEPARATOR \'' . pSQL($attribute_separator) . '\') as attribute_designation
                 FROM `' . _DB_PREFIX_ . 'product_attribute_combination` pac
                 LEFT JOIN `' . _DB_PREFIX_ . 'attribute` a ON a.`id_attribute` = pac.`id_attribute`
                 LEFT JOIN `' . _DB_PREFIX_ . 'attribute_group` ag ON ag.`id_attribute_group` = a.`id_attribute_group`
@@ -2537,7 +2537,7 @@ class ProductCore extends ObjectModel
         }
 
         $sql = 'SELECT pa.*, product_attribute_shop.*, ag.`id_attribute_group`, ag.`is_color_group`, agl.`name` AS group_name, al.`name` AS attribute_name, ' .
-            'a.`id_attribute`, stock.location ' .
+            'a.`id_attribute`, a.`position` AS attribute_position, stock.location ' .
             'FROM `' . _DB_PREFIX_ . 'product_attribute` pa ' .
             Shop::addSqlAssociation('product_attribute', 'pa') . ' ' .
             'LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac ON pac.`id_product_attribute` = pa.`id_product_attribute` ' .
@@ -2548,7 +2548,7 @@ class ProductCore extends ObjectModel
             'LEFT JOIN `' . _DB_PREFIX_ . 'stock_available` stock ON (stock.id_product = pa.id_product AND stock.id_product_attribute = IFNULL(pa.`id_product_attribute`, 0)) ' .
             'WHERE pa.`id_product` = ' . (int) $this->id . ' ' .
             'GROUP BY pa.`id_product_attribute`' . ($groupByIdAttributeGroup ? ', ag.`id_attribute_group` ' : '') .
-            'ORDER BY pa.`id_product_attribute`';
+            'ORDER BY pa.`id_product_attribute`, ag.`position`, a.`position`';
 
         $res = Db::getInstance()->executeS($sql);
 
@@ -2595,7 +2595,7 @@ class ProductCore extends ObjectModel
                 WHERE pa.`id_product` = ' . (int) $this->id . '
                 AND pa.`id_product_attribute` = ' . (int) $id_product_attribute . '
                 GROUP BY pa.`id_product_attribute`' . ($groupByIdAttributeGroup ? ',ag.`id_attribute_group`' : '') . '
-                ORDER BY pa.`id_product_attribute`';
+                ORDER BY pa.`id_product_attribute`, ag.`position`, a.`position`';
 
         $res = Db::getInstance()->executeS($sql);
 
@@ -7235,6 +7235,8 @@ class ProductCore extends ObjectModel
         FROM `' . _DB_PREFIX_ . 'attribute` a
         LEFT JOIN `' . _DB_PREFIX_ . 'attribute_lang` al
             ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = ' . (int) Context::getContext()->language->id . ')
+        LEFT JOIN `' . _DB_PREFIX_ . 'attribute_group` ag
+            ON (a.`id_attribute_group` = ag.`id_attribute_group`)
         LEFT JOIN `' . _DB_PREFIX_ . 'attribute_group_lang` agl
             ON (a.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = ' . (int) Context::getContext()->language->id . ')
         LEFT JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac
@@ -7243,7 +7245,8 @@ class ProductCore extends ObjectModel
             ON (pac.`id_product_attribute` = pa.`id_product_attribute`)
         ' . Shop::addSqlAssociation('product_attribute', 'pa') . '
         ' . Shop::addSqlAssociation('attribute', 'pac') . '
-        WHERE pa.`id_product` = ' . (int) $id_product);
+        WHERE pa.`id_product` = ' . (int) $id_product . '
+        ORDER BY ag.`position` ASC, a.`position` ASC');
 
         return $result;
     }
