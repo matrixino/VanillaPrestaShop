@@ -3095,7 +3095,6 @@ CREATE TABLE `PREFIX_shipment_product` (
 CREATE TABLE `PREFIX_business_entity`
 (
   `id_business_entity`       INT UNSIGNED AUTO_INCREMENT                     NOT NULL,
-  `enterprise_id`            VARCHAR(255) NOT NULL,
   `external_ref`             VARCHAR(255) DEFAULT NULL,
   `name`                     VARCHAR(255) NOT NULL,
   `legal_name`               VARCHAR(255) DEFAULT NULL,
@@ -3103,7 +3102,6 @@ CREATE TABLE `PREFIX_business_entity`
   `status`                   ENUM ('pending','active','inactive','rejected') NOT NULL DEFAULT 'pending',
   `created_at`               DATETIME     NOT NULL,
   `updated_at`               DATETIME     NOT NULL,
-  INDEX                      `business_entity_enterprise_id_idx` (`enterprise_id`),
   INDEX                      `business_entity_external_ref_idx` (`external_ref`),
   PRIMARY KEY (`id_business_entity`)
 ) ENGINE = ENGINE_TYPE
