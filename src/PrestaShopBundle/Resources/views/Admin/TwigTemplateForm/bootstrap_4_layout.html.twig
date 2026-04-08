@@ -482,13 +482,13 @@
           <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
           {{- widget|raw -}}
           <i class="md-checkbox-control"></i>
-          {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw : label|raw) -}}
+          {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw_purified : label|raw_purified) -}}
           </label>
         </div>
       {% else %}
       <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}{% if attrname is same as("class") %} form-check-label{% endif %}"{% endfor %}{% if label_attr|length <= 0 %} class="form-check-label"{% endif %}>
         {{- widget|raw -}}
-        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw : label|raw) -}}
+        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw_purified : label|raw_purified) -}}
       </label>
       {% endif %}
     {% endif %}
@@ -813,7 +813,7 @@
         '[/1]': '</span>',
         '[2]': '<span>' ~ recommended_length,
         '[/2]': '</span>',
-      })|raw }}
+      })|raw_purified }}
     </em>
   </small>
 {% endblock text_with_recommended_length_widget %}
@@ -837,7 +837,7 @@
 {% block form_hint %}
   {% if hint %}
     <div class="hint-box">
-      <div class="alert alert-info">{{ hint|raw }}</div>
+      <div class="alert alert-info">{{ hint|raw_purified }}</div>
     </div>
   {% endif %}
 {% endblock form_hint %}

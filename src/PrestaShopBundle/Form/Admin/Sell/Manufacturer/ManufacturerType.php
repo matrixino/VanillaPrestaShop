@@ -139,6 +139,9 @@ class ManufacturerType extends TranslatorAwareType
                 'required' => false,
                 'options' => [
                     'constraints' => [
+                        new CleanHtml([
+                            'message' => $this->trans('%s is invalid.', 'Admin.Notifications.Error'),
+                        ]),
                         new TypedRegex([
                             'type' => 'generic_name',
                         ]),
@@ -160,6 +163,9 @@ class ManufacturerType extends TranslatorAwareType
                 'required' => false,
                 'options' => [
                     'constraints' => [
+                        new CleanHtml([
+                            'message' => $this->trans('%s is invalid.', 'Admin.Notifications.Error'),
+                        ]),
                         new TypedRegex([
                             'type' => 'generic_name',
                         ]),

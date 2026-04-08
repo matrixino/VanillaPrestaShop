@@ -71,7 +71,7 @@ class DoctrineGridDataFactoryTest extends TestCase
      */
     private function createDoctrineQueryBuilderMock(): DoctrineQueryBuilderInterface
     {
-        $statement = $this->createMock(PDOStatement::class);
+        $statement = $this->createPartialMock(PDOStatement::class, ['fetchAll', 'fetch']);
         $statement->method('fetchAll')
             ->willReturn([
                 [
