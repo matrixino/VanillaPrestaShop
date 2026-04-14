@@ -52,7 +52,7 @@
 	<div class="flip-container">
 		<div class="flipper">
 			<div class="front front_login panel" {if isset($reset_token) && isset($id_employee)}style="display:none;"{/if}>
-				<h4 id="shop_name">{$shop_name|escape:'html':'UTF-8'}c</h4>
+				<h4 id="shop_name">{$shop_name|escape:'html':'UTF-8'}</h4>
 				{if !isset($wrong_folder_name) && !isset($wrong_install_name)}
 				<form action="#" id="login_form" method="post">
 					<input type="hidden" name="redirect" id="redirect" value="{$redirect|escape:'html':'UTF-8'}"/>
