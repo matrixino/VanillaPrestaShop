@@ -59,11 +59,11 @@ PrestaShop is an open-source e-commerce platform built on Symfony. It follows a 
 | `create-skill` | [skills/create-skill/SKILL.md](skills/create-skill/SKILL.md) | "create a skill for …" |
 | `domain-context-generator` | [skills/domain-context-generator/SKILL.md](skills/domain-context-generator/SKILL.md) | "generate context for [Domain]" |
 | `component-context-generator` | [skills/component-context-generator/SKILL.md](skills/component-context-generator/SKILL.md) | "generate context for [Component]" |
-| `create-form` | [skills/create-form/SKILL.md](skills/create-form/SKILL.md) | "create a form for [Entity]" |
+| `create-form` | [Component/Forms/skills/create-form/SKILL.md](Component/Forms/skills/create-form/SKILL.md) | "create a form for [Entity]" |
 
 ## Domain contexts
 
-All 57 domains under `src/Core/Domain/` have a context file at `Domain/{DomainName}/CONTEXT.md`. Read the relevant one before working in a domain.
+All 58 domains under `src/Core/Domain/` have a context file at `Domain/{DomainName}/CONTEXT.md`. Read the relevant one before working in a domain.
 
 Domains: Address, Alias, ApiClient, Attachment, AttributeGroup, Carrier, Cart, CartRule, CatalogPriceRule, Category, CmsPage, CmsPageCategory, Combination (code lives under `src/Core/Domain/Product/Combination/`), Configuration, Contact, Country, CreditSlip, Currency, Customer, CustomerMessage, CustomerService, Discount, Employee, Feature, Hook, ImageSettings, Language, MailTemplate, Manufacturer, Meta, Module, Notification, Order, OrderMessage, OrderReturn, OrderReturnState, OrderState, Position, Product, Profile, Search, SearchEngine, Security, Shipment, Shop, ShowcaseCard, SqlManagement, State, Store, Supplier, Tab, Tag, Tax, TaxRulesGroup, Theme, Title, Webservice, Zone
 
