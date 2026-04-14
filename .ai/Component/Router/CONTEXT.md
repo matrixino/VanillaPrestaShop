@@ -19,6 +19,7 @@ Back-office URL generation with security token injection and legacy route mappin
 - Token injection is **transparent** — all `generateUrl()` / `redirectToRoute()` calls in back-office controllers get the token automatically via the custom `Router`; no manual token append needed
 - Routes marked with `_anonymous_controller` attribute skip token injection — used for login and public API endpoints
 - `_legacy_link` route attribute enables the reverse mapping: `RouterProvider` builds `LegacyRoute` objects from this attribute to support old `Link::getAdminLink()` callers during migration
+- `_legacy_feature_flag` maps the routing to a specific feature flag. Depending on the feature flag status, the automatic legacy link conversion is enabled/disabled
 
 ## Canonical examples
 

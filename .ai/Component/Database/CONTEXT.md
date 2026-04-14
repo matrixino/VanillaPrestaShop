@@ -10,7 +10,6 @@ Repository abstraction layer between domain handlers and persistence: `AbstractO
 |-------|------|
 | Core repository base | `src/Core/Repository/AbstractObjectModelRepository.php` |
 | Multi-shop variant | `src/Core/Repository/AbstractMultiShopObjectModelRepository.php` |
-| Transaction contract | `src/Core/Repository/TransactionManagerInterface.php` |
 | Domain repositories (30+) | `src/Adapter/{Domain}/Repository/` |
 | Legacy DB adapter | `src/Adapter/Database.php` |
 

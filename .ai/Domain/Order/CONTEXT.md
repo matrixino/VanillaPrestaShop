@@ -20,6 +20,7 @@ Manages the full lifecycle of back-office orders: creation, status changes, prod
 - Refund logic is split across four dedicated classes in `src/Adapter/Order/Refund/`: calculator, updater, slip creator, and voucher generator — refund commands delegate to this subsystem rather than implementing logic inline.
 - `CancellationActionType` defines four mutually exclusive cancellation strategies (cancel, standard refund, partial refund, return) used by `AbstractRefundCommand` subclasses.
 - `src/Adapter/Order/Delivery/` and `src/Adapter/Order/GiftOptionsConfiguration.php` handle shop-configuration concerns, not per-order mutations.
+- This domain heavily relies on the legacy Cart and `Context::getContext()` stateful approach. A `ContextStateManager` component was developed to manage this — CQRS handlers use it to temporarily set context state during command execution.
 
 ## Canonical examples
 

@@ -16,8 +16,12 @@ Naming mismatches, identity traps, and non-obvious cross-domain relationships th
 
 ## Identity traps
 
+**Address — duplication on order edit**
+- When an address linked to an order is modified, PrestaShop duplicates it and creates a new row with a new `AddressId`
+- The original address data is preserved for the existing order
+
 **Carrier — dual ID**
-- `CarrierId` changes on every edit (PrestaShop copies the row and increments the ID on update)
+- `CarrierId` changes on every edit when it is assigned to an order (PrestaShop copies the row and increments the ID on update)
 - `CarrierReferenceId` is stable across edits — use this for any persistent reference to a carrier
 - Never store `CarrierId` long-term; always resolve via `CarrierReferenceId`
 
@@ -53,7 +57,7 @@ Normally: interfaces in Core, concrete implementations in Adapter. Exceptions wh
 - `ImageSettings` domain handlers
 - `Theme` domain handlers
 
-When adding a handler to these domains, follow the existing pattern (Core) rather than the standard pattern.
+When adding a handler to these domains, follow the existing pattern (Core) rather than the standard pattern. When handlers are migrated to the future persistence system (probably Doctrine), they should be moved into the Core namespace.
 
 ## Legacy class size warnings
 

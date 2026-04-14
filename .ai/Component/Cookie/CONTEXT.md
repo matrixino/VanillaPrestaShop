@@ -15,6 +15,8 @@ Encrypted HTTP cookie handling for front- and back-office: writing/reading encry
 
 - The **entire cookie payload is encrypted** as a single string with `PhpEncryption` — there is no plain-text cookie key
 - `session_id` and `session_token` are stored **inside** the encrypted cookie payload, not as separate cookies
+- Cookie is **no longer** the source of truth for Employee sessions — the Symfony session is. Cookie is only updated/maintained for backward compatibility with legacy pages
+- Same for multi-shop context: source of truth is a session token attribute, cookie is synced for legacy compatibility only
 - No modern DI wrapper exists — `Cookie` is still instantiated directly in legacy bootstrap
 
 ## Canonical examples

@@ -65,6 +65,10 @@ enough orientation to work in the domain — not an inventory of every class.
 
 ## Step-by-step process
 
+### 0. Confirm the target is a Domain, not a Component
+
+Check that `src/Core/Domain/{Name}/` exists and contains a CQRS structure (`Command/`, `Query/`, or handler interfaces). If you don't find a dedicated CQRS layer or a Controller for this domain, it is probably a Component — use the `component-context-generator` skill instead.
+
 ### 1. Explore the codebase
 
 Use the Explore agent to map:

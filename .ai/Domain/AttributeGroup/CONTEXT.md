@@ -17,6 +17,7 @@ Manages product attribute groups (e.g., "Color", "Size") and their individual at
 ## Non-obvious patterns
 
 - The `Attribute` sub-domain (`AttributeGroup/Attribute/`) has its own complete CQRS stack nested inside this domain — individual attribute CRUD lives here, not in a separate top-level domain.
+- The legacy object `Attribute` was renamed to `ProductAttribute` to avoid conflict with the new Attribute system in PHP 8
 - `src/Adapter/AttributeGroup/AbstractAttributeGroupHandler.php` and `AbstractAttributeGroupQueryHandler.php` provide shared base classes for handlers — extend these rather than duplicating repository access.
 - `src/Adapter/AttributeGroup/AttributeGroupViewDataProvider.php` handles view data assembly outside the standard query handler pattern.
 

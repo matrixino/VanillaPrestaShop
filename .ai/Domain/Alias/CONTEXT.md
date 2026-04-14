@@ -17,6 +17,7 @@ Manages search aliases — alternative search terms that redirect to a canonical
 
 - The controller is named `SearchAliasController`, not `AliasController` — it lives under `ShopParameters`, not `Catalog`.
 - `src/Adapter/Alias/Validate/AliasValidator.php` holds domain validation logic separate from the constraint constants pattern used in other domains.
+- The CQRS commands/queries are mostly based on the `searchTerm`, not the DB ID
 
 ## Canonical examples
 

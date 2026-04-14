@@ -17,19 +17,19 @@ Infrastructure for rendering and managing back-office data tables: column defini
 ## Non-obvious patterns
 
 - `AbstractGridDefinitionFactory` dispatches `action{GridId}GridDefinitionModifier` hook — modules add columns/actions without touching core code
-- `SearchCriteriaInterface` is stored as a Symfony request attribute per grid, not a service — each grid type has its own `{Domain}Filters` class
+- `SearchCriteriaInterface` is stored as a Symfony request attribute per grid, not a service — each grid type has its own `{Domain}Filters` class present in `src/Core/Search/Filters`
+- For specific use cases a dedicated filter builder may be needed — see `src/Core/Search/Builder/TypedBuilder`
 - Position updater (`GridPositionUpdater`) lives inside the Grid source tree but can be used by any entity that supports manual ordering, independent of grid rendering
 - 60+ concrete query builders exist (one per domain grid) — all extend `AbstractDoctrineQueryBuilder` and implement `getSearchQueryBuilder()` + `getCountQueryBuilder()`
 
 ## Canonical examples
 
-- `src/Core/Grid/Definition/Factory/AbstractGridDefinitionFactory.php`
-- `src/Core/Grid/Definition/Factory/ProductGridDefinitionFactory.php`
-- `src/Core/Grid/Query/AbstractDoctrineQueryBuilder.php`
+- `src/Core/Grid/Definition/Factory/AbstractGridDefinitionFactory.php` — base class showing the pattern every grid definition must follow
+- `src/Core/Grid/Definition/Factory/ProductGridDefinitionFactory.php` — concrete implementation
+- `src/Core/Grid/Query/LanguageQueryBuilder.php` — simple concrete query builder
 
 ## Related
 
-- [CQRS Component](../CQRS/CONTEXT.md) — some grids dispatch queries via `QueryBus`
 - [Forms Component](../Forms/CONTEXT.md) — filter forms use `FormChoiceProviderInterface`
 - [Hook Component](../Hook/CONTEXT.md) — `action{GridId}GridDefinitionModifier` hook for module extensibility
 - [PositionUpdater Component](../PositionUpdater/CONTEXT.md) — drag-and-drop reordering sub-layer

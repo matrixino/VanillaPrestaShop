@@ -12,7 +12,7 @@ Manages OAuth API clients used to authenticate against the PrestaShop Admin API.
 | Adapter | `src/Adapter/ApiClient/` — handler implementations |
 | Doctrine Entity | `src/PrestaShopBundle/Entity/ApiClient.php` — no legacy ObjectModel exists for this domain |
 | API Platform resource | `src/PrestaShopBundle/ApiPlatform/Resources/ApiClient.php` — exposes `/api-clients/infos` via CQRS |
-| Back-office UI | No dedicated back-office controller — managed through API Platform |
+| Back-office UI | `src/PrestaShopBundle/Controller/Admin/Configure/AdvancedParameters/AdminAPIController.php` — accessible via Advanced Parameters > Admin API. Contains both API client CRUD pages and API configuration form (confusing naming) |
 
 ## Non-obvious patterns
 

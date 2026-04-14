@@ -9,7 +9,6 @@ Back-office templating infrastructure: Twig extensions that expose PrestaShop-sp
 | Layer | Path |
 |-------|------|
 | Twig extensions (12+) | `src/PrestaShopBundle/Twig/Extension/`, `src/PrestaShopBundle/Twig/` |
-| Form utilities | `src/PrestaShopBundle/Form/FormBuilderModifier.php`, `FormCloner.php`, `FormHelper.php` |
 
 ## Non-obvious patterns
 

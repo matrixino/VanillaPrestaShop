@@ -22,7 +22,7 @@ Choose the location based on scope — in order of priority:
 After writing the file:
 1. Add one line to the `Current project skills` list in `CLAUDE.md`
 2. Add a `## Skills` section (or entry) to the corresponding `CONTEXT.md` — root `.ai/CONTEXT.md` for cross-cutting skills, or `.ai/Component/{Name}/CONTEXT.md` / `.ai/Domain/{Name}/CONTEXT.md` for scoped skills
-3. Create a symlink in `.claude/skills/` pointing to the skill **directory** (not the file):
+3. Create a symlink in `.claude/skills/` pointing to the skill **directory** (not the file). The path **must be relative**:
    ```
    cd .claude/skills && ln -s ../../<skill-dir-path-from-repo-root> <skill-name>
    ```
@@ -40,16 +40,18 @@ After writing the file:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | No (defaults to dir name) | Lowercase, hyphens, max 64 chars |
-| `description` | Recommended | What it does + trigger phrases. Max ~250 chars before truncation — front-load the key use case |
+| `description` | **Required** | What it does + trigger phrases. Max ~250 chars before truncation — front-load the key use case. If the skill requires arguments, describe them here. |
 | `argument-hint` | No | Shown in autocomplete, e.g. `[domain-name]` |
 | `allowed-tools` | No | Tools usable without permission prompt, e.g. `Read, Grep, Glob` |
 | `disable-model-invocation` | No | `true` = I cannot auto-invoke; only explicit `/name` call works |
 | `user-invocable` | No | `false` = hidden from `/` menu; I can still invoke automatically |
 | `paths` | No | Glob patterns that scope auto-activation, e.g. `src/**/*.php` |
 | `effort` | No | `low` / `medium` / `high` / `max` |
-| `context` | No | `fork` = run as isolated subagent |
+| `context` | No | Omit for inline execution (default). `fork` = run as isolated subagent |
 | `agent` | No | Subagent type when `context: fork` — `Explore`, `Plan`, `general-purpose` |
 | `model` | No | Override model for this skill |
+
+**Arguments:** If a skill requires arguments that the user must provide, describe them in the `description` field. At runtime, if a required argument is missing, use `AskUserQuestion` to prompt the user.
 
 ### Body
 

@@ -27,3 +27,4 @@ Provides read access to cart rules (vouchers/cart-level discounts) via queries. 
 
 - [CQRS Component](../../Component/CQRS/CONTEXT.md)
 - [Grid Component](../../Component/Grid/CONTEXT.md)
+- [Discount Domain](../Discount/CONTEXT.md) — write operations for cart rules are handled here

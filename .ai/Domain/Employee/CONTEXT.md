@@ -16,7 +16,7 @@ Manages back-office employee accounts: creation, editing, deletion, password man
 
 ## Non-obvious patterns
 
-- `ContextEmployeeProvider` is a widely used adapter service that exposes the currently logged-in employee to any service that needs it — it is not a CQRS query handler but an infrastructure helper injected across many components.
+- `ContextEmployeeProvider` is an old service that should not be used in new code (will be refactored and deprecated). Prefer `EmployeeContext` from the Context component instead.
 - `EmployeeFormAccessChecker` enforces that employees can only edit their own profile or profiles with lower permission levels; this access check is done in the adapter layer, not in the controller.
 - `NavigationMenuToggler` and `FormLanguageChanger` are adapter-level services that handle UI-state side-effects triggered by employee commands (collapsing the nav menu, switching the form language) — they live here because they are per-employee preferences.
 - A separate `Security/Session/EmployeeGridDefinitionFactory` exists for the employee session listing (active sessions), distinct from the main employee list grid.

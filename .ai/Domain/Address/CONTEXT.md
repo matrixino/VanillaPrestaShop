@@ -17,6 +17,7 @@ Manages customer and order postal addresses (creation, editing, deletion, valida
 
 - `Configuration/AddressConstraint.php` holds validation constraint constants used across handlers — check here before adding new validation logic.
 - `AddressId` is referenced directly from the Order domain (delivery/invoice address commands) and from the Customer domain query results — changes to this ValueObject have cross-domain impact.
+- When an address is modified, if it was used by an order the address is duplicated to keep the old data unchanged. A new Address is created with a new ID that will be used for future usages.
 
 ## Canonical examples
 

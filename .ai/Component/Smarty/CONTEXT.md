@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Front-office templating engine: extended Smarty classes with lazy cache invalidation, module and parent-theme template resource handlers, development debug mode, and adapter classes for managing Smarty settings. Does not power the back-office — that uses Twig exclusively.
+Front-office templating engine: extended Smarty classes with lazy cache invalidation, module and parent-theme template resource handlers, development debug mode, and adapter classes for managing Smarty settings. Still used in the back-office by legacy pages and modules.
 
 ## Layers
 

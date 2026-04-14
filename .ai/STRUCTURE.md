@@ -28,10 +28,14 @@ Each AI tool has its own configuration format (`CLAUDE.md`, `.cursorrules`, `.gi
 │   │   └── CONTEXT.md      # Domain-specific conventions, patterns, do/don't rules
 │   └── ...
 │
-└── Component/              # Cross-cutting component contexts (maps to shared infrastructure)
-    ├── {ComponentName}/
-    │   └── CONTEXT.md      # Component-specific conventions, usage patterns, do/don't rules
-    └── ...
+├── Component/              # Cross-cutting component contexts (maps to shared infrastructure)
+│   ├── {ComponentName}/
+│   │   └── CONTEXT.md      # Component-specific conventions, usage patterns, do/don't rules
+│   └── ...
+│
+└── generated/              # Pre-built index snapshots (cqrs.md, routes.md, entities.md, hooks.md)
+                            # Useful when no PHP runtime is available (web-based assistants, CI).
+                            # When PHP is available, prefer live console commands (see CONTEXT.md).
 ```
 
 ## File conventions
@@ -39,7 +43,7 @@ Each AI tool has its own configuration format (`CLAUDE.md`, `.cursorrules`, `.gi
 | File | Purpose | Target size |
 |------|---------|-------------|
 | `CONTEXT.md` | Conventions, patterns, do/don't rules for a domain or component | < 200 lines |
-| `SKILL.md` | Step-by-step task template an AI agent can follow to accomplish a recurring task | < 150 lines |
+| `SKILL.md` | Step-by-step task template an AI agent can follow to accomplish a recurring task | Prefer concise — no hard limit, but shorter skills consume less context |
 | `STRUCTURE.md` | This file — architecture documentation | N/A |
 | `GOTCHAS.md` | Cross-domain naming traps, identity pitfalls, and legacy mismatches | N/A |
 | `MULTISTORE.md` | Cross-cutting multi-store guide: ShopConstraint, scoped config, multi-shop repositories | N/A |
@@ -101,7 +105,7 @@ Contributors using web-based AI assistants should copy-paste the relevant `CONTE
 
 1. **Start with `.ai/CONTEXT.md`** — it contains project-wide rules and an index of all domain/component contexts.
 2. **Identify the relevant domain or component** from the index based on the files being worked on.
-3. **Read the specific `CONTEXT.md`** for that domain or component.
+3. **Read the specific `CONTEXT.md`** for that domain or component dynamically and only when needed to avoid overloading the AI context.
 4. **Check for a matching skill** before performing any recurring task:
    - All skills live in `.ai/skills/{skill-name}/SKILL.md` — check the `## Skills` table in `.ai/CONTEXT.md` or the relevant component/domain `CONTEXT.md`.
    - Read the `SKILL.md` and follow its instructions step by step.
@@ -110,14 +114,14 @@ Contributors using web-based AI assistants should copy-paste the relevant `CONTE
 
 ### Adding context for a new domain
 
-1. Create `.ai/Domain/{DomainName}/CONTEXT.md` using the template above.
-2. Add an entry to the index table in `.ai/CONTEXT.md`.
+1. Create `.ai/Domain/{DomainName}/CONTEXT.md` using the template above. A skill exists to help: use the `domain-context-generator` skill.
+2. Add an entry to the index in `.ai/CONTEXT.md`.
 3. Optionally create `.cursor/rules/{domain}.mdc` and `.github/instructions/{domain}.instructions.md` pointer files.
 
 ### Adding context for a new component
 
-1. Create `.ai/Component/{ComponentName}/CONTEXT.md` using the template above.
-2. Add an entry to the index table in `.ai/CONTEXT.md`.
+1. Create `.ai/Component/{ComponentName}/CONTEXT.md` using the template above. A skill exists to help: use the `component-context-generator` skill.
+2. Add an entry to the index in `.ai/CONTEXT.md`.
 
 ### Adding a skill
 
