@@ -230,7 +230,12 @@ function updateProduct(event, eventType, updateUrl) {
         $(prestashop.selectors.product.additionalInfos)
           .first()
           .replaceWith(data.product_additional_info);
-        if (!$('.modal.quickview.in, .modal.quickview.show').length) {
+        const $quickview = $('.modal.quickview.in, .modal.quickview.show');
+        if ($quickview.length) {
+          $quickview.find(prestashop.selectors.product.details).replaceWith(
+            data.product_details,
+          );
+        } else {
           $(prestashop.selectors.product.details).replaceWith(
             data.product_details,
           );
