@@ -1680,6 +1680,10 @@ class CartCore extends ObjectModel
         }
 
         if (!Validate::isLoadedObject($product)) {
+            // Product may have been deleted from catalog but still exist in a cart/order; deleteProduct only needs IDs.
+            if ($operator === 'down') {
+                return $this->deleteProduct($id_product, $id_product_attribute, (int) $id_customization, 0, $preserveGiftRemoval, $useOrderPrices);
+            }
             throw new PrestaShopException(sprintf('Product with ID "%s" could not be loaded.', $id_product));
         }
 
