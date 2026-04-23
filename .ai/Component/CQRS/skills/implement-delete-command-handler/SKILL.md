@@ -1,24 +1,14 @@
 ---
 name: implement-delete-command-handler
-brick: P4
-component: CQRS
-step: 2
-needs: [D4, D9, P1]
+description: >
+  Implement the delete handler. Verifies the entity exists, checks business
+  constraints (e.g., cannot delete if referenced by active orders), then calls
+  repository delete.
+needs: [create-delete-command, create-command-handler-interface, create-doctrine-repository]
 produces: "Delete{Domain}Handler.php"
-conditional: false
 ---
 
 # implement-delete-command-handler
-
-## Description
-Implement the delete handler. Verifies the entity exists, checks business constraints (e.g., cannot delete if referenced by active orders), then calls repository delete.
-
-## Context
-- **Brick:** P4 — Step 2
-- **Reads from:** D4 (delete command structure), D9 (interface to implement), P1 (repository to call)
-- **Writes to:** H1 (controller calls via bus)
-- **Artifact:** `src/Adapter/{Domain}/CommandHandler/Delete{Domain}Handler.php`
-- **PS example:** `src/Adapter/Carrier/CommandHandler/DeleteCarrierHandler.php`
 
 ## Instructions
 

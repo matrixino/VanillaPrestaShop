@@ -1,24 +1,13 @@
 ---
 name: create-form-type
-brick: F1
-component: Forms
-step: 7
-needs: [A3]
+description: >
+  Create the Symfony form type that renders the multi-tab add/edit form for the
+  entity. Uses PrestaShop's `NavigationTabType` for tab organization, not
+  standard Symfony tabs.
 produces: "{Domain}Type.php — Symfony form type with tab layout containing all form fields"
-conditional: false
 ---
 
 # create-form-type
-
-## Description
-Create the Symfony form type that renders the multi-tab add/edit form for the entity. Uses PrestaShop's `NavigationTabType` for tab organization, not standard Symfony tabs.
-
-## Context
-- **Brick:** F1 — Step 7
-- **Reads from:** A3 manifest Section 3 (form tabs and field definitions)
-- **Writes to:** H1 (controller builds this form), F4 (tab layout uses NavigationTabType)
-- **Artifact:** `src/PrestaShopBundle/Form/Admin/{Section}/{Domain}/{Domain}Type.php`
-- **PS example:** `src/PrestaShopBundle/Form/Admin/Shipping/Carrier/CarrierType.php`
 
 ## Instructions
 

@@ -1,24 +1,13 @@
 ---
 name: register-cqrs-services
-brick: —
-component: CQRS
-step: 2
-needs: [D9, D10, P2, P3, P4, P5, P6, P7, P8, P9, P10, P1]
+description: >
+  Register all domain handlers and the repository in the Symfony DI container.
+  Commands and queries route to handlers via command/query bus tags.
+needs: [create-command-handler-interface, create-query-handler-interface, implement-create-command-handler, implement-edit-command-handler, implement-delete-command-handler, implement-get-query-handler, implement-list-query-handler, implement-bulk-delete-handler, implement-bulk-status-handler, implement-toggle-status-handler, implement-sub-resource-handler, create-doctrine-repository]
 produces: "DI YAML service registrations for all handlers and repository"
-conditional: false
 ---
 
 # register-cqrs-services
-
-## Description
-Register all domain handlers and the repository in the Symfony DI container. Commands and queries route to handlers via command/query bus tags.
-
-## Context
-- **Brick:** — — Step 2
-- **Reads from:** All handler classes (P2–P10) and repository (P1) to register
-- **Writes to:** Symfony DI container — makes all handlers callable via the command/query bus
-- **Artifact:** `src/PrestaShopBundle/Resources/config/services/{domain}.yml` or inline in existing services files
-- **PS example:** `src/PrestaShopBundle/Resources/config/services/` (check carrier services)
 
 ## Instructions
 

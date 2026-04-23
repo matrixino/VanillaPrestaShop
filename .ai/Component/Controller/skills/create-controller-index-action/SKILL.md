@@ -1,24 +1,14 @@
 ---
 name: create-controller-index-action
-brick: "—"
-component: Controller
-step: 5
-needs: [H1, G1, G2, G3]
+description: >
+  Documents the full implementation of the grid index action. Builds the
+  SearchCriteria from the request, presents the grid, and renders the listing
+  template.
+needs: [create-symfony-admin-controller, create-grid-definition, create-grid-query-builder, create-grid-filters]
 produces: "indexAction() method — renders the grid listing page"
-conditional: false
 ---
 
 # create-controller-index-action
-
-## Description
-Documents the full implementation of the grid index action. Builds the SearchCriteria from the request, presents the grid, and renders the listing template.
-
-## Context
-- **Brick:** — — Step 5
-- **Reads from:** H1 (controller skeleton), G1/G2/G3 (grid factory, filters, column definitions)
-- **Writes to:** T1 (index.html.twig — receives the presented grid)
-- **Artifact:** `{Domain}Controller.php` (edit H1 output)
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 

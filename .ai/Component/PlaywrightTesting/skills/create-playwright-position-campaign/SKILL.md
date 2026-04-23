@@ -1,24 +1,15 @@
 ---
 name: create-playwright-position-campaign
-brick: E6
-component: PlaywrightTesting
-step: 11
-needs: [E1, E2, G1]
+description: >
+  Create the campaign that verifies drag-and-drop row reordering in the grid.
+  Reads initial positions, drags row 1 to position 2, and verifies the new
+  order.
+needs: [create-playwright-test-data, create-playwright-resetter, create-grid-definition]
 produces: "04_changePosition.ts — drag-and-drop position reorder campaign"
-conditional: "only if domain has PositionColumn in grid (G1)"
+conditional: "only if domain has PositionColumn in grid"
 ---
 
 # create-playwright-position-campaign
-
-## Description
-Create the campaign that verifies drag-and-drop row reordering in the grid. Reads initial positions, drags row 1 to position 2, and verifies the new order.
-
-## Context
-- **Brick:** E6 — Step 11
-- **Reads from:** E1 (fixtures for distinct names), E2 (resetter), G1 (PositionColumn presence)
-- **Writes to:** E2 (cleanup in afterAll)
-- **Artifact:** `tests/UI/campaigns/functional/BO/{section}/{subsection}/04_changePosition.ts`
-- **PS example:** Check any PS grid with drag-and-drop reordering in `tests/UI/`
 
 ## Instructions
 

@@ -1,24 +1,13 @@
 ---
 name: create-playwright-test-data
-brick: E1
-component: PlaywrightTesting
-step: 11
-needs: [A3]
+description: >
+  Create the TypeScript test data module defining typed fixtures for minimal and
+  full entity creation. These fixtures are imported by all Playwright test
+  campaigns to ensure consistent test data.
 produces: "tests/UI/data/{domain}.ts — typed test fixtures for all test scenarios"
-conditional: false
 ---
 
 # create-playwright-test-data
-
-## Description
-Create the TypeScript test data module defining typed fixtures for minimal and full entity creation. These fixtures are imported by all Playwright test campaigns to ensure consistent test data.
-
-## Context
-- **Brick:** E1 — Step 11
-- **Reads from:** A3 manifest (field list, required fields, types)
-- **Writes to:** E3–E7 (all campaigns import fixtures from here)
-- **Artifact:** `tests/UI/data/{domain}.ts`
-- **PS example:** `tests/UI/data/carriers.ts`
 
 ## Instructions
 

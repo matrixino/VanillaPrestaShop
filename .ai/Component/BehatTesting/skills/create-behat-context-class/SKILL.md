@@ -1,24 +1,14 @@
 ---
 name: create-behat-context-class
-brick: B2
-component: BehatTesting
-step: 3
-needs: [B1, D9, D10]
+description: >
+  Create the PHPUnit/Behat context class that implements every step definition
+  from the feature file. Extends `AbstractDomainFeatureContext` and uses string
+  references to track created entities.
+needs: [create-behat-feature-file, create-command-handler-interface, create-query-handler-interface]
 produces: "{Domain}FeatureContext.php — step definitions implementing all Gherkin scenarios"
-conditional: false
 ---
 
 # create-behat-context-class
-
-## Description
-Create the PHPUnit/Behat context class that implements every step definition from the feature file. Extends `AbstractDomainFeatureContext` and uses string references to track created entities.
-
-## Context
-- **Brick:** B2 — Step 3
-- **Reads from:** B1 (step definitions needed), D9/D10 (handler interfaces to call via bus)
-- **Writes to:** B3–B6 (scenarios written in feature file, implemented here)
-- **Artifact:** `tests/Integration/Behaviour/Features/Context/Domain/{Domain}FeatureContext.php`
-- **PS example:** `tests/Integration/Behaviour/Features/Context/Domain/CarrierFeatureContext.php`
 
 ## Instructions
 
@@ -35,5 +25,5 @@ Create the PHPUnit/Behat context class that implements every step definition fro
 
 - Always use `$this->sharedStorage` for entity references — never use hardcoded IDs
 - All bus calls go through `$this->getCommandBus()` / `$this->getQueryBus()` — never instantiate handlers directly
-- Catch typed domain exceptions (D7) in error scenarios — not generic \Exception
+- Catch typed domain exceptions in error scenarios — not generic \Exception
 - Step definitions must be deterministic — no random data, no timing dependencies

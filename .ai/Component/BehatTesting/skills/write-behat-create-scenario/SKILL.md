@@ -1,24 +1,13 @@
 ---
 name: write-behat-create-scenario
-brick: B3
-component: BehatTesting
-step: 3
-needs: [B1, B2, D2]
+description: >
+  Write the Gherkin scenario and corresponding step definitions for the create
+  operation. Covers happy path and validation error cases.
+needs: [create-behat-feature-file, create-behat-context-class, create-create-command]
 produces: "Add{Domain} scenario in feature file + step definitions in context class"
-conditional: false
 ---
 
 # write-behat-create-scenario
-
-## Description
-Write the Gherkin scenario and corresponding step definitions for the create operation. Covers happy path and validation error cases.
-
-## Context
-- **Brick:** B3 — Step 3
-- **Reads from:** B1 (feature file), B2 (context class), D2 (Add{Domain}Command)
-- **Writes to:** B4 (edit scenario reuses ref created here)
-- **Artifact:** `tests/Integration/Behaviour/Features/Scenario/{Domain}/{domain}_management.feature` (edit)
-- **PS example:** See carrier feature file create scenarios
 
 ## Instructions
 

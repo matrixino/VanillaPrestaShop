@@ -1,24 +1,14 @@
 ---
 name: create-ts-entry-point
-brick: JS1
-component: GlobalJS
-step: 8
-needs: [F1, A3]
+description: >
+  Create the TypeScript entry point that boots the Vue.js form manager for the
+  entity's add/edit form. This file is the Webpack entry and must import and
+  mount all Vue components for the domain.
+needs: [create-form-type]
 produces: "admin-dev/themes/new-theme/js/pages/{domain}/index.ts — TypeScript entry point for the domain form"
-conditional: false
 ---
 
 # create-ts-entry-point
-
-## Description
-Create the TypeScript entry point that boots the Vue.js form manager for the entity's add/edit form. This file is the Webpack entry and must import and mount all Vue components for the domain.
-
-## Context
-- **Brick:** JS1 — Step 8
-- **Reads from:** F1 (form structure to match), A3 (which Vue components are needed)
-- **Writes to:** JS2–JS5 (imported and initialized from here)
-- **Artifact:** `admin-dev/themes/new-theme/js/pages/{domain}/index.ts`
-- **PS example:** `admin-dev/themes/new-theme/js/pages/carrier/index.ts`
 
 ## Instructions
 
@@ -33,5 +23,5 @@ Create the TypeScript entry point that boots the Vue.js form manager for the ent
 ## Rules
 
 - Entry point must be registered in webpack.config.js — untouched entries are not compiled
-- Mount point ID must match the Twig template's container element (T2)
+- Mount point ID must match the Twig template's container element
 - Only import — do not inline component logic in the entry point

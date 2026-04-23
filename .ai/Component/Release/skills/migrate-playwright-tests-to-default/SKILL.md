@@ -1,24 +1,14 @@
 ---
 name: migrate-playwright-tests-to-default
-brick: R3
-component: Release
-step: 12
-needs: [R1, E3, E4, E5, E6, E7]
+description: >
+  After GA, the new pages are the default and the feature flag is no longer
+  needed in tests. Edit all campaigns to remove the `enableFeatureFlag` call
+  from `beforeAll` and update any legacy URLs to use Symfony routes.
+needs: [promote-feature-flag-to-stable, create-playwright-crud-campaign, create-playwright-filter-campaign, create-playwright-bulk-campaign, create-playwright-position-campaign, create-playwright-tab-campaign]
 produces: "All E3–E7 campaign files edited to remove feature flag enable call and use Symfony URLs"
-conditional: false
 ---
 
 # migrate-playwright-tests-to-default
-
-## Description
-After GA, the new pages are the default and the feature flag is no longer needed in tests. Edit all campaigns to remove the `enableFeatureFlag` call from `beforeAll` and update any legacy URLs to use Symfony routes.
-
-## Context
-- **Brick:** R3 — Step 12
-- **Reads from:** E3–E7 (campaign files to edit), R1 (confirming GA has landed)
-- **Writes to:** (downstream test suite — no further bricks)
-- **Artifact:** All playwright campaign files from E3–E7 (edit)
-- **PS example:** Search campaign files for `enableFeatureFlag` to locate all occurrences
 
 ## Instructions
 

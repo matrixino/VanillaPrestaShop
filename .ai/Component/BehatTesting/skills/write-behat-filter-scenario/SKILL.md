@@ -1,24 +1,13 @@
 ---
 name: write-behat-filter-scenario
-brick: "—"
-component: BehatTesting
-step: 3
-needs: [B2, G2]
+description: >
+  Write Behat scenarios that verify the grid filtering and search functionality.
+  Creates test data and verifies filtered results.
+needs: [create-behat-context-class, create-grid-query-builder]
 produces: "Filter and search scenarios in the feature file"
-conditional: false
 ---
 
 # write-behat-filter-scenario
-
-## Description
-Write Behat scenarios that verify the grid filtering and search functionality. Creates test data and verifies filtered results.
-
-## Context
-- **Brick:** — — Step 3
-- **Reads from:** B2 (context class), G2 (grid filter definitions)
-- **Writes to:** — (extends feature file coverage)
-- **Artifact:** Feature file + context class (edits)
-- **PS example:** See existing filter scenarios in carrier or product feature files
 
 ## Instructions
 

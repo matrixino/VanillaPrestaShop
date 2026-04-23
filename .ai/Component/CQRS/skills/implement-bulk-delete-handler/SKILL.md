@@ -1,24 +1,14 @@
 ---
 name: implement-bulk-delete-handler
-brick: P7
-component: CQRS
-step: 2
-needs: [D11, P1]
+description: >
+  Loop over the list of IDs and call the single-delete repository method for
+  each. Collect errors and throw a bulk exception if any deletions fail.
+needs: [create-bulk-delete-command, create-doctrine-repository]
 produces: "BulkDelete{Domain}sHandler.php"
 conditional: "only if D11 was created"
 ---
 
 # implement-bulk-delete-handler
-
-## Description
-Loop over the list of IDs and call the single-delete repository method for each. Collect errors and throw a bulk exception if any deletions fail.
-
-## Context
-- **Brick:** P7 — Step 2
-- **Reads from:** D11 (bulk delete command structure), P1 (repository to call)
-- **Writes to:** H1 (controller calls via bus)
-- **Artifact:** `src/Adapter/{Domain}/CommandHandler/BulkDelete{Domain}sHandler.php`
-- **PS example:** `src/Adapter/Carrier/CommandHandler/BulkDeleteCarriersHandler.php`
 
 ## Instructions
 

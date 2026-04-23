@@ -1,24 +1,14 @@
 ---
 name: create-behat-data-transformer
-brick: "—"
-component: BehatTesting
-step: 3
-needs: [B2]
+description: >
+  Create the data transformer that converts Gherkin `TableNode` or
+  `PyStringNode` data into the typed parameters needed by CQRS commands. Handles
+  type coercion, reference resolution, and multilingual values.
+needs: [create-behat-context-class]
 produces: "TableNode-to-command data transformer for complex Gherkin tables"
-conditional: false
 ---
 
 # create-behat-data-transformer
-
-## Description
-Create the data transformer that converts Gherkin `TableNode` or `PyStringNode` data into the typed parameters needed by CQRS commands. Handles type coercion, reference resolution, and multilingual values.
-
-## Context
-- **Brick:** — — Step 3
-- **Reads from:** B2 (context class to extend)
-- **Writes to:** B3–B6 (all create/edit steps use this transformer)
-- **Artifact:** Helper method in `{Domain}FeatureContext.php` or a `{Domain}DataTransformer.php` utility
-- **PS example:** Check existing context classes for `parseCreateCarrierData()` pattern
 
 ## Instructions
 

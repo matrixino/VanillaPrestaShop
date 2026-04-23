@@ -1,24 +1,13 @@
 ---
 name: implement-get-query-handler
-brick: P5
-component: CQRS
-step: 2
-needs: [D5, D10, P1]
+description: >
+  Implement the query handler that loads the entity and maps it to the edit DTO
+  or array returned to the form data provider.
+needs: [create-get-query, create-query-handler-interface, create-doctrine-repository]
 produces: "Get{Domain}ForEditingHandler.php — returns populated edit DTO"
-conditional: false
 ---
 
 # implement-get-query-handler
-
-## Description
-Implement the query handler that loads the entity and maps it to the edit DTO or array returned to the form data provider.
-
-## Context
-- **Brick:** P5 — Step 2
-- **Reads from:** D5 (get query structure), D10 (interface to implement), P1 (repository to call)
-- **Writes to:** F2 (form data provider reads this handler's output)
-- **Artifact:** `src/Adapter/{Domain}/QueryHandler/Get{Domain}ForEditingHandler.php`
-- **PS example:** `src/Adapter/Carrier/QueryHandler/GetCarrierForEditingHandler.php`
 
 ## Instructions
 

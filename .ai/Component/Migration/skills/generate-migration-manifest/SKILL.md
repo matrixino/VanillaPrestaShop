@@ -1,24 +1,12 @@
 ---
 name: generate-migration-manifest
-brick: A3
-component: Migration
-step: 0
-needs: [A1, A2]
+description: >
+  Synthesize the outputs of A1 and A2 into a single `migration-manifest.md` that
+  serves as the migration specification — every subsequent brick reads from this
+  document to know what to create.
 produces: "migration-manifest.md — authoritative spec listing all commands, queries, form tabs, grid columns, hooks, and sub-resources"
-conditional: false
 ---
 
-# generate-migration-manifest
-
-## Description
-Synthesize the outputs of A1 and A2 into a single `migration-manifest.md` that serves as the migration specification — every subsequent brick reads from this document to know what to create.
-
-## Context
-- **Brick:** A3 — Step 0
-- **Reads from:** A1 output (controller audit) and A2 output (ObjectModel audit)
-- **Writes to:** All downstream bricks (D1–D14, G1–G5, F1–F6, etc.) read this manifest
-- **Artifact:** `migration-manifest.md` (created at project/domain root or in a docs folder)
-- **PS example:** No pre-existing file — created fresh per domain
 
 ## Instructions
 

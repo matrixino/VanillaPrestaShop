@@ -1,24 +1,14 @@
 ---
 name: create-playwright-tab-campaign
-brick: E7
-component: PlaywrightTesting
-step: 11
-needs: [E1, E2, F1, T2]
+description: >
+  Create one Playwright campaign per form tab (as defined in F1 and A3
+  manifest). Each campaign creates an entity, edits it to fill all fields in the
+  specific tab, saves, and verifies every field value persisted correctly.
+needs: [create-playwright-test-data, create-playwright-resetter, create-form-type, create-twig-form-template]
 produces: "0{N}_{TabName}.ts — one campaign per form tab verifying all fields in that tab persist"
-conditional: false
 ---
 
 # create-playwright-tab-campaign
-
-## Description
-Create one Playwright campaign per form tab (as defined in F1 and A3 manifest). Each campaign creates an entity, edits it to fill all fields in the specific tab, saves, and verifies every field value persisted correctly.
-
-## Context
-- **Brick:** E7 — Step 11
-- **Reads from:** E1 (full fixture data for the tab), F1 (tab names, field names), T2 (form selectors)
-- **Writes to:** E2 (cleanup in afterAll)
-- **Artifact:** `tests/UI/campaigns/functional/BO/{section}/{subsection}/0{N}_{TabName}.ts`
-- **PS example:** Check carrier tab campaigns (generalSettings, shippingLocationsAndCosts, etc.) in `tests/UI/`
 
 ## Instructions
 

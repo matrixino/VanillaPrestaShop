@@ -1,24 +1,14 @@
 ---
 name: create-controller-edit-action
-brick: "—"
-component: Controller
-step: 5
-needs: [H1, F2, F3, D3, D5]
+description: >
+  Documents the edit action. GET loads the entity via Get query and pre-fills
+  the form using the DataProvider; POST dispatches the Edit command via
+  FormDataHandler.
+needs: [create-symfony-admin-controller, create-form-data-provider, create-form-data-handler, create-edit-command, create-get-query]
 produces: "editAction() — GET loads entity into form, POST dispatches Edit command"
-conditional: false
 ---
 
 # create-controller-edit-action
-
-## Description
-Documents the edit action. GET loads the entity via Get query and pre-fills the form using the DataProvider; POST dispatches the Edit command via FormDataHandler.
-
-## Context
-- **Brick:** — — Step 5
-- **Reads from:** H1 (controller skeleton), F2 (form data provider to pre-fill form), F3 (form data handler to dispatch D3), D3 (Edit command), D5 (Get{Domain}ForEditing query)
-- **Writes to:** T2 (create/edit form template)
-- **Artifact:** `{Domain}Controller.php` (edit H1 output)
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 

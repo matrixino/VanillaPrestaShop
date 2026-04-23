@@ -1,24 +1,15 @@
 ---
 name: create-tab-error-navigator
-brick: JS5
-component: GlobalJS
-step: 8
-needs: [JS1, F1]
+description: >
+  Create the TypeScript module that, on page load after a form submission with
+  validation errors, detects which tab contains invalid fields and activates
+  that tab automatically. This prevents users from seeing a success-looking form
+  when errors exist in a hidden tab.
+needs: [create-ts-entry-point, create-form-type]
 produces: "tabErrorNavigator.ts — module that switches to the first form tab containing a server-side validation error"
-conditional: false
 ---
 
 # create-tab-error-navigator
-
-## Description
-Create the TypeScript module that, on page load after a form submission with validation errors, detects which tab contains invalid fields and activates that tab automatically. This prevents users from seeing a success-looking form when errors exist in a hidden tab.
-
-## Context
-- **Brick:** JS5 — Step 8
-- **Reads from:** F4 (tab structure defines which CSS selectors to scan), F1 (field IDs)
-- **Writes to:** Activates the correct tab in the NavigationTabType UI
-- **Artifact:** `admin-dev/themes/new-theme/js/pages/{domain}/tabErrorNavigator.ts`
-- **PS example:** Check any PS multi-tab form for tab error navigation JS
 
 ## Instructions
 

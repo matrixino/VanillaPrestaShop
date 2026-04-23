@@ -1,24 +1,13 @@
 ---
 name: create-toggle-status-command
-brick: D13
-component: CQRS
-step: 13
-needs: [D1]
+description: >
+  Command for toggling the active status of a single entity, used by the grid
+  toggle switch (AJAX).
+needs: [create-identity-value-object]
 produces: "Toggle{Domain}ActiveStatusCommand.php — single-row status toggle"
-conditional: false
 ---
 
 # create-toggle-status-command
-
-## Description
-Command for toggling the active status of a single entity, used by the grid toggle switch (AJAX).
-
-## Context
-- **Brick:** D13 — Step 13
-- **Reads from:** D1 ({Domain}Id)
-- **Writes to:** D9 (Toggle{Domain}StatusHandlerInterface), P handler (reads current status and flips)
-- **Artifact:** `src/Core/Domain/{Domain}/Command/Toggle{Domain}ActiveStatusCommand.php`
-- **PS example:** `src/Core/Domain/Carrier/Command/ToggleCarrierStatusCommand.php`
 
 ## Instructions
 

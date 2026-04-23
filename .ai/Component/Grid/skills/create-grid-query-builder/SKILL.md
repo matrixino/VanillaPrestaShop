@@ -1,24 +1,13 @@
 ---
 name: create-grid-query-builder
-brick: G2
-component: Grid
-step: 4
-needs: [A3, A2]
+description: >
+  Create the Doctrine DBAL QueryBuilder that fetches grid rows with support for
+  filtering, sorting, and pagination. The column aliases in this query must
+  exactly match the column IDs in the Grid Definition.
 produces: "{Domain}QueryBuilder.php — SQL query builder for grid listing with filters and pagination"
-conditional: false
 ---
 
 # create-grid-query-builder
-
-## Description
-Create the Doctrine DBAL QueryBuilder that fetches grid rows with support for filtering, sorting, and pagination. The column aliases in this query must exactly match the column IDs in the Grid Definition (G1).
-
-## Context
-- **Brick:** G2 — Step 4
-- **Reads from:** A2 (table name, column names), A3 (filter definitions, sortable columns)
-- **Writes to:** G1 (column alias contract), G3 (filters applied here), H1 (grid presenter calls this)
-- **Artifact:** `src/Adapter/Grid/Query/{Domain}QueryBuilder.php`
-- **PS example:** `src/Adapter/Grid/Query/CarrierQueryBuilder.php`
 
 ## Instructions
 
@@ -33,7 +22,7 @@ Create the Doctrine DBAL QueryBuilder that fetches grid rows with support for fi
 
 ## Rules
 
-- Column aliases in SELECT must exactly match column IDs in Grid Definition (G1)
+- Column aliases in SELECT must exactly match column IDs in Grid Definition
 - NEVER use raw string concatenation for filter values — always use parameterized queries
 - Always alias the primary key as `id_{domain}` for row action routing
 - The count query must NOT include LIMIT/OFFSET — it counts all matching rows

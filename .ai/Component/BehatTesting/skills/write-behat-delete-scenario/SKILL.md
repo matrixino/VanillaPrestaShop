@@ -1,24 +1,13 @@
 ---
 name: write-behat-delete-scenario
-brick: B5
-component: BehatTesting
-step: 3
-needs: [B3, D4]
+description: >
+  Write the delete scenario and its step definitions. Tests both successful
+  deletion and the not-found case after deletion.
+needs: [write-behat-create-scenario, create-delete-command]
 produces: "Delete{Domain} scenario in feature file + step definitions"
-conditional: false
 ---
 
 # write-behat-delete-scenario
-
-## Description
-Write the delete scenario and its step definitions. Tests both successful deletion and the not-found case after deletion.
-
-## Context
-- **Brick:** B5 — Step 3
-- **Reads from:** B3 (entity reference in sharedStorage), D4 (Delete{Domain}Command)
-- **Writes to:** — (terminal step for basic CRUD coverage)
-- **Artifact:** Feature file + context class (edits)
-- **PS example:** See carrier feature file delete scenarios
 
 ## Instructions
 

@@ -1,24 +1,15 @@
 ---
 name: create-value-object-collection
-brick: —
-component: CQRS
-step: 1
-needs: [D8]
+description: >
+  Create a typed collection ValueObject when a domain field is a list of items
+  rather than a scalar. Validates the collection at construction and provides
+  iteration.
+needs: [create-domain-value-objects]
 produces: "Typed collection ValueObject for has-many relations (e.g., ShippingZoneCollection)"
 conditional: "only for domains with sub-resource collections"
 ---
 
 # create-value-object-collection
-
-## Description
-Create a typed collection ValueObject when a domain field is a list of items rather than a scalar. Validates the collection at construction and provides iteration.
-
-## Context
-- **Brick:** — — Step 1
-- **Reads from:** D8 (sub-resource value objects and types)
-- **Writes to:** D14 (sub-resource command holds this collection), P10 (handler uses it)
-- **Artifact:** `src/Core/Domain/{Domain}/ValueObject/{SubResource}Collection.php`
-- **PS example:** `src/Core/Domain/Carrier/ValueObject/` (zone/range value objects)
 
 ## Instructions
 

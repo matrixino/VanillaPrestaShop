@@ -1,24 +1,14 @@
 ---
 name: create-query-result-dto
-brick: —
-component: CQRS
-step: 1
-needs: [D5, D10]
+description: >
+  Create the typed DTO that the `Get{Domain}ForEditing` query handler returns.
+  This replaces untyped arrays with a proper PHP object with named, typed
+  getters.
+needs: [create-get-query, create-query-handler-interface]
 produces: "Editable{Domain}.php — typed DTO returned by Get{Domain}ForEditing query handler"
-conditional: false
 ---
 
 # create-query-result-dto
-
-## Description
-Create the typed DTO that the `Get{Domain}ForEditing` query handler returns. This replaces untyped arrays with a proper PHP object with named, typed getters.
-
-## Context
-- **Brick:** — — Step 1
-- **Reads from:** D5 (get query fields), D10 (query handler interface)
-- **Writes to:** P5 (get query handler returns this DTO), F2 (form data provider reads it)
-- **Artifact:** `src/Core/Domain/{Domain}/QueryResult/Editable{Domain}.php`
-- **PS example:** `src/Core/Domain/Carrier/QueryResult/EditableCarrier.php`
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: create-twig-form-template
-brick: T2
-component: Twig
-step: 9
-needs: [F1, H1, JS1]
+description: >
+  Create the Twig template for the add/edit form page. Renders the Symfony form
+  with NavigationTabType tabs and mounts the Vue.js form manager for dynamic
+  sections.
+needs: [create-form-type, create-symfony-admin-controller, create-ts-entry-point]
 produces: "form.html.twig — add/edit form page template with tab navigation"
-conditional: false
 ---
 
 # create-twig-form-template
-
-## Description
-Create the Twig template for the add/edit form page. Renders the Symfony form with NavigationTabType tabs and mounts the Vue.js form manager for dynamic sections.
-
-## Context
-- **Brick:** T2 — Step 9
-- **Reads from:** F1 (form variable passed by H1), JS1 (entry point registers the Vue app)
-- **Writes to:** T4 (form block details rendered here)
-- **Artifact:** `src/PrestaShopBundle/Resources/views/Admin/{Section}/{Domain}/form.html.twig`
-- **PS example:** `src/PrestaShopBundle/Resources/views/Admin/Shipping/Carrier/form.html.twig`
 
 ## Instructions
 

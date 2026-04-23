@@ -1,24 +1,14 @@
 ---
 name: register-behat-context
-brick: "—"
-component: BehatTesting
-step: 3
-needs: [B2]
+description: >
+  Register the new `{Domain}FeatureContext` in the Behat suite configuration so
+  the step definitions are discovered. Without this step, all step definitions
+  in the new context class are invisible to Behat.
+needs: [create-behat-context-class]
 produces: "behat.yml or suite configuration updated with new context class"
-conditional: false
 ---
 
 # register-behat-context
-
-## Description
-Register the new `{Domain}FeatureContext` in the Behat suite configuration so the step definitions are discovered. Without this step, all step definitions in the new context class are invisible to Behat.
-
-## Context
-- **Brick:** — — Step 3
-- **Reads from:** B2 (context class FQCN)
-- **Writes to:** — (enables all B3–B6 scenarios to run)
-- **Artifact:** `tests/Integration/Behaviour/behat.yml` or suite config (edit)
-- **PS example:** Check how CarrierFeatureContext is registered in behat.yml
 
 ## Instructions
 

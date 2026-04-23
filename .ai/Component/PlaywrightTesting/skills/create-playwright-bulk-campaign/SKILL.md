@@ -1,24 +1,15 @@
 ---
 name: create-playwright-bulk-campaign
-brick: E5
-component: PlaywrightTesting
-step: 11
-needs: [E1, E2, G4, H2, D11, D12, D13]
+description: >
+  Create the campaign covering bulk operations (bulk enable, disable, delete)
+  and the single-row quick-edit status toggle. Verifies the grid reflects the
+  changes after each bulk action.
+needs: [create-playwright-test-data, create-playwright-resetter, create-grid-action-types, create-admin-routing, create-bulk-delete-command, create-bulk-status-command, create-toggle-status-command]
 produces: "03_quickEditAndBulkActions.ts — bulk enable/disable/delete and quick-edit toggle campaign"
 conditional: "only if bulk actions were implemented (D11, D12, D13)"
 ---
 
 # create-playwright-bulk-campaign
-
-## Description
-Create the campaign covering bulk operations (bulk enable, disable, delete) and the single-row quick-edit status toggle. Verifies the grid reflects the changes after each bulk action.
-
-## Context
-- **Brick:** E5 — Step 11
-- **Reads from:** E1 (fixtures), E2 (resetter), G4 (bulk action selectors), H2 (routes), D11/D12/D13 (bulk handlers)
-- **Writes to:** E2 (cleanup in afterAll)
-- **Artifact:** `tests/UI/campaigns/functional/BO/{section}/{subsection}/03_quickEditAndBulkActions.ts`
-- **PS example:** Check existing quickEditAndBulkActions campaigns in `tests/UI/`
 
 ## Instructions
 

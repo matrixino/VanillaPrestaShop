@@ -1,24 +1,14 @@
 ---
 name: create-grid-bulk-actions
-brick: —
-component: Grid
-step: 4
-needs: [G1, H2]
+description: >
+  Documents the PrestaShop bulk action types and the correct way to wire them to
+  form submission routes. Bulk actions submit a form containing the selected row
+  IDs.
+needs: [create-grid-definition, create-admin-routing]
 produces: "BulkActionCollection with enable/disable/delete wired to correct routes"
-conditional: false
 ---
 
 # create-grid-bulk-actions
-
-## Description
-Documents the PrestaShop bulk action types and the correct way to wire them to form submission routes. Bulk actions submit a form containing the selected row IDs.
-
-## Context
-- **Brick:** — — Step 4
-- **Reads from:** G1 (factory to edit), H2 (route names to reference)
-- **Writes to:** G1 (bulk actions are defined inside the Grid Definition Factory)
-- **Artifact:** Grid Definition Factory `getBulkActions()` method
-- **PS example:** `src/Core/Grid/Definition/Factory/CarrierGridDefinitionFactory.php`
 
 ## Instructions
 

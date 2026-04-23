@@ -1,24 +1,15 @@
 ---
 name: create-choice-provider
-brick: —
-component: Forms
-step: 7
-needs: [F1]
+description: >
+  Create a ChoiceProvider service that fetches options for a `ChoiceType` form
+  field from the database. Used when select options are dynamic (e.g., list of
+  tax rule groups, carrier zones).
+needs: [create-form-type]
 produces: "{Domain}{Field}ChoiceProvider.php — service providing choices for ChoiceType fields"
 conditional: "only for fields rendered as select/radio with dynamic choices from DB"
 ---
 
 # create-choice-provider
-
-## Description
-Create a ChoiceProvider service that fetches options for a `ChoiceType` form field from the database. Used when select options are dynamic (e.g., list of tax rule groups, carrier zones).
-
-## Context
-- **Brick:** — — Step 7
-- **Reads from:** F1 (form type that will consume the choices)
-- **Writes to:** F1 (injected into form type as `choices` option), F6 (must be registered as a service)
-- **Artifact:** `src/Core/Form/Choice/{Domain}{Field}ChoiceProvider.php`
-- **PS example:** Check existing PS form choice providers (e.g., `CarrierByReferenceChoiceProvider`)
 
 ## Instructions
 

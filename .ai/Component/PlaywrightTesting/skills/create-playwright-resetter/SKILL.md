@@ -1,24 +1,13 @@
 ---
 name: create-playwright-resetter
-brick: E2
-component: PlaywrightTesting
-step: 11
-needs: [A3]
+description: >
+  Create the PHP Resetter class that cleans up entities created during test
+  campaigns. Called in `afterAll` hooks to ensure test isolation between
+  campaigns.
 produces: "tests/Resources/Resetter/{Domain}Resetter.php — PHP cleanup class for test isolation"
-conditional: false
 ---
 
 # create-playwright-resetter
-
-## Description
-Create the PHP Resetter class that cleans up entities created during test campaigns. Called in `afterAll` hooks to ensure test isolation between campaigns.
-
-## Context
-- **Brick:** E2 — Step 11
-- **Reads from:** A3 (table names, sub-resource tables to clean)
-- **Writes to:** E3–E7 (all campaigns call the resetter in afterAll)
-- **Artifact:** `tests/Resources/Resetter/{Domain}Resetter.php`
-- **PS example:** `tests/Resources/Resetter/CarrierResetter.php`
 
 ## Instructions
 

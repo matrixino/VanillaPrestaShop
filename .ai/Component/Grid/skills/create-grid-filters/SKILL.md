@@ -1,24 +1,14 @@
 ---
 name: create-grid-filters
-brick: G3
-component: Grid
-step: 4
-needs: [G1, A3]
+description: >
+  Create the Symfony Form type that renders the grid filter bar. Each filter
+  corresponds to a column that supports filtering, with the appropriate input
+  widget (text input, select, date range).
+needs: [create-grid-definition]
 produces: "{Domain}GridFilters.php — filter form type for the grid search bar"
-conditional: false
 ---
 
 # create-grid-filters
-
-## Description
-Create the Symfony Form type that renders the grid filter bar. Each filter corresponds to a column that supports filtering, with the appropriate input widget (text input, select, date range).
-
-## Context
-- **Brick:** G3 — Step 4
-- **Reads from:** A3 manifest Section 5 (filter definitions), G1 (filter IDs must match column IDs)
-- **Writes to:** H1 (controller builds this form and passes to template), T1 (template renders filters)
-- **Artifact:** `src/Core/Grid/Filter/{Domain}GridFilters.php`
-- **PS example:** `src/Core/Grid/Filter/CarrierGridFilters.php`
 
 ## Instructions
 

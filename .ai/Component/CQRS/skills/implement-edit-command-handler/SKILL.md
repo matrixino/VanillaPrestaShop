@@ -1,24 +1,13 @@
 ---
 name: implement-edit-command-handler
-brick: P3
-component: CQRS
-step: 2
-needs: [D3, D9, P1]
+description: >
+  Implement the edit handler using the partial-update pattern. Only fields
+  explicitly set on the command (non-null) are updated in the database.
+needs: [create-edit-command, create-command-handler-interface, create-doctrine-repository]
 produces: "Edit{Domain}Handler.php — partial-update handler"
-conditional: false
 ---
 
 # implement-edit-command-handler
-
-## Description
-Implement the edit handler using the partial-update pattern. Only fields explicitly set on the command (non-null) are updated in the database.
-
-## Context
-- **Brick:** P3 — Step 2
-- **Reads from:** D3 (edit command structure), D9 (interface to implement), P1 (repository to call)
-- **Writes to:** F3 (form data handler dispatches this), H1 (controller calls via bus)
-- **Artifact:** `src/Adapter/{Domain}/CommandHandler/Edit{Domain}Handler.php`
-- **PS example:** `src/Adapter/Carrier/CommandHandler/EditCarrierHandler.php`
 
 ## Instructions
 

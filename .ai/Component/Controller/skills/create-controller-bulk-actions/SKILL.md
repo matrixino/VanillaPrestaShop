@@ -1,24 +1,15 @@
 ---
 name: create-controller-bulk-actions
-brick: "—"
-component: Controller
-step: 5
-needs: [H1, D11, D12, D13]
+description: >
+  Documents the three bulk action controller methods. Each reads the selected
+  IDs from the submitted form, dispatches the appropriate bulk command, and
+  redirects with a result flash.
+needs: [create-symfony-admin-controller, create-bulk-delete-command, create-bulk-status-command, create-toggle-status-command]
 produces: "bulkDeleteAction(), bulkEnableStatusAction(), bulkDisableStatusAction() methods"
 conditional: "only if bulk commands exist (D11, D12, D13)"
 ---
 
 # create-controller-bulk-actions
-
-## Description
-Documents the three bulk action controller methods. Each reads the selected IDs from the submitted form, dispatches the appropriate bulk command, and redirects with a result flash.
-
-## Context
-- **Brick:** — — Step 5
-- **Reads from:** H1 (controller skeleton), D11 (BulkDelete command), D12 (BulkEnable command), D13 (BulkDisable command)
-- **Writes to:** T1 (redirects back to index listing)
-- **Artifact:** `{Domain}Controller.php` (edit H1 output)
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 

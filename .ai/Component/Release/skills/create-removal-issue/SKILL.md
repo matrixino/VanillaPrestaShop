@@ -1,24 +1,14 @@
 ---
 name: create-removal-issue
-brick: R6
-component: Release
-step: 13
-needs: [R4, R5]
+description: >
+  Create a GitHub issue that targets the actual removal of the legacy controller
+  in the next major version. This issue tracks prerequisites (module developer
+  migration, deprecation period) and assigns a milestone.
+needs: [add-legacy-deprecation-notice, write-changelog-deprecation]
 produces: "GitHub issue tracking the actual removal of Admin{Domain}sController in the next major version"
-conditional: false
 ---
 
 # create-removal-issue
-
-## Description
-Create a GitHub issue that targets the actual removal of the legacy controller in the next major version. This issue tracks prerequisites (module developer migration, deprecation period) and assigns a milestone.
-
-## Context
-- **Brick:** R6 — Step 13
-- **Reads from:** R4 (deprecation is in place), R5 (changelog entry confirms public announcement)
-- **Writes to:** (no further bricks — tracks future work)
-- **Artifact:** GitHub Issue (created via gh CLI or GitHub web UI)
-- **PS example:** Search GitHub issues for "Remove deprecated Admin" to see existing removal issue format
 
 ## Instructions
 

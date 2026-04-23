@@ -1,24 +1,13 @@
 ---
 name: create-grid-row-actions
-brick: —
-component: Grid
-step: 4
-needs: [G1, H2]
+description: >
+  Documents the PrestaShop row action types (edit link, delete link with
+  confirmation, custom actions) and the correct routing configuration.
+needs: [create-grid-definition, create-admin-routing]
 produces: "RowActionCollection with edit and delete actions wired to correct routes"
-conditional: false
 ---
 
 # create-grid-row-actions
-
-## Description
-Documents the PrestaShop row action types (edit link, delete link with confirmation, custom actions) and the correct routing configuration.
-
-## Context
-- **Brick:** — — Step 4
-- **Reads from:** G1 (factory to edit), H2 (route names to reference)
-- **Writes to:** G1 (row actions are defined inside the Grid Definition Factory)
-- **Artifact:** Grid Definition Factory `getRowActions()` method
-- **PS example:** `src/Core/Grid/Definition/Factory/CarrierGridDefinitionFactory.php`
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: create-vue-form-manager
-brick: JS2
-component: GlobalJS
-step: 8
-needs: [JS1, F1]
+description: >
+  Create the root Vue SFC that manages the overall form state and coordinates
+  between sub-components. Holds the reactive state shared across tabs and emits
+  form data to hidden inputs for Symfony form submission.
+needs: [create-ts-entry-point, create-form-type]
 produces: "{Domain}FormManager.vue — top-level Vue component orchestrating the form"
-conditional: false
 ---
 
 # create-vue-form-manager
-
-## Description
-Create the root Vue SFC that manages the overall form state and coordinates between sub-components. Holds the reactive state shared across tabs and emits form data to hidden inputs for Symfony form submission.
-
-## Context
-- **Brick:** JS2 — Step 8
-- **Reads from:** JS1 (mounted by entry point), F1 (form structure defines the state shape)
-- **Writes to:** JS3/JS4 (child components receive props from here)
-- **Artifact:** `admin-dev/themes/new-theme/js/pages/{domain}/{Domain}FormManager.vue`
-- **PS example:** `admin-dev/themes/new-theme/js/pages/carrier/CarrierFormManager.vue`
 
 ## Instructions
 

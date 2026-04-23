@@ -1,24 +1,14 @@
 ---
 name: promote-feature-flag-to-stable
-brick: R1
-component: Release
-step: 12
-needs: [H3, E3, E4, E5, E6, E7]
+description: >
+  Promote the domain's feature flag from `beta/state=0` to `stable/state=1` in a
+  dedicated GA PR. This is the only change in the GA PR — no features, no other
+  file changes.
+needs: [register-feature-flag, create-playwright-crud-campaign, create-playwright-filter-campaign, create-playwright-bulk-campaign, create-playwright-position-campaign, create-playwright-tab-campaign]
 produces: "feature_flag.xml updated to stability=stable and state=1"
-conditional: false
 ---
 
 # promote-feature-flag-to-stable
-
-## Description
-Promote the domain's feature flag from `beta/state=0` to `stable/state=1` in a dedicated GA PR. This is the only change in the GA PR — no features, no other file changes.
-
-## Context
-- **Brick:** R1 — Step 12
-- **Reads from:** H3 (flag entry to edit), E3–E7 (all playwright campaigns must pass before this)
-- **Writes to:** R3 (Playwright tests updated after this), R2 (upgrade SQL if needed)
-- **Artifact:** `install-dev/data/xml/feature_flag.xml` (edit H3 output)
-- **PS example:** Search `feature_flag.xml` for `<stability>stable</stability>` entries to see the pattern
 
 ## Instructions
 

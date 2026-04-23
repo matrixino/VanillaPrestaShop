@@ -1,24 +1,14 @@
 ---
 name: create-domain-interface
-brick: —
-component: CQRS
-step: 1
-needs: [P1]
+description: >
+  Define the repository interface in the Core domain layer. The concrete
+  implementation in Adapter implements this interface. Commands depend on the
+  interface, not the concrete class — enabling adapter replacement.
+needs: [create-doctrine-repository]
 produces: "{Domain}RepositoryInterface.php — interface allowing adapter swapping"
-conditional: false
 ---
 
 # create-domain-interface
-
-## Description
-Define the repository interface in the Core domain layer. The concrete implementation in Adapter implements this interface. Commands depend on the interface, not the concrete class — enabling adapter replacement.
-
-## Context
-- **Brick:** — — Step 1
-- **Reads from:** P1 (concrete repository methods to mirror in the interface)
-- **Writes to:** P2–P10 (handlers type-hint against this interface, not the concrete class)
-- **Artifact:** `src/Core/Domain/{Domain}/{Domain}RepositoryInterface.php`
-- **PS example:** `src/Core/Domain/Carrier/` (check for RepositoryInterface)
 
 ## Instructions
 

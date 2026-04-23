@@ -1,24 +1,13 @@
 ---
 name: write-behat-edit-scenario
-brick: B4
-component: BehatTesting
-step: 3
-needs: [B3, D3]
+description: >
+  Write the Gherkin scenario and step definitions for the edit operation.
+  Requires an entity created in B3 (via sharedStorage reference).
+needs: [write-behat-create-scenario, create-edit-command]
 produces: "Edit{Domain} scenario in feature file + step definitions"
-conditional: false
 ---
 
 # write-behat-edit-scenario
-
-## Description
-Write the Gherkin scenario and step definitions for the edit operation. Requires an entity created in B3 (via sharedStorage reference).
-
-## Context
-- **Brick:** B4 — Step 3
-- **Reads from:** B3 (entity reference in sharedStorage), D3 (Edit{Domain}Command)
-- **Writes to:** B5 (delete scenario references same entity)
-- **Artifact:** Feature file + context class (edits)
-- **PS example:** See carrier feature file edit scenarios
 
 ## Instructions
 

@@ -1,24 +1,15 @@
 ---
 name: create-twig-form-block
-brick: T4
-component: Twig
-step: 9
-needs: [T2, F1]
+description: >
+  Create Twig block overrides for form fields that need custom rendering beyond
+  Symfony's default form_widget. Common cases: displaying an existing image
+  preview next to the upload field, or a custom compound widget.
+needs: [create-twig-form-template, create-form-type]
 produces: "Twig blocks overriding specific form field rendering (e.g., image preview, custom widget)"
 conditional: "only if specific form fields need custom rendering"
 ---
 
 # create-twig-form-block
-
-## Description
-Create Twig block overrides for form fields that need custom rendering beyond Symfony's default form_widget. Common cases: displaying an existing image preview next to the upload field, or a custom compound widget.
-
-## Context
-- **Brick:** T4 — Step 9
-- **Reads from:** T2 (form template where overrides are applied), F1 (field IDs to override)
-- **Writes to:** T2 (applied via form_theme in the form template)
-- **Artifact:** Form template overrides within `form.html.twig` or a dedicated `_form_widgets.html.twig`
-- **PS example:** Check existing form widget overrides under `src/PrestaShopBundle/Resources/views/Admin/`
 
 ## Instructions
 

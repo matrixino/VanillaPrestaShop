@@ -1,24 +1,15 @@
 ---
 name: create-atomic-replace-pattern
-brick: —
-component: CQRS
-step: 2
-needs: [P10, D14]
+description: >
+  Documents the atomic replace pattern used for all sub-resource collections
+  (ranges, zones, groups). Always deletes all rows then inserts the new set in a
+  transaction.
+needs: [implement-sub-resource-handler, create-sub-resource-command]
 produces: "Reference implementation of the atomic delete-all+insert-all pattern for sub-resource collections"
 conditional: "only for domains with sub-resources"
 ---
 
 # create-atomic-replace-pattern
-
-## Description
-Documents the atomic replace pattern used for all sub-resource collections (ranges, zones, groups). Always deletes all rows then inserts the new set in a transaction.
-
-## Context
-- **Brick:** — — Step 2
-- **Reads from:** D14 (sub-resource command), P10 (handler using this pattern)
-- **Writes to:** P1 (repository implements this pattern in set{SubResource}s)
-- **Artifact:** pattern document / reference (no new file — this skill explains the pattern)
-- **PS example:** `src/Adapter/Carrier/Repository/CarrierRepository.php` (zone/range methods)
 
 ## Instructions
 

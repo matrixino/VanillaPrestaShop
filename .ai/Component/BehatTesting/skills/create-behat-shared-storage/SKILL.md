@@ -1,24 +1,15 @@
 ---
 name: create-behat-shared-storage
-brick: "—"
-component: BehatTesting
-step: 3
-needs: [B2]
+description: >
+  Documents the entity reference management pattern used across all Behat
+  contexts. String references like "carrier_1" are stored in SharedStorage and
+  resolved to integer IDs, allowing scenarios to reference entities without
+  coupling to DB IDs.
+needs: [create-behat-context-class]
 produces: "SharedStorage usage pattern for entity reference management across scenarios"
-conditional: false
 ---
 
 # create-behat-shared-storage
-
-## Description
-Documents the entity reference management pattern used across all Behat contexts. String references like "carrier_1" are stored in SharedStorage and resolved to integer IDs, allowing scenarios to reference entities without coupling to DB IDs.
-
-## Context
-- **Brick:** — — Step 3
-- **Reads from:** B2 (context class)
-- **Writes to:** B3–B6 (all steps that create or look up entities)
-- **Artifact:** Pattern document / reference for using `$this->sharedStorage` in contexts
-- **PS example:** Check existing context classes for `$this->sharedStorage->set()` / `$this->sharedStorage->get()` usage
 
 ## Instructions
 

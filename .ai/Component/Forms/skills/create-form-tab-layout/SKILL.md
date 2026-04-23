@@ -1,24 +1,14 @@
 ---
 name: create-form-tab-layout
-brick: F4
-component: Forms
-step: 7
-needs: [F1]
+description: >
+  Documents the PrestaShop-specific tab layout pattern using
+  `NavigationTabType`. Each form tab is a separate sub-form type embedded in the
+  root form type via NavigationTabType.
+needs: [create-form-type]
 produces: "NavigationTabType-based tab structure with correct anchor IDs and tab error classes"
-conditional: false
 ---
 
 # create-form-tab-layout
-
-## Description
-Documents the PrestaShop-specific tab layout pattern using `NavigationTabType`. Each form tab is a separate sub-form type embedded in the root form type via NavigationTabType.
-
-## Context
-- **Brick:** F4 — Step 7
-- **Reads from:** F1 (root form type)
-- **Writes to:** F1 (tab sub-form types are embedded in root form type)
-- **Artifact:** Form type files (edit F1 output) + tab sub-form types
-- **PS example:** Check any multi-tab PS form (e.g., Carrier form tabs)
 
 ## Instructions
 

@@ -1,24 +1,15 @@
 ---
 name: create-position-column
-brick: —
-component: Grid
-step: 4
-needs: [G1, H2]
+description: >
+  Documents how to add drag-and-drop row reordering to a PrestaShop grid.
+  Requires a PositionColumn in the definition, a dedicated update-position
+  route, and position handling in the repository.
+needs: [create-grid-definition, create-admin-routing]
 produces: "PositionColumn configuration and position-update route wiring"
 conditional: "only for entities with position/sort support"
 ---
 
 # create-position-column
-
-## Description
-Documents how to add drag-and-drop row reordering to a PrestaShop grid. Requires a PositionColumn in the definition, a dedicated update-position route, and position handling in the repository.
-
-## Context
-- **Brick:** — — Step 4
-- **Reads from:** G1 (factory to edit), H2 (routes to add)
-- **Writes to:** G1 (add PositionColumn), H2 (add update-position route), repository (position persistence)
-- **Artifact:** Grid Definition Factory (edit) + new route in H2
-- **PS example:** Check any grid with drag-and-drop reordering (e.g., CMS pages, carrier list if ordered)
 
 ## Instructions
 

@@ -1,24 +1,15 @@
 ---
 name: create-vue-tab-component
-brick: JS3
-component: GlobalJS
-step: 8
-needs: [JS2, F4]
+description: >
+  Create a Vue SFC for a form tab that has dynamic behavior (e.g.,
+  showing/hiding fields based on a toggle, dynamic table rows). Static tabs
+  rendered entirely by Twig do not need Vue components.
+needs: [create-vue-form-manager, create-form-tab-layout]
 produces: "Vue SFC for a dynamic form tab section"
 conditional: "only for tabs with dynamic/interactive content"
 ---
 
 # create-vue-tab-component
-
-## Description
-Create a Vue SFC for a form tab that has dynamic behavior (e.g., showing/hiding fields based on a toggle, dynamic table rows). Static tabs rendered entirely by Twig do not need Vue components.
-
-## Context
-- **Brick:** JS3 — Step 8
-- **Reads from:** JS2 (receives props from form manager)
-- **Writes to:** JS2 (emits updates back to form manager)
-- **Artifact:** `admin-dev/themes/new-theme/js/pages/{domain}/{TabName}Tab.vue`
-- **PS example:** Check carrier shipping tab or zones tab for Vue components
 
 ## Instructions
 
@@ -31,4 +22,4 @@ Create a Vue SFC for a form tab that has dynamic behavior (e.g., showing/hiding 
 ## Rules
 
 - Tab component is only created if the tab has JS-driven dynamic behavior
-- Static-only tabs are handled purely in Twig (T4) — no Vue component needed
+- Static-only tabs are handled purely in Twig — no Vue component needed

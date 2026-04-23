@@ -1,24 +1,15 @@
 ---
 name: create-multistore-repository
-brick: —
-component: CQRS
-step: 2
-needs: [P1]
+description: >
+  Documents the required multistore pattern in every PrestaShop repository. The
+  `getShopIdsByConstraint()` method from
+  `AbstractMultiShopObjectModelRepository` must be called on every write to
+  resolve which shop contexts to apply the change to.
+needs: [create-doctrine-repository]
 produces: "Pattern for implementing multistore-aware writes using getShopIdsByConstraint()"
-conditional: false
 ---
 
 # create-multistore-repository
-
-## Description
-Documents the required multistore pattern in every PrestaShop repository. The `getShopIdsByConstraint()` method from `AbstractMultiShopObjectModelRepository` must be called on every write to resolve which shop contexts to apply the change to.
-
-## Context
-- **Brick:** — — Step 2
-- **Reads from:** P1 (repository to extend with this pattern)
-- **Writes to:** All handler skills (P2–P10) that call write methods on the repository
-- **Artifact:** pattern document / reference (no new file — this skill augments P1)
-- **PS example:** `src/Adapter/Carrier/Repository/CarrierRepository.php`
 
 ## Instructions
 

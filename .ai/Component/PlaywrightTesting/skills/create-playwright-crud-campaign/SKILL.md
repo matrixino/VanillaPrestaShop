@@ -1,24 +1,14 @@
 ---
 name: create-playwright-crud-campaign
-brick: E3
-component: PlaywrightTesting
-step: 11
-needs: [E1, E2, H2, T1, T2]
+description: >
+  Create the most important Playwright campaign covering the full entity
+  lifecycle. Tests create, verify in list, edit, verify edit, and delete — all
+  on real browser pages.
+needs: [create-playwright-test-data, create-playwright-resetter, create-admin-routing, create-twig-index-template, create-twig-form-template]
 produces: "01_CRUD{Domain}.ts — end-to-end create → verify → edit → verify → delete lifecycle campaign"
-conditional: false
 ---
 
 # create-playwright-crud-campaign
-
-## Description
-Create the most important Playwright campaign covering the full entity lifecycle. Tests create, verify in list, edit, verify edit, and delete — all on real browser pages.
-
-## Context
-- **Brick:** E3 — Step 11
-- **Reads from:** E1 (test fixtures), H2 (route paths for navigation), T1/T2 (page selectors)
-- **Writes to:** E2 (cleanup in afterAll)
-- **Artifact:** `tests/UI/campaigns/functional/BO/{number}_{section}/{number}_{subsection}/01_CRUD{Domain}.ts`
-- **PS example:** `tests/UI/campaigns/functional/BO/` (check for existing CRUD campaigns)
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: register-feature-flag
-brick: H3
-component: Controller
-step: 10
-needs: [H2]
+description: >
+  Register the domain's feature flag in `feature_flag.xml`. This entry populates
+  the `ps_feature_flag` table at install/upgrade and enables the flag-based
+  routing between legacy and Symfony controllers.
+needs: [create-admin-routing]
 produces: "feature_flag.xml entry with stability=beta and state=0"
-conditional: false
 ---
 
 # register-feature-flag
-
-## Description
-Register the domain's feature flag in `feature_flag.xml`. This entry populates the `ps_feature_flag` table at install/upgrade and enables the flag-based routing between legacy and Symfony controllers.
-
-## Context
-- **Brick:** H3 — Step 10
-- **Reads from:** H2 (flag name used in `_legacy_feature_flag` — must match the `id` attribute here)
-- **Writes to:** H2 (routing depends on this registration), step 12 (GA promotes this to stable)
-- **Artifact:** `install-dev/data/xml/feature_flag.xml` (edit — add entry)
-- **PS example:** Check existing entries in `install-dev/data/xml/feature_flag.xml`
 
 ## Instructions
 

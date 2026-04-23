@@ -1,24 +1,14 @@
 ---
 name: register-grid-service
-brick: G5
-component: Grid
-step: 4
-needs: [G1, G2, G3]
+description: >
+  Register the grid components (definition factory, query builder, filters form
+  type) in the Symfony DI container with the required tags and constructor
+  arguments.
+needs: [create-grid-definition, create-grid-query-builder, create-grid-filters]
 produces: "DI YAML registrations for grid definition factory, query builder, and filters"
-conditional: false
 ---
 
 # register-grid-service
-
-## Description
-Register the grid components (definition factory, query builder, filters form type) in the Symfony DI container with the required tags and constructor arguments.
-
-## Context
-- **Brick:** G5 — Step 4
-- **Reads from:** G1, G2, G3 (class names and constructor dependencies)
-- **Writes to:** H1 (controller auto-wires grid presenter which depends on these services)
-- **Artifact:** `src/PrestaShopBundle/Resources/config/services/{domain}.yml` or grid services file
-- **PS example:** Check grid service registrations for Carrier in `src/PrestaShopBundle/Resources/config/services/`
 
 ## Instructions
 

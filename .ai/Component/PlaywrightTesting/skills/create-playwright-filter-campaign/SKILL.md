@@ -1,24 +1,14 @@
 ---
 name: create-playwright-filter-campaign
-brick: E4
-component: PlaywrightTesting
-step: 11
-needs: [E1, E2, G3, H2]
+description: >
+  Create the Playwright campaign that verifies all grid filters and sortable
+  columns. Creates known test data, applies each filter, verifies filtered
+  results, resets, and re-verifies.
+needs: [create-playwright-test-data, create-playwright-resetter, create-grid-filters, create-admin-routing]
 produces: "02_filterSort{Domain}s.ts — filter and sort campaign for the grid"
-conditional: false
 ---
 
 # create-playwright-filter-campaign
-
-## Description
-Create the Playwright campaign that verifies all grid filters and sortable columns. Creates known test data, applies each filter, verifies filtered results, resets, and re-verifies.
-
-## Context
-- **Brick:** E4 — Step 11
-- **Reads from:** E1 (fixtures for predictable test data), G3 (filter names to test)
-- **Writes to:** E2 (cleanup in afterAll)
-- **Artifact:** `tests/UI/campaigns/functional/BO/{section}/{subsection}/02_filterSort{Domain}s.ts`
-- **PS example:** Check existing filterSort campaigns in `tests/UI/`
 
 ## Instructions
 

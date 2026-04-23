@@ -1,24 +1,14 @@
 ---
 name: create-twig-breadcrumb
-brick: "—"
-component: Twig
-step: 9
-needs: [T1, T2]
+description: >
+  Documents how to configure the PrestaShop admin breadcrumb in Symfony
+  templates. The breadcrumb is populated via the controller's
+  `breadcrumbsAndTitle` block or via Twig.
+needs: [create-twig-index-template, create-twig-form-template]
 produces: "Breadcrumb configuration for index and form pages"
-conditional: false
 ---
 
 # create-twig-breadcrumb
-
-## Description
-Documents how to configure the PrestaShop admin breadcrumb in Symfony templates. The breadcrumb is populated via the controller's `breadcrumbsAndTitle` block or via Twig.
-
-## Context
-- **Brick:** — — Step 9
-- **Reads from:** T1, T2 (templates being edited), controller action
-- **Writes to:** T1, T2 (adds breadcrumb/title blocks) + controller (breadcrumb setup)
-- **Artifact:** Template blocks (edit T1, T2 output) + controller breadcrumb setup
-- **PS example:** Any PS admin controller extending `FrameworkBundleAdminController`
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: create-form-data-handler
-brick: F3
-component: Forms
-step: 7
-needs: [D2, D3, F2]
+description: >
+  Create the IdentifiableObject DataHandler that converts the form's submitted
+  data into Add or Edit commands and dispatches them to the command bus. This is
+  the bridge between the form and the CQRS layer.
+needs: [create-create-command, create-edit-command, create-form-data-provider]
 produces: "{Domain}FormDataHandler.php — IdentifiableObject DataHandler that dispatches Add/Edit commands from form data"
-conditional: false
 ---
 
 # create-form-data-handler
-
-## Description
-Create the IdentifiableObject DataHandler that converts the form's submitted data into Add or Edit commands and dispatches them to the command bus. This is the bridge between the form and the CQRS layer.
-
-## Context
-- **Brick:** F3 — Step 7
-- **Reads from:** D2 (Add{Domain}Command constructor), D3 (Edit{Domain}Command setters), F2 (same data structure)
-- **Writes to:** H1 (controller calls handler after form submission), P2/P3 (commands end up here)
-- **Artifact:** `src/Core/Form/IdentifiableObject/DataHandler/{Domain}FormDataHandler.php`
-- **PS example:** `src/Core/Form/IdentifiableObject/DataHandler/CarrierFormDataHandler.php`
 
 ## Instructions
 
@@ -32,5 +22,5 @@ Create the IdentifiableObject DataHandler that converts the form's submitted dat
 ## Rules
 
 - DataHandler maps form data to commands — it does NOT do persistence directly
-- Sub-resource commands (D14) are dispatched separately, after the main edit command
+- Sub-resource commands are dispatched separately, after the main edit command
 - Dispatch order matters for sub-resources: main entity first, then sub-resources

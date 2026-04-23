@@ -1,24 +1,14 @@
 ---
 name: create-get-query
-brick: D5
-component: CQRS
-step: 5
-needs: [D1]
+description: >
+  Create the query that retrieves all fields of a single entity for the edit
+  form. Returns a typed `Editable{Domain}` DTO (not an array), populated by the
+  adapter handler.
+needs: [create-identity-value-object]
 produces: "Get{Domain}ForEditing.php — query returning a typed DTO for the edit form"
-conditional: false
 ---
 
 # create-get-query
-
-## Description
-Create the query that retrieves all fields of a single entity for the edit form. Returns a typed `Editable{Domain}` DTO (not an array), populated by the adapter handler.
-
-## Context
-- **Brick:** D5 — Step 5
-- **Reads from:** D1 ({Domain}Id)
-- **Writes to:** D10 (Get{Domain}ForEditingHandlerInterface), P5, F2 (form data provider dispatches this)
-- **Artifact:** `src/Core/Domain/{Domain}/Query/Get{Domain}ForEditing.php`
-- **PS example:** `src/Core/Domain/Carrier/Query/GetCarrierForEditing.php`
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: write-behat-bulk-scenario
-brick: B6
-component: BehatTesting
-step: 3
-needs: [B3, D11, D12, D13]
+description: >
+  Write scenarios for bulk operations (bulk delete, bulk enable, bulk disable)
+  and single-row status toggle. Requires multiple entities created in B3.
+needs: [write-behat-create-scenario, create-bulk-delete-command, create-bulk-status-command, create-toggle-status-command]
 produces: "Bulk action scenarios (bulk delete, bulk enable/disable, toggle)"
 conditional: "only if bulk commands were created (D11, D12, D13)"
 ---
 
 # write-behat-bulk-scenario
-
-## Description
-Write scenarios for bulk operations (bulk delete, bulk enable, bulk disable) and single-row status toggle. Requires multiple entities created in B3.
-
-## Context
-- **Brick:** B6 — Step 3
-- **Reads from:** B3 (entity refs in sharedStorage), D11/D12/D13 (bulk commands)
-- **Writes to:** — (terminal step for bulk coverage)
-- **Artifact:** Feature file + context class (edits)
-- **PS example:** See carrier feature file bulk action scenarios
 
 ## Instructions
 

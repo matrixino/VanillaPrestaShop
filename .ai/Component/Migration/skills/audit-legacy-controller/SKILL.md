@@ -1,24 +1,12 @@
 ---
 name: audit-legacy-controller
-brick: A1
-component: Migration
-step: 0
-needs: []
+description: >
+  Read the legacy `Admin{Domain}sController.php` without modifying it. Extract
+  every field rendered, every action method, and every `Hook::exec()` call.
 produces: "Field map, action list (CRUD/bulk/toggle), hook inventory from the legacy controller"
-conditional: false
 ---
 
 # audit-legacy-controller
-
-## Description
-Read the legacy `Admin{Domain}sController.php` without modifying it. Extract every field rendered, every action method, and every `Hook::exec()` call.
-
-## Context
-- **Brick:** A1 — Step 0
-- **Reads from:** `controllers/admin/Admin{Domain}sController.php` (source of truth for legacy behaviour)
-- **Writes to:** A3 (generate-migration-manifest) consumes this field map
-- **Artifact:** `controllers/admin/Admin{Domain}sController.php` (read-only analysis)
-- **PS example:** `controllers/admin/AdminCarriersController.php`
 
 ## Instructions
 

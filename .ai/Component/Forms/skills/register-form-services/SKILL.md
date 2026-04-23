@@ -1,24 +1,14 @@
 ---
 name: register-form-services
-brick: F6
-component: Forms
-step: 7
-needs: [F1, F2, F3]
+description: >
+  Register the form type, data provider, and data handler in the Symfony DI
+  container. Ensures all form layer services are wired and discoverable by the
+  controller and form factory.
+needs: [create-form-type, create-form-data-provider, create-form-data-handler]
 produces: "DI YAML registrations for form type, data provider, and data handler"
-conditional: false
 ---
 
 # register-form-services
-
-## Description
-Register the form type, data provider, and data handler in the Symfony DI container. Ensures all form layer services are wired and discoverable by the controller and form factory.
-
-## Context
-- **Brick:** F6 — Step 7
-- **Reads from:** F1 ({Domain}Type class), F2 ({Domain}FormDataProvider class), F3 ({Domain}FormDataHandler class)
-- **Writes to:** H1 (controller injects registered services), Symfony container
-- **Artifact:** `src/PrestaShopBundle/Resources/config/services/{domain}.yml`
-- **PS example:** Check existing service YAML files under `src/PrestaShopBundle/Resources/config/services/`
 
 ## Instructions
 

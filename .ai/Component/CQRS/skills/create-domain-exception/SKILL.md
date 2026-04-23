@@ -1,24 +1,13 @@
 ---
 name: create-domain-exception
-brick: D7
-component: CQRS
-step: 7
-needs: [A3]
+description: >
+  Create the domain exception hierarchy — a base exception plus specific typed
+  exceptions for not-found and constraint violations. Controllers and callers
+  catch these typed exceptions to display appropriate user messages.
 produces: "{Domain}Exception.php + {Domain}NotFoundException.php + Cannot{Action}{Domain}Exception.php — typed exception hierarchy"
-conditional: false
 ---
 
 # create-domain-exception
-
-## Description
-Create the domain exception hierarchy — a base exception plus specific typed exceptions for not-found and constraint violations. Controllers and callers catch these typed exceptions to display appropriate user messages.
-
-## Context
-- **Brick:** D7 — Step 7
-- **Reads from:** A3 manifest (what failure modes exist: not found, cannot delete if in use, etc.)
-- **Writes to:** D1 (throws on invalid ID), P2–P10 (handlers throw these), H1 (controller catches these)
-- **Artifact:** `src/Core/Domain/{Domain}/Exception/`
-- **PS example:** `src/Core/Domain/Carrier/Exception/`
 
 ## Instructions
 

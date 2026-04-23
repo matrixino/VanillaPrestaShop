@@ -1,24 +1,14 @@
 ---
 name: create-symfony-admin-controller
-brick: H1
-component: Controller
-step: 5
-needs: [D9, D10, G1, F2, F3]
+description: >
+  Create the Symfony admin controller that wires all CRUD actions to the
+  command/query bus. The controller dispatches commands and queries — it
+  contains no business logic.
+needs: [create-command-handler-interface, create-query-handler-interface, create-grid-definition, create-form-data-provider, create-form-data-handler]
 produces: "{Domain}Controller.php — Symfony admin controller with all CRUD actions"
-conditional: false
 ---
 
 # create-symfony-admin-controller
-
-## Description
-Create the Symfony admin controller that wires all CRUD actions to the command/query bus. The controller dispatches commands and queries — it contains no business logic.
-
-## Context
-- **Brick:** H1 — Step 5
-- **Reads from:** D9/D10 (command/query interfaces to dispatch), G1 (grid definition for index), F2/F3 (form data provider/handler for edit)
-- **Writes to:** T1/T2 (renders templates), H2 (routes point to these actions)
-- **Artifact:** `src/PrestaShopBundle/Controller/Admin/{Section}/{Domain}Controller.php`
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 
@@ -31,11 +21,11 @@ Create the Symfony admin controller that wires all CRUD actions to the command/q
 7. `editAction` POST: submit form, call handler `->update($form)`, redirect.
 8. `deleteAction`: dispatch `Delete{Domain}Command`, redirect with flash.
 9. Add bulk action methods: `bulkDeleteAction`, `bulkEnableStatusAction`, `bulkDisableStatusAction`.
-10. Catch typed domain exceptions (D7) and display user-friendly flash messages.
+10. Catch typed domain exceptions and display user-friendly flash messages.
 
 ## Rules
 
 - ZERO business logic in controllers — delegate everything to handlers via bus
-- Never instantiate commands directly with `new` — use the form data handler (F3)
+- Never instantiate commands directly with `new` — use the form data handler
 - All exceptions from handlers must be caught and turned into flash messages
 - Toggle status action must return JSON for AJAX calls

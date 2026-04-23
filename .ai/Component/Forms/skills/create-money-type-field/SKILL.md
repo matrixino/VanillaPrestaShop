@@ -1,24 +1,14 @@
 ---
 name: create-money-type-field
-brick: —
-component: Forms
-step: 7
-needs: [F1]
+description: >
+  Documents the use of Symfony's MoneyType or PS-specific currency-aware type
+  for price fields. Handles currency display and decimal precision.
+needs: [create-form-type]
 produces: "MoneyType field configuration for price/cost fields"
 conditional: "only if domain has monetary fields (prices, shipping costs)"
 ---
 
 # create-money-type-field
-
-## Description
-Documents the use of Symfony's MoneyType or PS-specific currency-aware type for price fields. Handles currency display and decimal precision.
-
-## Context
-- **Brick:** — — Step 7
-- **Reads from:** F1 (form type to edit)
-- **Writes to:** F3 (DataHandler converts the decimal value for command setter)
-- **Artifact:** Form type (edit)
-- **PS example:** Check PS forms with price fields
 
 ## Instructions
 

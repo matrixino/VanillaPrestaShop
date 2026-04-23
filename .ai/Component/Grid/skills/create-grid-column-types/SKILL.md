@@ -1,24 +1,13 @@
 ---
 name: create-grid-column-types
-brick: —
-component: Grid
-step: 4
-needs: [G1]
+description: >
+  Documents all available PrestaShop grid column types and when to use each. The
+  correct column type determines the rendering and behavior of each grid cell.
+needs: [create-grid-definition]
 produces: "Reference for choosing the correct PS grid column type class for each data type"
-conditional: false
 ---
 
 # create-grid-column-types
-
-## Description
-Documents all available PrestaShop grid column types and when to use each. The correct column type determines the rendering and behavior of each grid cell.
-
-## Context
-- **Brick:** — — Step 4
-- **Reads from:** G1 (column declarations)
-- **Writes to:** G1 (inline reference — no separate artifact)
-- **Artifact:** Reference document / inline in G1
-- **PS example:** `src/Core/Grid/Column/Type/`
 
 ## Instructions
 

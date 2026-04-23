@@ -1,24 +1,14 @@
 ---
 name: add-legacy-deprecation-notice
-brick: R4
-component: Release
-step: 13
-needs: [R1]
+description: >
+  Add a visible yellow warning banner to the legacy admin controller's `init()`
+  method, shown only when the new Symfony page is available. This step happens
+  6–12 months after GA, not at GA time.
+needs: [promote-feature-flag-to-stable]
 produces: "Deprecation warning banner in AdminXxxController::init() visible when legacy page is accessed"
-conditional: false
 ---
 
 # add-legacy-deprecation-notice
-
-## Description
-Add a visible yellow warning banner to the legacy admin controller's `init()` method, shown only when the new Symfony page is available. This step happens 6–12 months after GA, not at GA time.
-
-## Context
-- **Brick:** R4 — Step 13
-- **Reads from:** R1 (confirms GA has landed, new page is available)
-- **Writes to:** R5 (changelog entry), R6 (removal issue)
-- **Artifact:** `controllers/admin/Admin{Domain}sController.php` (edit)
-- **PS example:** Check `AdminCarriersController.php` if the carrier deprecation banner was added (PR #39050)
 
 ## Instructions
 

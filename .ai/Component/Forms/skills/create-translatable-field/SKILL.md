@@ -1,24 +1,15 @@
 ---
 name: create-translatable-field
-brick: F5
-component: Forms
-step: 7
-needs: [F1, A2]
+description: >
+  Documents how to implement multilingual form fields using PrestaShop's
+  `TranslatableType`. Multilingual fields render a separate input per language
+  tab and submit a language-keyed array.
+needs: [create-form-type]
 produces: "TranslatableType field configuration for multilingual form fields"
 conditional: "only if domain has multilingual fields (A2 lang=true fields)"
 ---
 
 # create-translatable-field
-
-## Description
-Documents how to implement multilingual form fields using PrestaShop's `TranslatableType`. Multilingual fields render a separate input per language tab and submit a language-keyed array.
-
-## Context
-- **Brick:** F5 — Step 7
-- **Reads from:** F1 (form type to edit), A2 (fields where lang=true)
-- **Writes to:** F2/F3 (DataProvider/DataHandler handle the lang-keyed arrays)
-- **Artifact:** Form type files (edit F1 output)
-- **PS example:** Check TranslatableType usage in any PS form with multilingual name/description
 
 ## Instructions
 

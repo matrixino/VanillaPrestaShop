@@ -1,24 +1,14 @@
 ---
 name: create-twig-macros
-brick: "—"
-component: Twig
-step: 9
-needs: []
+description: >
+  Documents when and how to create Twig macros for domain-specific template
+  fragments that appear in multiple places. Prefer inline templates for
+  single-use fragments — only extract to macros when used 3+ times.
 produces: "Domain-specific Twig macros for reusable template fragments"
 conditional: "only if index or form templates have reusable fragments worth extracting"
 ---
 
 # create-twig-macros
-
-## Description
-Documents when and how to create Twig macros for domain-specific template fragments that appear in multiple places. Prefer inline templates for single-use fragments — only extract to macros when used 3+ times.
-
-## Context
-- **Brick:** — — Step 9
-- **Reads from:** T1, T2 (templates that would include the macros)
-- **Writes to:** T1, T2 (macro calls replace duplicated fragments)
-- **Artifact:** `src/PrestaShopBundle/Resources/views/Admin/{Section}/{Domain}/macros.html.twig`
-- **PS example:** Check existing macro files under `src/PrestaShopBundle/Resources/views/Admin/`
 
 ## Instructions
 

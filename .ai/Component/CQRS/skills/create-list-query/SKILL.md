@@ -1,24 +1,13 @@
 ---
 name: create-list-query
-brick: D6
-component: CQRS
-step: 6
-needs: [A3]
+description: >
+  Create the query used by the grid to retrieve the paginated, filtered, sorted
+  list of entities. In most PS domains this is handled by the grid query builder
+  rather than an explicit CQRS query; assess which pattern the domain uses.
 produces: "Get{Domain}sForListing.php or SearchCriteria-based query — grid data source query"
-conditional: false
 ---
 
 # create-list-query
-
-## Description
-Create the query used by the grid to retrieve the paginated, filtered, sorted list of entities. In most PS domains this is handled by the grid query builder (G2) rather than an explicit CQRS query; assess which pattern the domain uses.
-
-## Context
-- **Brick:** D6 — Step 6
-- **Reads from:** A3 manifest (grid columns, filter definitions)
-- **Writes to:** G2 (grid query builder), P6 (if explicit query handler exists)
-- **Artifact:** `src/Core/Domain/{Domain}/Query/Get{Domain}sForListing.php` or via SearchCriteria
-- **PS example:** `src/Core/Domain/Carrier/Query/` or grid QueryBuilder pattern (G2)
 
 ## Instructions
 

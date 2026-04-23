@@ -1,24 +1,14 @@
 ---
 name: create-admin-routing
-brick: H2
-component: Controller
-step: 6
-needs: [H1]
+description: >
+  Create the Symfony routing YAML file declaring all admin routes for the
+  domain. Every route must carry `_legacy_feature_flag` and `_legacy_controller`
+  to enable feature-flag-based routing between legacy and new controller.
+needs: [create-symfony-admin-controller]
 produces: "YAML routing file with all admin routes carrying _legacy_feature_flag and _legacy_controller"
-conditional: false
 ---
 
 # create-admin-routing
-
-## Description
-Create the Symfony routing YAML file declaring all admin routes for the domain. Every route must carry `_legacy_feature_flag` and `_legacy_controller` to enable feature-flag-based routing between legacy and new controller.
-
-## Context
-- **Brick:** H2 — Step 6
-- **Reads from:** H1 (controller class and action method names)
-- **Writes to:** H3 (flag name referenced here must be registered there), T1/T2 (route names used in templates)
-- **Artifact:** `src/PrestaShopBundle/Resources/config/routing/admin/{domain}.yml`
-- **PS example:** `src/PrestaShopBundle/Resources/config/routing/admin/carrier.yml`
 
 ## Instructions
 
@@ -35,7 +25,7 @@ Create the Symfony routing YAML file declaring all admin routes for the domain. 
    ```
 3. Include routes: index (GET), create (GET+POST), edit (GET+POST with `{id}` parameter), delete (POST with `{id}`), toggle status (POST+JSON), bulk delete/enable/disable (POST).
 4. Import this file from the main admin routing file.
-5. CRITICAL: `_legacy_feature_flag` value must exactly match the `id` attribute in feature_flag.xml (H3).
+5. CRITICAL: `_legacy_feature_flag` value must exactly match the `id` attribute in feature_flag.xml.
 6. Verify with `php bin/console debug:router | grep {domain}`.
 
 ## Rules

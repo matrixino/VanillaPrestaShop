@@ -1,24 +1,15 @@
 ---
 name: write-upgrade-sql
-brick: R2
-component: Release
-step: 12
-needs: [R1, H3]
+description: >
+  Create the SQL upgrade file that updates the `ps_feature_flag` table for shops
+  upgrading to the version containing the GA change. New installs get the flag
+  from the XML; upgrading shops need this SQL.
+needs: [promote-feature-flag-to-stable, register-feature-flag]
 produces: "upgrade/sql/{version}.sql — SQL to update flag for existing installations upgrading to this version"
 conditional: "only if PS upgrade scripts do not auto-sync feature_flag.xml with ps_feature_flag table"
 ---
 
 # write-upgrade-sql
-
-## Description
-Create the SQL upgrade file that updates the `ps_feature_flag` table for shops upgrading to the version containing the GA change. New installs get the flag from the XML; upgrading shops need this SQL.
-
-## Context
-- **Brick:** R2 — Step 12
-- **Reads from:** R1 (the flag name that needs updating)
-- **Writes to:** Applied automatically during PS upgrade process
-- **Artifact:** `upgrade/sql/{PS_version}.sql`
-- **PS example:** Check `upgrade/sql/` for existing SQL upgrade files
 
 ## Instructions
 

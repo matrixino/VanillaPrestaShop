@@ -1,24 +1,13 @@
 ---
 name: create-query-handler-interface
-brick: D10
-component: CQRS
-step: 10
-needs: [D5, D6]
+description: >
+  Create the query handler interfaces for all read operations. These define what
+  return types the handlers must provide.
+needs: [create-get-query, create-list-query]
 produces: "Handler interfaces in src/Core/Domain/{Domain}/QueryHandler/"
-conditional: false
 ---
 
 # create-query-handler-interface
-
-## Description
-Create the query handler interfaces for all read operations. These define what return types the handlers must provide.
-
-## Context
-- **Brick:** D10 — Step 10
-- **Reads from:** D5, D6
-- **Writes to:** P5, P6
-- **Artifact:** `src/Core/Domain/{Domain}/QueryHandler/Get{Domain}ForEditingHandlerInterface.php` etc.
-- **PS example:** `src/Core/Domain/Carrier/QueryHandler/`
 
 ## Instructions
 

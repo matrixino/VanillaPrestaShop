@@ -1,24 +1,14 @@
 ---
 name: write-changelog-deprecation
-brick: R5
-component: Release
-step: 13
-needs: [R4]
+description: >
+  Add a deprecation entry to CHANGELOG.md (or the equivalent PS release notes
+  document) announcing that the legacy controller is deprecated and will be
+  removed in the next major version.
+needs: [add-legacy-deprecation-notice]
 produces: "CHANGELOG.md entry announcing Admin{Domain}sController deprecation"
-conditional: false
 ---
 
 # write-changelog-deprecation
-
-## Description
-Add a deprecation entry to CHANGELOG.md (or the equivalent PS release notes document) announcing that the legacy controller is deprecated and will be removed in the next major version.
-
-## Context
-- **Brick:** R5 — Step 13
-- **Reads from:** R4 (confirms deprecation notice was added)
-- **Writes to:** (no further bricks — public announcement)
-- **Artifact:** `CHANGELOG.md` (edit)
-- **PS example:** Search `CHANGELOG.md` for existing `### Deprecated` sections to see the format
 
 ## Instructions
 

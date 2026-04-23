@@ -1,24 +1,14 @@
 ---
 name: create-twig-alert-block
-brick: "—"
-component: Twig
-step: 9
-needs: [T1, T2]
+description: >
+  Documents how to correctly render Symfony flash messages
+  (success/error/warning) in PS admin templates using the standard alert block.
+  Every index and form template needs this.
+needs: [create-twig-index-template, create-twig-form-template]
 produces: "Flash message display block in index and form templates"
-conditional: false
 ---
 
 # create-twig-alert-block
-
-## Description
-Documents how to correctly render Symfony flash messages (success/error/warning) in PS admin templates using the standard alert block. Every index and form template needs this.
-
-## Context
-- **Brick:** — — Step 9
-- **Reads from:** T1, T2 (templates being edited)
-- **Writes to:** T1, T2 (adds flash block to each template's content block)
-- **Artifact:** Template blocks (edit T1, T2 output)
-- **PS example:** Any PS admin template with flash message rendering
 
 ## Instructions
 

@@ -1,24 +1,15 @@
 ---
 name: create-file-upload-field
-brick: —
-component: Forms
-step: 7
-needs: [F1, A2]
+description: >
+  Documents how to implement file upload fields in PrestaShop Symfony forms. The
+  uploaded file is handled in the DataHandler and saved to the `img/` directory
+  via the PS file service.
+needs: [create-form-type]
 produces: "FileType configuration for image/logo upload fields"
 conditional: "only if domain has file upload (A2 analysis found image/logo field)"
 ---
 
 # create-file-upload-field
-
-## Description
-Documents how to implement file upload fields in PrestaShop Symfony forms. The uploaded file is handled in the DataHandler and saved to the `img/` directory via the PS file service.
-
-## Context
-- **Brick:** — — Step 7
-- **Reads from:** F1 (form type to edit), A2 (image/logo field detected)
-- **Writes to:** F3 (DataHandler saves the file), form Twig template (display existing image)
-- **Artifact:** Form type + file handling in F3 DataHandler
-- **PS example:** Check Carrier logo upload in CarrierType if present
 
 ## Instructions
 

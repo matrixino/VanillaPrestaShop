@@ -1,24 +1,13 @@
 ---
 name: create-controller-delete-action
-brick: "—"
-component: Controller
-step: 5
-needs: [H1, D4]
+description: >
+  Documents the delete action. Validates CSRF token, dispatches Delete command,
+  handles not-found and constraint exceptions, and redirects with flash.
+needs: [create-symfony-admin-controller, create-delete-command]
 produces: "deleteAction() — dispatches Delete command with CSRF protection"
-conditional: false
 ---
 
 # create-controller-delete-action
-
-## Description
-Documents the delete action. Validates CSRF token, dispatches Delete command, handles not-found and constraint exceptions, and redirects with flash.
-
-## Context
-- **Brick:** — — Step 5
-- **Reads from:** H1 (controller skeleton), D4 (Delete{Domain}Command)
-- **Writes to:** T1 (redirects back to index listing)
-- **Artifact:** `{Domain}Controller.php` (edit H1 output)
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 

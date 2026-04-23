@@ -1,24 +1,14 @@
 ---
 name: create-controller-create-action
-brick: "—"
-component: Controller
-step: 5
-needs: [H1, F2, F3, D2]
+description: >
+  Documents the create action implementation. GET builds an empty form; POST
+  validates, dispatches Add command via form data handler, and redirects with a
+  success flash.
+needs: [create-symfony-admin-controller, create-form-data-provider, create-form-data-handler, create-create-command]
 produces: "createAction() — GET renders empty form, POST dispatches Add command"
-conditional: false
 ---
 
 # create-controller-create-action
-
-## Description
-Documents the create action implementation. GET builds an empty form; POST validates, dispatches Add command via form data handler, and redirects with a success flash.
-
-## Context
-- **Brick:** — — Step 5
-- **Reads from:** H1 (controller skeleton), F2 (form data provider for empty form), F3 (form data handler to dispatch D2), D2 (Add command)
-- **Writes to:** T2 (create/edit form template)
-- **Artifact:** `{Domain}Controller.php` (edit H1 output)
-- **PS example:** `src/PrestaShopBundle/Controller/Admin/Shipping/CarrierController.php`
 
 ## Instructions
 
@@ -30,5 +20,5 @@ Documents the create action implementation. GET builds an empty form; POST valid
 
 ## Rules
 
-- Use the form data handler (F3) to convert form data to command — never build command manually in controller
+- Use the form data handler to convert form data to command — never build command manually in controller
 - Flash message keys must use PS translation domain `Admin.Notifications.Success`

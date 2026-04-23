@@ -1,24 +1,13 @@
 ---
 name: create-twig-index-template
-brick: T1
-component: Twig
-step: 9
-needs: [G1, H1, H2]
+description: >
+  Create the Twig template for the entity listing (grid) page. Extends the PS
+  admin layout and renders the grid, header buttons, and filters form.
+needs: [create-grid-definition, create-symfony-admin-controller, create-admin-routing]
 produces: "index.html.twig — back-office listing page template extending the PS admin layout"
-conditional: false
 ---
 
 # create-twig-index-template
-
-## Description
-Create the Twig template for the entity listing (grid) page. Extends the PS admin layout and renders the grid, header buttons, and filters form.
-
-## Context
-- **Brick:** T1 — Step 9
-- **Reads from:** G1 (grid variable passed by H1 controller), H2 (create route for "Add new" button)
-- **Writes to:** T3 (grid block embedded here)
-- **Artifact:** `src/PrestaShopBundle/Resources/views/Admin/{Section}/{Domain}/index.html.twig`
-- **PS example:** `src/PrestaShopBundle/Resources/views/Admin/Shipping/Carrier/index.html.twig`
 
 ## Instructions
 

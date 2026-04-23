@@ -1,24 +1,14 @@
 ---
 name: create-command-handler-interface
-brick: D9
-component: CQRS
-step: 9
-needs: [D2, D3, D4, D11, D12, D13]
+description: >
+  Create the handler interface for each command. These interfaces live in Core
+  and define the contract — the concrete implementations in Adapter are
+  registered to satisfy these interfaces.
+needs: [create-create-command, create-edit-command, create-delete-command, create-bulk-delete-command, create-bulk-status-command, create-toggle-status-command]
 produces: "Handler interfaces in src/Core/Domain/{Domain}/CommandHandler/ — contracts for all write operations"
-conditional: false
 ---
 
 # create-command-handler-interface
-
-## Description
-Create the handler interface for each command. These interfaces live in Core and define the contract — the concrete implementations in Adapter are registered to satisfy these interfaces.
-
-## Context
-- **Brick:** D9 — Step 9
-- **Reads from:** D2 (AddCommand), D3 (EditCommand), D4 (DeleteCommand), D11–D14 as applicable
-- **Writes to:** P2–P10 (concrete handler classes implement these interfaces)
-- **Artifact:** `src/Core/Domain/{Domain}/CommandHandler/Add{Domain}HandlerInterface.php` etc.
-- **PS example:** `src/Core/Domain/Carrier/CommandHandler/`
 
 ## Instructions
 

@@ -1,24 +1,14 @@
 ---
 name: create-form-data-provider
-brick: F2
-component: Forms
-step: 7
-needs: [D5, D10]
+description: >
+  Create the IdentifiableObject DataProvider that populates the edit form with
+  the existing entity's data. Implements `FormDataProviderInterface`, dispatches
+  the Get query, and maps the result to the form's expected array structure.
+needs: [create-get-query, create-query-handler-interface]
 produces: "{Domain}FormDataProvider.php — IdentifiableObject DataProvider that loads entity data for edit form"
-conditional: false
 ---
 
 # create-form-data-provider
-
-## Description
-Create the IdentifiableObject DataProvider that populates the edit form with the existing entity's data. Implements `FormDataProviderInterface`, dispatches the Get query, and maps the result to the form's expected array structure.
-
-## Context
-- **Brick:** F2 — Step 7
-- **Reads from:** D5 (Get{Domain}ForEditing query to dispatch), D10 (query handler return type)
-- **Writes to:** H1 (controller calls `$provider->getData($id)` to pre-fill form), F3 (paired DataHandler)
-- **Artifact:** `src/Core/Form/IdentifiableObject/DataProvider/{Domain}FormDataProvider.php`
-- **PS example:** `src/Core/Form/IdentifiableObject/DataProvider/CarrierFormDataProvider.php`
 
 ## Instructions
 

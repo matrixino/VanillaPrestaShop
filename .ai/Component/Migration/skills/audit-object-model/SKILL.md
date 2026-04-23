@@ -1,24 +1,13 @@
 ---
 name: audit-object-model
-brick: A2
-component: Migration
-step: 0
-needs: []
+description: >
+  Read the legacy ObjectModel class for the domain and extract its database
+  schema, field definitions, multilingual fields, and validation rules. This is
+  the authoritative source for what columns the Doctrine repository must handle.
 produces: "DB schema map, relation list, multilingual field list, validation rules from ObjectModel"
-conditional: false
 ---
 
 # audit-object-model
-
-## Description
-Read the legacy ObjectModel class for the domain and extract its database schema, field definitions, multilingual fields, and validation rules. This is the authoritative source for what columns the Doctrine repository must handle.
-
-## Context
-- **Brick:** A2 — Step 0
-- **Reads from:** `classes/{Domain}.php` and optionally `classes/lang/{Domain}Lang.php`
-- **Writes to:** A3, D8 (domain value objects), P1 (doctrine repository)
-- **Artifact:** `classes/{Domain}.php` (read-only analysis)
-- **PS example:** `classes/Carrier.php`, `classes/lang/CarrierLang.php`
 
 ## Instructions
 
@@ -36,5 +25,5 @@ Read the legacy ObjectModel class for the domain and extract its database schema
 
 - Never modify ObjectModel files — read-only audit
 - Flag any field with a custom validate method (`Validate::isXxx`) — these need a custom ValueObject
-- Note `$identifier` field name — it becomes the `{Domain}Id` ValueObject (D1)
+- Note `$identifier` field name — it becomes the `{Domain}Id` ValueObject
 - Relations declared in ObjectModel that link to another entity's table are sub-resource candidates
