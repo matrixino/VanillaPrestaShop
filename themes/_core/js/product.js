@@ -230,9 +230,11 @@ function updateProduct(event, eventType, updateUrl) {
         $(prestashop.selectors.product.additionalInfos)
           .first()
           .replaceWith(data.product_additional_info);
-        $(prestashop.selectors.product.details).replaceWith(
-          data.product_details,
-        );
+        if (!$('.modal.quickview.in, .modal.quickview.show').length) {
+          $(prestashop.selectors.product.details).replaceWith(
+            data.product_details,
+          );
+        }
         $(prestashop.selectors.product.flags)
           .first()
           .replaceWith(data.product_flags);
