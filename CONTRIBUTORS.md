@@ -820,6 +820,7 @@ GitHub contributors:
 - Sarah Dib
 - Sarah Lorenzini
 - Šarūnas Jonušas
+- Savio (Doyensec)
 - Sauli Maijala
 - sbordun
 - Seb
