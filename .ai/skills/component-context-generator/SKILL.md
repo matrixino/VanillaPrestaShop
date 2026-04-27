@@ -6,6 +6,7 @@ description: >
   "fill in the CONTEXT.md for [Component]", or when working inside `.ai/Component/` directories.
   Components live under `src/Core/{Name}/` and/or `src/Adapter/{Name}/` — they are shared infrastructure,
   not business domains. Examples: Grid, Form, Hook, CQRS, Translation, Router.
+subagent: recommended
 ---
 
 # PrestaShop Component CONTEXT.md Generator

@@ -7,6 +7,7 @@ description: >
   "create grid query builder for {Domain}".
 needs: [create-grid-definition]
 produces: "{Domain}QueryBuilder.php + optional GridDataFactory decorator"
+subagent: optional
 ---
 
 # create-grid-query-builder

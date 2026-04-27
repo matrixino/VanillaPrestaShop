@@ -7,6 +7,7 @@ description: >
   Trigger: "create form type for {Domain}".
 needs: [create-cqrs-commands, create-cqrs-queries]
 produces: "{Domain}Type.php + choice providers — Symfony form structure for add/edit"
+subagent: optional
 ---
 
 # create-form-type

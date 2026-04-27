@@ -7,6 +7,7 @@ description: >
   for {Domain}".
 needs: [create-behat-context]
 produces: "{domain}_management.feature — complete Gherkin scenario suite"
+subagent: optional
 ---
 
 # write-behat-scenarios

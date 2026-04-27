@@ -7,6 +7,7 @@ description: >
   auto-registration. Trigger: "implement handlers for {Domain}".
 needs: [create-cqrs-commands, create-cqrs-queries, create-doctrine-repository]
 produces: "src/Adapter/{Domain}/CommandHandler/ and QueryHandler/ — all handler implementations"
+subagent: optional
 ---
 
 # implement-cqrs-handlers

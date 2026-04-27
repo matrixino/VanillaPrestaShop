@@ -7,6 +7,7 @@ description: >
   Trigger: "create grid definition for {Domain}".
 needs: [create-cqrs-commands, create-admin-routing]
 produces: "{Domain}GridDefinitionFactory + {Domain}Filters + DI registration"
+subagent: optional
 ---
 
 # create-grid-definition

@@ -21,6 +21,10 @@ Trigger when asked to:
 - "Add a Symfony form for Xxx"
 - "Migrate AdminXxxController"
 
+## Sub-agent delegation (Claude Code)
+
+When the parent agent supports sub-agents (Claude Code does; other tools currently do not), step-00 audits are particularly suited to delegation: each audit reads a large legacy file and emits a structured artifact, so the parent can offload the read cost without losing context. The migration manifest synthesises both audits and acts as the shared context surface for every later step. Skills tagged `subagent: recommended` or `subagent: optional` in their frontmatter are candidates; tools without a sub-agent primitive simply run them in-line — behaviour is identical from the user's standpoint.
+
 ## Phase index
 
 | # | File | Title | Deliverable |

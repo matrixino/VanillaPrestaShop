@@ -6,6 +6,7 @@ description: >
   ShopConstraint when the entity requires it. Trigger: "create repository for {Domain}".
 needs: [create-cqrs-commands]
 produces: "{Domain}Repository.php — the single persistence entry point for the domain"
+subagent: optional
 ---
 
 # create-doctrine-repository

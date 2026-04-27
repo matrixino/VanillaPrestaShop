@@ -5,6 +5,7 @@ description: >
   schema, field definitions, multilingual fields, and validation rules. This is
   the authoritative source for what columns the Doctrine repository must handle.
 produces: "DB schema map, relation list, multilingual field list, validation rules from ObjectModel"
+subagent: recommended
 ---
 
 # audit-object-model

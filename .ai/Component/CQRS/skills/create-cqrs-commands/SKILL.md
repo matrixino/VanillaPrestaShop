@@ -8,6 +8,7 @@ description: >
   "set up domain layer for {Domain}".
 needs: []
 produces: "Complete src/Core/Domain/{Domain}/ layer: ValueObject/, Command/, CommandHandler/, Exception/"
+subagent: optional
 ---
 
 # create-cqrs-commands

@@ -7,6 +7,7 @@ description: >
   Component/Forms/CONTEXT.md for conventions. Trigger: "create form data handling for {Domain}".
 needs: [create-cqrs-commands, create-cqrs-queries, create-form-type]
 produces: "{Domain}FormDataProvider + {Domain}FormDataHandler + DI registration"
+subagent: optional
 ---
 
 # create-form-data-handling

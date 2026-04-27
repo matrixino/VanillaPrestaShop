@@ -6,6 +6,7 @@ description: >
   "write the context for [Domain]", "document the [X] domain",
   or when working inside `.ai/Domain/` directories.
   Also triggers on "create context for", "add AI context", "populate CONTEXT.md".
+subagent: recommended
 ---
 
 # PrestaShop Domain CONTEXT.md Generator

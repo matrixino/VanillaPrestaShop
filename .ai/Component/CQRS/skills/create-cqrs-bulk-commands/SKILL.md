@@ -7,6 +7,7 @@ description: >
 needs: [create-cqrs-commands, create-doctrine-repository]
 produces: "BulkDelete{Domain}sCommand + BulkToggle{Domain}StatusCommand + their handlers"
 conditional: "only if the grid has bulk actions (most entities do)"
+subagent: optional
 ---
 
 # create-cqrs-bulk-commands

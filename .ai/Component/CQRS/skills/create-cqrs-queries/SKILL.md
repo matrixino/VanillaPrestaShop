@@ -7,6 +7,7 @@ description: >
   "set up read side for {Domain}".
 needs: [create-cqrs-commands]
 produces: "src/Core/Domain/{Domain}/Query/, QueryResult/, QueryHandler/ — read-side domain layer"
+subagent: optional
 ---
 
 # create-cqrs-queries

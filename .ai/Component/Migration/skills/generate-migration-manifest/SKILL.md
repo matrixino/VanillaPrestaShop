@@ -7,6 +7,7 @@ description: >
   know what to create.
 needs: [audit-legacy-controller, audit-object-model]
 produces: "migration-manifest.md — authoritative spec listing all commands, queries, form fields, grid columns, hooks, and sub-resources"
+subagent: recommended
 ---
 
 

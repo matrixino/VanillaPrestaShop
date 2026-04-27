@@ -91,7 +91,7 @@ Only link when the relationship is **non-obvious** (architectural surprise, coex
 
 ### Project-specific frontmatter (custom metadata)
 
-This project uses three custom frontmatter fields on top of the standard ones: `needs`, `produces`, `conditional`. They are not interpreted by Claude Code but document the skill's place in larger workflows and serve as machine-readable hints for orchestrators.
+This project uses four custom frontmatter fields on top of the standard ones: `needs`, `produces`, `conditional`, `subagent`. They are not interpreted by Claude Code but document the skill's place in larger workflows and serve as machine-readable hints for orchestrators.
 
 See [`STRUCTURE.md` → SKILL.md project conventions](../../STRUCTURE.md#skillmd-project-conventions) for the full definition of these fields, the top-down dependency rule, and the standalone rule. Do not duplicate that documentation here.
 
@@ -157,6 +157,7 @@ placement rules above before applying them.
 - [ ] `description` front-loads the use case and lists trigger phrases
 - [ ] `description` does **not** restate "Read Component/X/CONTEXT.md…" — that line belongs in the body only
 - [ ] If the skill needs the parent CONTEXT.md, the body opens with a single `Read @.ai/Component/{Component}/CONTEXT.md for ...` reference
-- [ ] Custom frontmatter fields (`needs`, `produces`, `conditional`) follow [STRUCTURE.md conventions](../../STRUCTURE.md#skillmd-project-conventions) — top-down dependencies, standalone-usable
+- [ ] Custom frontmatter fields (`needs`, `produces`, `conditional`, `subagent`) follow [STRUCTURE.md conventions](../../STRUCTURE.md#skillmd-project-conventions) — top-down dependencies, standalone-usable
+- [ ] If the skill is read-heavy and produces a structured artifact, consider declaring `subagent: recommended` or `subagent: optional` (see [STRUCTURE.md](../../STRUCTURE.md#skillmd-project-conventions)). Absence is the default — leave the field off if the skill is small, interactive, or cross-references siblings
 - [ ] Corresponding `CONTEXT.md` updated with a `## Skills` entry (agnostic discovery)
 - [ ] Symlink created in `.claude/skills/` pointing to the skill directory (Claude Code discovery)

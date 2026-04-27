@@ -7,6 +7,7 @@ description: >
   "write Playwright tests for {Domain}".
 needs: [create-playwright-page-objects, create-playwright-test-data, create-admin-routing]
 produces: "Test campaign files in tests/UI/campaigns/functional/BO/{section}/{subsection}/"
+subagent: optional
 ---
 
 # write-playwright-campaigns

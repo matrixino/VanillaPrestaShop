@@ -6,6 +6,7 @@ description: >
   Trigger: "create form template for {Domain}".
 needs: [create-form-type, create-controller-form-actions, create-admin-routing]
 produces: "form.html.twig — add/edit form page template"
+subagent: optional
 ---
 
 # create-twig-form-template

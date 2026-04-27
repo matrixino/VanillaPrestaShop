@@ -4,6 +4,7 @@ description: >
   Read the legacy `Admin{Domain}sController.php` without modifying it. Extract
   every field rendered, every action method, and every `Hook::exec()` call.
 produces: "Field map, action list (CRUD/bulk/toggle), hook inventory from the legacy controller"
+subagent: recommended
 ---
 
 # audit-legacy-controller
