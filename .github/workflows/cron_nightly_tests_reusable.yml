@@ -118,13 +118,6 @@ jobs:
             CAMPAIGN: 'modules:20-29'
           - BRANCH: 8.2.x
             CAMPAIGN: 'modules:30-39'
-          ## 9.0.x
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'sanity:productV2'
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'functional:productV2'
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'modules'
           ## 9.1.x
           - BRANCH: 9.1.x
             CAMPAIGN: 'sanity:productV2'

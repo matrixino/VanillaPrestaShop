@@ -2873,6 +2873,11 @@
       <title>Modify checkout process</title>
       <description>This hook is called when constructing the checkout process</description>
     </hook>
+    <hook id="actionCheckoutBuildProcess">
+      <name>actionCheckoutBuildProcess</name>
+      <title>Build checkout process</title>
+      <description>This hook is triggered before the checkout is rendered. Modules may return a checkout process provider. The provider is used only when exactly one enabled and valid provider is available.</description>
+    </hook>
     <hook id="actionCheckoutStepRenderTemplate">
       <name>actionCheckoutStepRenderTemplate</name>
       <title>Modify the parameters of the checkout step template rendering</title>

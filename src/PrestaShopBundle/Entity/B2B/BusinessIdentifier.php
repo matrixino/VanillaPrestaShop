@@ -39,6 +39,11 @@ class BusinessIdentifier
     private bool $deleted = false;
 
     /**
+     * @ORM\Column(name="label", type="string", length=255)
+     */
+    private string $label;
+
+    /**
      * @ORM\OneToMany(targetEntity="PrestaShopBundle\Entity\B2B\BusinessEntityIdentifier", mappedBy="businessIdentifier")
      */
     private Collection $businessEntityIdentifiers;
@@ -95,6 +100,18 @@ class BusinessIdentifier
     public function removeBusinessEntityIdentifier(BusinessEntityIdentifier $businessEntityIdentifier): self
     {
         $this->businessEntityIdentifiers->removeElement($businessEntityIdentifier);
+
+        return $this;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    public function setLabel(string $label): self
+    {
+        $this->label = $label;
 
         return $this;
     }

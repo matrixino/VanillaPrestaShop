@@ -232,7 +232,7 @@ admin_orders_shipment_get_merge_form:
     expose: true
 
 admin_orders_shipment_get_edit_form:
-  path: /{orderId}/shipment/edit-form
+  path: /{orderId}/shipment/{shipmentId}/edit-form
   methods: [ GET ]
   defaults:
     _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getEditShipmentForm
@@ -262,18 +262,19 @@ admin_orders_get_add_product_form:
     expose: true
 
 admin_orders_get_edit_product_form:
-  path: /{orderId}/product/edit
+  path: /{orderId}/product/{orderDetailId}/edit
   methods: [ GET ]
   defaults:
     _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::getEditProductForm
   requirements:
     orderId: \d+
+    orderDetailId: \d+
   options:
     expose: true
 
 admin_orders_edit_shipment:
-  path: /{orderId}/shipment/edit
-  methods: [ POST ]
+  path: /{orderId}/shipment/{shipmentId}/edit
+  methods: [ PUT ]
   defaults:
     _controller: PrestaShopBundle\Controller\Admin\Sell\Order\OrderController::editShipmentAction
   requirements:

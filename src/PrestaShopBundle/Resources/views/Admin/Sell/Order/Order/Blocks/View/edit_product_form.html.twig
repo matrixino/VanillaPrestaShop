@@ -54,7 +54,7 @@
     </div>
   </div>
 
-  <div class="form-group">
+  <div class="form-group{% if shipments is not empty %} d-none{% endif %}">
     <label class="form-control-label">
       {{ 'Quantity'|trans({}, 'Admin.Global') }}
     </label>
@@ -72,9 +72,8 @@
     {% do editProductForm.invoice.setRendered() %}
   {% endif %}
 
-  {# DO NOT DELETE, IT WILL USED IN ANOTHER PR FOR ADD SHIPMENT ACTIONS #}
-  {# {% if shipments is not empty %}
-    <table class="table mt-4">
+  {% if shipments is not empty %}
+    <table class="table mb-0">
       <thead>
         <tr>
           <th>{{ 'Shipment'|trans({}, 'Admin.Global') }}</th>
@@ -83,16 +82,16 @@
       </thead>
       <tbody>
         {% for shipment in shipments %}
-          <tr id="{{ shipment.id }}">
-            <td class="w-100">{{ 'Shipment'|trans({}, 'Admin.Global') }} {{ shipment.id }}</td>
+          <tr>
+            <td class="w-100">{{ 'Shipment'|trans({}, 'Admin.Global') }} {{ shipment.shipmentId }}</td>
             <td class="text-right">
-              <input type="number" class="form-control js-shipment-quantity" value="{{ shipment.quantity }}" min="1">
+              <input type="number" class="form-control js-shipment-quantity" value="{{ shipment.quantity }}" data-shipment-id="{{ shipment.shipmentId }}">
             </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
-  {% endif %} #}
+  {% endif %}
 
   {% do editProductForm.cancel.setRendered() %}
   {% do editProductForm.save.setRendered() %}

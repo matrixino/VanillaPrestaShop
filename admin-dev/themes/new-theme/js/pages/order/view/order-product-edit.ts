@@ -232,11 +232,14 @@ export default class OrderProductEdit {
   handleShipmentQty(): void {
     const total = this.shipmentInputs.reduce((sum, input) => sum + Number(input.value), 0);
     const availableQuantity = parseInt(this.quantityInput.data('availableQuantity'), 10);
+    const previousQuantity = parseInt(this.quantityInput.data('previousQuantity'), 10);
+    const maxQuantity = availableQuantity + previousQuantity;
+    const hasAtLeastOneQty = this.shipmentInputs.some((input) => Number(input.value) > 0);
     this.quantity = total;
     this.quantityInput.val(total);
     this.updateShipmentQtyCounter(total);
     this.updateTotal();
-    this.productEditSaveBtn.prop('disabled', total <= 0 || total > availableQuantity);
+    this.productEditSaveBtn.prop('disabled', !hasAtLeastOneQty || total > maxQuantity);
   }
 
   updateShipmentQtyCounter(total: number): void {
@@ -244,9 +247,11 @@ export default class OrderProductEdit {
       return;
     }
     const availableQuantity = parseInt(this.quantityInput.data('availableQuantity'), 10);
-    this.shipmentQtyCounter.textContent = `(${total} / ${availableQuantity})`;
-    this.shipmentQtyCounter.classList.toggle('text-danger', total > availableQuantity);
-    this.shipmentQtyCounter.classList.toggle('text-muted', total >= 0 && total <= availableQuantity);
+    const previousQuantity = parseInt(this.quantityInput.data('previousQuantity'), 10);
+    const maxQuantity = availableQuantity + previousQuantity;
+    this.shipmentQtyCounter.textContent = `(${total}/${maxQuantity})`;
+    this.shipmentQtyCounter.classList.toggle('text-danger', total > maxQuantity);
+    this.shipmentQtyCounter.classList.toggle('text-muted', total >= 0 && total <= maxQuantity);
   };
 
   updateTotal(): void {
@@ -402,12 +407,19 @@ export default class OrderProductEdit {
   }
 
   editProduct(orderId: number, orderDetailId: number): void {
-    const params = {
-      price_tax_incl: this.priceTaxIncludedInput?.val(),
-      price_tax_excl: this.priceTaxExcludedInput?.val(),
-      quantity: this.quantityInput.val(),
-      invoice: this.productEditInvoiceSelect?.val(),
+    const params: Record<string, string | {shipment_id: number; quantity: number}[]> = {
+      price_tax_incl: String(this.priceTaxIncludedInput?.val()),
+      price_tax_excl: String(this.priceTaxExcludedInput?.val()),
+      quantity: String(this.quantityInput.val()),
+      invoice: String(this.productEditInvoiceSelect?.val()),
     };
+
+    if (this.isMultishipmentIsEnabled && this.shipmentInputs.length > 0) {
+      params.shipmentProducts = this.shipmentInputs.map((input) => ({
+        shipment_id: Number(input.dataset.shipmentId),
+        quantity: Number(input.value),
+      }));
+    }
 
     $.ajax({
       url: this.router.generate('admin_orders_update_product', {
@@ -415,7 +427,8 @@ export default class OrderProductEdit {
         orderDetailId,
       }),
       method: 'POST',
-      data: params,
+      contentType: 'application/json',
+      data: JSON.stringify(params),
     }).then(
       () => {
         this.removeShipmentListeners();

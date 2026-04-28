@@ -10,7 +10,7 @@ namespace Tests\Unit\Core\Pricing\Debug;
 
 use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
-use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingHistoryDisplayer;
+use PrestaShop\PrestaShop\Core\Pricing\Debug\ProductPriceHistoryDisplayer;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPrice;
 use PrestaShop\PrestaShop\Core\Pricing\Product\TrackedProductPrice;
 use PrestaShop\PrestaShop\Core\Pricing\ValueObject\TaxablePrice;
@@ -20,7 +20,7 @@ class PricingHistoryDisplayerTest extends TestCase
 {
     public function testFormatNonTrackedDtoReturnsNoData(): void
     {
-        $displayer = new PricingHistoryDisplayer();
+        $displayer = new ProductPriceHistoryDisplayer();
         $productPrice = ProductPrice::create(1, 0);
 
         $this->assertSame('No tracking data available', $displayer->formatAsString($productPrice));
@@ -29,7 +29,7 @@ class PricingHistoryDisplayerTest extends TestCase
 
     public function testFormatTrackedDtoWithNoModifications(): void
     {
-        $displayer = new PricingHistoryDisplayer();
+        $displayer = new ProductPriceHistoryDisplayer();
         $productPrice = TrackedProductPrice::create(1, 0);
 
         $this->assertSame('No modifications recorded', $displayer->formatAsString($productPrice));
@@ -37,7 +37,7 @@ class PricingHistoryDisplayerTest extends TestCase
 
     public function testFormatTrackedDtoAsString(): void
     {
-        $displayer = new PricingHistoryDisplayer();
+        $displayer = new ProductPriceHistoryDisplayer();
         $productPrice = TrackedProductPrice::create(1, 0);
         $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 
@@ -50,7 +50,7 @@ class PricingHistoryDisplayerTest extends TestCase
 
     public function testFormatTrackedDtoAsArray(): void
     {
-        $displayer = new PricingHistoryDisplayer();
+        $displayer = new ProductPriceHistoryDisplayer();
         $productPrice = TrackedProductPrice::create(1, 0);
         $productPrice->setUnitPrice(TaxablePrice::fromTaxExcluded(new DecimalNumber('29.99'), TaxRate::zero()));
 

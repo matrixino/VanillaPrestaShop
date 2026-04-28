@@ -2,6 +2,9 @@ services:
   _defaults:
     public: false
 
+  PrestaShop\PrestaShop\Adapter\Order\Checkout\CheckoutProcessProviderResolver:
+    public: true
+
   PrestaShop\PrestaShop\Adapter\Order\Checkout\OnePageCheckoutAvailabilityChecker:
     arguments:
       - '@PrestaShop\PrestaShop\Adapter\Configuration'

@@ -132,9 +132,10 @@ describe('BO - Stocks - Movements : Filter by category, movement type, employee 
         expect(isAdvancedFiltersVisible).to.be.eq(true);
 
         const choices = await boStockMovementsPage.getAdvancedFiltersMovementTypeChoices(page);
-        expect(choices).to.be.length(2);
+        expect(choices).to.be.length(3);
         expect(choices).to.contains('None');
         expect(choices).to.contains('Employee Edition');
+        expect(choices).to.contains('Product return');
       });
     });
 
@@ -280,10 +281,11 @@ describe('BO - Stocks - Movements : Filter by category, movement type, employee 
         await boStockMovementsPage.setAdvancedFiltersVisible(page);
 
         const choices = await boStockMovementsPage.getAdvancedFiltersMovementTypeChoices(page);
-        expect(choices).to.be.length(3);
+        expect(choices).to.be.length(4);
         expect(choices).to.contains('None');
         expect(choices).to.contains('Employee Edition');
         expect(choices).to.contains('Customer Order');
+        expect(choices).to.contains('Product return');
       });
     });
 

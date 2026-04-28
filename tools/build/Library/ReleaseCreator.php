@@ -122,6 +122,13 @@ class ReleaseCreator
         '\.webpack$',
         'rector\.php',
         'phpstan(.*)?',
+        '\.header-stamp.*',
+        // Filter AI tools (MD files are alredy filtered via a generic rule above)
+        '\.ai.*',
+        '\.claude.*',
+        '\.cursor.*',
+        '\.windsurf.*',
+        '\.github.*',
     ];
 
     /**

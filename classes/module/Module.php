@@ -416,19 +416,23 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Check for override conflicts
-        $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
-        if (!$moduleOverrideChecker) {
-            $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
-        }
-        if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
-            $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+            $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
+            if (!$moduleOverrideChecker) {
+                $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
+            }
+            if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
+                $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
 
-            return false;
+                return false;
+            }
         }
 
         if (!$this->installControllers()) {
             $this->_errors[] = Context::getContext()->getTranslator()->trans('Could not install module controllers.', [], 'Admin.Modules.Notification');
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -444,7 +448,9 @@ abstract class ModuleCore implements ModuleInterface
             if (method_exists($this, 'uninstallTabs')) {
                 $this->uninstallTabs();
             }
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -903,7 +909,7 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Uninstall all overrides this module may have used
-        if (!$this->uninstallOverrides()) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && !$this->uninstallOverrides()) {
             return false;
         }
 
@@ -1031,8 +1037,7 @@ abstract class ModuleCore implements ModuleInterface
         if (!$moduleOverrideChecker) {
             $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
         }
-
-        if ($this->getOverrides() != null) {
+        if ($this->getOverrides() != null && !Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
             if (!$moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
                 // Install overrides
                 try {
@@ -1170,7 +1175,7 @@ abstract class ModuleCore implements ModuleInterface
         Hook::exec('actionModuleDisable', ['module' => $this]);
 
         $result = true;
-        if ($this->getOverrides() != null) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && $this->getOverrides() != null) {
             $result &= $this->uninstallOverrides();
         }
 

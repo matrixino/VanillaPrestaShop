@@ -1231,6 +1231,48 @@ class LinkCore
     }
 
     /**
+     * Create a link to an Attachmnt download.
+     *
+     * @param Attachment|int $attachment Attachment object
+     * @param string|null $alias
+     * @param bool|null $ssl
+     * @param int|null $idLang
+     * @param int|null $idShop
+     * @param bool $relativeProtocol
+     *
+     * @return string
+     */
+    public function getAttachmentLink(
+        $attachment,
+        $alias = null,
+        $ssl = null,
+        $idLang = null,
+        $idShop = null,
+        $relativeProtocol = false
+    ) {
+        if (!$idLang) {
+            $idLang = Context::getContext()->language->id;
+        }
+
+        $url = $this->getBaseLink($idShop, $ssl, $relativeProtocol) . $this->getLangLink($idLang, null, $idShop);
+
+        $dispatcher = Dispatcher::getInstance();
+        if (!is_object($attachment)) {
+            if ($alias !== null && !$dispatcher->hasKeyword('attachment_rule', $idLang, 'meta_title', $idShop)) {
+                return $url . $dispatcher->createUrl('attachment_rule', $idLang, ['id' => (int) $attachment, 'rewrite' => (string) $alias], $this->allow, '', $idShop);
+            }
+            $attachment = new Attachment($attachment, $idLang);
+        }
+
+        // Set available keywords
+        $params = [];
+        $params['id'] = $attachment->id;
+        $params['rewrite'] = Tools::str2url((!$alias) ? (is_array($attachment->file_name) ? $attachment->file_name[(int) $idLang] : $attachment->file_name) : $alias);
+
+        return $url . $dispatcher->createUrl('attachment_rule', $idLang, $params, $this->allow, '', $idShop);
+    }
+
+    /**
      * @param string $url
      * @param int $p
      *
@@ -1586,6 +1628,18 @@ class LinkCore
                     $params['name'],
                     $params['controller'],
                     $params['params'],
+                    $params['ssl'],
+                    $params['id_lang'],
+                    $params['id_shop'],
+                    $params['relative_protocol']
+                );
+
+                break;
+
+            case 'attachment':
+                $link = $context->link->getAttachmentLink(
+                    new Attachment(isset($params['id']) ? $params['id'] : $params['params']['id_attachment'], $params['id_lang']),
+                    $params['alias'],
                     $params['ssl'],
                     $params['id_lang'],
                     $params['id_shop'],

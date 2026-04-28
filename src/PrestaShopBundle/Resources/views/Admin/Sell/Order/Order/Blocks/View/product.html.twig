@@ -137,7 +137,7 @@
               {{ '(Max %amount_refundable% %tax_method%)'|trans({
                 '%amount_refundable%': product.amountRefundable,
                 '%tax_method%': orderForViewing.taxMethod
-              }, 'Admin.Orderscustomers.Help')|raw }}
+              }, 'Admin.Orderscustomers.Help')|raw_purified }}.
             </small>
           </div>
         </div>

@@ -3,11 +3,11 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  *}
 <!DOCTYPE html>
-<!--[if lt IE 7]> <html lang="{$iso}" class="no-js lt-ie9 lt-ie8 lt-ie7 lt-ie6"> <![endif]-->
-<!--[if IE 7]>    <html lang="{$iso}" class="no-js lt-ie9 lt-ie8 ie7"> <![endif]-->
-<!--[if IE 8]>    <html lang="{$iso}" class="no-js lt-ie9 ie8"> <![endif]-->
-<!--[if gt IE 8]> <html lang="{$iso}" class="no-js ie9"> <![endif]-->
-<html lang="{$iso}">
+<!--[if lt IE 7]> <html lang="{$iso|escape:'html':'UTF-8'}" class="no-js lt-ie9 lt-ie8 lt-ie7 lt-ie6"> <![endif]-->
+<!--[if IE 7]>    <html lang="{$iso|escape:'html':'UTF-8'}" class="no-js lt-ie9 lt-ie8 ie7"> <![endif]-->
+<!--[if IE 8]>    <html lang="{$iso|escape:'html':'UTF-8'}" class="no-js lt-ie9 ie8"> <![endif]-->
+<!--[if gt IE 8]> <html lang="{$iso|escape:'html':'UTF-8'}" class="no-js ie9"> <![endif]-->
+<html lang="{$iso|escape:'html':'UTF-8'}">
 <head>
   <meta charset="utf-8">
 
@@ -17,15 +17,15 @@
   <link rel="apple-touch-icon" href="{$img_dir}app_icon.png" />
 
   <meta name="robots" content="NOFOLLOW, NOINDEX">
-  <title>{if $meta_title != ''}{$meta_title} • {/if}{$shop_name}</title>
+  <title>{if $meta_title != ''}{$meta_title|escape:'html':'UTF-8'} • {/if}{$shop_name|escape:'html':'UTF-8'}</title>
   {if !isset($display_header_javascript) || $display_header_javascript}
   <script type="text/javascript">
     var help_class_name = '{$controller_name|@addcslashes:'\''}';
-    var iso_user = '{$iso_user|@addcslashes:'\''}';
+    var iso_user = '{$iso_user|escape:'javascript'|@addcslashes:'\''}';
     var lang_is_rtl = '{$lang_is_rtl|intval}';
-    var full_language_code = '{$full_language_code|@addcslashes:'\''}';
+    var full_language_code = '{$full_language_code|escape:'javascript'|@addcslashes:'\''}';
     var full_cldr_language_code = '{$full_cldr_language_code|@addcslashes:'\''}';
-    var country_iso_code = '{$country_iso_code|@addcslashes:'\''}';
+    var country_iso_code = '{$country_iso_code|escape:'javascript'|@addcslashes:'\''}';
     var _PS_VERSION_ = '{$smarty.const._PS_VERSION_|@addcslashes:'\''}';
     var roundMode = {$round_mode|intval};
 {if isset($shop_context)}
@@ -58,6 +58,7 @@
 		var default_language = '{$default_language|intval}';
 		var admin_notification_get_link = adminNotificationGetLink = '{$link->getAdminLink("AdminCommon")|addslashes}';
 		var admin_notification_push_link = adminNotificationPushLink ='{$link->getAdminLink("AdminCommon", true, ['route' => 'admin_common_notifications_ack'])|addslashes}';
+		var tab_modules_list = '{if isset($tab_modules_list) && $tab_modules_list}{$tab_modules_list|escape:'javascript'|addslashes}{/if}';
 		var update_success_msg = '{l|escape s='Successful update' js=1 d='Admin.Notifications.Success'}';
 		var search_product_msg = '{l|escape s='Search for a product' js=1 d='Admin.Orderscustomers.Feature'}';
 	</script>
@@ -84,16 +85,16 @@
   <!--
     // @todo: multishop color
     <style type="text/css">
-      div#header_infos, div#header_infos a#header_shopname, div#header_infos a#header_logout, div#header_infos a#header_foaccess {ldelim}color:{$brightness}{rdelim}
+      div#header_infos, div#header_infos a#header_shopname, div#header_infos a#header_logout, div#header_infos a#header_foaccess {ldelim}color:{$brightness|escape:'html':'UTF-8'}{rdelim}
     </style>
   -->
   {/if}
 </head>
 
 {if $display_header}
-<body class="lang-{$iso_user}{if $lang_is_rtl} lang-rtl{/if} ps_back-office{if $employee->bo_menu} page-sidebar{if $collapse_menu} page-sidebar-closed{/if}{else} page-topbar{/if} {$controller_name|escape|strtolower}{if !empty($debug_mode)} developer-mode{/if}"
-      {if isset($js_router_metadata.base_url)}data-base-url="{$js_router_metadata.base_url}"{/if}
-      {if isset($js_router_metadata.token)}data-token="{$js_router_metadata.token}"{/if}>
+<body class="lang-{$iso_user|escape:'html':'UTF-8'}{if $lang_is_rtl} lang-rtl{/if} ps_back-office{if $employee->bo_menu} page-sidebar{if $collapse_menu} page-sidebar-closed{/if}{else} page-topbar{/if} {$controller_name|escape|strtolower}{if !empty($debug_mode)} developer-mode{/if}"
+      {if isset($js_router_metadata.base_url)}data-base-url="{$js_router_metadata.base_url|escape:'html':'UTF-8'}"{/if}
+      {if isset($js_router_metadata.token)}data-token="{$js_router_metadata.token|escape:'html':'UTF-8'}"{/if}>
   {* begin  HEADER *}
   <header id="header" class="bootstrap">
     <nav id="header_infos" role="navigation">
@@ -115,10 +116,9 @@
             {if !empty($quick_access)}
               {foreach $quick_access as $quick}
                 <li class="quick-row-link{if $link->matchQuickLink({$quick.link})}{assign "matchQuickLink" $quick.id_quick_access} active{/if}">
-                  <a {if isset($quick.class)}class="{$quick.class}"{/if}
-                     href="{$quick.link|escape:'html':'UTF-8'}" {if $quick.new_window}target="_blank"{/if}
-                     data-item="{$quick.name}"
-                  >{$quick.name}</a>
+                  <a {if isset($quick.class)}class="{$quick.class|escape:'html':'UTF-8'}"{/if} href="{$quick.link|escape:'html':'UTF-8'}" {if $quick.new_window}target="_blank"{/if}>
+                    {$quick.name|escape:'html':'UTF-8'}
+                  </a>
                 </li>
               {/foreach}
             {/if}
@@ -126,7 +126,7 @@
             {if isset($matchQuickLink)}
               <li>
                 <a id="quick-remove-link" href="javascript:void(0);" class="ajax-quick-link" data-method="remove"
-                  data-quicklink-id="{$matchQuickLink}">
+                  data-quicklink-id="{$matchQuickLink|intval}">
                   <i class="material-icons">remove_circle</i>
                   {l|escape s='Remove from QuickAccess' d='Admin.Navigation.Header'}
                 </a>
@@ -157,7 +157,7 @@
             var method = $(this).data('method');
 
             if(method == 'add')
-              var name = prompt('{l|escape s='Please name this shortcut:' js=1 d='Admin.Navigation.Header'}', '{$quick_access_current_link_name.0|truncate:32}');
+              var name = prompt('{l|escape s='Please name this shortcut:' js=1 d='Admin.Navigation.Header'}', '{$quick_access_current_link_name.0|escape:"javascript"|truncate:32}}');
 
             if(method == 'add' && name || method == 'remove')
             {
@@ -169,7 +169,7 @@
                 data: {
                   "url": "{$link->getQuickLink($smarty.server['REQUEST_URI']|escape:'javascript')}",
                   "name": name,
-                  "icon": "{$quick_access_current_link_icon}"
+                  "icon": "{$quick_access_current_link_icon|escape:'javascript'}"
                 },
                 dataType: "json",
                 success: function(data) {
@@ -240,7 +240,7 @@
              data-toggle="tooltip"
              data-placement="bottom"
              data-html="true"
-             title="{$smarty.capture.title|htmlspecialchars}"
+             title="{$smarty.capture.title|escape:'html':'UTF-8'}"
           >
             <i class="material-icons">build</i>
             <span>{l|escape s='Maintenance mode' d='Admin.Navigation.Header'}</span>
@@ -324,7 +324,7 @@
                     <div class="tab-pane {$active} empty" id="customers-notifications" role="tabpanel">
                       <p class="no-notification">
                         {l|escape s='No new customer for now :(' d='Admin.Navigation.Notification'}<br>
-                        {$no_customer_tip}
+                        {$no_customer_tip|escape:'html':'UTF-8'}
                       </p>
                       <div class="notification-elements"></div>
                     </div>
@@ -334,7 +334,7 @@
                     <div class="tab-pane {$active} empty" id="messages-notifications" role="tabpanel">
                       <p class="no-notification">
                         {l|escape s='No new message for now.' d='Admin.Navigation.Notification'}<br>
-                        {$no_customer_message_tip}
+                        {$no_customer_message_tip|escape:'html':'UTF-8'}
                       </p>
                       <div class="notification-elements"></div>
                     </div>
@@ -359,7 +359,7 @@
           <ul id="employee_links" class="dropdown-menu dropdown-menu-right">
             <li class="employee-wrapper-avatar" data-mobile="true" data-from="employee_links" data-target="menu">
               <span class="employee_avatar">
-                <img class="imgm img-thumbnail" alt="" src="{$employee->getImage()}" width="60" height="60" />
+                <img class="imgm img-thumbnail" alt="" src="{$employee->getImage()|escape:'html':'UTF-8'}" width="60" height="60" />
               </span>
             </li>
             <li class="text-left text-nowrap username" data-mobile="true" data-from="employee_links" data-target="menu">{l|escape s='Welcome back %name%' sprintf=['%name%' => $employee->firstname] d='Admin.Navigation.Header'}</li>
@@ -368,9 +368,9 @@
 
             {foreach from=$displayBackOfficeEmployeeMenu item=$menuItem}
               {assign var=menuItemProperties value=$menuItem->getProperties()}
-              <li class="{$menuItem->getClass()}">
-                <a class="dropdown-item" href="{$menuItemProperties.link}" {if !isset($menuItemProperties.isExternalLink) || true === $menuItemProperties.isExternalLink} target="_blank"{/if} rel="noopener noreferrer nofollow">
-                  {if isset($menuItemProperties.icon)}<i class="material-icons">{$menuItemProperties.icon}</i> {/if}{$menuItem->getContent()}
+              <li class="{$menuItem->getClass()|escape:'html':'UTF-8'}">
+                <a class="dropdown-item" href="{$menuItemProperties.link|escape:'html':'UTF-8'}" {if !isset($menuItemProperties.isExternalLink) || true === $menuItemProperties.isExternalLink} target="_blank"{/if} rel="noopener noreferrer nofollow">
+                  {if isset($menuItemProperties.icon)}<i class="material-icons">{$menuItemProperties.icon|escape:'html':'UTF-8'}</i> {/if}{$menuItem->getContent()}
                 </a>
               </li>
               {if $menuItem@last}
