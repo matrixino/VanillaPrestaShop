@@ -278,6 +278,10 @@ services:
     autowire: true
     public: false
 
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\EditShipmentFormDataProvider:
+    autowire: true
+    public: false
+
   PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\SplitShipmentFormDataProvider:
     autowire: true
     public: false

@@ -124,6 +124,23 @@ class CheckoutProcessCore implements RenderableInterface
     }
 
     /**
+     * @return array
+     */
+    public function getCheckoutStepsForTemplate()
+    {
+        return array_map(function (CheckoutStepInterface $step) {
+            return [
+                'identifier' => $step->getIdentifier(),
+                'title' => $step->getTitle(),
+                'is_reachable' => $step->isReachable(),
+                'is_complete' => $step->isComplete(),
+                'is_current' => $step->isCurrent(),
+                'ui' => new RenderableProxy($step),
+            ];
+        }, $this->getSteps());
+    }
+
+    /**
      * @param array $extraParams
      *
      * @return string
@@ -137,12 +154,7 @@ class CheckoutProcessCore implements RenderableInterface
         );
 
         $params = [
-            'steps' => array_map(function (CheckoutStepInterface $step) {
-                return [
-                    'identifier' => $step->getIdentifier(),
-                    'ui' => new RenderableProxy($step),
-                ];
-            }, $this->getSteps()),
+            'steps' => $this->getCheckoutStepsForTemplate(),
         ];
 
         $scope->assign(array_merge($extraParams, $params));

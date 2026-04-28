@@ -11,6 +11,9 @@ namespace Tests\Integration\Behaviour\Features\Context\Domain\Pricing;
 use Behat\Gherkin\Node\TableNode;
 use PHPUnit\Framework\Assert;
 use PrestaShop\Decimal\DecimalNumber;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Calculator\CartCalculator;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\CartPrice;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\CartPriceInterface;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPrice;
 use PrestaShop\PrestaShop\Core\Pricing\Product\ProductPriceInterface;
@@ -88,8 +91,48 @@ class PricingFeatureContext extends AbstractDomainFeatureContext
         }
     }
 
+    /**
+     * @When I compute the cart price for cart :cartReference I should get:
+     */
+    public function iComputeCartPriceAndAssert(string $cartReference, TableNode $table): void
+    {
+        $cartId = (int) $this->getSharedStorage()->get($cartReference);
+        $cartPrice = CartPrice::create($cartId);
+
+        $this->getCartCalculator()->compute($cartPrice);
+        $this->assertCartPrice($cartPrice, $table);
+    }
+
+    protected function assertCartPrice(CartPriceInterface $cartPrice, TableNode $table): void
+    {
+        $data = $table->getRowsHash();
+
+        if (isset($data['product_count'])) {
+            Assert::assertCount(
+                (int) $data['product_count'],
+                $cartPrice->getProductPrices(),
+                sprintf(
+                    'Expected %d products, got %d',
+                    (int) $data['product_count'],
+                    count($cartPrice->getProductPrices())
+                )
+            );
+        }
+
+        $this->assertPriceField($cartPrice->getProductTotal(), 'product_total', $data);
+        $this->assertPriceField($cartPrice->getShippingTotal(), 'shipping_total', $data);
+        $this->assertPriceField($cartPrice->getWrappingTotal(), 'wrapping_total', $data);
+        $this->assertPriceField($cartPrice->getDiscountTotal(), 'discount_total', $data);
+        $this->assertPriceField($cartPrice->getCartTotal(), 'cart_total', $data);
+    }
+
     protected function getCartProductCalculator(): ProductCalculator
     {
         return $this->getContainer()->get('prestashop.pricing.cart.product_calculator');
+    }
+
+    protected function getCartCalculator(): CartCalculator
+    {
+        return $this->getContainer()->get('prestashop.pricing.cart.cart_calculator');
     }
 }

@@ -112,6 +112,14 @@ class DispatcherCore
                 'tags' => ['regexp' => '[a-zA-Z0-9-\pL]*'],
             ],
         ],
+        'attachment_rule' => [
+            'controller' => 'attachment',
+            'rule' => 'attachment/{id}-{rewrite}',
+            'keywords' => [
+                'id' => ['regexp' => '[0-9]+', 'param' => 'id_attachment'],
+                'rewrite' => ['regexp' => self::REWRITE_PATTERN],
+            ],
+        ],
     ];
 
     /**

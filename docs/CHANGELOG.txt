@@ -24,6 +24,18 @@ needs please refer to https://devdocs.prestashop.com/ for more information.
 Changelog for PrestaShop 9
 
 ####################################
+#   v9.1.0 - (2026-03-13)
+####################################
+
+- Back Office:
+  - Improvement:
+    - GHSA-35pf-37c6-jxjv Prevent xss exploitation via unprotected variables in template
+    - GHSA-283w-xf3q-788v Fix improper use of validation framework
+  - Bug fix:
+    - #40888: Add ShopContext and LanguageContext to FeatureAttributeRepository
+    - #40923: Dynamize docker names when using docker exec in CI
+
+####################################
 #   v9.1.0 RC 1 - (2026-02-19)
 ####################################
 

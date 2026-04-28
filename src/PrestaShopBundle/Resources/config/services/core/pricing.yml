@@ -41,6 +41,27 @@ services:
     arguments:
       $calculators: !tagged_iterator { tag: 'prestashop.pricing.order.product_calculator' }
 
+  # Cart product provider
+  PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\DatabaseCartProductProvider:
+    arguments:
+      $dbPrefix: '%database_prefix%'
+  PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\CartProductProviderInterface:
+    alias: PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\DatabaseCartProductProvider
+
+  # Cart calculators
+  PrestaShop\PrestaShop\Core\Pricing\Cart\Calculator\ProductTotalCalculator:
+    arguments:
+      $cartProductProvider: '@PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\CartProductProviderInterface'
+      $productCalculator: '@prestashop.pricing.cart.product_calculator'
+    tags: [ { name: 'prestashop.pricing.cart.cart_calculator', priority: 100 } ]
+
+  # Cart calculator (orchestrator)
+  prestashop.pricing.cart.cart_calculator:
+    class: PrestaShop\PrestaShop\Core\Pricing\Cart\Calculator\CartCalculator
+    arguments:
+      $calculators: !tagged_iterator { tag: 'prestashop.pricing.cart.cart_calculator' }
+
   # Debug
   PrestaShop\PrestaShop\Core\Pricing\Debug\PricingRegistry: ~
-  PrestaShop\PrestaShop\Core\Pricing\Debug\PricingHistoryDisplayer: ~
+  PrestaShop\PrestaShop\Core\Pricing\Debug\ProductPriceHistoryDisplayer: ~
+  PrestaShop\PrestaShop\Core\Pricing\Debug\CartPriceHistoryDisplayer: ~

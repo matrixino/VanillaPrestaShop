@@ -317,7 +317,7 @@ class DatabaseDump
      */
     private function getTableChecksum(string $table): string
     {
-        $checksum = $this->db->executeS(sprintf('CHECKSUM TABLE %s;', $table));
+        $checksum = $this->db->executeS(sprintf('CHECKSUM TABLE `%s`;', $table));
         $checksum = $checksum[0]['Checksum'];
 
         // The content only is not enough we must make sure that the auto increment index is the same

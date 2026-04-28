@@ -39,11 +39,6 @@ class BusinessEntity
     private int $id;
 
     /**
-     * @ORM\Column(name="enterprise_id", type="string", length=255)
-     */
-    private string $enterpriseId;
-
-    /**
      * @ORM\Column(name="external_ref", type="string", length=255, nullable=true)
      */
     private ?string $externalRef;
@@ -111,18 +106,6 @@ class BusinessEntity
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getEnterpriseId(): string
-    {
-        return $this->enterpriseId;
-    }
-
-    public function setEnterpriseId(string $enterpriseId): self
-    {
-        $this->enterpriseId = $enterpriseId;
-
-        return $this;
     }
 
     public function getExternalRef(): ?string

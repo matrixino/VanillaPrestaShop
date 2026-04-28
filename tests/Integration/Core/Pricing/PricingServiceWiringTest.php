@@ -8,8 +8,12 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Core\Pricing;
 
-use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingHistoryDisplayer;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Calculator\CartCalculator;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\CartProductProviderInterface;
+use PrestaShop\PrestaShop\Core\Pricing\Cart\Provider\DatabaseCartProductProvider;
+use PrestaShop\PrestaShop\Core\Pricing\Debug\CartPriceHistoryDisplayer;
 use PrestaShop\PrestaShop\Core\Pricing\Debug\PricingRegistry;
+use PrestaShop\PrestaShop\Core\Pricing\Debug\ProductPriceHistoryDisplayer;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Calculator\ProductCalculator;
 use PrestaShop\PrestaShop\Core\Pricing\Product\Provider\CatalogProductProvider;
 use PrestaShop\PrestaShop\Core\Pricing\Rounding\RoundingService;
@@ -60,9 +64,33 @@ class PricingServiceWiringTest extends KernelTestCase
         $this->assertInstanceOf(PricingRegistry::class, $registry);
     }
 
-    public function testPricingHistoryDisplayerIsRegistered(): void
+    public function testDatabaseCartProductProviderIsRegistered(): void
     {
-        $displayer = self::getContainer()->get(PricingHistoryDisplayer::class);
-        $this->assertInstanceOf(PricingHistoryDisplayer::class, $displayer);
+        $service = self::getContainer()->get(DatabaseCartProductProvider::class);
+        $this->assertInstanceOf(DatabaseCartProductProvider::class, $service);
+    }
+
+    public function testCartProductProviderInterfaceAlias(): void
+    {
+        $service = self::getContainer()->get(CartProductProviderInterface::class);
+        $this->assertInstanceOf(DatabaseCartProductProvider::class, $service);
+    }
+
+    public function testCartCalculatorIsRegistered(): void
+    {
+        $calculator = self::getContainer()->get('prestashop.pricing.cart.cart_calculator');
+        $this->assertInstanceOf(CartCalculator::class, $calculator);
+    }
+
+    public function testProductPriceHistoryDisplayerIsRegistered(): void
+    {
+        $displayer = self::getContainer()->get(ProductPriceHistoryDisplayer::class);
+        $this->assertInstanceOf(ProductPriceHistoryDisplayer::class, $displayer);
+    }
+
+    public function testCartPriceHistoryDisplayerIsRegistered(): void
+    {
+        $displayer = self::getContainer()->get(CartPriceHistoryDisplayer::class);
+        $this->assertInstanceOf(CartPriceHistoryDisplayer::class, $displayer);
     }
 }
