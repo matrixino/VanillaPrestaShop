@@ -32,8 +32,30 @@ Infrastructure for building, populating, and handling back-office forms tied to 
 - `src/Core/Form/IdentifiableObject/DataHandler/ProductFormDataHandler.php` — complex handler delegating to CommandBuilders (advanced use case)
 - `src/PrestaShopBundle/Form/Admin/Configure/AdvancedParameters/Security/FormDataProvider.php` — settings page data provider
 
-## Related
+## Conventions
 
-- [CQRS Component](../CQRS/CONTEXT.md) — `FormDataHandler` implementations dispatch commands via `CommandBus`
-- [Grid Component](../Grid/CONTEXT.md) — filter forms for grids use `FormChoiceProviderInterface`
-- [Product Domain](../../Domain/Product/CONTEXT.md) — heaviest consumer; 16 CommandBuilders + dedicated DataHandler/DataProvider/OptionsProvider
+- **Default form base class:** standard entity forms extend `TranslatorAwareType` or `AbstractType`. `NavigationTabType` is only for complex multi-tab forms (exception, not the default)
+- **Form types define structure only** — no knowledge of commands/queries. Validation via Symfony constraints on fields
+- **IdentifiableObject pattern:** entity forms use `FormDataProviderInterface` (reads data for edit) + `FormDataHandlerInterface` (dispatches commands on create/update). These are encapsulated by two framework services:
+  - `FormBuilder` (`PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder`) — builds the Symfony form. For edit, calls `DataProvider::getData($id)` to pre-fill. For create, calls `DataProvider::getDefaultData()`. The controller calls `$this->getFormBuilder()->getForm(...)`
+  - `FormHandler` (`PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandler`) — handles form submission. Validates the form, then calls `DataHandler::create()` or `DataHandler::update()`. The controller calls `$this->getFormHandler()->handle($form)`
+  - The controller never calls DataProvider or DataHandler directly — it goes through FormBuilder and FormHandler
+- **DataProvider contract:** `getData($id): array` dispatches the Get query and maps DTO to form array structure. `getDefaultData(): array` returns defaults for create form — must match the same structure as `getData()`
+- **DataHandler contract:** `create(array $data): mixed` builds Add command from form data and dispatches via command bus, returns new ID. `update($id, array $data): void` builds Edit command with setters for non-null fields. Sub-resource commands are dispatched separately after the main command
+- **Multilingual fields:** use `TranslatableType` wrapping the inner field type (including `TextareaType` and `FormattedTextareaType` for multilingual textareas). Data is an array keyed by language ID
+- **File uploads:** use `FileType` with `'mapped' => false, 'required' => false`. Actual file saving happens in the DataHandler, not the form type. The edit template renders the existing file via a custom Twig block
+- **Money / decimal fields:** PrestaShop stores prices with 6 decimal places. Always set explicit decimal scale. Use `DecimalNumber` in commands — never native `float`
+- **Choice providers:** dynamic select options use `ChoiceProviderInterface` services injected into form types. Keys are labels, values are DB IDs
+- **Service registration:** form types tagged with `form.type`, DataProvider/DataHandler registered with `autowire: true` and `autoconfigure: true`. Service IDs follow `prestashop.core.form.identifiable_object.data_provider.{domain}_form_data_provider` (and `data_handler` equivalently)
+- **Sub-resource dispatch order:** in `DataHandler::create()`/`update()`, dispatch the main entity command first, then sub-resource commands separately
+- **Tab anchor IDs:** when using `NavigationTabType`, tab anchor IDs are derived from tab names and used by JS for error-driven tab navigation
+- **Error handling:** server-side validation via Symfony constraints is the source of truth. JS tab error navigation is enhancement only
+
+## Skills
+
+| Skill | Trigger |
+|-------|---------|
+| [`create-form-type`](skills/create-form-type/SKILL.md) | "create form type for {Domain}" |
+| [`create-form-tab-layout`](skills/create-form-tab-layout/SKILL.md) | "create tab layout for {Domain} form" |
+| [`create-form-data-handling`](skills/create-form-data-handling/SKILL.md) | "create form data handling for {Domain}" |
+

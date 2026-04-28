@@ -78,6 +78,34 @@ surprising abstractions, delegation chains, legacy gotchas, cross-domain flows]
 
 **What NOT to include:** class name inventories (commands, queries, exceptions, handlers, value objects). These can always be found by grepping or globbing — listing them wastes context tokens without adding value.
 
+### SKILL.md project conventions
+
+`SKILL.md` files in this project follow two PrestaShop-specific conventions on top of the standard skill format.
+
+#### Description rule
+
+Skill descriptions must front-load **what the skill does + trigger phrases** — nothing else. They are short and shown in skill listings, so every word counts. In particular:
+
+- **Do not write "Read Component/X/CONTEXT.md for conventions" in the description.** That instruction belongs in the skill body. Repeating it in the description wastes characters and is redundant for any tool that reads the body.
+- The body of every skill that depends on a component context already starts with `Read @.ai/Component/{Component}/CONTEXT.md for ...` — that is the canonical location.
+
+#### Custom frontmatter fields (`needs`, `produces`, `conditional`, `subagent`)
+
+These fields are **a PrestaShop project convention**, not part of any official skill specification. Claude Code reads frontmatter as plain text and does not interpret these fields as semantic metadata, but they remain visible to AI agents and human readers and they document the skill's place in larger workflows.
+
+| Field | Purpose |
+|-------|---------|
+| `needs` | List of skill names this skill logically depends on (prerequisites). Use **skill names**, not opaque IDs or step numbers. Empty list `[]` = no dependencies. |
+| `produces` | A short string describing the artifact(s) the skill creates — useful when chaining skills in an orchestrator. |
+| `conditional` | When to skip the skill entirely. Example: `"only if the grid has bulk actions"`. |
+| `subagent` | Declares the skill is well-suited to **sub-agent delegation** when the parent agent supports the primitive (e.g. Claude Code). Values: `recommended` or `optional`. Tool-neutral — non-Claude tools ignore the field and run the skill in-line. |
+
+**Top-down rule:** dependencies are declared **top-down only**. A skill states what it needs; it never declares what needs it. This keeps each skill standalone — it does not know who calls it.
+
+**Standalone rule:** every skill must remain usable independently of any workflow. `needs` documents a logical prerequisite ("you should have a repository before implementing handlers"), not a hard runtime dependency. An orchestrator skill (e.g. [`legacy-to-symfony-migration`](Component/Migration/skills/legacy-to-symfony-migration/SKILL.md)) is responsible for ordering — individual skills just need to be invocable on their own.
+
+**`subagent` semantics.** Sub-agents pay off when input is large, output is structured/small, and the small output is enough for downstream work — i.e. the skill produces a written artifact at a known path. Use `recommended` for read-heavy skills with high payoff (typically audits and context generators); use `optional` for moderate, file-output mechanical work where delegation works but the gain is modest. Like `conditional`, **absence is the default** — the skill runs in-line in the parent context. Orchestrator skills also leave the field absent: they are themselves the parent of any spawned sub-agents.
+
 ### Writing guidelines
 
 - **Be concise** — use bullet points and tables, not paragraphs. AI parses structured content more reliably.

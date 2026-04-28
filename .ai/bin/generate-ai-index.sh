@@ -5,14 +5,17 @@
 # Output: cqrs.md, routes.md, entities.md, hooks.md
 #
 # Usage:
-#   bash bin/generate-ai-index.sh
-#   bash bin/generate-ai-index.sh --output .ai/generated
+#   bash .ai/bin/generate-ai-index.sh
+#   bash .ai/bin/generate-ai-index.sh --output .ai/generated
 #
 # Design: pure grep/awk/sed — no runtime dependencies beyond bash + coreutils.
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Force C locale for deterministic sort order across macOS and Linux
+export LC_ALL=C
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUTPUT_DIR="${REPO_ROOT}/.ai/generated"
 TODAY=$(date +%Y-%m-%d)
 
@@ -250,8 +253,9 @@ generate_entities() {
         columns=$(awk '
             /@ORM\\Column|#\[ORM\\Column/ { in_col=1 }
             in_col && /^[[:space:]]+(private|protected|public)[[:space:]]/ {
-                match($0, /\$([a-zA-Z_][a-zA-Z0-9_]*)/, arr)
-                if (arr[1] != "") printf "%s ", arr[1]
+                if (match($0, /\$[a-zA-Z_][a-zA-Z0-9_]*/)) {
+                    printf "%s ", substr($0, RSTART+1, RLENGTH-1)
+                }
                 in_col=0
             }
         ' "$f")
@@ -262,13 +266,19 @@ generate_entities() {
             /@ORM\\(ManyToOne|OneToMany|ManyToMany|OneToOne)|#\[ORM\\(ManyToOne|OneToMany|ManyToMany|OneToOne)/ {
                 rel_type = $0
                 sub(/.*ORM\\/, "", rel_type); sub(/[\(\[].*/, "", rel_type)
-                # extract targetEntity
+                # extract targetEntity value
                 target = $0
-                if (match(target, /targetEntity[=:][ \t]*["\x27]?([A-Za-z\\]+)["\x27]?/, arr)) {
-                    t = arr[1]; sub(/.*\\/, "", t)
-                    printf "%s→%s ", rel_type, t
-                } else if (match(target, /targetEntity[=:][ \t]*([A-Za-z][A-Za-z0-9_]+)::class/, arr)) {
-                    printf "%s→%s ", rel_type, arr[1]
+                if (match(target, /targetEntity[=:][ \t]*/)) {
+                    val = substr(target, RSTART + RLENGTH)
+                    # strip leading quotes
+                    gsub(/^["'"'"']/, "", val)
+                    # take until non-identifier char (allow backslash for FQCN)
+                    if (match(val, /[A-Za-z\\][A-Za-z0-9_\\]*/)) {
+                        t = substr(val, RSTART, RLENGTH)
+                        sub(/.*\\/, "", t)
+                        sub(/::class$/, "", t)
+                        printf "%s→%s ", rel_type, t
+                    }
                 }
             }
         ' "$f")
@@ -291,11 +301,12 @@ generate_hooks() {
 
     # Extract literal hook names passed to dispatch* methods
     # Pattern: dispatchWithParameters('hookName', ...) or dispatchWithParameters("hookName", ...)
+    # Uses sed instead of grep -P for macOS/Linux portability
     local all_hooks
-    all_hooks=$(grep -rh \
-        "dispatchWithParameters\|dispatchRenderingWithParameters\|dispatchHook\b\|dispatchRendering\b" \
+    all_hooks=$(grep -rh -E \
+        "dispatchWithParameters|dispatchRenderingWithParameters|dispatchHook[^a-zA-Z]|dispatchRendering[^a-zA-Z]" \
         "$src_dir" --include="*.php" 2>/dev/null \
-        | grep -oP "(?<=\(')[a-zA-Z][a-zA-Z0-9_]+(?=')|(?<=\")[a-zA-Z][a-zA-Z0-9_]+(?=\")" \
+        | sed -n "s/.*(['\"][[:space:]]*\([a-zA-Z][a-zA-Z0-9_]*\)['\"].*/\1/p" \
         | grep -E "^(action|display|filter|header|footer|Dashboard|leftColumn|rightColumn)" \
         | grep -E "^.{8,}" \
         | sort -u || true)
@@ -303,10 +314,10 @@ generate_hooks() {
     # Also check classes/ legacy dir
     local legacy_hooks=""
     if [[ -d "$REPO_ROOT/classes" ]]; then
-        legacy_hooks=$(grep -rh \
-            "Hook::exec\b\|Hook::execWithoutCache\b" \
+        legacy_hooks=$(grep -rh -E \
+            "Hook::exec[^a-zA-Z]|Hook::execWithoutCache[^a-zA-Z]" \
             "$REPO_ROOT/classes" --include="*.php" 2>/dev/null \
-            | grep -oP "(?<=\(')[a-zA-Z][a-zA-Z0-9_]+(?=')|(?<=\")[a-zA-Z][a-zA-Z0-9_]+(?=\")" \
+            | sed -n "s/.*(['\"][[:space:]]*\([a-zA-Z][a-zA-Z0-9_]*\)['\"].*/\1/p" \
             | grep -E "^(action|display|filter|header|footer|Dashboard|leftColumn|rightColumn)" \
             | grep -E "^.{8,}" \
             | sort -u || true)
@@ -378,7 +389,7 @@ sync_skill_symlinks() {
             ln -s "$target" "$link"
             created=$((created + 1))
         fi
-    done < <(find "$REPO_ROOT/.ai" -name "SKILL.md" | sort)
+    done < <(find "$REPO_ROOT/.ai" -iname "skill.md" | sort)
 
     echo "  ✓ skill symlinks ($created created, $already already linked)"
 }

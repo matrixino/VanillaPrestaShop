@@ -6,6 +6,7 @@ description: >
   "fill in the CONTEXT.md for [Component]", or when working inside `.ai/Component/` directories.
   Components live under `src/Core/{Name}/` and/or `src/Adapter/{Name}/` — they are shared infrastructure,
   not business domains. Examples: Grid, Form, Hook, CQRS, Translation, Router.
+subagent: recommended
 ---
 
 # PrestaShop Component CONTEXT.md Generator
@@ -102,9 +103,23 @@ Pick 2–3 files: the main interface, the most-used implementation, and one doma
 
 List the contents of `.ai/skills/` and check if any skill targets this component. If one exists, include a `## Skills` section before `## Related` linking to it.
 
-### 7. Write Related
+### 7. Write Related (use sparingly)
 
-Links to other `.ai/Component/` or `.ai/Domain/` context files that are architecturally connected.
+Links to other `.ai/Component/` or `.ai/Domain/` context files — but **only when the relationship is non-obvious**.
+
+The whole point of splitting contexts into separate files is to avoid loading everything at once. Every cross-reference is a potential cascade: an AI agent reads component A, follows a link to component B, follows B's link to C... and ends up loading all contexts. This defeats the purpose of the split.
+
+**Include a link when:**
+- The relationship is architecturally surprising (e.g. PositionUpdater lives inside Grid's source tree)
+- Two components coexist during a migration and the coexistence has gotchas (e.g. Twig ↔ Smarty)
+
+**Do NOT include a link when:**
+- The relationship is obvious from imports (e.g. "Controller dispatches CQRS commands")
+- You're linking just to mention a hook name or a specific class — those are greppable
+- The link points to a domain just because that domain is a heavy consumer of the component
+- The link would create a bidirectional reference (A → B and B → A)
+
+When in doubt, omit the link. An agent can always find related contexts via the index in `.ai/CONTEXT.md`.
 
 ---
 
@@ -143,9 +158,7 @@ Infrastructure for rendering and managing back-office data tables: column defini
 
 ## Related
 
-- [CQRS Component](../CQRS/CONTEXT.md) — some grids dispatch queries via `QueryBus`
-- [Forms Component](../Forms/CONTEXT.md) — filter forms use `FormChoiceProviderInterface`
-- [Hook Component](../Hook/CONTEXT.md) — `action{GridId}GridDefinitionModifier` hook
+- [PositionUpdater Component](../PositionUpdater/CONTEXT.md) — drag-and-drop reordering sub-layer (lives inside Grid source tree)
 ```
 
 ---

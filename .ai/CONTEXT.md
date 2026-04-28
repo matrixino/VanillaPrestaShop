@@ -79,9 +79,9 @@ Domains: Address, Alias, ApiClient, Attachment, AttributeGroup, Carrier, Cart, C
 
 ## Component contexts
 
-All 23 shared infrastructure components have a context file at `Component/{ComponentName}/CONTEXT.md`.
+All 26 shared infrastructure components have a context file at `Component/{ComponentName}/CONTEXT.md`.
 
-Components: BackOfficeHelp, Configuration, Console, Context, ContextStateManager, Cookie, CQRS, Database, Export, FacetedSearch, Forms, GlobalJS, Grid, Hook, Import, Link, Locale, MailTemplate, PositionUpdater, Router, Smarty, TinyMCE, Twig
+Components: BackOfficeHelp, Behat, Configuration, Console, Context, ContextStateManager, Controller, Cookie, CQRS, Database, Export, FacetedSearch, Forms, Grid, Hook, Import, Javascript, Link, Locale, MailTemplate, Migration, Playwright, PositionUpdater, Router, Smarty, TinyMCE, Twig
 
 ## Generated indexes
 
