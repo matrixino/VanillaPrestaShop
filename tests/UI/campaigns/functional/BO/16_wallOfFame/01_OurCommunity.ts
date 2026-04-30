@@ -48,13 +48,6 @@ describe('BO - Community - Wall of Fame', async () => {
     expect(pageTitle).to.contains(boWallOfFamePage.pageTitle);
   });
 
-  it('should check the page title', async function () {
-    await testContext.addContextItem(this, 'testIdentifier', 'checkPageTitle', baseContext);
-
-    const pageTitle = await boWallOfFamePage.getPageTitle(page);
-    expect(pageTitle).to.contains(boWallOfFamePage.pageTitle);
-  });
-
   it('should check that \'Contributions by PrestaShop\' percentage is greater than 0', async function () {
     await testContext.addContextItem(this, 'testIdentifier', 'checkPSContributionPercent', baseContext);
 
@@ -69,13 +62,13 @@ describe('BO - Community - Wall of Fame', async () => {
     expect(percentage, 'Community contribution percentage should be greater than 0').to.be.above(0);
   });
 
-  it('should check that the sum of all contributions equals 100% (±0.1)', async function () {
+  it('should check that the sum of all contributions equals 100%', async function () {
     await testContext.addContextItem(this, 'testIdentifier', 'checkTotalContributionIs100', baseContext);
 
     const psPercentage = await boWallOfFamePage.getContributionPercentage(page, 'PrestaShop');
     const communityPercentage = await boWallOfFamePage.getContributionPercentage(page, 'Community');
     const total = psPercentage + communityPercentage;
 
-    expect(total, 'Total contribution should equal 100% (±0.1)').to.be.closeTo(100, 0.1);
+    expect(total, 'Total contribution should equal 100%').to.equal(100);
   });
 });
