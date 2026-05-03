@@ -1,27 +1,7 @@
-{# **
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * #}
+{#
+ # For the full copyright and license information, please view the
+ # docs/licenses/LICENSE.txt file that was distributed with this source code.
+ #}
 
 {#
 # This form theme is an implementation of PrestaShop UI kit, it based on the bootstrap4 layout and overrides a few
@@ -129,8 +109,11 @@
 {% block form_disabling_switch %}
   {% set disablingSwitchName = disabling_switch_prefix ~ form.vars.name %}
   {% if attribute(form.parent, disablingSwitchName) is defined %}
-    {{ form_errors(attribute(form.parent, disablingSwitchName)) }}
-    {{ form_widget(attribute(form.parent, disablingSwitchName)) }}
+    <div class="d-inline-flex align-items-center ml-3">
+      {{ form_errors(attribute(form.parent, disablingSwitchName)) }}
+      {{ form_widget(attribute(form.parent, disablingSwitchName)) }}
+      {{ form_label(attribute(form.parent, disablingSwitchName)) }}
+    </div>
   {% endif %}
 {% endblock %}
 
@@ -180,7 +163,7 @@
     {% if required %}
       <span class="text-danger">*</span>
     {% endif %}
-    {{ translation_domain is same as(false) ? label|raw : label|raw }}
+    {{ translation_domain is same as(false) ? label|raw_purified : label|raw_purified }}
     {% if label_attr['tooltip'] is defined %}
       {% set placement = label_attr['tooltip_placement'] is defined ? label_attr['tooltip_placement'] : 'top' %}
       <i class="icon-question" data-toggle="pstooltip" data-placement="{{ placement }}"
@@ -192,7 +175,8 @@
       {% set placement = label_attr['popover_placement'] is defined ? label_attr['popover_placement'] : 'top' %}
       {{ include('@Common/HelpBox/helpbox.html.twig', {placement: placement, content: content}) }}
     {% endif %}
-    {{- block('form_disabling_switch') -}}
+
+      {{- block('form_disabling_switch') -}}
     </{{ labelTag }}>
   {%- endif -%}
   {% if label_subtitle is defined and label_subtitle is not empty %}
@@ -672,14 +656,14 @@
 
         <i class="form-check-round"></i>
 
-        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw : label|raw) -}}
+        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw_purified : label|raw_purified) -}}
       </label>
     {% else %}
       <div class="md-checkbox md-checkbox-inline">
         <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
         {{- widget|raw -}}
         <i class="md-checkbox-control"></i>
-        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw : label|raw) -}}
+        {{- label is not same as(false) ? (translation_domain is same as(false) ? label|raw_purified : label|raw_purified) -}}
         </label>
       </div>
     {% endif %}
@@ -1072,7 +1056,7 @@
         '[/1]': '</span>',
         '[2]': '<span>' ~ recommended_length,
         '[/2]': '</span>',
-      })|raw }}
+      })|raw_purified }}
     </em>
   </small>
 {% endblock %}
@@ -1155,7 +1139,7 @@
 {% block form_help %}
   {% if help is not null %}
     {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' form-text')|trim}) -%}
-      <small id="{{ id }}_help"{% with {attr: help_attr} %}{{ block('attributes') }}{% endwith %}>{{ help|raw }}</small>
+      <small id="{{ id }}_help"{% with {attr: help_attr} %}{{ block('attributes') }}{% endwith %}>{{ help|raw_purified }}</small>
   {% endif %}
   {% if warning is defined %}
     {{ warning }}
@@ -1184,9 +1168,9 @@
     <div class="small font-secondary form-external-link{% if external_link.align is same as('right') %} text-right{% endif %}">
       {# If placeholders are included in the text use it as is, else prepend and append them to the text #}
       {% if '[1]' in external_link.text and '[/1]' in external_link.text %}
-        {{ external_link.text|replace({'[1]': openingTag, '[/1]': '</a>'})|raw }}
+        {{ external_link.text|escape|replace({'[1]': openingTag, '[/1]': '</a>'})|raw_purified }}
       {% else %}
-        {{ ('[1]' ~ external_link.text ~ '[/1]')|replace({'[1]': openingTag, '[/1]': '</a>'})|raw }}
+        {{ ('[1]' ~ external_link.text|escape ~ '[/1]')|replace({'[1]': openingTag, '[/1]': '</a>'})|raw_purified }}
       {% endif %}
     </div>
   {% endif %}
@@ -1244,12 +1228,12 @@
     <div class="alert alert-{{ alert_type }}{% if alert_title is defined %} expandable-alert{% endif %}" role="alert">
     {% if alert_title is defined %}
       <p class="alert-text">
-        {{ alert_title|raw }}
+        {{ alert_title|raw_purified }}
       </p>
     {% else %}
       {% for message in alert_message %}
         <p class="alert-text">
-          {{ message|raw }}
+          {{ message|raw_purified }}
         </p>
       {% endfor %}
     {% endif %}
@@ -1259,13 +1243,13 @@
         {% if alert_message|length > 1 %}
           <ul class="p-0">
             {% for message in alert_message %}
-              <li>{{ message|raw }}</li>
+              <li>{{ message|raw_purified }}</li>
             {% endfor %}
           </ul>
         {% else %}
           {% for message in alert_message %}
             <p>
-              {{ message|raw }}
+              {{ message|raw_purified }}
             </p>
           {% endfor %}
         {% endif %}
@@ -1295,7 +1279,7 @@
     {# Allows to insert content as prefix, like an icon #}
     {% if prefix is defined %}
     <span class="text-preview-prefix">
-      {{ prefix|raw }}
+      {{ prefix|raw_purified }}
     </span>
     {% endif %}
 
@@ -1305,14 +1289,14 @@
         {{ value|raw }}
       {% else %}
         {# This just outputs the value #}
-        {{ value|e('html') }}
+        {{ value|raw_purified }}
       {% endif %}
     </span>
 
     {# Allows to insert content as suffix, like an icon #}
     {% if suffix is defined %}
     <span class="text-preview-suffix">
-      {{ suffix|raw }}
+      {{ suffix|raw_purified }}
     </span>
     {% endif %}
   </span>
@@ -1689,6 +1673,7 @@
       </div>
     {% endfor -%}
   </div>
+  {{- block('form_help') -}}
 {%- endblock -%}
 
 {% block image_with_preview_widget %}

@@ -18,6 +18,14 @@ admin_discounts_search_grid:
     _legacy_link: AdminCartRules:submitFiltercart_rule
     _legacy_feature_flag: discount
 
+admin_discounts_reset_grid:
+  path: /reset_discount_search
+  methods: [ POST ]
+  defaults:
+    _controller: 'PrestaShopBundle\Controller\Admin\Sell\Catalog\DiscountController::resetSearchAction'
+    _legacy_controller: AdminCartRules
+    _legacy_feature_flag: discount
+
 admin_discounts_create:
   path: /new/{discountType}
   methods: [ GET, POST ]

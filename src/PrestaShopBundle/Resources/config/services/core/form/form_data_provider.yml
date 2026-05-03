@@ -244,9 +244,6 @@ services:
     arguments:
       - '@prestashop.core.query_bus'
 
-  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\CartRuleFormDataProvider:
-    autowire: true
-
   PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\DiscountFormDataProvider:
     autowire: true
 
@@ -270,5 +267,25 @@ services:
     public: false
 
   PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\TagFormDataProvider:
+    autowire: true
+    public: false
+
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\AddProductFormDataProvider:
+    autowire: true
+    public: false
+
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\MergeShipmentFormDataProvider:
+    autowire: true
+    public: false
+
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\EditShipmentFormDataProvider:
+    autowire: true
+    public: false
+
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\SplitShipmentFormDataProvider:
+    autowire: true
+    public: false
+
+  PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\EditProductFormDataProvider:
     autowire: true
     public: false

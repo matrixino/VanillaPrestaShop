@@ -19,13 +19,25 @@ body:
       options:
         - label: I understand and accept the project's [code of conduct](https://github.com/PrestaShop/PrestaShop/blob/develop/CODE_OF_CONDUCT.md).
           required: true
-        - label: I have already [searched in existing issues](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+label%3ABug) and found no previous report of this bug.
+        - label: I have already [searched in existing issues](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue%20type%3ABug) and found no previous report of this bug.
           required: true
   - type: textarea
-    id: what-happened
+    id: bug-description
     attributes:
       label: Describe the bug and add attachments
-      description: What went wrong? If possible, add screenshots, error logs or screen recordings to help explain your problem.
+      description: What went wrong? If possible, add screenshots, error logs, zip used or screen recordings to help explain your problem. More information you add, The more information you give us, the better we will be able to understand and fix your problem.
+    validations:
+      required: true
+  - type: textarea
+    id: step-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps to reproduce the issue.
+      placeholder: |
+        1. Go to ‘…’
+        2. Click on ‘…’
+        3. Scroll down to ‘…’
+        4. See error
     validations:
       required: true
   - type: textarea
@@ -33,45 +45,31 @@ body:
     attributes:
       label: Expected behavior
       description: Explain what you expected to happen instead.
-    validations:
-      required: false
   - type: textarea
-    id: steps-reproduce
+    id: actual-result
     attributes:
-      label: Steps to reproduce
-      description: List the exact steps to reproduce the issue.
-      placeholder: |
-        1. Go to '...'
-        2. Click on '....'
-        3. Scroll down to '....'
-        4. See error
-    validations:
-      required: true
+      label: Actual Result
+      description: Explains what happens and the difference between this and the expected behavior.
   - type: input
     id: prestashop-version
     attributes:
-      label: PrestaShop version(s) where the bug happened
-      placeholder: "e.g., 1.7.5.2 or 1.7.8.0"
+      label: PrestaShop version where the bug happens
+      description: Specify which versions your issue come from
+      placeholder: "e.g., 8.2.3, 9.0.2 or dev"
     validations:
       required: true
   - type: input
-    id: prestashop-installation-method
+    id: ps-installation
     attributes:
-      label: How you installed PrestaShop
+      label: How have you installed PrestaShop
       description: Choose the method you used to install PrestaShop.
-      placeholder: "e.g., downloading the package and where you downloaded it, using git clone, the docker image, etc."
-    validations:
-      required: false
+      placeholder: "e.g., downloading the package and where you downloaded it, using git clone, the docker image..."
   - type: input
     id: php-version
     attributes:
       label: PHP version(s) where the bug happened
       placeholder: "e.g., 7.1 or 8.0"
-    validations:
-      required: false
   - type: input
     id: sponsor-company
     attributes:
       label: Your company or customer's name goes here (if applicable).
-    validations:
-      required: false

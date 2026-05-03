@@ -1,9 +1,6 @@
 // Import utils
 import testContext from '@utils/testContext';
 
-// Import common tests
-import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
-
 import {expect} from 'chai';
 import {
   type BrowserContext,
@@ -17,16 +14,12 @@ import {
 const baseContext: string = 'functional_FO_hummingbird_productPage_quickView_changeCombination';
 
 /*
-Pre-condition:
-- Install hummingbird theme
 Scenario:
 - Go to FO
 - Quick view first product
 - Change combination then close the modal
 - Quick view third product
 - Change combination
-Post-condition:
-- Uninstall hummingbird theme
  */
 describe('FO - Product page - Quick view : Change combination', async () => {
   let browserContext: BrowserContext;
@@ -53,9 +46,6 @@ describe('FO - Product page - Quick view : Change combination', async () => {
     name: 'dimension',
     value: '40x60cm',
   };
-
-  // Pre-condition : Install Hummingbird
-  enableTheme('hummingbird', `${baseContext}_preTest`);
 
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
@@ -114,7 +104,7 @@ describe('FO - Product page - Quick view : Change combination', async () => {
       await foHummingbirdModalQuickViewPage.setAttribute(page, secondAttributes[1]);
 
       const quickViewImageMain = await foHummingbirdModalQuickViewPage.getQuickViewImageMain(page);
-      expect(quickViewImageMain).to.contains('1-home_default');
+      expect(quickViewImageMain).to.contains('1-default_xl');
     });
 
     it('should select the color white and check the cover image', async function () {
@@ -123,7 +113,7 @@ describe('FO - Product page - Quick view : Change combination', async () => {
       await foHummingbirdModalQuickViewPage.setAttribute(page, firstAttributes[1]);
 
       const quickViewImageMain = await foHummingbirdModalQuickViewPage.getQuickViewImageMain(page);
-      expect(quickViewImageMain).to.contains('2-home_default');
+      expect(quickViewImageMain).to.contains('2-default_xl');
     });
 
     it('should close the quick view modal', async function () {
@@ -167,7 +157,4 @@ describe('FO - Product page - Quick view : Change combination', async () => {
       ]);
     });
   });
-
-  // Post-condition : Uninstall Hummingbird
-  disableTheme('hummingbird', `${baseContext}_postTest`);
 });

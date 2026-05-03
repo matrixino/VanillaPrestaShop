@@ -1,28 +1,8 @@
 <?php
 
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 use PrestaShop\Autoload\PrestashopAutoload;
@@ -31,6 +11,7 @@ use PrestaShop\PrestaShop\Adapter\LegacyLogger;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Module\Repository\ModuleRepository;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
+use PrestaShop\PrestaShop\Core\Context\LegacyControllerContext;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
@@ -365,7 +346,9 @@ abstract class ModuleCore implements ModuleInterface
                 }
                 $this->_path = __PS_BASE_URI__ . 'modules/' . $this->name . '/';
             }
-            if (!$this->context->controller instanceof Controller) {
+
+            // In Symfony BO, context controller is not a legacy Controller (proxy/context), keep modules cache to preserve module id.
+            if (!$this->context->controller instanceof Controller && !$this->context->controller instanceof LegacyControllerContext) {
                 static::$modules_cache = null;
             }
             $this->local_path = _PS_MODULE_DIR_ . $this->name . '/';
@@ -433,19 +416,23 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Check for override conflicts
-        $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
-        if (!$moduleOverrideChecker) {
-            $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
-        }
-        if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
-            $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+            $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
+            if (!$moduleOverrideChecker) {
+                $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
+            }
+            if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
+                $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
 
-            return false;
+                return false;
+            }
         }
 
         if (!$this->installControllers()) {
             $this->_errors[] = Context::getContext()->getTranslator()->trans('Could not install module controllers.', [], 'Admin.Modules.Notification');
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -461,7 +448,9 @@ abstract class ModuleCore implements ModuleInterface
             if (method_exists($this, 'uninstallTabs')) {
                 $this->uninstallTabs();
             }
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -920,7 +909,7 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Uninstall all overrides this module may have used
-        if (!$this->uninstallOverrides()) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && !$this->uninstallOverrides()) {
             return false;
         }
 
@@ -1048,8 +1037,7 @@ abstract class ModuleCore implements ModuleInterface
         if (!$moduleOverrideChecker) {
             $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
         }
-
-        if ($this->getOverrides() != null) {
+        if ($this->getOverrides() != null && !Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
             if (!$moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
                 // Install overrides
                 try {
@@ -1187,7 +1175,7 @@ abstract class ModuleCore implements ModuleInterface
         Hook::exec('actionModuleDisable', ['module' => $this]);
 
         $result = true;
-        if ($this->getOverrides() != null) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && $this->getOverrides() != null) {
             $result &= $this->uninstallOverrides();
         }
 

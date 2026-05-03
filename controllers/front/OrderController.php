@@ -1,31 +1,13 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
+use PrestaShop\PrestaShop\Adapter\Order\Checkout\CheckoutProcessProviderResolver;
 use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
 use PrestaShop\PrestaShop\Adapter\Shipment\DeliveryOptionsProvider;
+use PrestaShop\PrestaShop\Core\Checkout\OnePageCheckoutAvailabilityCheckerInterface;
 use PrestaShop\PrestaShop\Core\Checkout\TermsAndConditions;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
@@ -319,8 +301,10 @@ class OrderControllerCore extends FrontController
 
         $this->context->smarty->assign([
             'checkout_process' => new RenderableProxy($this->checkoutProcess),
+            'checkout_steps' => $this->checkoutProcess->getCheckoutStepsForTemplate(),
             'display_transaction_updated_info' => Tools::getIsset('updatedTransaction'),
             'tos_cms' => $this->getDefaultTermsAndConditions(),
+            'is_one_page_checkout_enabled' => $this->checkoutProcess->isOnePageCheckoutEnabled(),
         ]);
 
         parent::initContent();
@@ -397,10 +381,20 @@ class OrderControllerCore extends FrontController
      */
     protected function buildCheckoutProcess(CheckoutSession $session, $translator)
     {
+        /** @var CheckoutProcessProviderResolver $checkoutProcessProviderResolver */
+        $checkoutProcessProviderResolver = $this->get(CheckoutProcessProviderResolver::class);
+        $resolvedCheckoutProcess = $checkoutProcessProviderResolver->resolve($session, $translator);
+        if ($resolvedCheckoutProcess instanceof CheckoutProcess) {
+            return $resolvedCheckoutProcess;
+        }
+
         $checkoutProcess = new CheckoutProcess(
             $this->context,
             $session
         );
+        /** @var OnePageCheckoutAvailabilityCheckerInterface $onePageCheckoutAvailabilityChecker */
+        $onePageCheckoutAvailabilityChecker = $this->get(OnePageCheckoutAvailabilityCheckerInterface::class);
+        $checkoutProcess->setOnePageCheckoutAvailabilityChecker($onePageCheckoutAvailabilityChecker);
 
         $checkoutProcess
             ->addStep(new CheckoutPersonalInformationStep(

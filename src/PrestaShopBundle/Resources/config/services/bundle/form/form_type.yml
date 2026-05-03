@@ -42,8 +42,6 @@ services:
       $productTypeListener: '@PrestaShopBundle\Form\Admin\Sell\Product\EventListener\ProductTypeListener'
       $isAllShopContext: '@=service("prestashop.adapter.shop.context").isAllShopContext()'
 
-  PrestaShopBundle\Form\Admin\Sell\CartRule\:
-    resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Sell/CartRule/*"
   PrestaShopBundle\Form\Admin\Sell\Discount\:
     resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Sell/Discount/*"
   PrestaShopBundle\Form\Admin\Sell\Product\:
@@ -438,6 +436,9 @@ services:
     class: 'PrestaShopBundle\Form\Admin\Sell\Discount\DiscountFeaturesType'
     arguments:
       $featuresChoiceProvider: '@prestashop.adapter.form.choice_provider.features_choice_provider'
+  PrestaShopBundle\Form\Admin\Sell\Discount\DiscountTypeChoiceType:
+    arguments:
+      $choiceProvider: '@PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\DiscountTypeChoiceProvider'
 
   PrestaShopBundle\Form\Admin\Sell\Discount\DiscountCustomerEligibilityChoiceType:
     arguments:

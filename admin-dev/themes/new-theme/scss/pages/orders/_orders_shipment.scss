@@ -1,3 +1,7 @@
+/**
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
+ */
 .shipment-form {
   &__tooltip-wrapper {
     display: flex;
@@ -220,6 +224,29 @@
     }
 
     .skeleton-shipment-modal {
+      display: none;
+    }
+  }
+}
+
+#addOrderProductModal,
+#editOrderProductModal {
+  // Default state
+  .modal-body {
+    display: none;
+  }
+
+  // Loaded state: show modal body, hide skeleton
+  &[data-state="loaded"] {
+    .modal-body {
+      display: block;
+    }
+
+    .skeleton-add-product-form {
+      display: none;
+    }
+
+    .skeleton-edit-product-form {
       display: none;
     }
   }

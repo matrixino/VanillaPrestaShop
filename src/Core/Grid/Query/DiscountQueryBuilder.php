@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 declare(strict_types=1);
@@ -31,6 +11,7 @@ namespace PrestaShop\PrestaShop\Core\Grid\Query;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use PrestaShop\PrestaShop\Core\ConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Context\LanguageContext;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
@@ -45,6 +26,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
         string $dbPrefix,
         private readonly DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator,
         private readonly LanguageContext $languageContext,
+        private readonly ConfigurationInterface $configuration,
     ) {
         parent::__construct($connection, $dbPrefix);
     }
@@ -54,12 +36,28 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
      */
     public function getSearchQueryBuilder(SearchCriteriaInterface $searchCriteria): QueryBuilder
     {
+        $quantityUsedSubquery = sprintf(
+            '(SELECT COUNT(*)
+                FROM %sorders o
+                INNER JOIN %sorder_cart_rule ocr ON ocr.id_order = o.id_order
+                WHERE ocr.deleted = 0
+                AND ocr.id_cart_rule = cr.id_cart_rule
+                AND o.current_state != %d
+            )',
+            $this->dbPrefix,
+            $this->dbPrefix,
+            (int) $this->configuration->get('PS_OS_ERROR')
+        );
+
         $qb = $this->getQueryBuilder($searchCriteria->getFilters())
             ->select(
                 'cr.id_cart_rule AS id_discount,
                 crl.name,
                 crt.discount_type,
+                crtl.name AS discount_type_name,
                 cr.code,
+                ' . $quantityUsedSubquery . ' AS quantity_used,
+                cr.total_quantity,
                 cr.date_from,
                 cr.date_to,
                 cr.active'
@@ -111,6 +109,12 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
                 'crt',
                 'cr.id_cart_rule_type = crt.id_cart_rule_type'
             )
+            ->leftJoin(
+                'crt',
+                $this->dbPrefix . 'cart_rule_type_lang',
+                'crtl',
+                'crt.id_cart_rule_type = crtl.id_cart_rule_type AND crtl.id_lang = :contextLangId'
+            )
             ->setParameter('contextLangId', $this->languageContext->getId())
         ;
 
@@ -129,7 +133,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
             'id_discount' => 'cr.id_cart_rule',
             'name' => 'crl.name',
             'code' => 'cr.code',
-            'discount_type' => 'crt.discount_type',
+            'discount_type' => 'crt.id_cart_rule_type',
             'active' => 'cr.active',
         ];
 
@@ -187,7 +191,7 @@ class DiscountQueryBuilder extends AbstractDoctrineQueryBuilder
 
     private function applyPeriodFilter(QueryBuilder $qb, mixed $value, DateTimeImmutable $now): void
     {
-        if (!is_string($value) || $value === '' || $value === DiscountSettings::PERIOD_FILTER_ALL) {
+        if (!is_string($value) || empty($value)) {
             return;
         }
 
