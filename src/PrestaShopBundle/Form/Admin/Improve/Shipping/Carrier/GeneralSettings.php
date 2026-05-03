@@ -1,31 +1,12 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 namespace PrestaShopBundle\Form\Admin\Improve\Shipping\Carrier;
 
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CleanHtml;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
 use PrestaShop\PrestaShop\Core\Form\ChoiceProvider\GroupByIdChoiceProvider;
 use PrestaShopBundle\Form\Admin\Type\ImagePreviewType;
@@ -39,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Url;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -66,6 +48,11 @@ class GeneralSettings extends TranslatorAwareType
                     $this->trans('The carrier\'s name will be displayed during checkout.', 'Admin.Shipping.Help') . '<br/>' .
                     $this->trans('For in-store pickup, enter 0 to replace the carrier name with your shop name.', 'Admin.Shipping.Help'),
                 'required' => true,
+                'constraints' => [
+                    new CleanHtml([
+                        'message' => $this->trans('%s is invalid.', 'Admin.Notifications.Error'),
+                    ]),
+                ],
             ])
             ->add('localized_delay', TranslatableType::class, [
                 'required' => true,
@@ -74,6 +61,13 @@ class GeneralSettings extends TranslatorAwareType
                 'type' => TextType::class,
                 'constraints' => [
                     new DefaultLanguage(),
+                ],
+                'options' => [
+                    'constraints' => [
+                        new CleanHtml([
+                            'message' => $this->trans('%s is invalid.', 'Admin.Notifications.Error'),
+                        ]),
+                    ],
                 ],
             ])
             ->add('active', SwitchType::class, [
@@ -88,6 +82,13 @@ class GeneralSettings extends TranslatorAwareType
                 'attr' => [
                     'min' => 0,
                     'max' => 9,
+                ],
+                'constraints' => [
+                    new Range([
+                        'min' => 0,
+                        'max' => 9,
+                        'notInRangeMessage' => $this->trans('The grade must be between 0 and 9.', 'Admin.Shipping.Notification'),
+                    ]),
                 ],
             ])
             ->add('logo_preview', ImagePreviewType::class, [

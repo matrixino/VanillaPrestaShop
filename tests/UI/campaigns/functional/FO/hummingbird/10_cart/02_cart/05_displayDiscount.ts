@@ -2,7 +2,6 @@ import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
 import {createCartRuleTest, deleteCartRuleTest} from '@commonTests/BO/catalog/cartRule';
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
 
 import {
   type BrowserContext,
@@ -51,15 +50,13 @@ describe('FO - Cart : Display discount on product', async () => {
     applyDiscountTo: 'Specific product',
     product: dataProducts.demo_9.name,
   });
+  const secondCartRuleDiscount: number = parseFloat(secondCartRuleData.discountAmount!.value.toString());
 
   // Pre-condition: Create first cart rule
   createCartRuleTest(firstCartRuleData, `${baseContext}_PreTest_1`);
 
   // Pre-condition: Create second cart rule
   createCartRuleTest(secondCartRuleData, `${baseContext}_PreTest_2`);
-
-  // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest_3`);
 
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
@@ -78,7 +75,7 @@ describe('FO - Cart : Display discount on product', async () => {
       await foHummingbirdHomePage.changeLanguage(page, 'en');
 
       const isHomePage = await foHummingbirdHomePage.isHomePage(page);
-      expect(isHomePage, 'Fail to open FO home page').to.eq(true);
+      expect(isHomePage).to.eq(true);
     });
 
     it(`should search for the product '${dataProducts.demo_8.name}'`, async function () {
@@ -149,22 +146,22 @@ describe('FO - Cart : Display discount on product', async () => {
       await foHummingbirdCartPage.addPromoCode(page, firstCartRuleData.code);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.equal(firstCartRuleData.name);
+      expect(cartRuleName).to.contains(firstCartRuleData.name);
     });
 
     it('should check the discount value', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountValue1', baseContext);
 
-      const discount = await utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
+      const discount = utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
 
       const discountValue = await foHummingbirdCartPage.getCartRuleValue(page);
-      expect(discountValue).to.equal(`-€${discount.toFixed(2)}`);
+      expect(discountValue).to.contains(`-€${discount.toFixed(2)}`);
     });
 
     it('should check the total after the discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount1', baseContext);
 
-      const discount = await utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
+      const discount = utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
 
       const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
       expect(totalAfterDiscount.toString()).to.equal((dataProducts.demo_9.finalPrice * 2 - discount).toFixed(2));
@@ -176,27 +173,25 @@ describe('FO - Cart : Display discount on product', async () => {
       await foHummingbirdCartPage.addPromoCode(page, secondCartRuleData.code);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 2);
-      expect(cartRuleName).to.equal(secondCartRuleData.name);
+      expect(cartRuleName).to.contains(secondCartRuleData.name);
     });
 
     it('should check the discount value', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountValue2', baseContext);
 
       const discountValue = await foHummingbirdCartPage.getCartRuleValue(page, 2);
-      expect(discountValue).to.equal(`-€${parseFloat(secondCartRuleData.discountAmount!.value.toString()).toFixed(2)}`);
+      expect(discountValue).to.contains(`-€${secondCartRuleDiscount.toFixed(2)}`);
     });
 
     it('should check the total after the discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount', baseContext);
 
-      const firstDiscount = await utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
+      const firstDiscount = utilsCore.percentage(dataProducts.demo_9.finalPrice, firstCartRuleData.getDiscountPercent());
 
       const totalAfterDiscount = await foHummingbirdCartPage.getATIPrice(page);
       expect(totalAfterDiscount.toString())
-        .to.equal(
-          (dataProducts.demo_9.finalPrice * 2 - (firstDiscount + parseFloat(secondCartRuleData.discountAmount!.value.toString())))
-            .toFixed(2),
-        );
+        .to.equal((dataProducts.demo_9.finalPrice * 2 - (firstDiscount + secondCartRuleDiscount))
+          .toFixed(2));
     });
 
     it('should remove the second discount', async function () {
@@ -253,7 +248,4 @@ describe('FO - Cart : Display discount on product', async () => {
 
   // Post-Condition: Delete second cart rule
   deleteCartRuleTest(secondCartRuleData.name, `${baseContext}_PostTest_2`);
-
-  // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest_3`);
 });

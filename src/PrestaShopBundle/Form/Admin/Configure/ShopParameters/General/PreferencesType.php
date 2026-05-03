@@ -1,36 +1,21 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 namespace PrestaShopBundle\Form\Admin\Configure\ShopParameters\General;
 
 use PrestaShop\PrestaShop\Adapter\Entity\Order;
 use PrestaShop\PrestaShop\Core\ConfigurationInterface;
+use PrestaShop\PrestaShop\Core\Feature\Enum\ShopModeEnum;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
+use PrestaShopBundle\EventSubscriber\UpdateShopModeFieldListener;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -42,6 +27,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class PreferencesType extends TranslatorAwareType
 {
+    public const SHOP_MODE = 'shop_mode';
+
     /**
      * @var bool
      */
@@ -73,6 +60,8 @@ class PreferencesType extends TranslatorAwareType
      * @param bool $isShopFeatureEnabled
      * @param bool $isSingleShopContext
      * @param bool $isAllShopContext
+     * @param ?FeatureFlagStateCheckerInterface $featureFlagStateChecker
+     * @param ?UpdateShopModeFieldListener $updateShopModeFieldListener
      */
     public function __construct(
         RequestStack $requestStack,
@@ -81,7 +70,9 @@ class PreferencesType extends TranslatorAwareType
         ConfigurationInterface $configuration,
         bool $isShopFeatureEnabled,
         bool $isSingleShopContext,
-        bool $isAllShopContext
+        bool $isAllShopContext,
+        private readonly ?FeatureFlagStateCheckerInterface $featureFlagStateChecker,
+        private readonly ?UpdateShopModeFieldListener $updateShopModeFieldListener,
     ) {
         parent::__construct($translator, $locales);
 
@@ -98,6 +89,8 @@ class PreferencesType extends TranslatorAwareType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $configuration = $this->configuration;
+
+        $showB2bShopMode = $this->featureFlagStateChecker?->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_B2B) ?? false;
 
         if ($this->requestStack->getCurrentRequest()->isSecure()) {
             $builder->add('enable_ssl', SwitchType::class, [
@@ -120,7 +113,26 @@ class PreferencesType extends TranslatorAwareType
                     'Enable or disable token in the Front Office to improve PrestaShop\'s security.',
                     'Admin.Shopparameters.Help'
                 ),
-            ])
+            ]);
+        if ($showB2bShopMode) {
+            $builder
+                ->add(self::SHOP_MODE, EnumType::class, [
+                    'class' => ShopModeEnum::class,
+                    'label' => $this->trans(
+                        'Shop mode',
+                        'Admin.Shopparameters.Feature'),
+                    'help' => $this->trans(
+                        'Choose which features are enabled in your shop: B2C only, B2B only, or both.',
+                        'Admin.Shopparameters.Help'
+                    ),
+                ]);
+
+            if (null !== $this->updateShopModeFieldListener) {
+                $builder->addEventSubscriber($this->updateShopModeFieldListener);
+            }
+        }
+
+        $builder
             ->add('allow_html_iframes', SwitchType::class, [
                 'label' => $this->trans(
                     'Allow iframes on HTML fields',

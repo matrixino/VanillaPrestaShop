@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 namespace PrestaShop\PrestaShop\Core\Addon\Theme;
@@ -181,6 +161,7 @@ class ThemeManager implements AddonManagerInterface
                 ->doEnableModules($theme->getModulesToEnable())
                 ->doResetModules($theme->get('global_settings.modules.to_reset', []))
                 ->doApplyImageTypes($theme->get('global_settings.image_types', []))
+                ->doUnhookModules($theme->get('global_settings.hooks.modules_to_unhook', []))
                 ->doHookModules($theme->get('global_settings.hooks.modules_to_hook', []));
 
             $theme->onEnable();
@@ -297,6 +278,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, no need to disable it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName) && $moduleManager->isEnabled($moduleName)) {
                 $moduleManager->disable($moduleName);
             }
@@ -318,6 +305,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to enable it', $moduleName));
+                continue;
+            }
+
             if (!$moduleManager->isInstalled($moduleName)
                 && !$moduleManager->install($moduleName)
             ) {
@@ -344,6 +337,12 @@ class ThemeManager implements AddonManagerInterface
         $moduleManager = $moduleManagerBuilder->build();
 
         foreach ($modules as $moduleName) {
+            // If module has been removed we ignore it but inform via a warning
+            if (!$moduleManager->isOnDisk($moduleName)) {
+                $this->logger->warning(sprintf('Module %s was removed from disk, impossible to reset it', $moduleName));
+                continue;
+            }
+
             if ($moduleManager->isInstalled($moduleName)) {
                 $moduleManager->reset($moduleName);
             }
@@ -360,6 +359,18 @@ class ThemeManager implements AddonManagerInterface
     private function doHookModules(array $hooks): self
     {
         $this->hookConfigurator->setHooksConfiguration($hooks);
+
+        return $this;
+    }
+
+    /**
+     * @param array $hooks
+     *
+     * @return self
+     */
+    private function doUnhookModules(array $hooks): self
+    {
+        $this->hookConfigurator->unhookModules($hooks);
 
         return $this;
     }

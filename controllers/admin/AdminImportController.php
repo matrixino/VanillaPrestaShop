@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -1171,14 +1151,14 @@ class AdminImportControllerCore extends AdminController
         }
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Category::existsInDatabase((int) $info['id'], 'category')) {
             $category = new Category((int) $info['id']);
         } else {
-            if (isset($info['id']) && (int) $info['id'] && Category::existsInDatabase((int) $info['id'], 'category')) {
-                $category = new Category((int) $info['id']);
-            } else {
-                $category = new Category();
-            }
+            $category = new Category();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $category);
@@ -2661,14 +2641,14 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Customer::customerIdExistsStatic((int) $info['id'])) {
             $customer = new Customer((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Customer::customerIdExistsStatic((int) $info['id'])) {
-                $customer = new Customer((int) $info['id']);
-            } else {
-                $customer = new Customer();
-            }
+            $customer = new Customer();
         }
 
         $customer_exist = false;
@@ -2920,14 +2900,13 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Address::addressExists((int) $info['id'])) {
             $address = new Address((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Address::addressExists((int) $info['id'])) {
-                $address = new Address((int) $info['id']);
-            } else {
-                $address = new Address();
-            }
+            $address = new Address();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $address);
@@ -3240,14 +3219,13 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Manufacturer::existsInDatabase((int) $info['id'], 'manufacturer')) {
             $manufacturer = new Manufacturer((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Manufacturer::existsInDatabase((int) $info['id'], 'manufacturer')) {
-                $manufacturer = new Manufacturer((int) $info['id']);
-            } else {
-                $manufacturer = new Manufacturer();
-            }
+            $manufacturer = new Manufacturer();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $manufacturer);
@@ -3355,14 +3333,13 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Supplier::existsInDatabase((int) $info['id'], 'supplier')) {
             $supplier = new Supplier((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Supplier::existsInDatabase((int) $info['id'], 'supplier')) {
-                $supplier = new Supplier((int) $info['id']);
-            } else {
-                $supplier = new Supplier();
-            }
+            $supplier = new Supplier();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $supplier);
@@ -3461,14 +3438,13 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Alias::existsInDatabase((int) $info['id'], 'alias')) {
             $alias = new Alias((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Alias::existsInDatabase((int) $info['id'], 'alias')) {
-                $alias = new Alias((int) $info['id']);
-            } else {
-                $alias = new Alias();
-            }
+            $alias = new Alias();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $alias);
@@ -3541,14 +3517,13 @@ class AdminImportControllerCore extends AdminController
     {
         AdminImportController::setDefaultValues($info);
 
-        if ($force_ids && isset($info['id']) && (int) $info['id']) {
+        if (!$force_ids) {
+            unset($info['id']);
+        }
+        if ($force_ids && isset($info['id']) && (int) $info['id'] && Store::existsInDatabase((int) $info['id'], 'store')) {
             $store = new Store((int) $info['id']);
         } else {
-            if (array_key_exists('id', $info) && (int) $info['id'] && Store::existsInDatabase((int) $info['id'], 'store')) {
-                $store = new Store((int) $info['id']);
-            } else {
-                $store = new Store();
-            }
+            $store = new Store();
         }
 
         AdminImportController::arrayWalk($info, ['AdminImportController', 'fillInfo'], $store);

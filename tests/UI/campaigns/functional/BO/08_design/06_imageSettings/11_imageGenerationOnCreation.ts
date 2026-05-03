@@ -193,7 +193,7 @@ describe('BO - Design - Image Settings - Image Generation on creation', async ()
     it('should check the product header details', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkProductHeaderDetails', baseContext);
 
-      const taxValue = await utilsCore.percentage(productData.priceTaxExcluded, productData.tax);
+      const taxValue = utilsCore.percentage(productData.priceTaxExcluded, productData.tax);
 
       const productHeaderSummary = await boProductsCreatePage.getProductHeaderSummary(page);
       await Promise.all([

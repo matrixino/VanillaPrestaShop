@@ -5,6 +5,9 @@ import {
   utilsCore,
   utilsPlaywright,
 } from '@prestashop-core/ui-testing';
+import {
+  config,
+} from 'chai';
 
 let screenshotNumber: number = 1;
 
@@ -18,6 +21,8 @@ let screenshotNumber: number = 1;
  * @description Create unique browser for all mocha run
  */
 before(async function () {
+  config.truncateThreshold = 0;
+
   this.browser = await utilsPlaywright.createBrowser();
 });
 

@@ -136,11 +136,6 @@ parameters:
 			path: src/Core/Cart/CartRow.php
 
 		-
-			message: "#^Using _DB_PREFIX_ is forbidden, Use dependency injection instead$#"
-			count: 1
-			path: src/Core/Cart/CartRow.php
-
-		-
 			message: "#^Class Currency is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
 			count: 4
 			path: src/Core/Cart/CartRuleCalculator.php
@@ -1031,6 +1026,11 @@ parameters:
 			path: src/Core/Stock/StockManager.php
 
 		-
+			message: "#^Using _PS_DEFAULT_THEME_NAME_ is forbidden, Use dependency injection instead$#"
+			count: 1
+			path: src/Core/Translation/Storage/Provider/Definition/ThemeProviderDefinition.php
+
+		-
 			message: "#^Class PrestaShopBundle\\\\ApiPlatform\\\\Normalizer\\\\CQRSApiNormalizer extends @final class Symfony\\\\Component\\\\Serializer\\\\Normalizer\\\\ObjectNormalizer\\.$#"
 			count: 1
 			path: src/PrestaShopBundle/ApiPlatform/Normalizer/CQRSApiNormalizer.php
@@ -1039,6 +1039,11 @@ parameters:
 			message: "#^Method Symfony\\\\Component\\\\Serializer\\\\Normalizer\\\\DenormalizerInterface\\:\\:supportsDenormalization\\(\\) invoked with 4 parameters, 2\\-3 required\\.$#"
 			count: 1
 			path: src/PrestaShopBundle/ApiPlatform/Normalizer/CQRSApiNormalizer.php
+
+		-
+			message: "#^Class PrestaShopBundle\\\\Command\\\\AboutCommand extends @final class Symfony\\\\Bundle\\\\FrameworkBundle\\\\Command\\\\AboutCommand\\.$#"
+			count: 1
+			path: src/PrestaShopBundle/Command/AboutCommand.php
 
 		-
 			message: "#^Class Employee is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
@@ -1064,6 +1069,16 @@ parameters:
 			message: "#^Namespace Validate is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
 			count: 3
 			path: src/PrestaShopBundle/Command/ConfigCommand.php
+
+		-
+			message: "#^Namespace Language is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
+			count: 4
+			path: src/PrestaShopBundle/Command/ExportModuleTranslationsCommand.php
+
+		-
+			message: "#^Namespace Module is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
+			count: 2
+			path: src/PrestaShopBundle/Command/ExportModuleTranslationsCommand.php
 
 		-
 			message: "#^Class Employee is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
@@ -1196,14 +1211,19 @@ parameters:
 			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php
 
 		-
-			message: "#^Namespace Dispatcher is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
-			count: 2
-			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php
-
-		-
 			message: "#^Namespace ImageManager is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
 			count: 1
 			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/CategoryController.php
+
+		-
+			message: "#^Class HelperTreeCategories is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
+			count: 1
+			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php
+
+		-
+			message: "#^Namespace HelperTreeCategories is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
+			count: 1
+			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php
 
 		-
 			message: "#^Class Language is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
@@ -1376,16 +1396,6 @@ parameters:
 			path: src/PrestaShopBundle/Form/Admin/Configure/ShopParameters/TrafficSeo/Meta/UrlSchemaType.php
 
 		-
-			message: "#^Class AttributeGroup is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
-			count: 2
-			path: src/PrestaShopBundle/Form/Admin/Sell/Catalog/AttributeType.php
-
-		-
-			message: "#^Namespace AttributeGroup is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
-			count: 1
-			path: src/PrestaShopBundle/Form/Admin/Sell/Catalog/AttributeType.php
-
-		-
 			message: "#^Class Validate is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
 			count: 2
 			path: src/PrestaShopBundle/Form/Admin/Sell/Customer/CustomerType.php
@@ -1494,6 +1504,11 @@ parameters:
 			message: "#^Using _DB_PREFIX_ is forbidden, Use dependency injection instead$#"
 			count: 3
 			path: src/PrestaShopBundle/Translation/Loader/SqlTranslationLoader.php
+
+		-
+			message: "#^Using _PS_DEFAULT_THEME_NAME_ is forbidden, Use dependency injection instead$#"
+			count: 1
+			path: src/PrestaShopBundle/Translation/Provider/FrontOfficeProvider.php
 
 		-
 			message: "#^Class Link is forbidden, No legacy calls inside the prestashop bundle\\. Please create an interface and an adapter if you need to\\.$#"
@@ -1614,13 +1629,3 @@ parameters:
 			message: "#^Unsafe access to private constant bankwire\\:\\:NAME through static\\:\\:\\.$#"
 			count: 1
 			path: tests/Unit/Resources/parsed-modules/module-static-const.php
-
-		-
-			message: '#Namespace HelperTreeCategories is forbidden, No legacy calls inside the prestashop bundle\. Please create an interface and an adapter if you need to\.#'
-			count: 1
-			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php 
-
-		-
-			message: '#Class HelperTreeCategories is forbidden, No legacy calls inside the prestashop bundle\. Please create an interface and an adapter if you need to\.#'
-			count: 1
-			path: src/PrestaShopBundle/Controller/Admin/Sell/Catalog/Product/ProductController.php 

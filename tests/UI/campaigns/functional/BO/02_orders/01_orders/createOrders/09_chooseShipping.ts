@@ -234,7 +234,7 @@ describe('BO - Orders - Create order : Choose shipping', async () => {
 
       await boOrdersCreatePage.setGift(page, true);
 
-      const tax = await utilsCore.percentage(giftOptions.price, 10);
+      const tax = utilsCore.percentage(giftOptions.price, 10);
       const totalTaxExc = (dataProducts.demo_12.priceTaxExcluded + giftOptions.price).toFixed(2);
       const totalTaxInc = (dataProducts.demo_12.price + giftOptions.price + tax).toFixed(2);
 
@@ -268,6 +268,19 @@ describe('BO - Orders - Create order : Choose shipping', async () => {
 
       const giftMessageText = await boOrdersViewBlockTabListPage.getGiftMessage(page);
       expect(giftMessageText).to.be.equal(giftMessage);
+    });
+
+    it('should check the title of the 3 tabs', async function () {
+      await testContext.addContextItem(this, 'testIdentifier', 'checkTabNames', baseContext);
+
+      const statusTabName = await boOrdersViewBlockTabListPage.getTabName(page, 1);
+      expect(statusTabName).to.contain('Status');
+
+      const documentsTabName = await boOrdersViewBlockTabListPage.getTabName(page, 2);
+      expect(documentsTabName).to.contain('Documents');
+
+      const shipmentsTabName = await boOrdersViewBlockTabListPage.getTabName(page, 3);
+      expect(shipmentsTabName).to.contain('Carriers');
     });
   });
 

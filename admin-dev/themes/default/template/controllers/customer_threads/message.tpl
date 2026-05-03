@@ -1,42 +1,22 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  *}
 
 {if !$email}
 	<div class="panel">
 		<h3>
 			{if !empty($message.employee_name)}
-				<i>{$employee_avatar}</i>
-					 ({$message.employee_name}) - {$PS_SHOP_NAME}
+				<i>{$employee_avatar|escape:'html':'UTF-8'}</i>
+					 ({$message.employee_name|escape:'html':'UTF-8'}) - {$PS_SHOP_NAME|escape:'html':'UTF-8'}
 			{else}
 				<i class="icon-user"></i>
 				{if !empty($message.id_customer)}
 					<a href="{$link->getAdminLink('AdminCustomers', true, [], ['id_customer' => $message.id_customer, 'viewcustomer' => 1])}" title="{l|escape s='View customer' d='Admin.Orderscustomers.Feature'}">
-						{$message.customer_name}
+						{$message.customer_name|escape:'html':'UTF-8'}
 					</a>
 				{else}
-					{$message.email}
+					{$message.email|escape:'html':'UTF-8'}
 				{/if}
 			{/if}
 		</h3>
@@ -58,7 +38,7 @@
 			{if empty($message.id_employee)}
 			<dl class="dl-horizontal">
 				<dt>{l s='Browser:' d='Admin.Orderscustomers.Feature'}</dt>
-				<dd>{$message.user_agent}&nbsp;</dd>
+				<dd>{$message.user_agent|escape:'html':'UTF-8'}&nbsp;</dd>
 			</dl>
 			{/if}
 			{if !empty($message.file_name) && $file_name}
@@ -94,8 +74,8 @@
 						<dd>
 							<select name="id_contact" class="fixed-width-lg" onchange="this.form.submit();">
 								{foreach $contacts as $contact}
-									<option value="{$contact.id_contact}" {if $contact.id_contact == $message.id_contact}selected="selected"{/if}>
-										{$contact.name}
+									<option value="{$contact.id_contact|intval}" {if $contact.id_contact == $message.id_contact}selected="selected"{/if}>
+										{$contact.name|escape:'html':'UTF-8'}
 									</option>
 								{/foreach}
 							</select>
@@ -115,9 +95,9 @@
 				<dt>{l s='Sent by:' d='Admin.Orderscustomers.Feature'}</dt>
 				<dd>
 					{if !empty($message.customer_name)}
-						{$message.customer_name} ({$message.email})
+						{$message.customer_name|escape:'html':'UTF-8'} ({$message.email|escape:'html':'UTF-8'})
 					{else}
-						{$message.email}
+						{$message.email|escape:'html':'UTF-8'}
 					{/if}
 				</dd>
 			</dl>
@@ -145,17 +125,17 @@
 
 			<!--<dl class="dl-horizontal">
 				<dt>{l s='Subject:'}</dt>
-				<dd>{$message.subject}</dd>
+				<dd>{$message.subject|escape:'html':'UTF-8'}</dd>
 			</dl>-->
 {/if}
 {if !$email}
 			<dl class="dl-horizontal">
 				<dt>{l s='Thread ID:' d='Admin.Orderscustomers.Feature'}</dt>
-				<dd>{$message.id_customer_thread}</dd>
+				<dd>{$message.id_customer_thread|intval}</dd>
 			</dl>
 			<dl class="dl-horizontal">
 				<dt>{l s='Message ID:' d='Admin.Orderscustomers.Feature'}</dt>
-				<dd>{$message.id_customer_message}</dd>
+				<dd>{$message.id_customer_message|intval}</dd>
 			</dl>
 {/if}
 			<dl class="dl-horizontal">
@@ -183,7 +163,7 @@
 					<textarea class="col-lg-12" rows="6" name="reply_message">{$PS_CUSTOMER_SERVICE_SIGNATURE}</textarea>
 				</div>
 				<div class="row">
-					<p class="pull-right">{l s='Your reply will be sent to:' d='Admin.Orderscustomers.Feature'} {$message.email}</p>
+					<p class="pull-right">{l s='Your reply will be sent to:' d='Admin.Orderscustomers.Feature'} {$message.email|escape:'html':'UTF-8'}</p>
 				</div>
 				<div class="row row-margin-bottom">
 					<input type="file" name="joinFile"/>
@@ -192,7 +172,7 @@
 					<button type="submit" class="btn btn-default" name="submitReply">
 						<i class="icon-check"></i> {l s='Send my reply' d='Admin.Orderscustomers.Feature'}</button>
 					<input type="hidden" name="id_customer_thread" value="{$message.id_customer_thread|intval}" />
-					<input type="hidden" name="msg_email" value="{$message.email}" />
+					<input type="hidden" name="msg_email" value="{$message.email|escape:'html':'UTF-8'}" />
 				</div>
 			</form>
 		</div>

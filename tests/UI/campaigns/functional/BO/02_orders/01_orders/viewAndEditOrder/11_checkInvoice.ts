@@ -5,7 +5,7 @@ import {expect} from 'chai';
 import {deleteCartRuleTest} from '@commonTests/BO/catalog/cartRule';
 import {bulkDeleteProductsTest} from '@commonTests/BO/catalog/product';
 import {enableEcoTaxTest, disableEcoTaxTest} from '@commonTests/BO/international/ecoTax';
-import {createOrderByCustomerTest, createOrderSpecificProductTest} from '@commonTests/FO/classic/order';
+import {createOrderByCustomerTest, createOrderSpecificProductTest} from '@commonTests/FO/hummingbird/order';
 
 import {
   boDashboardPage,
@@ -922,7 +922,7 @@ describe('BO - Orders - View and edit order: Check invoice', async () => {
           + 'are correct', async function () {
           await testContext.addContextItem(this, 'testIdentifier', 'checkBasePriceSpecificPrice', baseContext);
 
-          const discountValue = await utilsCore.percentage(
+          const discountValue = utilsCore.percentage(
             productWithSpecificPrice.price,
             productWithSpecificPrice.specificPrice.discount,
           );
@@ -976,7 +976,7 @@ describe('BO - Orders - View and edit order: Check invoice', async () => {
           async function () {
             await testContext.addContextItem(this, 'testIdentifier', 'checkTotalToPay3', baseContext);
 
-            const discount = await utilsCore.percentage(
+            const discount = utilsCore.percentage(
               productWithSpecificPrice.price,
               productWithSpecificPrice.specificPrice.discount,
             );
@@ -1469,7 +1469,7 @@ describe('BO - Orders - View and edit order: Check invoice', async () => {
           await testContext.addContextItem(this, 'testIdentifier', 'checkDiscountsTable', baseContext);
 
           const totalPrice = productWithEcoTax.price + customizedProduct.price;
-          const discount = await utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
+          const discount = utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
 
           const isDiscountVisible = await utilsFile.isTextInPDF(
             filePath,
@@ -1483,7 +1483,7 @@ describe('BO - Orders - View and edit order: Check invoice', async () => {
           await testContext.addContextItem(this, 'testIdentifier', 'checkTotalDiscount', baseContext);
 
           const totalPrice = productWithEcoTax.price + customizedProduct.price;
-          const discount = await utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
+          const discount = utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
 
           const isDiscountVisible = await utilsFile.isTextInPDF(
             filePath,
@@ -1518,7 +1518,7 @@ describe('BO - Orders - View and edit order: Check invoice', async () => {
           await testContext.addContextItem(this, 'testIdentifier', 'checkIsDiscountNotVisible', baseContext);
 
           const totalPrice = productWithEcoTax.price + customizedProduct.price;
-          const discount = await utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
+          const discount = utilsCore.percentage(totalPrice, parseInt(discountData.value, 10));
 
           const isDiscountVisible = await utilsFile.isTextInPDF(
             filePath,

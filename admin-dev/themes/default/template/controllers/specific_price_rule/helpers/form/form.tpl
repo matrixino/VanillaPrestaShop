@@ -1,26 +1,6 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  *}
 {extends file="helpers/form/form.tpl"}
 
@@ -41,7 +21,7 @@
 			<div class="col-lg-8">
 				<select id="id_category" name="id_category">
 					{foreach from=$categories item='category'}
-					<option value="{$category.id_category|intval}">({$category.id_category|intval}) {$category.name}</option>
+					<option value="{$category.id_category|intval}">({$category.id_category|intval}) {$category.name|escape:'html':'UTF-8'}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -58,7 +38,7 @@
 			<div class="col-lg-8">
 				<select id="id_manufacturer" name="id_manufacturer">
 					{foreach from=$manufacturers item='manufacturer'}
-						<option value="{$manufacturer.id_manufacturer}">{$manufacturer.name}</option>
+						<option value="{$manufacturer.id_manufacturer}">{$manufacturer.name|escape:'html':'UTF-8'}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -75,7 +55,7 @@
 			<div class="col-lg-8">
 				<select id="id_supplier" name="id_supplier">
 					{foreach from=$suppliers item='supplier'}
-						<option value="{$supplier.id_supplier}">{$supplier.name}</option>
+						<option value="{$supplier.id_supplier}">{$supplier.name|escape:'html':'UTF-8'}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -92,7 +72,7 @@
 			<div class="col-lg-4">
 				<select id="id_attribute_group">
 					{foreach from=$attributes_group item='attribute_group'}
-						<option value="{$attribute_group.id_attribute_group}">{$attribute_group.name}</option>
+						<option value="{$attribute_group.id_attribute_group}">{$attribute_group.name|escape:'html':'UTF-8'}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -100,7 +80,7 @@
 				{foreach from=$attributes_group item='attribute_group'}
 					<select class="id_attribute" style="display:none;" id="id_attribute_{$attribute_group.id_attribute_group}">
 						{foreach from=$attribute_group.attributes item='attribute'}
-							<option value="{$attribute.id_attribute}">{$attribute.name}</option>
+							<option value="{$attribute.id_attribute}">{$attribute.name|escape:'html':'UTF-8'}</option>
 						{/foreach}
 					</select>
 				{/foreach}
@@ -118,7 +98,7 @@
 			<div class="col-lg-4">
 				<select id="id_feature">
 					{foreach from=$features item='feature'}
-						<option value="{$feature.id_feature}">{$feature.name}</option>
+						<option value="{$feature.id_feature}">{$feature.name|escape:'html':'UTF-8'}</option>
 					{/foreach}
 				</select>
 			</div>
@@ -126,7 +106,7 @@
 				{foreach from=$features item='feature'}
 					<select class="id_feature_value" style="display:none;" id="id_feature_{$feature.id_feature}">
 						{foreach from=$feature.values item='value'}
-							<option value="{$value.id_feature_value}">{$value.value}</option>
+							<option value="{$value.id_feature_value}">{$value.value|escape:'html':'UTF-8'}</option>
 						{/foreach}
 					</select>
 				{/foreach}

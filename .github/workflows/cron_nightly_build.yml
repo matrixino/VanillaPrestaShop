@@ -3,7 +3,7 @@ name: Nightly Build
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '30 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -20,24 +20,15 @@ jobs:
       matrix:
         BRANCH:
           - develop
-          - 9.0.x
+          - 9.1.x
           - 8.2.x
-          - 8.1.x
-          - 8.0.x
-          - 1.7.8.x
         include:
           - BRANCH: develop
             node: 20
-          - BRANCH: 9.0.x
+          - BRANCH: 9.1.x
             node: 20
           - BRANCH: 8.2.x
             node: 16
-          - BRANCH: 8.1.x
-            node: 16
-          - BRANCH: 8.0.x
-            node: 14
-          - BRANCH: 1.7.8.x
-            node: 14
 
     env:
       PHP_VERSION: '7.4'
@@ -46,6 +37,8 @@ jobs:
       GH_BRANCH: ${{ matrix.BRANCH }}
       GC_PROJECT_ID: ${{ secrets.GC_PROJECT_ID }}
       GC_SERVICE_KEY: ${{ secrets.GC_SERVICE_KEY }}
+      XML_FILE: ${{ matrix.BRANCH == 'develop' && 'nightly.xml' || format('nightly_{0}.xml', matrix.BRANCH)}}
+      ZIP_FILE: ${{ matrix.BRANCH == 'develop' && 'nightly.zip' || format('nightly_{0}.zip', matrix.BRANCH)}}
 
     steps:
       - uses: actions/checkout@v4
@@ -76,11 +69,11 @@ jobs:
         run: today=`date +%Y-%m-%d`; for i in *; do mv $i $today-$GH_BRANCH-$i; done
         working-directory: ${{ env.RELEASE_DIR }}
 
-      - name: Create nightly.zip for develop
-        if: env.GH_BRANCH == 'develop'
+      - name: Create nightly.(zip & xml) for each branch
         run: |
           today=`date +%Y-%m-%d`
-          cp $today-$GH_BRANCH*.zip nightly.zip
+          cp $today-$GH_BRANCH*.zip ${{ env.ZIP_FILE }}
+          cp $today-$GH_BRANCH*.xml ${{ env.XML_FILE }}
         working-directory: ${{ env.RELEASE_DIR }}
 
       - name: Auth Cloud Sdk
@@ -92,9 +85,11 @@ jobs:
       - name: Setup Cloud Sdk
         uses: google-github-actions/setup-gcloud@v1
 
-      - name: Delete last Nightly zip from develop
-        if: env.GH_BRANCH == 'develop'
-        run: gsutil rm -rf gs://prestashop-core-nightly/nightly.zip
+      - name: Delete last Nightly zip for each branch
+        run: gsutil rm -rf gs://prestashop-core-nightly/${{ env.ZIP_FILE }}
+
+      - name: Delete last Nightly xml for each branch
+        run: gsutil rm -rf gs://prestashop-core-nightly/${{ env.XML_FILE }}
 
       - name: Upload to Google Cloud Storage (GCS)
         if: always()

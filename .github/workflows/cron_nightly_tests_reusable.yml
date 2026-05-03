@@ -20,6 +20,11 @@ on:
         description: 'Database Server (MySQL `mysql` / MariaDB `mariadb`)'
         required: true
         type: string
+      UBUNTU_VERSION:
+        description: 'Ubuntu Server'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
       TESTS_DIR:
         description: 'Where UI tests are'
         required: false
@@ -41,7 +46,7 @@ jobs:
   # First job: Run tests in parallel
   test:
     name: Nightly tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.UBUNTU_VERSION }}
     strategy:
       fail-fast: false
       matrix:
@@ -80,9 +85,6 @@ jobs:
           - 'functional:BO:advanced-parameters:07-10'
           - 'functional:BO:advanced-parameters:11-12'
           - 'functional:BO:header'
-          - 'functional:FO:01-03'
-          - 'functional:FO:04-07'
-          - 'functional:FO:08-12'
           - 'functional:FO:classic:01-03'
           - 'functional:FO:classic:04-07'
           - 'functional:FO:classic:08-12'
@@ -99,117 +101,12 @@ jobs:
           - 'modules:30-39'
           - 'regression'
         exclude:
-          ## 1.7.8.x
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'audit'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'cldr'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:BO:advanced-parameters:11-12'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:BO:dashboard'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:productV2'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:API'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:classic:01-03'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:classic:04-07'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:classic:08-12'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:hummingbird:01-03'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:hummingbird:04-07'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:FO:hummingbird:08-12'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'functional:WS'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'modules'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'modules:01-09'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'modules:10-19'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'modules:20-29'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'modules:30-39'
-          - BRANCH: 1.7.8.x
-            CAMPAIGN: 'sanity:productV2'
-          ## 8.0.x
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'audit'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'cldr'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:BO:advanced-parameters:11-12'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:BO:dashboard'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:productV2'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:API'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:classic:01-03'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:classic:04-07'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:classic:08-12'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:hummingbird:01-03'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:hummingbird:04-07'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:FO:hummingbird:08-12'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'functional:WS'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'modules'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'modules:01-09'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'modules:10-19'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'modules:20-29'
-          - BRANCH: 8.0.x
-            CAMPAIGN: 'modules:30-39'
-          ## 8.1.x
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'audit'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:BO:advanced-parameters:11-12'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:FO:01-03'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:FO:04-07'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:FO:08-12'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:FO:hummingbird:04-07'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'functional:FO:hummingbird:08-12'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'modules:01-09'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'modules:10-19'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'modules:20-29'
-          - BRANCH: 8.1.x
-            CAMPAIGN: 'modules:30-39'
           ## 8.2.x
           - BRANCH: 8.2.x
             CAMPAIGN: 'audit'
           - BRANCH: 8.2.x
             CAMPAIGN: 'functional:BO:advanced-parameters:11-12'
           - BRANCH: 8.2.x
-            CAMPAIGN: 'functional:FO:01-03'
-          - BRANCH: 8.2.x
-            CAMPAIGN: 'functional:FO:04-07'
-          - BRANCH: 8.2.x
-            CAMPAIGN: 'functional:FO:08-12'
-          - BRANCH: 8.2.x
             CAMPAIGN: 'functional:FO:hummingbird:04-07'
           - BRANCH: 8.2.x
             CAMPAIGN: 'functional:FO:hummingbird:08-12'
@@ -221,26 +118,14 @@ jobs:
             CAMPAIGN: 'modules:20-29'
           - BRANCH: 8.2.x
             CAMPAIGN: 'modules:30-39'
-          ## 9.0.x
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'functional:FO:01-03'
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'functional:FO:04-07'
-          - BRANCH: 9.0.x
-            CAMPAIGN: 'functional:FO:08-12'
-          - BRANCH: 9.0.x
+          ## 9.1.x
+          - BRANCH: 9.1.x
             CAMPAIGN: 'sanity:productV2'
-          - BRANCH: 9.0.x
+          - BRANCH: 9.1.x
             CAMPAIGN: 'functional:productV2'
-          - BRANCH: 9.0.x
+          - BRANCH: 9.1.x
             CAMPAIGN: 'modules'
           ## develop
-          - BRANCH: develop
-            CAMPAIGN: 'functional:FO:01-03'
-          - BRANCH: develop
-            CAMPAIGN: 'functional:FO:04-07'
-          - BRANCH: develop
-            CAMPAIGN: 'functional:FO:08-12'
           - BRANCH: develop
             CAMPAIGN: 'sanity:productV2'
           - BRANCH: develop
@@ -253,7 +138,6 @@ jobs:
       REPORTS_DIR: 'reports_${{ matrix.BRANCH }}'  # Where to move test's reports
       TEST_CAMPAIGN: ${{ matrix.CAMPAIGN }}  # Command to execute from the matrix
       INSTALL_AUTO: ${{ (matrix.CAMPAIGN == 'sanity') && 'false' || 'true' }}
-      ENABLE_SSL: ${{ ((matrix.BRANCH == '8.0.x') || (matrix.BRANCH == '1.7.8.x')) && 'false' || 'true' }}
       CLIENT_ID_API: ui-test-client
       CLIENT_SECRET_API: 18c7b983c2eaa22a111609ce2b1c435e
 
@@ -268,8 +152,8 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           PHP_VERSION: ${{ inputs.PHP_VERSION }}
-          ENABLE_SSL: ${{ env.ENABLE_SSL }}
           INSTALL_AUTO: ${{ env.INSTALL_AUTO }}
+          CP_API_CONFIG: ${{ (env.GH_BRANCH == '8.2.x') && 'true' || 'false' }}
           DB_SERVER: ${{ inputs.DB_SERVER }}
       - name: Setup Environment failure
         uses: ./.github/actions/setup-env-export-logs
@@ -277,20 +161,19 @@ jobs:
           DOCKER_PREFIX: prestashop
           ARTIFACT_NAME: setup-nightly-${{ matrix.BRANCH }}-${{ matrix.CAMPAIGN }}-${{ inputs.DB_SERVER }}
           DB_SERVER: ${{ inputs.DB_SERVER }}
-          ENABLE_SSL: ${{ env.ENABLE_SSL }}
           INSTALL_AUTO: ${{ env.INSTALL_AUTO }}
         if: failure()
 
       # Create API Client for API campaign
       - name: Create API client
-        if: ${{ (env.GH_BRANCH == '9.0.x' || env.GH_BRANCH == 'develop') && env.TEST_CAMPAIGN == 'functional:API' }}
+        if: ${{ (startsWith(env.GH_BRANCH, '9.') || env.GH_BRANCH == 'develop') && env.TEST_CAMPAIGN == 'functional:API' }}
         run: |
           docker exec prestashop-prestashop-git-1 php ./bin/console prestashop:api-client create ${{ env.CLIENT_ID_API }} --all-scopes --name='Test client' --description='Test client with all scopes' --timeout=3600 --secret=${{ env.CLIENT_SECRET_API }}
 
       # Keycloak is only needed for API campaign
       - name: Setup Keycloak
         uses: ./.github/actions/setup-keycloak
-        if: ${{ (env.GH_BRANCH == '9.0.x' || env.GH_BRANCH == 'develop') && env.TEST_CAMPAIGN == 'functional:API' }}
+        if: ${{ (startsWith(env.GH_BRANCH, '9.') || env.GH_BRANCH == 'develop') && env.TEST_CAMPAIGN == 'functional:API' }}
 
       - name: Run Tests
         continue-on-error: true
@@ -303,6 +186,10 @@ jobs:
         env:
           CLIENT_ID_API: ${{ env.CLIENT_ID_API }}
           CLIENT_SECRET_API: ${{ env.CLIENT_SECRET_API }}
+          PS_VERSION: ${{ env.GH_BRANCH }}
+
+      - name: Clean environment variable
+        run: echo "TEST_CAMPAIGN_ARTIFACT=$( echo -e '${{ env.TEST_CAMPAIGN }}' | tr ':' '-' )" >> $GITHUB_ENV
 
       # Rename and upload report as artifact
       - name: Rename file reports
@@ -311,13 +198,12 @@ jobs:
           REPORTS_DIR_PATH: ${{ github.workspace }}/${{ env.REPORTS_DIR }}
         run: |
           mkdir -p ${{ env.REPORTS_DIR_PATH }}
-          FILENAME="$( echo -e '${{ env.TEST_CAMPAIGN }}' | tr  ':' '-'  )"
-          mv ./mochawesome-report/mochawesome.json ${{ env.REPORTS_DIR_PATH }}/${FILENAME}.json
+          mv ./mochawesome-report/mochawesome.json ${{ env.REPORTS_DIR_PATH }}/${{ env.TEST_CAMPAIGN_ARTIFACT }}.json
 
-      - uses: actions/upload-artifact@v3
-        name: Upload report
+      - name: Upload report
+        uses: actions/upload-artifact@v6
         with:
-          name: reports_${{ env.GH_BRANCH }}
+          name: reports_${{ env.GH_BRANCH }}_${{ env.TEST_CAMPAIGN_ARTIFACT }}
           path: ${{ env.REPORTS_DIR }}
 
   # Second job: Merge Mochawesome reports and upload them on GCP
@@ -327,7 +213,7 @@ jobs:
     if: ${{ always() }}
     needs:
       - test
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.UBUNTU_VERSION }}
 
     strategy:
       fail-fast: false
@@ -346,11 +232,12 @@ jobs:
           fetch-depth: 0
           ref: ${{ env.GH_BRANCH }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         name: Download reports
         with:
-          name: reports_${{ env.GH_BRANCH }}
           path: ${{ env.REPORTS_DIR }}
+          pattern: reports_${{ env.GH_BRANCH }}_*
+          merge-multiple: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
