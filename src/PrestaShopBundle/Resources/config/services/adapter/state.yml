@@ -33,3 +33,8 @@ services:
   prestashop.adapter.state.command_handler.bulk_update_state_zone_handler:
     class: 'PrestaShop\PrestaShop\Adapter\State\CommandHandler\BulkUpdateStateZoneHandler'
     autoconfigure: true
+
+  PrestaShop\PrestaShop\Adapter\State\Repository\StateRepository:
+    arguments:
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'

@@ -8,7 +8,7 @@ import {
   boProductsCreatePage,
   type BrowserContext,
   FakerProduct,
-  foClassicProductPage,
+  foHummingbirdProductPage,
   type Page,
   utilsCore,
   utilsFile,
@@ -134,7 +134,7 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
     it('should check the product header details', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkProductHeaderDetails', baseContext);
 
-      const taxValue = await utilsCore.percentage(newProductData.priceTaxExcluded, newProductData.tax);
+      const taxValue = utilsCore.percentage(newProductData.priceTaxExcluded, newProductData.tax);
 
       const productHeaderSummary = await boProductsCreatePage.getProductHeaderSummary(page);
       await Promise.all([
@@ -162,18 +162,18 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
       // Click on preview button
       page = await boProductsCreatePage.previewProduct(page);
 
-      await foClassicProductPage.changeLanguage(page, 'en');
+      await foHummingbirdProductPage.changeLanguage(page, 'en');
 
-      const pageTitle = await foClassicProductPage.getPageTitle(page);
+      const pageTitle = await foHummingbirdProductPage.getPageTitle(page);
       expect(pageTitle).to.contains(newProductData.name);
     });
 
     it('should check all product information', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkProductInformation', baseContext);
 
-      const taxValue = await utilsCore.percentage(newProductData.priceTaxExcluded, newProductData.tax);
+      const taxValue = utilsCore.percentage(newProductData.priceTaxExcluded, newProductData.tax);
 
-      const result = await foClassicProductPage.getProductInformation(page);
+      const result = await foHummingbirdProductPage.getProductInformation(page);
       await Promise.all([
         expect(result.name).to.equal(newProductData.name),
         expect(result.price.toFixed(2)).to.equal((newProductData.priceTaxExcluded + taxValue).toFixed(2)),
@@ -186,7 +186,7 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO', baseContext);
 
       // Go back to BO
-      page = await foClassicProductPage.closePage(browserContext, page, 0);
+      page = await foHummingbirdProductPage.closePage(browserContext, page, 0);
 
       const pageTitle = await boProductsCreatePage.getPageTitle(page);
       expect(pageTitle).to.contains(boProductsCreatePage.pageTitle);
@@ -205,7 +205,7 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
     it('should check the product header details', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkEditedProductHeaderDetails', baseContext);
 
-      const taxValue = await utilsCore.percentage(editProductData.priceTaxExcluded, editProductData.tax);
+      const taxValue = utilsCore.percentage(editProductData.priceTaxExcluded, editProductData.tax);
 
       const productHeaderSummary = await boProductsCreatePage.getProductHeaderSummary(page);
       await Promise.all([
@@ -226,18 +226,18 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
       // Click on preview button
       page = await boProductsCreatePage.previewProduct(page);
 
-      await foClassicProductPage.changeLanguage(page, 'en');
+      await foHummingbirdProductPage.changeLanguage(page, 'en');
 
-      const pageTitle = await foClassicProductPage.getPageTitle(page);
+      const pageTitle = await foHummingbirdProductPage.getPageTitle(page);
       expect(pageTitle).to.contains(editProductData.name);
     });
 
     it('should check all product information', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkEditedProductInformation', baseContext);
 
-      const taxValue = await utilsCore.percentage(editProductData.priceTaxExcluded, editProductData.tax);
+      const taxValue = utilsCore.percentage(editProductData.priceTaxExcluded, editProductData.tax);
 
-      const result = await foClassicProductPage.getProductInformation(page);
+      const result = await foHummingbirdProductPage.getProductInformation(page);
       await Promise.all([
         expect(result.name).to.equal(editProductData.name),
         expect(result.price.toFixed(2)).to.equal((editProductData.priceTaxExcluded + taxValue).toFixed(2)),
@@ -249,7 +249,7 @@ describe('BO - Catalog - Products : CRUD standard product', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'goBackToBO2', baseContext);
 
       // Go back to BO
-      page = await foClassicProductPage.closePage(browserContext, page, 0);
+      page = await foHummingbirdProductPage.closePage(browserContext, page, 0);
 
       const pageTitle = await boProductsCreatePage.getPageTitle(page);
       expect(pageTitle).to.contains(boProductsCreatePage.pageTitle);

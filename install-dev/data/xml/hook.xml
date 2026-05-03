@@ -2873,6 +2873,11 @@
       <title>Modify checkout process</title>
       <description>This hook is called when constructing the checkout process</description>
     </hook>
+    <hook id="actionCheckoutBuildProcess">
+      <name>actionCheckoutBuildProcess</name>
+      <title>Build checkout process</title>
+      <description>This hook is triggered before the checkout is rendered. Modules may return a checkout process provider. The provider is used only when exactly one enabled and valid provider is available.</description>
+    </hook>
     <hook id="actionCheckoutStepRenderTemplate">
       <name>actionCheckoutStepRenderTemplate</name>
       <title>Modify the parameters of the checkout step template rendering</title>
@@ -4603,11 +4608,6 @@
       <title>Provide feature value identifiable object form data for update</title>
       <description>This hook allows to provide feature value identifiable object form data which will prefill the form in update/edition page</description>
     </hook>
-    <hook id="actionCartRuleFormDataProviderData">
-      <name>actionCartRuleFormDataProviderData</name>
-      <title>Provide cart rule identifiable object form data for update</title>
-      <description>This hook allows to provide cart rule identifiable object form data which will prefill the form in update/edition page</description>
-    </hook>
     <hook id="actionTitleFormDataProviderData">
       <name>actionTitleFormDataProviderData</name>
       <title>Provide title identifiable object form data for update</title>
@@ -4632,11 +4632,6 @@
       <name>actionFeatureValueFormDataProviderDefaultData</name>
       <title>Provide feature value identifiable object default form data for creation</title>
       <description>This hook allows to provide feature value identifiable object form data which will prefill the form in creation page</description>
-    </hook>
-    <hook id="actionCartRuleFormDataProviderDefaultData">
-      <name>actionCartRuleFormDataProviderDefaultData</name>
-      <title>Provide cart rule identifiable object default form data for creation</title>
-      <description>This hook allows to provide cart rule identifiable object form data which will prefill the form in creation page</description>
     </hook>
     <hook id="actionTitleFormDataProviderDefaultData">
       <name>actionTitleFormDataProviderDefaultData</name>
@@ -5522,6 +5517,161 @@
       <name>actionOverrideProductQuantity</name>
       <title>Override product quantity calculation</title>
       <description>Allows modules to override the final product quantity returned by Product::getQuantity(), including cart-aware calculations.</description>
+    </hook>
+    <hook id="actionModuleUpgradeAfter">
+      <name>actionModuleUpgradeAfter</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionModuleEnable">
+      <name>actionModuleEnable</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionModuleDisable">
+      <name>actionModuleDisable</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionConfigurationUpdateValueBefore">
+      <name>actionConfigurationUpdateValueBefore</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionAdminDuplicateDiscountBefore">
+      <name>actionAdminDuplicateDiscountBefore</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionAdminDuplicateDiscountAfter">
+      <name>actionAdminDuplicateDiscountAfter</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionFacetedSearchSetSupportedControllers">
+      <name>actionFacetedSearchSetSupportedControllers</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionFacetedSearchFilters">
+      <name>actionFacetedSearchFilters</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionMainMenuModifier">
+      <name>actionMainMenuModifier</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionTagFormBuilderModifier">
+      <name>actionTagFormBuilderModifier</name>
+      <title>Modify tag identifiable object form</title>
+      <description>This hook allows to modify tag identifiable object forms content by modifying form builder data or FormBuilder itself</description>
+    </hook>
+    <hook id="actionTagFormDataProviderData">
+      <name>actionTagFormDataProviderData</name>
+      <title>Provide tag identifiable object form data for update</title>
+      <description>This hook allows to provide tag identifiable object form data which will prefill the form in update/edition page</description>
+    </hook>
+    <hook id="actionTagFormDataProviderDefaultData">
+      <name>actionTagFormDataProviderDefaultData</name>
+      <title>Provide tag identifiable object default form data for creation</title>
+      <description>This hook allows to provide tag identifiable object form data which will prefill the form in creation page</description>
+    </hook>
+    <hook id="actionBeforeUpdateTagFormHandler">
+      <name>actionBeforeUpdateTagFormHandler</name>
+      <title>Modify tag identifiable object data before updating it</title>
+      <description>This hook allows to modify tag identifiable object forms data before it was updated</description>
+    </hook>
+    <hook id="actionAfterUpdateTagFormHandler">
+      <name>actionAfterUpdateTagFormHandler</name>
+      <title>Modify tag identifiable object data after updating it</title>
+      <description>This hook allows to modify tag identifiable object forms data after it was updated</description>
+    </hook>
+    <hook id="actionBeforeCreateTagFormHandler">
+      <name>actionBeforeCreateTagFormHandler</name>
+      <title>Modify tag identifiable object data before creating it</title>
+      <description>This hook allows to modify tag identifiable object forms data before it was created</description>
+    </hook>
+    <hook id="actionAfterCreateTagFormHandler">
+      <name>actionAfterCreateTagFormHandler</name>
+      <title>Modify tag identifiable object data after creating it</title>
+      <description>This hook allows to modify tag identifiable object forms data after it was created</description>
+    </hook>
+    <hook id="actionDiscountGridDefinitionModifier">
+      <name>actionDiscountGridDefinitionModifier</name>
+      <title>Modify discount grid definition</title>
+      <description>This hook allows to alter discount grid columns, actions and filters</description>
+    </hook>
+    <hook id="actionDiscountGridQueryBuilderModifier">
+      <name>actionDiscountGridQueryBuilderModifier</name>
+      <title>Modify discount grid query builder</title>
+      <description>This hook allows to alter Doctrine query builder for discount grid</description>
+    </hook>
+    <hook id="actionDiscountGridDataModifier">
+      <name>actionDiscountGridDataModifier</name>
+      <title>Modify discount grid data</title>
+      <description>This hook allows to modify discount grid data</description>
+    </hook>
+    <hook id="actionDiscountGridFilterFormModifier">
+      <name>actionDiscountGridFilterFormModifier</name>
+      <title>Modify discount grid filters</title>
+      <description>This hook allows to modify filters for discount grid</description>
+    </hook>
+    <hook id="actionDiscountGridPresenterModifier">
+      <name>actionDiscountGridPresenterModifier</name>
+      <title>Modify discount grid template data</title>
+      <description>This hook allows to modify data which is about to be used in template for discount grid</description>
+    </hook>
+    <hook id="actionFrontControllerDetectContextCountryAfter">
+      <name>actionFrontControllerDetectContextCountryAfter</name>
+      <title>Action after detecting context country</title>
+      <description>Allows modules to modify the context country after it has been detected via geolocation.</description>
+    </hook>
+    <hook id="actionFrontControllerInitContextCurrencyAfter">
+      <name>actionFrontControllerInitContextCurrencyAfter</name>
+      <title>Action after initializing context currency</title>
+      <description>Allows modules to modify the context currency after it has been initialized.</description>
+    </hook>
+    <hook id="actionFacetedSearchSetSupportedControllers">
+      <name>actionFacetedSearchSetSupportedControllers</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionFacetedSearchFilters">
+      <name>actionFacetedSearchFilters</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionMainMenuModifier">
+      <name>actionMainMenuModifier</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionFacetedSearchCacheKeyGeneration">
+      <name>actionFacetedSearchCacheKeyGeneration</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="gSitemapAppendUrls">
+      <name>gSitemapAppendUrls</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionUpdateDefaultCombinationAfter">
+      <name>actionUpdateDefaultCombinationAfter</name>
+      <title>After default combination update</title>
+      <description>Allows modules to react after the default combination of a product has been updated. This hook is triggered once the default combination has been successfully changed.</description>
+    </hook>
+    <hook id="actionOverrideShippingFreePrice">
+      <name>actionOverrideShippingFreePrice</name>
+      <title>Override price that determines free shipping</title>
+      <description>Allows modules to override the free shipping price and return their custom value, for example to specify it by zone or other criteria.</description>
+    </hook>
+    <hook id="actionOverrideShippingFreeWeight">
+      <name>actionOverrideShippingFreeWeight</name>
+      <title>Override weight that determines free shipping</title>
+      <description>Allows modules to override the free shipping weight and return their custom value, for example to specify it by zone or other criteria.</description>
     </hook>
   </entities>
 </entity_hook>

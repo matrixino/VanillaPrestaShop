@@ -31,6 +31,10 @@ services:
     tags:
       - 'console.command'
 
+  PrestaShopBundle\Command\CheckTranslationFixtures:
+    tags:
+      - 'console.command'
+
   PrestaShopBundle\Command\LegacyLinkLinterCommand:
     arguments:
       - '@prestashop.bundle.routing.linter.legacy_link_linter'
@@ -60,10 +64,6 @@ services:
     arguments:
       - '@prestashop.bundle.routing.linter.admin_route_provider'
       - '@prestashop.bundle.routing.linter.security_annotation_linter'
-    tags:
-      - 'console.command'
-
-  PrestaShopBundle\Command\UpdateLicensesCommand:
     tags:
       - 'console.command'
 

@@ -1,26 +1,6 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  *}
 
 <div class="leadin">{block name="leadin"}{/block}</div>
@@ -133,7 +113,7 @@
 											{if $field['list']}
 												<select class="form-control fixed-width-xxl {if isset($field['class'])}{$field['class']}{/if}" name="{$key}"{if isset($field['js'])} onchange="{$field['js']}"{/if} id="{$key}" {if isset($field['size'])} size="{$field['size']}"{/if} {if !empty($field['multiple'])} multiple="multiple"{/if}>
 													{foreach $field['list'] AS $k => $option}
-														<option value="{$option[$field['identifier']]}"{if $field['value'] == $option[$field['identifier']]} selected="selected"{/if}>{$option['name']}</option>
+														<option value="{$option[$field['identifier']]|escape:'html':'UTF-8'}"{if $field['value'] == $option[$field['identifier']]} selected="selected"{/if}>{$option['name']|escape:'html':'UTF-8'}</option>
 													{/foreach}
 												</select>
 											{elseif isset($input.empty_message)}
@@ -301,9 +281,9 @@
 												<div id="{$key}_{$language.id_lang}" style="display: {if $language.id_lang == $current_id_lang}block{else}none{/if};" class="col-lg-9">
 													<select name="{$key}_{$language.iso_code|upper}">
 														{foreach $field['list'] AS $k => $v}
-															<option value="{if isset($v.cast)}{$v.cast[$v[$field.identifier]]}{else}{$v[$field.identifier]}{/if}"
+															<option value="{if isset($v.cast)}{$v.cast[$v[$field.identifier]]|escape:'html':'UTF-8'}{else}{$v[$field.identifier]|escape:'html':'UTF-8'}{/if}"
 																{if $field['value'][$language.id_lang] == $v['name']} selected="selected"{/if}>
-																{$v['name']}
+																{$v['name']|escape:'html':'UTF-8'}
 															</option>
 														{/foreach}
 													</select>

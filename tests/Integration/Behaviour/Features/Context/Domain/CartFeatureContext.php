@@ -1,33 +1,14 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 namespace Tests\Integration\Behaviour\Features\Context\Domain;
 
 use Behat\Behat\Context\Environment\InitializedContextEnvironment;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Gherkin\Node\TableNode;
 use Cart;
 use CartRule;
 use Configuration;
@@ -39,6 +20,7 @@ use DateInterval;
 use DateTime;
 use Exception;
 use PHPUnit\Framework\Assert;
+use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Cart\Repository\CartRepository;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\AddCartRuleToCartCommand;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Command\AddCustomizationCommand;
@@ -63,12 +45,12 @@ use PrestaShop\PrestaShop\Core\Domain\Cart\Exception\MinimalQuantityException;
 use PrestaShop\PrestaShop\Core\Domain\Cart\Query\GetCartForOrderCreation;
 use PrestaShop\PrestaShop\Core\Domain\Cart\QueryResult\CartForOrderCreation;
 use PrestaShop\PrestaShop\Core\Domain\Cart\ValueObject\CartId;
+use PrestaShop\PrestaShop\Core\Domain\CartRule\Exception\CartRuleValidityException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Customization\ValueObject\CustomizationId;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\PackOutOfStockException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductCustomizationNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\SearchProducts;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\FoundProduct;
-use PrestaShop\PrestaShop\Core\Domain\ValueObject\Reduction;
 use PrestaShopDatabaseException;
 use PrestaShopException;
 use Product;
@@ -186,7 +168,34 @@ class CartFeatureContext extends AbstractDomainFeatureContext
             );
             $this->getSharedStorage()->set($productName, $productId);
 
-            // Clear cart static cache or it will have no products in next calls
+            // Clear cart static cache, or it will have no products in next calls
+            Cart::resetStaticCache();
+        } catch (MinimalQuantityException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When /^I add (\d+) combination(?:s)? "(.+)" from product "(.+)" to the cart "(.+)"$/
+     *
+     * @param int $quantity
+     * @param string $combinationReference
+     * @param string $productReference
+     * @param string $cartReference
+     */
+    public function addCombinationsToCart(int $quantity, string $combinationReference, string $productReference, string $cartReference)
+    {
+        try {
+            $this->getCommandBus()->handle(
+                new AddProductToCartCommand(
+                    $this->referenceToId($cartReference),
+                    $this->referenceToId($productReference),
+                    $quantity,
+                    $this->referenceToId($combinationReference)
+                )
+            );
+
+            // Clear cart static cache, or it will have no products in next calls
             Cart::resetStaticCache();
         } catch (MinimalQuantityException $e) {
             $this->setLastException($e);
@@ -595,13 +604,16 @@ class CartFeatureContext extends AbstractDomainFeatureContext
     {
         $cartId = $this->getSharedStorage()->get($cartReference);
         $cartRuleId = $this->getSharedStorage()->get($voucherCode);
-
-        $this->getCommandBus()->handle(
-            new AddCartRuleToCartCommand(
-                $cartId,
-                $cartRuleId
-            )
-        );
+        try {
+            $this->getCommandBus()->handle(
+                new AddCartRuleToCartCommand(
+                    $cartId,
+                    $cartRuleId
+                )
+            );
+        } catch (CartRuleValidityException $e) {
+            $this->setLastException($e);
+        }
     }
 
     /**
@@ -643,6 +655,22 @@ class CartFeatureContext extends AbstractDomainFeatureContext
             $this->getCommandBus()->handle(new RemoveProductFromCartCommand(
                 $cartId,
                 $productId
+            ));
+        } catch (CartException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When I delete combination :combinationReference from product :productReference from cart :cartReference
+     */
+    public function deleteCombination(string $combinationReference, string $productReference, string $cartReference)
+    {
+        try {
+            $this->getCommandBus()->handle(new RemoveProductFromCartCommand(
+                $this->referenceToId($cartReference),
+                $this->referenceToId($productReference),
+                $this->referenceToId($combinationReference)
             ));
         } catch (CartException $e) {
             $this->setLastException($e);
@@ -1022,16 +1050,17 @@ class CartFeatureContext extends AbstractDomainFeatureContext
 
     /**
      * @param string $cartReference
+     * @param bool $hideDiscounts
      *
      * @return CartForOrderCreation
      */
-    private function getCartForOrderCreationByReference(string $cartReference): CartForOrderCreation
+    private function getCartForOrderCreationByReference(string $cartReference, bool $hideDiscounts = true): CartForOrderCreation
     {
         $cartId = $this->getSharedStorage()->get($cartReference);
 
         return $this->getQueryBus()->handle(
             (new GetCartForOrderCreation($cartId))
-                ->setHideDiscounts(true)
+                ->setHideDiscounts($hideDiscounts)
         );
     }
 
@@ -1123,6 +1152,94 @@ class CartFeatureContext extends AbstractDomainFeatureContext
         $cartTotal = $cartInfo->getSummary()->getTotalPriceWithTaxes();
         if ($cartTotal !== $expectedTotal) {
             throw new RuntimeException(sprintf('Expects %s, got %s instead', $expectedTotal, $cartTotal));
+        }
+    }
+
+    /**
+     * @Then my cart :cartReference should have the following details:
+     *
+     * @param TableNode $tableNode
+     *
+     * @return void
+     */
+    public function assertCartDetailsAfterDiscount(string $cartReference, TableNode $tableNode): void
+    {
+        $cartInfo = $this->getCartForOrderCreationByReference($cartReference);
+        $data = $this->localizeByRows($tableNode);
+
+        if (isset($data['total_products'])) {
+            Assert::assertSame($data['total_products'], $cartInfo->getSummary()->getTotalProductsPrice());
+        }
+        if (isset($data['total_discount'])) {
+            Assert::assertSame($data['total_discount'], $cartInfo->getSummary()->getTotalDiscount());
+        }
+        if (isset($data['shipping'])) {
+            Assert::assertSame($data['shipping'], $cartInfo->getSummary()->getTotalShippingPrice());
+        }
+        if (isset($data['total'])) {
+            Assert::assertSame($data['total'], $cartInfo->getSummary()->getTotalPriceWithTaxes());
+        }
+    }
+
+    /**
+     * @Then the cart :cartReference should have the following reductions:
+     */
+    public function checkCartRuleContextualValue(string $cartReference, TableNode $tableNode): void
+    {
+        $expectedCartRuleValues = $tableNode->getRowsHash();
+        $expectedCartRulesKeys = array_keys($expectedCartRuleValues);
+        $cart = new Cart($this->referenceToId($cartReference));
+        $cartRuleRows = $cart->getCartRules();
+
+        Assert::assertCount(count($expectedCartRuleValues), $cartRuleRows, 'Unexpected cart rules count in cart');
+
+        foreach ($cartRuleRows as $key => $cartRuleRow) {
+            $cartRuleReference = $expectedCartRulesKeys[$key];
+
+            Assert::assertTrue(
+                $this->getSharedStorage()->exists($cartRuleReference),
+                sprintf('cart rule by reference "%s" doesnt exist', $cartRuleReference)
+            );
+
+            Assert::assertSame(
+                (int) $cartRuleRow['id_cart_rule'],
+                $this->getSharedStorage()->get($cartRuleReference),
+                sprintf('Cart rule %s was not expected in cart (or the sequence is unexpected).', $cartRuleReference)
+            );
+
+            $expectedReduction = new DecimalNumber((string) $expectedCartRuleValues[$cartRuleReference]);
+            $actualReduction = new DecimalNumber((string) $cartRuleRow['value_real']);
+
+            Assert::assertTrue(
+                $actualReduction->equals($expectedReduction),
+                sprintf('Unexpected contextual reduction. Expected %s, got %s', $expectedReduction, $actualReduction)
+            );
+        }
+    }
+
+    /**
+     * @Then my cart :cartReference should have the following details, without hiding auto discounts:
+     *
+     * @param TableNode $tableNode
+     *
+     * @return void
+     */
+    public function assertCartDetailsAfterDiscountWihoutHidingAutoDiscounts(string $cartReference, TableNode $tableNode): void
+    {
+        $cartInfo = $this->getCartForOrderCreationByReference($cartReference, false);
+        $data = $this->localizeByRows($tableNode);
+
+        if (isset($data['total_products'])) {
+            Assert::assertSame($data['total_products'], $cartInfo->getSummary()->getTotalProductsPrice());
+        }
+        if (isset($data['total_discount'])) {
+            Assert::assertSame($data['total_discount'], $cartInfo->getSummary()->getTotalDiscount());
+        }
+        if (isset($data['shipping'])) {
+            Assert::assertSame($data['shipping'], $cartInfo->getSummary()->getTotalShippingPrice());
+        }
+        if (isset($data['total'])) {
+            Assert::assertSame($data['total'], $cartInfo->getSummary()->getTotalPriceWithTaxes());
         }
     }
 

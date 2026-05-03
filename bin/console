@@ -2,6 +2,7 @@
 <?php
 
 use PrestaShopBundle\Console\PrestaShopApplication;
+use PrestaShop\PrestaShop\Core\Addon\Theme\Theme;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Dotenv\Dotenv;
@@ -14,10 +15,32 @@ use Symfony\Component\ErrorHandler\Debug;
 
 set_time_limit(0);
 
+require_once __DIR__ . '/../autoload.php';
+
+// Loads .env file from the root of project
+$dotEnvFile = dirname(__FILE__, 2) . '/.env';
+(new Dotenv())
+  // DO NOT use putEnv
+  ->usePutenv(false)
+  ->loadEnv($dotEnvFile)
+;
+
 try {
     require_once __DIR__ . '/../config/config.inc.php';
-} catch (PrestaShopException) {
-    // Prevent breaking all CLI command when the shop is not installed
+} catch (PrestaShopException $e) {
+    // Prevent breaking all CLI command when the shop is not installed, define fallback values
+    if (!defined('__PS_BASE_URI__')) {
+      define('__PS_BASE_URI__', '/');
+    }
+    if (!defined('_THEME_NAME_')) {
+      define('_THEME_NAME_', Theme::getDefaultTheme());
+    }
+    if (!defined('_PARENT_THEME_NAME_')) {
+      define('_PARENT_THEME_NAME_', '');
+    }
+
+    // Define all the URI base constants
+    require_once __DIR__ . '/../config/defines_uri.inc.php';
 }
 
 $input = new ArgvInput();
@@ -36,14 +59,6 @@ $kernelClass = match ($appId) {
 if ($debug) {
     Debug::enable();
 }
-
-// Loads .env file from the root of project
-$dotEnvFile = dirname(__FILE__, 2) . '/.env';
-  (new Dotenv())
-  // DO NOT use putEnv
-      ->usePutenv(false)
-      ->loadEnv($dotEnvFile)
-;
 
 $kernel = new $kernelClass($env, $debug);
 $application = new PrestaShopApplication($kernel);

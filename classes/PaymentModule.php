@@ -1,30 +1,15 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
+
 use PrestaShop\PrestaShop\Adapter\MailTemplate\MailPartialTemplateRenderer;
+use PrestaShop\PrestaShop\Adapter\Shipment\OrderShipmentCreator;
+use PrestaShop\PrestaShop\Adapter\Shipment\OrderShipmentService;
 use PrestaShop\PrestaShop\Adapter\StockManager;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 
 abstract class PaymentModuleCore extends Module
 {
@@ -228,6 +213,7 @@ abstract class PaymentModuleCore extends Module
             'id_order_state' => &$id_order_state,
             'payment_method' => $payment_method,
         ]);
+        $orderShipmentService = $this->get(OrderShipmentService::class);
 
         $this->context->cart = new Cart((int) $id_cart);
         $this->context->customer = new Customer((int) $this->context->cart->id_customer);
@@ -317,7 +303,7 @@ abstract class PaymentModuleCore extends Module
             if (Validate::isLoadedObject($rule)) {
                 if ($error = $rule->checkValidity($this->context, true, true)) {
                     $this->context->cart->removeCartRule((int) $rule->id);
-                    if (isset($this->context->cookie, $this->context->cookie->id_customer) && $this->context->cookie->id_customer && !empty($rule->code)) {
+                    if (!empty($this->context->customer->id) && !empty($rule->code)) {
                         Tools::redirect($this->context->link->getPageLink(
                             'order',
                             null,
@@ -346,33 +332,66 @@ abstract class PaymentModuleCore extends Module
             $id_order_state = Configuration::get('PS_OS_ERROR');
         }
 
-        foreach ($package_list as $id_address => $packageByAddress) {
-            foreach ($packageByAddress as $id_package => $package) {
-                $orderData = $this->createOrderFromCart(
-                    $this->context->cart,
-                    $this->context->currency,
-                    $package['product_list'],
-                    $id_address,
-                    $this->context,
-                    $reference,
-                    $secure_key,
-                    $payment_method,
-                    $this->name,
-                    $dont_touch_amount,
-                    $amount_paid,
-                    0,
-                    $cart_total_paid,
-                    self::DEBUG_MODE,
-                    $order_status,
-                    $id_order_state,
-                    isset($package['id_carrier']) ? $package['id_carrier'] : null
-                );
-                $order = $orderData['order'];
-                $order_list[] = $order;
-                $order_detail_list[] = $orderData['orderDetail'];
+        if (!$this->isFeatureFlagIsEnabledForMultiShipment()) {
+            foreach ($package_list as $id_address => $packageByAddress) {
+                foreach ($packageByAddress as $id_package => $package) {
+                    $orderData = $this->createOrderFromCart(
+                        $this->context->cart,
+                        $this->context->currency,
+                        $package['product_list'],
+                        $id_address,
+                        $this->context,
+                        $reference,
+                        $secure_key,
+                        $payment_method,
+                        $this->name,
+                        $dont_touch_amount,
+                        $amount_paid,
+                        0,
+                        $cart_total_paid,
+                        self::DEBUG_MODE,
+                        $order_status,
+                        $id_order_state,
+                        isset($package['id_carrier']) ? $package['id_carrier'] : null
+                    );
+                    $order = $orderData['order'];
+                    $order_list[] = $order;
+                    $order_detail_list[] = $orderData['orderDetail'];
+                }
             }
-        }
+        } else {
+            $productsByCarriers = [];
+            $idAddress = null;
 
+            foreach ($package_list as $id_address => $packageByAddress) {
+                $idAddress = $id_address;
+                foreach ($packageByAddress as $id_package => $package) {
+                    $productsByCarriers[$package['id_carrier']]['product_list'] = $package['product_list'];
+                }
+            }
+            $orderData = $this->createOrderFromCart(
+                $this->context->cart,
+                $this->context->currency,
+                $productsByCarriers,
+                $idAddress,
+                $this->context,
+                $reference,
+                $secure_key,
+                $payment_method,
+                $this->name,
+                $dont_touch_amount,
+                $amount_paid,
+                0,
+                $cart_total_paid,
+                self::DEBUG_MODE,
+                $order_status,
+                $id_order_state,
+                null
+            );
+            $order = $orderData['order'];
+            $order_list[] = $order;
+            $order_detail_list[] = $orderData['orderDetail'];
+        }
         // The country can only change if the address used for the calculation is the delivery address, and if multi-shipping is activated
         if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_delivery' && isset($context_country)) {
             $this->context->country = $context_country;
@@ -453,11 +472,22 @@ abstract class PaymentModuleCore extends Module
 
                 $product_price = Product::getTaxCalculationMethod() == PS_TAX_EXC ? Tools::ps_round($price, Context::getContext()->getComputingPrecision()) : $price_wt;
 
+                $carrierName = null;
+                if ($orderShipmentService->orderHasShipment($order->id)) {
+                    $carrierName = $orderShipmentService->getCarrierForProduct($order->id, (int) $product['id_product'])->name;
+                }
+
                 $product_var_tpl = [
                     'id_product' => $product['id_product'],
                     'id_product_attribute' => $product['id_product_attribute'],
                     'reference' => $product['reference'],
-                    'name' => $product['name'] . (!empty($product['attributes']) ? ' - ' . $product['attributes'] : ''),
+                    'name' => $this->trans(
+                        '%name%%attributes%%carrier%',
+                        [
+                            '%name%' => $product['name'],
+                            '%attributes%' => !empty($product['attributes']) ? $this->trans(' - %attributes%', ['%attributes%' => $product['attributes']], 'Emails.Body') : '',
+                            '%carrier%' => $carrierName ? $this->trans(' - Carrier: %carrier_name%', ['%carrier_name%' => $carrierName], 'Emails.Body') : '',
+                        ], 'Emails.Body'),
                     'price' => Tools::getContextLocale($this->context)->formatPrice($product_price * $product['quantity'], $this->context->currency->iso_code),
                     'quantity' => $product['quantity'],
                     'customization' => [],
@@ -646,6 +676,15 @@ abstract class PaymentModuleCore extends Module
                 }
 
                 if (Validate::isEmail($this->context->customer->email)) {
+                    if ($orderShipmentService->orderHasShipment($order->id)) {
+                        $carriers = $orderShipmentService->getAllCarriersForOrder($order->id);
+                        $carrierNames = array_map(fn ($carrier) => $carrier->name, $carriers);
+                        $carrierNames = implode(', ', $carrierNames);
+                    } else {
+                        $carrier = new Carrier($order->id_carrier);
+                        $carrierNames = $carrier->name;
+                    }
+
                     $data = [
                         '{firstname}' => $this->context->customer->firstname,
                         '{lastname}' => $this->context->customer->lastname,
@@ -686,7 +725,7 @@ abstract class PaymentModuleCore extends Module
                         '{order_name}' => $order->getUniqReference(),
                         '{id_order}' => $order->id,
                         '{date}' => Tools::displayDate(date('Y-m-d H:i:s'), true),
-                        '{carrier}' => ($virtual_product || !isset($carrier->name)) ? $this->trans('No carrier', [], 'Admin.Payment.Notification') : $carrier->name,
+                        '{carrier}' => ($virtual_product || !isset($carrierNames)) ? $this->trans('No carrier', [], 'Admin.Payment.Notification') : $carrierNames,
                         '{payment}' => $order->payment,
                         '{products}' => $product_list_html,
                         '{products_txt}' => $product_list_txt,
@@ -944,8 +983,15 @@ abstract class PaymentModuleCore extends Module
      */
     protected function getEmailTemplateContent($template_name, $mail_type, $var)
     {
-        $email_configuration = Configuration::get('PS_MAIL_TYPE');
-        if ($email_configuration != $mail_type && $email_configuration != Mail::TYPE_BOTH) {
+        $configuration = Configuration::get('PS_MAIL_TYPE');
+
+        // Do not render TXT if not needed
+        if ($mail_type === Mail::TYPE_TEXT && !in_array($configuration, [Mail::TYPE_TEXT, Mail::TYPE_BOTH])) {
+            return '';
+        }
+
+        // Do not render HTML if not needed
+        if ($mail_type === Mail::TYPE_HTML && !in_array($configuration, [Mail::TYPE_HTML, Mail::TYPE_BOTH, Mail::TYPE_BOTH_AUTOMATIC_TEXT])) {
             return '';
         }
 
@@ -969,10 +1015,18 @@ abstract class PaymentModuleCore extends Module
         $debug,
         $order_status,
         $id_order_state,
-        $carrierId = null
+        $carrierId = null,
     ) {
         $order = new Order();
-        $order->product_list = $productList;
+        if (!$this->isFeatureFlagIsEnabledForMultiShipment()) {
+            $order->product_list = $productList;
+        } else {
+            foreach ($productList as $products) {
+                foreach ($products['product_list'] as $product) {
+                    $order->product_list[] = $product;
+                }
+            }
+        }
 
         $computingPrecision = Context::getContext()->getComputingPrecision();
 
@@ -1034,14 +1088,33 @@ abstract class PaymentModuleCore extends Module
         );
         $order->total_discounts = $order->total_discounts_tax_incl;
 
-        $order->total_shipping_tax_excl = Tools::ps_round(
-            (float) $cart->getPackageShippingCost($carrierId, false, null, $order->product_list),
-            $computingPrecision
-        );
         $order->total_shipping_tax_incl = Tools::ps_round(
-            (float) $cart->getPackageShippingCost($carrierId, true, null, $order->product_list),
+            (float) abs($cart->getOrderTotal(true, Cart::ONLY_SHIPPING, $order->product_list, null)),
             $computingPrecision
         );
+
+        $order->total_shipping_tax_excl = Tools::ps_round(
+            (float) abs($cart->getOrderTotal(false, Cart::ONLY_SHIPPING, $order->product_list, null)),
+            $computingPrecision
+        );
+
+        // loop for each carrier to store the shipping cost
+        if ($this->isFeatureFlagIsEnabledForMultiShipment()) {
+            foreach ($productList as $carrierId => $product) {
+                $totalShippingTaxExcl = Tools::ps_round(
+                    (float) abs($cart->getOrderTotal(false, Cart::ONLY_SHIPPING, $order->product_list, $carrierId)),
+                    $computingPrecision
+                );
+                $totalShippingTaxIncl = Tools::ps_round(
+                    (float) abs($cart->getOrderTotal(true, Cart::ONLY_SHIPPING, $order->product_list, $carrierId)),
+                    $computingPrecision
+                );
+
+                $productList[$carrierId]['total_shipping_tax_excl'] = $totalShippingTaxExcl;
+                $productList[$carrierId]['total_shipping_tax_incl'] = $totalShippingTaxIncl;
+            }
+        }
+
         $order->total_shipping = $order->total_shipping_tax_incl;
 
         if (null !== $carrier && Validate::isLoadedObject($carrier)) {
@@ -1122,6 +1195,10 @@ abstract class PaymentModuleCore extends Module
             $order_carrier->shipping_cost_tax_excl = (float) $order->total_shipping_tax_excl;
             $order_carrier->shipping_cost_tax_incl = (float) $order->total_shipping_tax_incl;
             $order_carrier->add();
+        }
+
+        if ($this->isFeatureFlagIsEnabledForMultiShipment()) {
+            $this->addShipmentToOrder($order, $productList);
         }
 
         return ['order' => $order, 'orderDetail' => $order_detail];
@@ -1257,7 +1334,10 @@ abstract class PaymentModuleCore extends Module
 
                 // Create a new instance of Cart Rule without id_lang, in order to update its quantity
                 $cart_rule_to_update = new CartRule((int) $cartRule->id);
-                $cart_rule_to_update->quantity = max(0, $cart_rule_to_update->quantity - 1);
+                // if the cart rule isn't in nolimit mode, we decrease the quantity available
+                if ($cart_rule_to_update->quantity !== null) {
+                    $cart_rule_to_update->quantity = max(0, $cart_rule_to_update->quantity - 1);
+                }
                 $cart_rule_to_update->update();
             }
 
@@ -1271,5 +1351,37 @@ abstract class PaymentModuleCore extends Module
         }
 
         return $cart_rules_list;
+    }
+
+    private function addShipmentToOrder(Order $order, array $productsByCarrier)
+    {
+        if (!$this->isFeatureFlagIsEnabledForMultiShipment()) {
+            return;
+        }
+
+        /** @var OrderShipmentCreator $orderShipmentCreator */
+        $orderShipmentCreator = $this->get('PrestaShop\PrestaShop\Adapter\Shipment\OrderShipmentCreator');
+        $physicalProductsByCarrier = [];
+
+        foreach ($productsByCarrier as $carrierId => $products) {
+            $filteredProducts = array_filter($products['product_list'], function (array $product) {
+                return !$product['is_virtual'];
+            });
+
+            if (!empty($filteredProducts)) {
+                $physicalProductsByCarrier[$carrierId]['product_list'] = array_values($filteredProducts);
+                $physicalProductsByCarrier[$carrierId]['total_shipping_tax_excl'] = $products['total_shipping_tax_excl'];
+                $physicalProductsByCarrier[$carrierId]['total_shipping_tax_incl'] = $products['total_shipping_tax_incl'];
+            }
+        }
+        $orderShipmentCreator->addShipmentOrder($order, $physicalProductsByCarrier);
+    }
+
+    private function isFeatureFlagIsEnabledForMultiShipment()
+    {
+        /** @var FeatureFlagStateCheckerInterface $featureFlagManager */
+        $featureFlagManager = $this->get(FeatureFlagStateCheckerInterface::class);
+
+        return $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT);
     }
 }

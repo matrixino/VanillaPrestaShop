@@ -9,7 +9,7 @@ inputs:
   NODE_VERSION:
     required: false
     description: Node Version to Build Themes
-    default: 16.20.1
+    default: 20.19.5
   DB_SERVER:
     required: false
     description: Database Server for PrestaShop (mysql/mariadb)
@@ -88,7 +88,8 @@ runs:
         DB_USER: 'root'
         DB_PASSWD: 'prestashop'
         PS_LANGUAGE: 'en'
-        ADMIN_PASSWD: 'Correct Horse Battery Staple'
+        ADMIN_PASSWD: 'Pr3st4Sh0P'
+        TIMEZONE: 'Europe/Paris'
       run: |
         cd ${{ inputs.PRESTASHOP_DIR }}
         if [[ "${{ inputs.DOCKER_DAEMON }}" = "true" ]]; then

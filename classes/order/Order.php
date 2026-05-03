@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
 use PrestaShopBundle\Entity\MutatorType;
@@ -378,6 +358,7 @@ class OrderCore extends ObjectModel
     public function getCartProducts()
     {
         $product_id_list = [];
+        $cart_base_product_quantity = [];
         $products = $this->getProducts();
         foreach ($products as &$product) {
             $product['id_product_attribute'] = $product['product_attribute_id'];
@@ -386,6 +367,12 @@ class OrderCore extends ObjectModel
                 . $product['product_id'] . '_'
                 . $product['product_attribute_id'] . '_'
                 . (isset($product['id_customization']) ? $product['id_customization'] : '0');
+
+            if (!isset($cart_base_product_quantity[$product['id_product']])) {
+                $cart_base_product_quantity[$product['id_product']] = $product['cart_quantity'];
+            } else {
+                $cart_base_product_quantity[$product['id_product']] += $product['cart_quantity'];
+            }
         }
         unset($product);
 
@@ -395,6 +382,8 @@ class OrderCore extends ObjectModel
                 . $product['id_product'] . '_'
                 . (isset($product['id_product_attribute']) ? $product['id_product_attribute'] : '0') . '_'
                 . (isset($product['id_customization']) ? $product['id_customization'] : '0');
+
+            $product['cart_base_product_quantity'] = isset($cart_base_product_quantity[$product['id_product']]) ? $cart_base_product_quantity[$product['id_product']] : 0;
 
             if (in_array($key, $product_id_list)) {
                 $product_list[] = $product;
@@ -520,6 +509,8 @@ class OrderCore extends ObjectModel
         $delivery = false;
         $paid = false;
         $shipped = false;
+        $email = false;
+
         if ($filters > 0) {
             if ($filters & OrderState::FLAG_NO_HIDDEN) {
                 $no_hidden = true;
@@ -535,6 +526,9 @@ class OrderCore extends ObjectModel
             }
             if ($filters & OrderState::FLAG_SHIPPED) {
                 $shipped = true;
+            }
+            if ($filters & OrderState::FLAG_EMAIL) {
+                $email = true;
             }
         }
 
@@ -555,6 +549,7 @@ class OrderCore extends ObjectModel
             ' . ($delivery ? ' AND os.delivery = 1' : '') . '
             ' . ($paid ? ' AND os.paid = 1' : '') . '
             ' . ($shipped ? ' AND os.shipped = 1' : '') . '
+            ' . ($email ? ' AND os.send_email = 1' : '') . '
             ' . ((int) $id_order_state ? ' AND oh.`id_order_state` = ' . (int) $id_order_state : '') . '
             ORDER BY oh.date_add DESC, oh.id_order_history DESC');
             if ($no_hidden) {
@@ -697,13 +692,13 @@ class OrderCore extends ObjectModel
     {
         $address = Address::initialize($this->id_address_delivery, true);
         $id_country = (int) $address->id_country;
-
+        $customerGroupId = (int) (new Customer($this->id_customer))->id_default_group;
         $specific_price = SpecificPrice::getSpecificPrice(
             $product['product_id'],
             $product['id_shop'],
             $this->id_currency,
             $id_country,
-            $this->id_shop_group,
+            $customerGroupId,
             $product['product_quantity'],
             $product['product_attribute_id']
         );

@@ -43,6 +43,12 @@ services:
     tags:
       - { name: validator.constraint_validator }
 
+  PrestaShop\PrestaShop\Core\ConstraintValidator\DiscountProductSegmentValidator:
+    arguments:
+      - '@translator'
+    tags:
+      - { name: validator.constraint_validator }
+
   prestashop.core.constraint_validator.address_country_dni_validator:
     class: 'PrestaShop\PrestaShop\Core\ConstraintValidator\AddressDniRequiredValidator'
     arguments:
@@ -70,5 +76,13 @@ services:
       - { name: validator.constraint_validator }
 
   PrestaShop\PrestaShop\Core\ConstraintValidator\InstalledApiResourceScopeValidator:
+    autowire: true
+    autoconfigure: true
+
+  PrestaShop\PrestaShop\Core\ConstraintValidator\UniqueDiscountCodeValidator:
+    autowire: true
+    autoconfigure: true
+
+  PrestaShop\PrestaShop\Core\ConstraintValidator\NotCustomizableProductValidator:
     autowire: true
     autoconfigure: true
