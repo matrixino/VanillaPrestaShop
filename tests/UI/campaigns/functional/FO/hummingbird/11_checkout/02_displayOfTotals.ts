@@ -1,7 +1,6 @@
 import testContext from '@utils/testContext';
 import {expect} from 'chai';
 
-import {enableHummingbird, disableHummingbird} from '@commonTests/BO/design/hummingbird';
 import {createCartRuleTest, deleteCartRuleTest} from '@commonTests/BO/catalog/cartRule';
 
 import {
@@ -26,7 +25,6 @@ const baseContext: string = 'functional_FO_hummingbird_checkout_displayOfTotals'
 
 /*
 Pre-condition:
-- Install the theme hummingbird
 - Create new cart rule
 Scenario:
 - Add product to cart
@@ -35,7 +33,6 @@ Scenario:
 - Proceed to checkout
 - Choose carrier and check details
 Post-condition:
-- Uninstall the theme hummingbird
 - Delete created cart rule
  */
 
@@ -59,13 +56,10 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       tax: 'Tax included',
     },
   });
-  const cartRuleWithCodeDiscountValue:number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+  const cartRuleDiscount: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
 
   // Pre-condition: Create cart rule with code
   createCartRuleTest(cartRuleWithCodeData, `${baseContext}_preTest_1`);
-
-  // Pre-condition : Install Hummingbird
-  enableHummingbird(`${baseContext}_preTest_2`);
 
   describe('Display total', async () => {
     before(async function () {
@@ -84,7 +78,7 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       await foHummingbirdHomePage.changeLanguage(page, 'en');
 
       const isHomePage = await foHummingbirdHomePage.isHomePage(page);
-      expect(isHomePage, 'Fail to open FO home page').to.equal(true);
+      expect(isHomePage).to.equal(true);
     });
 
     it('should go to login page', async function () {
@@ -93,7 +87,7 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       await foHummingbirdHomePage.goToLoginPage(page);
 
       const pageTitle = await foHummingbirdLoginPage.getPageTitle(page);
-      expect(pageTitle, 'Fail to open FO login page').to.contains(foHummingbirdLoginPage.pageTitle);
+      expect(pageTitle).to.contains(foHummingbirdLoginPage.pageTitle);
     });
 
     it('should sign in with created customer', async function () {
@@ -139,19 +133,19 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       await foHummingbirdCartPage.clickOnPromoCode(page);
 
       const cartRuleName = await foHummingbirdCartPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.equal(cartRuleWithCodeData.name);
+      expect(cartRuleName).to.contains(cartRuleWithCodeData.name);
     });
 
     it('should verify the total after the discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount3', baseContext);
 
-      const totalAfterPromoCode: number = dataProducts.demo_12.finalPrice - cartRuleWithCodeDiscountValue;
+      const totalAfterPromoCode: number = dataProducts.demo_12.finalPrice - cartRuleDiscount;
 
       const priceATI = await foHummingbirdCartPage.getATIPrice(page);
       expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
       const discountValue = await foHummingbirdCartPage.getCartRuleValue(page, 1);
-      expect(discountValue).to.equal(`-€${cartRuleWithCodeDiscountValue.toFixed(2)}`);
+      expect(discountValue).to.contains(`-€${cartRuleDiscount.toFixed(2)}`);
     });
 
     it('should validate shopping cart and go to checkout page', async function () {
@@ -184,7 +178,7 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       await testContext.addContextItem(this, 'testIdentifier', 'checkCartRuleName', baseContext);
 
       const cartRuleName = await foHummingbirdCheckoutPage.getCartRuleName(page, 1);
-      expect(cartRuleName).to.equal(cartRuleWithCodeData.name);
+      expect(cartRuleName).to.contains(cartRuleWithCodeData.name);
     });
 
     it('should check the total', async function () {
@@ -193,7 +187,7 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
       const totalAfterDiscount = await foHummingbirdCheckoutPage.getATIPrice(page);
       expect(totalAfterDiscount.toFixed(2))
         .to.equal(
-          (dataProducts.demo_12.price - cartRuleWithCodeDiscountValue + dataCarriers.myCarrier.priceTTC).toFixed(2),
+          (dataProducts.demo_12.price - cartRuleDiscount + dataCarriers.myCarrier.priceTTC).toFixed(2),
         );
     });
 
@@ -205,9 +199,6 @@ describe('FO - Checkout : Display of total (price, vouchers, shipping)', async (
     });
   });
 
-  // Post-condition : Uninstall Hummingbird
-  disableHummingbird(`${baseContext}_postTest_1`);
-
   // Post-condition: Delete created cart rule
-  deleteCartRuleTest(cartRuleWithCodeData.name, `${baseContext}_postTest_2`);
+  deleteCartRuleTest(cartRuleWithCodeData.name, `${baseContext}_postTest`);
 });

@@ -1,27 +1,8 @@
 <?php
+
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 use PrestaShop\Autoload\PrestashopAutoload;
@@ -30,6 +11,7 @@ use PrestaShop\PrestaShop\Adapter\LegacyLogger;
 use PrestaShop\PrestaShop\Adapter\Module\ModuleDataProvider;
 use PrestaShop\PrestaShop\Adapter\Module\Repository\ModuleRepository;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
+use PrestaShop\PrestaShop\Core\Context\LegacyControllerContext;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Module\Legacy\ModuleInterface;
@@ -199,9 +181,10 @@ abstract class ModuleCore implements ModuleInterface
     /** @var array Array filled with cache permissions (modules / employee profiles) */
     protected static $cache_lgc_access = [];
 
+    /** @var ModuleParser */
     protected static ModuleParser $moduleParser;
 
-    /** @var Context */
+    /** @var Context|null */
     protected $context;
 
     /** @var Smarty_Data|Smarty_Internal_TemplateBase */
@@ -219,7 +202,7 @@ abstract class ModuleCore implements ModuleInterface
     /**
      * @var array array of arrays representing tabs added by this module
      *
-     * @see PrestaShop\PrestaShop\Adapter\Module\Tab\RegisterTabs($module)
+     * @see PrestaShop\PrestaShop\Adapter\Module\Tab\ModuleTabRegister->registerTabs($module)
      */
     protected $tabs = [];
 
@@ -363,7 +346,9 @@ abstract class ModuleCore implements ModuleInterface
                 }
                 $this->_path = __PS_BASE_URI__ . 'modules/' . $this->name . '/';
             }
-            if (!$this->context->controller instanceof Controller) {
+
+            // In Symfony BO, context controller is not a legacy Controller (proxy/context), keep modules cache to preserve module id.
+            if (!$this->context->controller instanceof Controller && !$this->context->controller instanceof LegacyControllerContext) {
                 static::$modules_cache = null;
             }
             $this->local_path = _PS_MODULE_DIR_ . $this->name . '/';
@@ -431,19 +416,23 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Check for override conflicts
-        $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
-        if (!$moduleOverrideChecker) {
-            $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
-        }
-        if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
-            $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+            $moduleOverrideChecker = $this->get(ModuleOverrideChecker::class);
+            if (!$moduleOverrideChecker) {
+                $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
+            }
+            if ($moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
+                $this->_errors = array_merge($moduleOverrideChecker->getErrors(), $this->_errors);
 
-            return false;
+                return false;
+            }
         }
 
         if (!$this->installControllers()) {
             $this->_errors[] = Context::getContext()->getTranslator()->trans('Could not install module controllers.', [], 'Admin.Modules.Notification');
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -459,7 +448,9 @@ abstract class ModuleCore implements ModuleInterface
             if (method_exists($this, 'uninstallTabs')) {
                 $this->uninstallTabs();
             }
-            $this->uninstallOverrides();
+            if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
+                $this->uninstallOverrides();
+            }
 
             return false;
         }
@@ -483,11 +474,11 @@ abstract class ModuleCore implements ModuleInterface
 
             Db::getInstance()->execute('
                 INSERT INTO `' . _DB_PREFIX_ . 'module_access` (`id_profile`, `id_authorization_role`) (
-                    SELECT id_profile, "' . Db::getInstance()->Insert_ID() . '"
-                    FROM ' . _DB_PREFIX_ . 'access a
+                    SELECT `id_profile`, "' . Db::getInstance()->Insert_ID() . '"
+                    FROM `' . _DB_PREFIX_ . 'access` a
                     LEFT JOIN `' . _DB_PREFIX_ . 'authorization_role` r
-                    ON r.id_authorization_role = a.id_authorization_role
-                    WHERE r.slug = "ROLE_MOD_TAB_ADMINMODULESSF_' . $action . '"
+                    ON r.`id_authorization_role` = a.`id_authorization_role`
+                    WHERE r.`slug` = "ROLE_MOD_TAB_ADMINMODULESSF_' . $action . '"
             )');
         }
 
@@ -721,10 +712,16 @@ abstract class ModuleCore implements ModuleInterface
      */
     public static function upgradeModuleVersion($name, $version)
     {
-        return Db::getInstance()->execute('
+        $result = Db::getInstance()->execute('
             UPDATE `' . _DB_PREFIX_ . 'module` m
-            SET m.version = \'' . pSQL($version) . '\'
-            WHERE m.name = \'' . pSQL($name) . '\'');
+            SET m.`version` = \'' . pSQL($version) . '\'
+            WHERE m.`name` = \'' . pSQL($name) . '\'');
+
+        if (isset(static::$modules_cache[$name]['upgrade']) && true == static::$modules_cache[$name]['upgrade']['success']) {
+            Hook::exec('actionModuleUpgradeAfter', ['module_name' => $name, 'old_version' => static::$modules_cache[$name]['upgrade']['upgraded_from'], 'new_version' => $version]);
+        }
+
+        return $result;
     }
 
     /**
@@ -912,7 +909,7 @@ abstract class ModuleCore implements ModuleInterface
         }
 
         // Uninstall all overrides this module may have used
-        if (!$this->uninstallOverrides()) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && !$this->uninstallOverrides()) {
             return false;
         }
 
@@ -929,10 +926,10 @@ abstract class ModuleCore implements ModuleInterface
         // Remove all configured meta data (titles, URLs etc.) for this module's front controllers
         foreach ($this->controllers as $controller) {
             $page_name = 'module-' . $this->name . '-' . $controller;
-            $meta = Db::getInstance()->getValue('SELECT id_meta FROM `' . _DB_PREFIX_ . 'meta` WHERE page="' . pSQL($page_name) . '"');
+            $meta = Db::getInstance()->getValue('SELECT `id_meta` FROM `' . _DB_PREFIX_ . 'meta` WHERE `page`="' . pSQL($page_name) . '"');
             if ((int) $meta > 0) {
-                Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'meta_lang` WHERE id_meta=' . (int) $meta);
-                Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'meta` WHERE id_meta=' . (int) $meta);
+                Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'meta_lang` WHERE `id_meta`=' . (int) $meta);
+                Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'meta` WHERE `id_meta`=' . (int) $meta);
             }
         }
 
@@ -1017,6 +1014,8 @@ abstract class ModuleCore implements ModuleInterface
      */
     public function enable($force_all = false)
     {
+        Hook::exec('actionModuleEnable', ['module' => $this]);
+
         // Retrieve all shops where the module is enabled
         $list = Shop::getContextListShopID();
         if (!$this->id || !is_array($list)) {
@@ -1038,8 +1037,7 @@ abstract class ModuleCore implements ModuleInterface
         if (!$moduleOverrideChecker) {
             $moduleOverrideChecker = new ModuleOverrideChecker($this->getTranslator(), _PS_OVERRIDE_DIR_);
         }
-
-        if ($this->getOverrides() != null) {
+        if ($this->getOverrides() != null && !Configuration::get('PS_DISABLE_MODULE_OVERRIDES')) {
             if (!$moduleOverrideChecker->hasOverrideConflict($this->getLocalPath() . 'override')) {
                 // Install overrides
                 try {
@@ -1174,8 +1172,10 @@ abstract class ModuleCore implements ModuleInterface
      */
     public function disable($force_all = false)
     {
+        Hook::exec('actionModuleDisable', ['module' => $this]);
+
         $result = true;
-        if ($this->getOverrides() != null) {
+        if (!Configuration::get('PS_DISABLE_MODULE_OVERRIDES') && $this->getOverrides() != null) {
             $result &= $this->uninstallOverrides();
         }
 
@@ -1193,7 +1193,7 @@ abstract class ModuleCore implements ModuleInterface
 
     public function hasShopAssociations(): bool
     {
-        $sql = "SELECT m.id_module FROM %smodule m INNER JOIN %smodule_shop ms ON ms.id_module = m.id_module WHERE m.id_module = '%s'";
+        $sql = "SELECT m.`id_module` FROM %smodule m INNER JOIN %smodule_shop ms ON ms.`id_module` = m.`id_module` WHERE m.`id_module` = '%s'";
         $result = Db::getInstance()->getRow(sprintf($sql, _DB_PREFIX_, _DB_PREFIX_, (int) $this->id));
 
         return isset($result['id_module']);
@@ -1539,7 +1539,7 @@ abstract class ModuleCore implements ModuleInterface
 
         $modules_installed = [];
         $result = Db::getInstance()->executeS('
-        SELECT m.name, m.version, mp.interest
+        SELECT m.`name`, m.`version`, mp.`interest`
         FROM `' . _DB_PREFIX_ . 'module` m
         ' . Shop::addSqlAssociation('module', 'm', false) . '
         LEFT JOIN `' . _DB_PREFIX_ . 'module_preference` mp ON (mp.`module` = m.`name` AND mp.`id_employee` = ' . (int) $id_employee . ')');
@@ -1721,11 +1721,11 @@ abstract class ModuleCore implements ModuleInterface
         // Get modules information from database
         if (!empty($module_name_list)) {
             $list = Shop::getContextListShopID();
-            $sql = 'SELECT m.id_module, m.name, (
-                        SELECT COUNT(*) FROM ' . _DB_PREFIX_ . 'module_shop ms WHERE m.id_module = ms.id_module AND ms.id_shop IN (' . implode(',', $list) . ')
+            $sql = 'SELECT m.`id_module`, m.`name`, (
+                        SELECT COUNT(*) FROM `' . _DB_PREFIX_ . 'module_shop` ms WHERE m.`id_module` = ms.`id_module` AND ms.`id_shop` IN (' . implode(',', $list) . ')
                     ) as total
-                    FROM ' . _DB_PREFIX_ . 'module m
-                    WHERE LOWER(m.name) IN (' . Tools::strtolower(implode(',', $module_name_list)) . ')';
+                    FROM `' . _DB_PREFIX_ . 'module` m
+                    WHERE LOWER(m.`name`) IN (' . Tools::strtolower(implode(',', $module_name_list)) . ')';
             $results = Db::getInstance()->executeS($sql);
 
             foreach ($results as $result) {
@@ -1840,7 +1840,7 @@ abstract class ModuleCore implements ModuleInterface
             $sql .= 'LEFT JOIN `' . _DB_PREFIX_ . 'hook_module` hm ON m.`id_module` = hm.`id_module`
                  LEFT JOIN `' . _DB_PREFIX_ . 'hook` k ON hm.`id_hook` = k.`id_hook`
                  WHERE k.`position` = 1
-                 GROUP BY m.id_module';
+                 GROUP BY m.`id_module`';
         }
 
         return Db::getInstance()->executeS($sql);
@@ -1985,8 +1985,8 @@ abstract class ModuleCore implements ModuleInterface
             $maxPosition = max((int) $from['position'], (int) $to['position']);
 
             $shiftHookPositionsSql = 'UPDATE `' . _DB_PREFIX_ . 'hook_module`
-                SET position = position ' . ($way ? '- 1' : '+ 1') . '
-                WHERE position BETWEEN ' . $minPosition . ' AND ' . $maxPosition . '
+                SET `position` = `position` ' . ($way ? '- 1' : '+ 1') . '
+                WHERE `position` BETWEEN ' . $minPosition . ' AND ' . $maxPosition . '
                 AND `id_hook` = ' . (int) $from['id_hook'] . ' AND `id_shop` = ' . $shop_id;
 
             if (!Db::getInstance()->execute($shiftHookPositionsSql)) {
@@ -2243,10 +2243,10 @@ abstract class ModuleCore implements ModuleInterface
     public function isEnabledForShopContext()
     {
         return (bool) Db::getInstance()->getValue(
-            'SELECT id_module
+            'SELECT `id_module`
             FROM `' . _DB_PREFIX_ . 'module_shop`
-            WHERE id_module=' . (int) $this->id . ' AND id_shop IN (' . implode(',', array_map('intval', Shop::getContextListShopID())) . ')
-            GROUP BY id_module
+            WHERE `id_module`=' . (int) $this->id . ' AND `id_shop` IN (' . implode(',', array_map('intval', Shop::getContextListShopID())) . ')
+            GROUP BY `id_module`
             HAVING COUNT(*)=' . (int) count(Shop::getContextListShopID())
         );
     }
@@ -2646,10 +2646,10 @@ abstract class ModuleCore implements ModuleInterface
                 `slug` LIKE "%UPDATE" as "configure",
                 `slug` LIKE "%DELETE" as "uninstall"
             FROM `' . _DB_PREFIX_ . 'authorization_role` a
-            LEFT JOIN `' . _DB_PREFIX_ . 'module_access` j ON j.id_authorization_role = a.id_authorization_role
+            LEFT JOIN `' . _DB_PREFIX_ . 'module_access` j ON j.`id_authorization_role` = a.`id_authorization_role`
             WHERE `slug` LIKE "' . Permission::PREFIX_MODULE . '%"
-            AND j.id_profile = "' . (int) $idProfile . '"
-            ORDER BY a.slug
+            AND j.`id_profile` = "' . (int) $idProfile . '"
+            ORDER BY a.`slug`
         ');
 
             foreach ($profileRoles as $role) {
@@ -2890,7 +2890,7 @@ abstract class ModuleCore implements ModuleInterface
     {
         foreach ($this->controllers as $controller) {
             $page = 'module-' . $this->name . '-' . $controller;
-            $result = Db::getInstance()->getValue('SELECT * FROM ' . _DB_PREFIX_ . 'meta WHERE page="' . pSQL($page) . '"');
+            $result = Db::getInstance()->getValue('SELECT * FROM `' . _DB_PREFIX_ . 'meta` WHERE `page`="' . pSQL($page) . '"');
             if ((int) $result > 0) {
                 continue;
             }

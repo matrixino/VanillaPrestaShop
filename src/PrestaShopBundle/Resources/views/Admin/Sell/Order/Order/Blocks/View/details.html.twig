@@ -1,27 +1,7 @@
-{# **
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
- * #}
+{#
+ # For the full copyright and license information, please view the
+ # docs/licenses/LICENSE.txt file that was distributed with this source code.
+ #}
 
 {% set statusTitle %}
   {{ 'Status'|trans({}, 'Admin.Global') }} ({{ orderForViewing.history.statuses|length }})
@@ -31,15 +11,11 @@
   {{ 'Documents'|trans({}, 'Admin.Orderscustomers.Feature') }} (<span class="count">{{ orderForViewing.documents.documents|length }}</span>)
 {% endset %}
 
-{% set carriersTitle %}
-  {{ 'Carriers'|trans({}, 'Admin.Shipping.Feature') }} (<span class="count">{{ orderForViewing.shipping.carriers|length }}</span>)
-{% endset %}
-
 {% set merchantReturnsTitle %}
   {{ 'Merchandise returns'|trans({}, 'Admin.Orderscustomers.Feature') }} (<span data-role="count">{{ orderForViewing.returns.orderReturns|length }}</span>)
 {% endset %}
 
-<div class="mt-2">
+<div class="mb-3">
   <ul class="nav nav nav-tabs d-print-none" role="tablist">
     <li class="nav-item">
       <a class="nav-link active show" id="historyTab" data-toggle="tab" href="#historyTabContent" role="tab" aria-controls="historyTabContent" aria-expanded="true" aria-selected="false">
@@ -53,12 +29,22 @@
         {{ documentsTitle }}
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" id="orderShippingTab" data-toggle="tab" href="#orderShippingTabContent" role="tab" aria-controls="orderShippingTabContent" aria-expanded="true" aria-selected="false">
-        <i class="material-icons">local_shipping</i>
-        {{ carriersTitle }}
-      </a>
-    </li>
+    {% if isImprovedShipmentFeatureFlagEnabled and orderHasShipment == true %}
+      <li class="nav-item">
+        <a class="nav-link" id="orderShipmentsTab" data-toggle="tab" href="#orderShipmentsTabContent" role="tab" aria-controls="orderShipmentsTabContent" aria-expanded="true" aria-selected="false">
+          <i class="material-icons">local_shipping</i>
+          {{ shipmentsLabel|raw_purified }}
+        </a>
+      </li>
+    {% else %}
+      <li class="nav-item">
+        <a class="nav-link" id="orderShippingTab" data-toggle="tab" href="#orderShippingTabContent" role="tab" aria-controls="orderShippingTabContent" aria-expanded="true" aria-selected="false">
+          <i class="material-icons">local_shipping</i>
+          {{ carriersLabel|raw_purified }}
+        </a>
+      </li>
+    {% endif %}
+
     {% if merchandiseReturnEnabled %}
       <li class="nav-item">
         <a class="nav-link" id="orderReturnsTab" data-toggle="tab" href="#orderReturnsTabContent" role="tab" aria-controls="orderReturnsTabContent" aria-expanded="true" aria-selected="false">
@@ -90,16 +76,29 @@
         {% endblock %}
       {% endembed %}
     </div>
-    <div class="tab-pane d-print-block fade" id="orderShippingTabContent" role="tabpanel" aria-labelledby="orderShippingTab">
-      {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}
-        {% block header %}
-          {{ carriersTitle }}
-        {% endblock %}
-        {% block body %}
-          {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/shipping.html.twig') }}
-        {% endblock %}
-      {% endembed %}
-    </div>
+    {% if isImprovedShipmentFeatureFlagEnabled and orderHasShipment == true %}
+      <div class="tab-pane d-print-block fade" id="orderShipmentsTabContent" role="tabpanel" aria-labelledby="orderShipmentsTab">
+        {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}
+          {% block header %}
+            {{ shipmentsLabel|raw_purified }}
+          {% endblock %}
+          {% block body %}
+            {{ include('@PrestaShop/Admin/Common/Grid/grid.html.twig', {grid: shipmentsGrid}) }}
+          {% endblock %}
+        {% endembed %}
+      </div>
+    {% else %}
+      <div class="tab-pane d-print-block fade" id="orderShippingTabContent" role="tabpanel" aria-labelledby="orderShippingTab">
+        {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}
+          {% block header %}
+            {{ carriersLabel|raw_purified }}
+          {% endblock %}
+          {% block body %}
+            {{ include('@PrestaShop/Admin/Sell/Order/Order/Blocks/View/shipping.html.twig') }}
+          {% endblock %}
+        {% endembed %}
+      </div>
+    {% endif %}
     {% if merchandiseReturnEnabled %}
       <div class="tab-pane d-print-block fade" id="orderReturnsTabContent" role="tabpanel" aria-labelledby="orderReturnsTab">
         {% embed '@PrestaShop/Admin/Sell/Order/Order/Blocks/View/details_card.html.twig' %}

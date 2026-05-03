@@ -30,6 +30,10 @@ services:
       - { name: 'prestashop.openapi.schema_adapter.resource', priority: 40 }
       - { name: 'prestashop.openapi.schema_adapter.operation', priority: 20 }
 
+  PrestaShopBundle\ApiPlatform\OpenApi\Adapter\PositionCollectionAdapter:
+    tags:
+      - { name: 'prestashop.openapi.schema_adapter.operation', priority: 20 }
+
   PrestaShopBundle\ApiPlatform\OpenApi\Adapter\DecimalNumberAdapter:
     tags:
       - { name: 'prestashop.openapi.schema_adapter.resource', priority: 30 }

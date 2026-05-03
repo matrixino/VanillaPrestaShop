@@ -21,11 +21,13 @@ import {
   utilsDate,
   utilsPlaywright,
 } from '@prestashop-core/ui-testing';
+import {enableTheme, disableTheme} from '@commonTests/BO/design/hummingbird';
 
 const baseContext: string = 'functional_FO_classic_checkout_displayOfTotals';
 
 /*
 Pre-condition:
+- Enable the theme classic
 - Create new cart rule
 Scenario:
 - Add product to cart
@@ -34,6 +36,7 @@ Scenario:
 - Proceed to checkout
 - Choose carrier and check details
 Post-condition:
+- Disable the theme classic
 - Delete created cart rule
  */
 
@@ -57,10 +60,13 @@ describe('FO - Checkout : Display of totals', async () => {
       tax: 'Tax included',
     },
   });
-  const cartRuleWithCodeDiscountValue: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+  const cartRuleWithCodeDiscount: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+
+  // Pre-condition : Enable the theme classic
+  enableTheme('classic', `${baseContext}_preTest_0`);
 
   // Pre-condition: Create cart rule with code
-  createCartRuleTest(cartRuleWithCodeData, `${baseContext}_preTest`);
+  createCartRuleTest(cartRuleWithCodeData, `${baseContext}_preTest_1`);
 
   describe('Display total', async () => {
     before(async function () {
@@ -79,7 +85,7 @@ describe('FO - Checkout : Display of totals', async () => {
       await foClassicHomePage.changeLanguage(page, 'en');
 
       const isHomePage = await foClassicHomePage.isHomePage(page);
-      expect(isHomePage, 'Fail to open FO home page').to.equal(true);
+      expect(isHomePage).to.equal(true);
     });
 
     it('should go to login page', async function () {
@@ -88,7 +94,7 @@ describe('FO - Checkout : Display of totals', async () => {
       await foClassicHomePage.goToLoginPage(page);
 
       const pageTitle = await foClassicLoginPage.getPageTitle(page);
-      expect(pageTitle, 'Fail to open FO login page').to.contains(foClassicLoginPage.pageTitle);
+      expect(pageTitle).to.contains(foClassicLoginPage.pageTitle);
     });
 
     it('should sign in with created customer', async function () {
@@ -140,13 +146,13 @@ describe('FO - Checkout : Display of totals', async () => {
     it('should verify the total after the discount', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'checkTotalAfterDiscount3', baseContext);
 
-      const totalAfterPromoCode: number = dataProducts.demo_12.finalPrice - cartRuleWithCodeDiscountValue;
+      const totalAfterPromoCode: number = dataProducts.demo_12.finalPrice - cartRuleWithCodeDiscount;
 
       const priceATI = await foClassicCartPage.getATIPrice(page);
       expect(priceATI).to.equal(parseFloat(totalAfterPromoCode.toFixed(2)));
 
       const discountValue = await foClassicCartPage.getCartRuleValue(page, 1);
-      expect(discountValue).to.equal(`-€${cartRuleWithCodeDiscountValue.toFixed(2)}`);
+      expect(discountValue).to.equal(`-€${cartRuleWithCodeDiscount.toFixed(2)}`);
     });
 
     it('should validate shopping cart and go to checkout page', async function () {
@@ -188,7 +194,7 @@ describe('FO - Checkout : Display of totals', async () => {
       const totalAfterDiscount = await foClassicCheckoutPage.getATIPrice(page);
       expect(totalAfterDiscount.toFixed(2))
         .to.equal(
-          (dataProducts.demo_12.price - cartRuleWithCodeDiscountValue + dataCarriers.myCarrier.priceTTC).toFixed(2),
+          (dataProducts.demo_12.price - cartRuleWithCodeDiscount + dataCarriers.myCarrier.priceTTC).toFixed(2),
         );
     });
 
@@ -201,5 +207,8 @@ describe('FO - Checkout : Display of totals', async () => {
   });
 
   // Post-condition: Delete created cart rule
-  deleteCartRuleTest(cartRuleWithCodeData.name, `${baseContext}_postTest`);
+  deleteCartRuleTest(cartRuleWithCodeData.name, `${baseContext}_postTest_1`);
+
+  // Post-condition : Disable the theme classic
+  disableTheme('classic', `${baseContext}_postTest_2`);
 });

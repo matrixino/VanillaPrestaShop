@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -130,6 +110,14 @@ class DispatcherCore
                 'supplier' => ['regexp' => '[_a-zA-Z0-9-\pL]*'],
                 'price' => ['regexp' => '[0-9\.,]*'],
                 'tags' => ['regexp' => '[a-zA-Z0-9-\pL]*'],
+            ],
+        ],
+        'attachment_rule' => [
+            'controller' => 'attachment',
+            'rule' => 'attachment/{id}-{rewrite}',
+            'keywords' => [
+                'id' => ['regexp' => '[0-9]+', 'param' => 'id_attachment'],
+                'rewrite' => ['regexp' => self::REWRITE_PATTERN],
             ],
         ],
     ];
@@ -537,7 +525,14 @@ class DispatcherCore
         // If friendly URLs are activated and there are more than one languages on the shop, we handle the language
         // Set $_GET['isolang'] and remove the language part from the request URI
         if ($this->use_routes && $isMultiLanguageActivated) {
-            // If we find a language in the URL, we assign it and remove it from the URL
+            /*
+             * If we find a language in the URL, we assign it and remove it from the URL
+             *
+             * @todo Please note that this does not validate the language code in any way.
+             * It would be better to check if the language actually exists in the shop directly.
+             * If not, the default language remains used and the url is redirected to the URL of
+             * the default language later, but only because of the canonical redirect.
+             */
             if (preg_match('#^/([a-z]{2})(?:/.*)?$#', $requestUri, $matches)) {
                 $_GET['isolang'] = $matches[1];
                 $requestUri = substr($requestUri, 3);
@@ -823,6 +818,42 @@ class DispatcherCore
     public function getRoutes()
     {
         return $this->routes;
+    }
+
+    /**
+     * Sets the controller
+     *
+     * @return $this
+     */
+    public function setController(string $controller): self
+    {
+        if (!Validate::isControllerName($controller)) {
+            throw new PrestaShopException('Dispatcher::setController() controller name is not valid');
+        }
+
+        $this->controller = $controller;
+
+        return $this;
+    }
+
+    /**
+     * Sets the front controller
+     *
+     * @return $this
+     */
+    public function setFrontController(int $front_controller): self
+    {
+        if (!in_array($front_controller, [
+            self::FC_ADMIN,
+            self::FC_FRONT,
+            self::FC_MODULE,
+        ])) {
+            throw new PrestaShopException('Dispatcher::setFrontController() front_controller name is not valid');
+        }
+
+        $this->front_controller = $front_controller;
+
+        return $this;
     }
 
     /**

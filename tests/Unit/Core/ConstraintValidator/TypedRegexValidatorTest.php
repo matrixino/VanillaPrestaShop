@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 namespace Tests\Unit\Core\ConstraintValidator;
@@ -378,6 +358,37 @@ class TypedRegexValidatorTest extends ConstraintValidatorTestCase
     public function testItFailsForStateIsoCodeTypeWhenInvalidCharactersGiven(string $invalidChar): void
     {
         $this->assertViolationIsRaised(new TypedRegex(['type' => TypedRegex::TYPE_STATE_ISO_CODE]), $invalidChar);
+    }
+
+    /**
+     * @dataProvider getInvalidCharactersForDiscountCode
+     *
+     * @param string $invalidChar
+     */
+    public function testItFailsForDiscountCodeWhenInvalidCharactersGiven(string $invalidChar): void
+    {
+        $this->assertViolationIsRaised(new TypedRegex(['type' => TypedRegex::TYPE_DISCOUNT_CODE]), $invalidChar);
+    }
+
+    /**
+     * @dataProvider getDataForDiscountCodeTest
+     *
+     * @param string $value
+     *
+     * @return void
+     */
+    public function testDiscountCode(string $value, bool $expectSuccess): void
+    {
+        $constraint = new TypedRegex(TypedRegex::TYPE_DISCOUNT_CODE);
+        $this->validator->validate($value, $constraint);
+
+        if ($expectSuccess) {
+            $this->assertNoViolation();
+        } else {
+            $this->buildViolation($constraint->message)
+                ->setParameter('%s', '"' . $value . '"')
+                ->assertRaised();
+        }
     }
 
     /**
@@ -866,6 +877,53 @@ class TypedRegexValidatorTest extends ConstraintValidatorTestCase
         yield [':'];
         yield ['.'];
         yield [','];
+    }
+
+    /**
+     * @return Generator
+     */
+    public function getInvalidCharactersForDiscountCode(): Generator
+    {
+        yield ['!'];
+        yield ['@'];
+        yield ['$'];
+        yield ['^'];
+        yield ['&'];
+        yield ['*'];
+        yield ['('];
+        yield [')'];
+        yield ['+'];
+        yield ['='];
+        yield ['{'];
+        yield ['}'];
+        yield ['['];
+        yield ['['];
+        yield ['<'];
+        yield ['>'];
+        yield ['?'];
+        yield ['/'];
+        yield ['\\'];
+        yield ['\''];
+        yield [';'];
+        yield [':'];
+        yield ['.'];
+        yield [','];
+    }
+
+    /**
+     * @return array[]
+     */
+    public function getDataForDiscountCodeTest(): array
+    {
+        return [
+            ['CODE123', true],
+            ['code123', true],
+            ['CODE-123', true],
+            ['CODE_123', true],
+            ['CODE[]123', false],
+            ['CODE{}123', false],
+            ['CODE)(123', false],
+        ];
     }
 
     /**

@@ -6,7 +6,8 @@ About PrestaShop
 [![UI tests](https://github.com/PrestaShop/PrestaShop/actions/workflows/sanity.yml/badge.svg)](https://github.com/PrestaShop/PrestaShop/actions/workflows/sanity.yml)
 [![Nightly Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi-nightly.prestashop-project.org%2Fdata%2Fbadge&label=Nightly%20Status&cacheSeconds=3600)](https://nightly.prestashop-project.org/)
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg?style=flat-square)](https://php.net/)
-[![GitHub release](https://img.shields.io/github/v/release/prestashop/prestashop)](https://github.com/PrestaShop/PrestaShop)
+[![GitHub release](https://img.shields.io/github/v/release/prestashop/prestashop?sort=semver)](https://github.com/PrestaShop/PrestaShop)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=prestashop)](https://insights.linuxfoundation.org/project/prestashop)
 [![Slack chat](https://img.shields.io/badge/Chat-on%20Slack-red)](https://www.prestashop-project.org/slack/)
 [![GitHub forks](https://img.shields.io/github/forks/PrestaShop/PrestaShop)](https://github.com/PrestaShop/PrestaShop/network)
 [![GitHub stars](https://img.shields.io/github/stars/PrestaShop/PrestaShop)](https://github.com/PrestaShop/PrestaShop/stargazers)
@@ -24,7 +25,7 @@ The first stable version of PrestaShop 9.0 was released on June 10th, 2025. Lear
 About the `develop` branch
 --------
 
-The `develop` branch of this repository contains the work in progress source code for the next version of PrestaShop. Currently, the next version will be PrestaShop 9.1.
+The `develop` branch of this repository contains the work in progress source code for the next version of PrestaShop. Currently, it is exclusively for version 9.1.
 
 For more information on our branch system, read our guide on [installing PrestaShop for development][install-guide-dev].
 
@@ -61,9 +62,18 @@ make docker-start
 
 **Default Admin Credentials:**
 - Email: `demo@prestashop.com`
-- Password: `Correct Horse Battery Staple`
+- Password: `Pr3st4Sh0P`
 
-Docker will bind your port 8001 to the web server. If you want to use other port, open and modify the file `docker-compose.yml`.
+Or the backoffice on this URL: http://localhost:8001/admin-dev (default access credentials: demo@prestashop.com / Pr3st4Sh0P)
+
+You can customize the admin credentials by setting the following environment variables before running docker compose:
+```
+export ADMIN_MAIL=your-email@example.com
+export ADMIN_PASSWD=Your-Secure-Password
+docker compose up
+```
+
+Docker will bind your port **8001** to the web server. If you want to use other port, open and modify the file `docker-compose.yml`.
 MySQL credentials can also be found and modified in this file if needed.
 
 **Note:**  Before auto-installing PrestaShop, this container checks the file *app/config/parameters.php* does not exist on startup.
@@ -81,7 +91,7 @@ Documentation
 
 For technical information (core, module and theme development, performance...), head on to [PrestaShop DevDocs][devdocs]
 
-If you want to learn how to use PrestaShop 8, read our [User documentation][user-doc].
+If you want to learn how to use PrestaShop 9, read our [User documentation][user-doc].
 
 First-time users will be particularly interested in the following guides:
 
@@ -102,6 +112,8 @@ If you want to contribute code to PrestaShop, read the [CONTRIBUTING.md][contrib
 Don't know where to start? Check the [good first issue](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) label to have a look at all beginner-friendly improvements and bug fixes.
 
 If you want to help translate PrestaShop in your language, [join us on Crowdin][crowdin]!
+
+If using AI tools to write code, make sure your agent has read the [.ai/CONTEXT.md](.ai/CONTEXT.md) file. You can find more details in our dev doc regarding [AI assisted development](https://devdocs.prestashop-project.org/9/development/ai-assisted-development/).
 
 
 Reporting Issues

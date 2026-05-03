@@ -18,7 +18,7 @@ import {
   dataPaymentMethods,
   dataProducts,
   FakerCartRule,
-  foClassicCheckoutPage,
+  foHummingbirdCheckoutPage,
   type MailDev,
   type MailDevEmail,
   type Page,
@@ -58,7 +58,6 @@ describe('BO - Orders - Create order : Check summary', async () => {
       tax: 'Tax excluded',
     },
   });
-  const cartRuleWithCodeDiscountValue: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
   const paymentMethodModuleName: string = dataPaymentMethods.checkPayment.moduleName;
   const orderMessage: string = 'Test order message';
 
@@ -169,7 +168,7 @@ describe('BO - Orders - Create order : Check summary', async () => {
       it('should check summary block', async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'checkSummaryBlock1', baseContext);
 
-        const totalTaxes = await utilsCore.percentage(dataProducts.demo_12.priceTaxExcluded, dataProducts.demo_12.tax);
+        const totalTaxes = utilsCore.percentage(dataProducts.demo_12.priceTaxExcluded, dataProducts.demo_12.tax);
 
         const result = await boOrdersCreatePage.getSummaryDetails(page);
         await Promise.all([
@@ -191,24 +190,25 @@ describe('BO - Orders - Create order : Check summary', async () => {
         const result = await boOrdersCreatePage.getVoucherDetailsFromTable(page);
         await Promise.all([
           expect(result.name).to.contains(cartRuleWithCodeData.name),
-          expect(result.value).to.equal(cartRuleWithCodeDiscountValue),
+          expect(result.value).to.equal(cartRuleWithCodeData.discountAmount!.value),
         ]);
       });
 
       it('should check summary block', async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'checkSummaryBlock2', baseContext);
 
-        const totalTaxes = await utilsCore.percentage(
-          dataProducts.demo_12.priceTaxExcluded - cartRuleWithCodeDiscountValue,
+        const discount: number = parseFloat(cartRuleWithCodeData.discountAmount!.value.toString());
+        const totalTaxes = utilsCore.percentage(
+          dataProducts.demo_12.priceTaxExcluded - discount,
           20,
         );
-        const totalTaxExcluded = dataProducts.demo_12.priceTaxExcluded - cartRuleWithCodeDiscountValue;
+        const totalTaxExcluded = dataProducts.demo_12.priceTaxExcluded - discount;
         const totalTaxIncluded = totalTaxes + totalTaxExcluded;
 
         const result = await boOrdersCreatePage.getSummaryDetails(page);
         await Promise.all([
           expect(result.totalProducts).to.equal(`€${dataProducts.demo_12.priceTaxExcluded.toFixed(2)}`),
-          expect(result.totalVouchers).to.equal(`-€${cartRuleWithCodeDiscountValue.toFixed(2)}`),
+          expect(result.totalVouchers).to.equal(`-€${discount.toFixed(2)}`),
           expect(result.totalShipping).to.equal('€0.00'),
           expect(result.totalTaxes).to.equal(`€${totalTaxes.toFixed(2)}`),
           expect(result.totalTaxExcluded).to.equal(`€${totalTaxExcluded.toFixed(2)}`),
@@ -228,7 +228,7 @@ describe('BO - Orders - Create order : Check summary', async () => {
       it('should check summary block', async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'checkSummaryBlock3', baseContext);
 
-        const totalTaxes = await utilsCore.percentage(dataProducts.demo_12.priceTaxExcluded, dataProducts.demo_12.tax);
+        const totalTaxes = utilsCore.percentage(dataProducts.demo_12.priceTaxExcluded, dataProducts.demo_12.tax);
 
         const result = await boOrdersCreatePage.getSummaryDetails(page);
         await Promise.all([
@@ -285,14 +285,14 @@ describe('BO - Orders - Create order : Check summary', async () => {
 
         page = await boOrdersCreatePage.setMoreActionsProceedToCheckout(page);
 
-        const isCheckoutPage = await foClassicCheckoutPage.isCheckoutPage(page);
+        const isCheckoutPage = await foHummingbirdCheckoutPage.isCheckoutPage(page);
         expect(isCheckoutPage, 'Not redirected to checkout page!').to.eq(true);
       });
 
       it('should close the checkout page and go back to BO', async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'goBackToBo', baseContext);
 
-        page = await foClassicCheckoutPage.closePage(browserContext, page, 0);
+        page = await foHummingbirdCheckoutPage.closePage(browserContext, page, 0);
 
         const pageTitle = await boOrdersCreatePage.getPageTitle(page);
         expect(pageTitle, 'Fo page not closed!').to.contains(boOrdersCreatePage.pageTitle);

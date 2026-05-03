@@ -33,3 +33,7 @@ _attributes:
 _cart_rule:
   resource: "cart_rule.yml"
   prefix: /cart-rules
+
+_discount:
+  resource: "discount.yml"
+  prefix: /discounts

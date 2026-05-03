@@ -283,12 +283,10 @@ services:
       - '@=service("prestashop.adapter.legacy.context").getContext().language.id'
       - "@=service(\"prestashop.adapter.shop.context\").getContextListShopID(parameter('multishop.settings.share_orders'))"
 
-  prestashop.core.grid.query_builder.cart_rule:
-    class: 'PrestaShop\PrestaShop\Core\Grid\Query\CartRuleQueryBuilder'
+  prestashop.core.grid.query_builder.discount:
+    class: 'PrestaShop\PrestaShop\Core\Grid\Query\DiscountQueryBuilder'
     parent: 'prestashop.core.grid.abstract_query_builder'
-    arguments:
-      - '@prestashop.core.query.doctrine_search_criteria_applicator'
-      - '@=service("prestashop.adapter.legacy.context").getContext().language.id'
+    autowire: true
     public: true
 
   prestashop.core.grid.query_builder.catalog_price_rule:
@@ -547,3 +545,15 @@ services:
     autowire: true
     arguments:
       - '@prestashop.core.query.doctrine_search_criteria_applicator'
+
+  PrestaShop\PrestaShop\Core\Grid\Query\ShipmentQueryBuilder:
+    parent: 'prestashop.core.grid.abstract_query_builder'
+    public: false
+    arguments:
+      $searchCriteriaApplicator: '@prestashop.core.query.doctrine_search_criteria_applicator'
+
+  PrestaShop\PrestaShop\Core\Grid\Query\TagQueryBuilder:
+    parent: 'prestashop.core.grid.abstract_query_builder'
+    public: false
+    arguments:
+      $searchCriteriaApplicator: '@prestashop.core.query.doctrine_search_criteria_applicator'

@@ -1,10 +1,10 @@
 # Executables (local)
 DOCKER_COMP = docker compose
 PHP_CONT =
-PHP_CONT_WITH_LOGIN = bash -l
+PHP_CONT_WITH_LOGIN = bash
 
 # Determine if we are using docker
-DOCKER_RUNNING := $(shell docker compose ps -q)
+DOCKER_RUNNING := $(shell docker compose ps -q 2>/dev/null)
 ifneq ($(strip $(DOCKER_RUNNING)),)
 	PHP_CONT = $(DOCKER_COMP) exec -T prestashop-git runuser -u www-data -g www-data --
 	PHP_CONT_WITH_LOGIN = $(DOCKER_COMP) exec -T prestashop-git runuser -u www-data -g www-data -- bash -l
@@ -50,7 +50,7 @@ install-prestashop: ## Install fresh PrestaShop database (requires containers to
 	$(PHP_CONT) .docker/install/database.sh
 
 ## —— Assets 🎨 ———————————————————————————————————————————————————————————————
-assets: admin front ## Build all assets
+assets: ## Build all assets
 	$(PHP_CONT_WITH_LOGIN) ./tools/assets/build.sh all --force
 
 wait-assets: ## Wait for assets to be built

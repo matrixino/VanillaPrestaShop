@@ -172,7 +172,6 @@ describe('BO - Orders - Create order : Add a product to the cart', async () => {
     product: productWithCartRule.name,
     freeShipping: true,
     discountType: 'Amount',
-    discountPercent: 20,
     discountAmount: {
       value: 20,
       currency: 'EUR',
@@ -467,7 +466,7 @@ describe('BO - Orders - Create order : Add a product to the cart', async () => {
       await testContext.addContextItem(this, 'testIdentifier', 'addStandardCombinationsProduct', baseContext);
 
       await boOrdersCreatePage.addProductToCart(page, dataProducts.demo_1, dataProducts.demo_1.name);
-      const discountValue = await utilsCore.percentage(dataProducts.demo_1.price, dataProducts.demo_1.specificPrice.discount);
+      const discountValue = utilsCore.percentage(dataProducts.demo_1.price, dataProducts.demo_1.specificPrice.discount);
 
       const result = await boOrdersCreatePage.getProductDetailsFromTable(page, 2);
       await Promise.all([

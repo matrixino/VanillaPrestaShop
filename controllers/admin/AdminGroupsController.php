@@ -1,27 +1,7 @@
 <?php
 /**
- * Copyright since 2007 PrestaShop SA and Contributors
- * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.md.
- * It is also available through the world-wide-web at this URL:
- * https://opensource.org/licenses/OSL-3.0
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to https://devdocs.prestashop.com/ for more information.
- *
- * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
- * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * For the full copyright and license information, please view the
+ * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 
 /**
@@ -663,9 +643,9 @@ class AdminGroupsControllerCore extends AdminController
         $guest = new Group((int) Configuration::get('PS_GUEST_GROUP'));
         $default = new Group((int) Configuration::get('PS_CUSTOMER_GROUP'));
 
-        $unidentified_group_information = $this->trans('%group_name% - All persons without a customer account or customers that are not logged in.', ['%group_name%' => '<b>' . $unidentified->name[$this->context->language->id] . '</b>'], 'Admin.Shopparameters.Help');
-        $guest_group_information = $this->trans('%group_name% - All persons who placed an order through Guest Checkout.', ['%group_name%' => '<b>' . $guest->name[$this->context->language->id] . '</b>'], 'Admin.Shopparameters.Help');
-        $default_group_information = $this->trans('%group_name% - All persons who created an account on this site.', ['%group_name%' => '<b>' . $default->name[$this->context->language->id] . '</b>'], 'Admin.Shopparameters.Help');
+        $unidentified_group_information = $this->trans('%group_name% - All persons without a customer account or customers that are not logged in.', ['%group_name%' => '<b>' . htmlentities($unidentified->name[$this->context->language->id]) . '</b>'], 'Admin.Shopparameters.Help');
+        $guest_group_information = $this->trans('%group_name% - All persons who placed an order through Guest Checkout.', ['%group_name%' => '<b>' . htmlentities($guest->name[$this->context->language->id]) . '</b>'], 'Admin.Shopparameters.Help');
+        $default_group_information = $this->trans('%group_name% - All persons who created an account on this site.', ['%group_name%' => '<b>' . htmlentities($default->name[$this->context->language->id]) . '</b>'], 'Admin.Shopparameters.Help');
 
         $this->displayInformation($this->trans('PrestaShop has three default customer groups:', [], 'Admin.Shopparameters.Help'));
         $this->displayInformation($unidentified_group_information);
