@@ -1684,7 +1684,7 @@ class CartCore extends ObjectModel
             if ($operator === 'down') {
                 PrestaShopLogger::addLog(
                     sprintf('Cart::updateQty - Product with ID "%s" could not be loaded, removing it from cart.', $id_product),
-                    2,
+                    PrestaShopLogger::LOG_SEVERITY_LEVEL_WARNING,
                     null,
                     'Cart',
                     (int) $this->id
