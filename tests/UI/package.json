@@ -16,8 +16,8 @@
     "// Check suites": "Script to check if suites are well all executed",
     "check:suites": "ts-node tools/suites.ts",
     "// Linkchecker": "Script to run link checker",
-    "check:links": "ts-mocha tools/linkchecker.ts",
-    "check:links:fast-fail": "ts-mocha --bail tools/linkchecker.ts",
+    "check:links": "ts-mocha --import module-alias/register tools/linkchecker.ts",
+    "check:links:fast-fail": "ts-mocha --import module-alias/register --bail tools/linkchecker.ts",
     "// Specific test": "Script to run a specific test/folder",
     "test:specific": "ts-mocha $EXTRA_TEST_PARAMS --file utils/setup.ts campaigns/$TEST_PATH",
     "test:specific:fast-fail": "ts-mocha $EXTRA_TEST_PARAMS --bail --file utils/setup.ts campaigns/$TEST_PATH",
@@ -125,17 +125,17 @@
     "@types/chai-string": "^1.4.5",
     "@types/mocha": "^10.0.10",
     "@types/mochawesome": "^6.2.5",
+    "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-html": "^8.1.4",
     "eslint-plugin-import": "^2.32.0",
     "mochawesome-merge": "^4.3.0",
     "ts-mocha": "^11.1.0",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
