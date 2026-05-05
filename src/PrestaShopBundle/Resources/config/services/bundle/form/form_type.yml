@@ -571,6 +571,8 @@ services:
     arguments:
       $zoneChoiceProvider: '@prestashop.core.form.choice_provider.zone_by_id'
 
+  PrestaShopBundle\Form\Admin\Improve\International\Locations\CountryOptionsType:
+
   PrestaShopBundle\Form\Admin\Sell\CustomerService\MerchandiseReturn\MerchandiseReturnOptionsType:
 
   PrestaShopBundle\Form\Admin\Type\CarrierChoiceType:
