@@ -9,16 +9,16 @@ declare(strict_types=1);
 namespace Tests\Unit\Core\Domain\Country\AddressFormat;
 
 use PHPUnit\Framework\TestCase;
-use PrestaShop\PrestaShop\Adapter\Country\AddressFormat\LegacyAddressFormatChecker;
+use PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat\AddressFormatChecker;
 use PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat\AddressFormatCheckerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat\AddressFormatFieldsProviderInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @group address-format
  *
- * Tests the legacy-backed implementation of AddressFormatCheckerInterface. The adapter delegates
- * to the legacy AddressFormat ObjectModel which uses reflection on Address/Customer/Country/State
- * classes — the test environment must be able to autoload those classes (full PrestaShop
- * bootstrap), which is the case for tests/Unit configured under tests/phpunit-unit.xml.
+ * Unit-tests the pure Core checker against an in-memory fields provider and a
+ * no-op translator — no PrestaShop bootstrap, no legacy ObjectModel reflection.
  */
 class AddressFormatCheckerTest extends TestCase
 {
@@ -26,7 +26,37 @@ class AddressFormatCheckerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->checker = new LegacyAddressFormatChecker();
+        $fieldsProvider = new class() implements AddressFormatFieldsProviderInterface {
+            public function getFieldsForClass(string $className): array
+            {
+                return [
+                    'Address' => ['firstname', 'lastname', 'company', 'address1', 'postcode', 'city', 'phone'],
+                    'Country' => ['name', 'iso_code'],
+                    'State' => ['name', 'iso_code'],
+                    'Customer' => ['firstname', 'lastname', 'email'],
+                    'Warehouse' => ['name', 'reference'],
+                ][$className] ?? [];
+            }
+
+            public function getRequiredFields(): array
+            {
+                return ['firstname', 'lastname', 'address1', 'city', 'Country:name'];
+            }
+        };
+
+        $translator = new class() implements TranslatorInterface {
+            public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
+            {
+                return strtr($id, $parameters);
+            }
+
+            public function getLocale(): string
+            {
+                return 'en';
+            }
+        };
+
+        $this->checker = new AddressFormatChecker($fieldsProvider, $translator);
     }
 
     public function testValidFormatReturnsNoErrors(): void
@@ -47,10 +77,22 @@ class AddressFormatCheckerTest extends TestCase
 
     public function testMissingRequiredFieldProducesError(): void
     {
+        // Drops `firstname` — required and bare → resolves to Address:firstname.
         $format = "lastname\naddress1\ncity\nCountry:name";
         $errors = $this->checker->validate($format);
 
-        $this->assertNotEmpty($errors, 'Missing firstname should produce a validation error.');
+        $this->assertNotEmpty($errors);
+        $this->assertStringContainsString('firstname', $errors[0]);
+    }
+
+    public function testCustomerPrefixedTokenDoesNotSatisfyBareRequired(): void
+    {
+        // Customer:firstname is a different token from bare `firstname` (=Address:firstname).
+        // The required entry `firstname` should remain unsatisfied.
+        $format = "Customer:firstname lastname\naddress1\ncity\nCountry:name";
+        $errors = $this->checker->validate($format);
+
+        $this->assertNotEmpty($errors);
     }
 
     public function testDuplicateTokenProducesError(): void
@@ -61,7 +103,7 @@ class AddressFormatCheckerTest extends TestCase
         $this->assertNotEmpty($errors);
     }
 
-    public function testUnknownFieldProducesError(): void
+    public function testUnknownBareFieldProducesError(): void
     {
         $format = "firstname lastname\naddress1\ncity\nCountry:name\ntotally_not_a_field";
         $errors = $this->checker->validate($format);
@@ -71,7 +113,17 @@ class AddressFormatCheckerTest extends TestCase
 
     public function testForbiddenClassProducesError(): void
     {
+        // Manufacturer is not in the picker objects whitelist.
         $format = "firstname lastname\naddress1\ncity\nCountry:name\nManufacturer:name";
+        $errors = $this->checker->validate($format);
+
+        $this->assertNotEmpty($errors);
+    }
+
+    public function testUnknownPrefixedFieldProducesError(): void
+    {
+        // Country exists in the picker but `siret` does not belong to it.
+        $format = "firstname lastname\naddress1\ncity\nCountry:siret";
         $errors = $this->checker->validate($format);
 
         $this->assertNotEmpty($errors);
@@ -79,8 +131,17 @@ class AddressFormatCheckerTest extends TestCase
 
     public function testEmptyFormatReturnsErrors(): void
     {
-        // An empty format has no required fields → produces errors for all of them.
+        // No tokens at all → every required field is missing.
         $errors = $this->checker->validate('');
+
+        $this->assertNotEmpty($errors);
+    }
+
+    public function testMalformedPrefixedTokenProducesError(): void
+    {
+        // Empty class or empty field on either side of the colon.
+        $format = "firstname lastname\naddress1\ncity\nCountry:name\n:name";
+        $errors = $this->checker->validate($format);
 
         $this->assertNotEmpty($errors);
     }
