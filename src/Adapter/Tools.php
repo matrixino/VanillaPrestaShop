@@ -107,6 +107,11 @@ class Tools
         return LegacyTools::ps_round($value, $precision, $round_mode);
     }
 
+    public function convertPrice($price, $currency = null, $toCurrency = true, ?\Context $context = null)
+    {
+        return LegacyTools::convertPrice($price, $currency, $toCurrency, $context);
+    }
+
     /**
      * Return domain name according to configuration and depending on ssl activation.
      *

@@ -14,11 +14,6 @@ use PrestaShop\Decimal\DecimalNumber;
 use ReflectionNamedType;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 
-/**
- * Adapts DecimalNumber properties in OpenAPI schema.
- * Internally we rely on DecimalNumber for float values because they are more accurate,
- * but in the JSON format they should be considered as float, so we update the schema for these types.
- */
 class DecimalNumberAdapter implements OpenApiSchemaAdapterInterface
 {
     public function __construct(
