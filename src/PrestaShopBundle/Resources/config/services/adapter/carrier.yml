@@ -56,3 +56,5 @@ services:
   PrestaShop\PrestaShop\Adapter\Carrier\QueryHandler\GetAvailableCarriersHandler:
 
   PrestaShop\PrestaShop\Adapter\Carrier\QueryHandler\GetCarriersForProductHandler:
+
+  PrestaShop\PrestaShop\Adapter\Carrier\ShippingCostCalculator:
