@@ -110,67 +110,84 @@
           v-if="mode === 'visual'"
           class="address-format-builder__lines"
         >
-          <div
+          <template
             v-for="(line, lineIndex) in lines"
             :key="`line-${lineIndex}`"
-            class="address-format-builder__line"
-            :class="{
-              'is-drag-over': dragOverLine === lineIndex && draggingLine < 0,
-              'is-dragging': draggingLine === lineIndex,
-            }"
-            @dragenter="onLineDragEnter(lineIndex, $event)"
-            @dragover="onLineDragOver(lineIndex, $event)"
-            @dragleave="onLineDragLeave"
-            @drop="onLineDrop(lineIndex, $event)"
           >
-            <span
-              class="address-format-builder__grip"
-              draggable="true"
-              :title="$t('lines.dragHint')"
-              :aria-label="$t('lines.dragHint')"
-              tabindex="0"
-              @dragstart="onLineDragStart(lineIndex, $event)"
-              @dragend="onLineDragEnd"
-              @keydown="onGripKeydown(lineIndex, $event)"
+            <div
+              v-if="lineDropTarget && lineDropTarget.index === lineIndex && lineDropTarget.before"
+              class="address-format-builder__line-drop-indicator"
+              aria-hidden="true"
+            />
+            <div
+              class="address-format-builder__line"
+              :class="{
+                'is-drag-over': dragOverLine === lineIndex && draggingLine < 0,
+                'is-dragging': draggingLine === lineIndex,
+                'is-selected': selectedLine === lineIndex,
+              }"
+              :aria-pressed="selectedLine === lineIndex"
+              @click="toggleSelectLine(lineIndex)"
+              @dragenter="onLineDragEnter(lineIndex, $event)"
+              @dragover="onLineDragOver(lineIndex, $event)"
+              @dragleave="onLineDragLeave"
+              @drop="onLineDrop(lineIndex, $event)"
             >
-              <i class="material-icons">drag_indicator</i>
-            </span>
-            <span class="address-format-builder__line-number">{{ lineIndex + 1 }}</span>
-            <div class="address-format-builder__chips">
               <span
-                v-if="line.length === 0"
-                class="address-format-builder__line-empty"
-              >{{ $t('lines.empty') }}</span>
-              <span
-                v-for="(token, chipIndex) in line"
-                :key="`chip-${lineIndex}-${chipIndex}-${token.raw}`"
-                class="tag address-format-builder__chip"
+                class="address-format-builder__grip"
                 draggable="true"
-                @dragstart="onChipDragStart(lineIndex, chipIndex, $event)"
-                @dragend="onChipDragEnd"
+                :title="$t('lines.dragHint')"
+                :aria-label="$t('lines.dragHint')"
+                tabindex="0"
+                @click.stop
+                @dragstart="onLineDragStart(lineIndex, $event)"
+                @dragend="onLineDragEnd"
+                @keydown="onGripKeydown(lineIndex, $event)"
               >
-                <span class="address-format-builder__chip-key">{{ token.object }}</span>
-                <span class="address-format-builder__chip-sep">:</span>
-                <span class="address-format-builder__chip-value">{{ token.field }}</span>
-                <button
-                  type="button"
-                  class="address-format-builder__chip-close"
-                  :aria-label="$t('lines.removeChip')"
-                  @click.prevent="removeToken(lineIndex, chipIndex)"
-                >
-                  <i class="material-icons">close</i>
-                </button>
+                <i class="material-icons">drag_indicator</i>
               </span>
+              <span class="address-format-builder__line-number">{{ lineIndex + 1 }}</span>
+              <div class="address-format-builder__chips">
+                <span
+                  v-if="line.length === 0"
+                  class="address-format-builder__line-empty"
+                >{{ $t('lines.empty') }}</span>
+                <span
+                  v-for="(token, chipIndex) in line"
+                  :key="`chip-${lineIndex}-${chipIndex}-${token.raw}`"
+                  class="tag address-format-builder__chip"
+                  draggable="true"
+                  @dragstart="onChipDragStart(lineIndex, chipIndex, $event)"
+                  @dragend="onChipDragEnd"
+                >
+                  <span class="address-format-builder__chip-key">{{ token.object }}</span>
+                  <span class="address-format-builder__chip-sep">:</span>
+                  <span class="address-format-builder__chip-value">{{ token.field }}</span>
+                  <button
+                    type="button"
+                    class="address-format-builder__chip-close"
+                    :aria-label="$t('lines.removeChip')"
+                    @click.stop.prevent="removeToken(lineIndex, chipIndex)"
+                  >
+                    <i class="material-icons">close</i>
+                  </button>
+                </span>
+              </div>
+              <button
+                type="button"
+                class="btn btn-link btn-sm address-format-builder__line-remove"
+                :aria-label="$t('lines.remove')"
+                @click.stop.prevent="removeLine(lineIndex)"
+              >
+                <i class="material-icons">delete</i>
+              </button>
             </div>
-            <button
-              type="button"
-              class="btn btn-link btn-sm address-format-builder__line-remove"
-              :aria-label="$t('lines.remove')"
-              @click.prevent="removeLine(lineIndex)"
-            >
-              <i class="material-icons">delete</i>
-            </button>
-          </div>
+            <div
+              v-if="lineDropTarget && lineDropTarget.index === lineIndex && !lineDropTarget.before"
+              class="address-format-builder__line-drop-indicator"
+              aria-hidden="true"
+            />
+          </template>
           <button
             type="button"
             class="btn btn-outline-secondary btn-sm address-format-builder__add-line"
@@ -317,6 +334,7 @@
   import {
     AvailableObjects,
     Line,
+    Token,
     parseFormat,
     serializeLines,
     resolveToken,
@@ -334,15 +352,22 @@
     | {kind: 'line', lineIndex: number}
     | null;
 
+  interface LineDropTarget {
+    index: number;
+    before: boolean;
+  }
+
   interface State {
     mode: Mode;
     lines: Line[];
     rawText: string;
     activeTab: string;
     searchQuery: string;
+    selectedLine: number;
     dragSource: DragSource;
     dragOverLine: number;
     draggingLine: number;
+    lineDropTarget: LineDropTarget | null;
   }
 
   const PICKER_OBJECTS = ['Customer', 'Warehouse', 'Country', 'State', 'Address'];
@@ -386,9 +411,11 @@
         rawText: this.initialValue,
         activeTab: 'Customer',
         searchQuery: '',
+        selectedLine: -1,
         dragSource: null,
         dragOverLine: -1,
         draggingLine: -1,
+        lineDropTarget: null,
       };
     },
     computed: {
@@ -425,7 +452,7 @@
         const raw = this.$t('picker.requiredFooter') as string;
 
         return raw
-          .replace('[link]', `<a href="${this.requiredFieldsUrl}">`)
+          .replace('[link]', `<a href="${this.requiredFieldsUrl}" target="_blank" rel="noopener noreferrer">`)
           .replace('[/link]', '</a>');
       },
     },
@@ -443,6 +470,12 @@
           this.commitRaw();
         }
       },
+    },
+    mounted(): void {
+      document.addEventListener('click', this.handleDocumentClick);
+    },
+    beforeUnmount(): void {
+      document.removeEventListener('click', this.handleDocumentClick);
     },
     methods: {
       setMode(mode: Mode): void {
@@ -467,11 +500,24 @@
         if (this.isPlaced(object, field)) {
           return;
         }
-        const token = {
+        this.appendToken({
           object,
           field,
           raw: preferredRaw(object, field, this.objects),
-        };
+        });
+      },
+      insertField(field: string): void {
+        this.appendToken(resolveToken(field, this.objects));
+      },
+      /**
+       * Append a token to the currently-selected row when the user has selected one,
+       * otherwise to the last row (or as a new row when the last row is non-empty).
+       */
+      appendToken(token: Token): void {
+        if (this.selectedLine >= 0 && this.selectedLine < this.lines.length) {
+          this.lines[this.selectedLine].push(token);
+          return;
+        }
         const last = this.lines[this.lines.length - 1];
 
         if (last && last.length === 0) {
@@ -480,14 +526,24 @@
           this.lines.push([token]);
         }
       },
-      insertField(field: string): void {
-        const token = resolveToken(field, this.objects);
-        const last = this.lines[this.lines.length - 1];
+      toggleSelectLine(lineIndex: number): void {
+        this.selectedLine = this.selectedLine === lineIndex ? -1 : lineIndex;
+      },
+      /**
+       * Document-level click listener: clear the selection whenever the click
+       * lands outside any line row (whether outside the component entirely or
+       * inside it but on something else like the picker, banner, mode tabs).
+       * The row's own @click toggles selection first; document then sees the
+       * click bubble up and skips when the target is inside a row.
+       */
+      handleDocumentClick(ev: MouseEvent): void {
+        const target = ev.target as HTMLElement | null;
 
-        if (last && last.length === 0) {
-          last.push(token);
-        } else {
-          this.lines.push([token]);
+        if (target?.closest('.address-format-builder__line')) {
+          return;
+        }
+        if (this.selectedLine !== -1) {
+          this.selectedLine = -1;
         }
       },
       insertAllMissing(): void {
@@ -500,6 +556,11 @@
         this.lines.splice(lineIndex, 1);
         if (this.lines.length === 0) {
           this.lines.push([]);
+        }
+        if (this.selectedLine === lineIndex) {
+          this.selectedLine = -1;
+        } else if (this.selectedLine > lineIndex) {
+          this.selectedLine -= 1;
         }
       },
       addLine(): void {
@@ -581,6 +642,7 @@
       onLineDragEnd(): void {
         this.dragSource = null;
         this.draggingLine = -1;
+        this.lineDropTarget = null;
       },
       onLineDragEnter(lineIndex: number, ev: DragEvent): void {
         if (this.draggingLine !== -1) {
@@ -597,17 +659,24 @@
       },
       onLineDragOver(lineIndex: number, ev: DragEvent): void {
         const types = ev.dataTransfer?.types ?? [];
+        const isLineDrag = types.includes('application/prestashop-address-format-line');
+        const isFieldDrag = types.includes('application/prestashop-address-format-field');
+        const isChipDrag = types.includes('application/prestashop-address-format-chip');
 
-        if (
-          types.includes('application/prestashop-address-format-field')
-          || types.includes('application/prestashop-address-format-chip')
-          || types.includes('application/prestashop-address-format-line')
-        ) {
-          ev.preventDefault();
-          if (ev.dataTransfer) {
-            const isFieldDrag = types.includes('application/prestashop-address-format-field');
-            ev.dataTransfer.dropEffect = isFieldDrag ? 'copy' : 'move';
-          }
+        if (!isLineDrag && !isFieldDrag && !isChipDrag) {
+          return;
+        }
+        ev.preventDefault();
+        if (ev.dataTransfer) {
+          ev.dataTransfer.dropEffect = isFieldDrag ? 'copy' : 'move';
+        }
+
+        if (isLineDrag) {
+          // Decide whether to land before or after the hovered row based on cursor Y.
+          const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+          const before = (ev.clientY - rect.top) < rect.height / 2;
+          this.lineDropTarget = {index: lineIndex, before};
+        } else {
           this.dragOverLine = lineIndex;
         }
       },
@@ -635,12 +704,16 @@
           this.moveChip(fromLine, chipIndex, lineIndex);
         } else if (lineData) {
           const fromLine = parseInt(lineData, 10);
-          this.moveLine(fromLine, lineIndex + 1);
+          // Use the cursor-derived target so dragging upward lands above the target row.
+          const before = this.lineDropTarget?.index === lineIndex && this.lineDropTarget.before;
+          const target = before ? lineIndex : lineIndex + 1;
+          this.moveLine(fromLine, target);
         }
 
         this.dragOverLine = -1;
         this.dragSource = null;
         this.draggingLine = -1;
+        this.lineDropTarget = null;
       },
       onGripKeydown(lineIndex: number, ev: KeyboardEvent): void {
         if (ev.key === 'ArrowUp') {
@@ -698,6 +771,7 @@
       padding: 0.5rem;
       gap: 0.5rem;
       border-radius: 2px;
+      cursor: pointer;
       transition: background-color 120ms ease;
 
       &.is-drag-over {
@@ -709,15 +783,34 @@
         opacity: 0.4;
       }
 
+      &.is-selected {
+        background-color: rgba(37, 185, 215, 0.12);
+        outline: 1px solid rgba(37, 185, 215, 0.5);
+      }
+
       & + & {
         border-top: 1px solid #f1f3f5;
       }
+    }
+
+    &__line-drop-indicator {
+      height: 2px;
+      background-color: #25b9d7;
+      margin: 0 0.375rem;
+      border-radius: 1px;
+      pointer-events: none;
     }
 
     &__grip {
       cursor: grab;
       color: #6c757d;
       display: inline-flex;
+      align-items: center;
+      // Stretch full row height + bleed into the line's padding so the entire
+      // left edge of the row is a drag handle. +3px each side widens the hit zone.
+      align-self: stretch;
+      padding: 0.5rem 3px;
+      margin: -0.5rem 0;
 
       &:focus {
         outline: 2px solid #25b9d7;
