@@ -74,6 +74,7 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
                         $shippingCostTaxIncluded = (float) (string) $result->getTaxIncluded();
                     }
                 }
+                $this->updateOrderShippingTotal((int) $order->id);
             }
 
             $shipment = new Shipment();
@@ -88,10 +89,6 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
             $shipment->setCancelledAt(null);
 
             $shipmentId = $this->shipmentRepository->save($shipment);
-
-            if (!$this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING')) {
-                $this->updateOrderShippingTotal((int) $order->id);
-            }
 
             return $shipmentId;
         } catch (Exception $e) {
