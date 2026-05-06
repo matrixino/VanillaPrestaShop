@@ -59,10 +59,7 @@ describe('WS - Categories : CRUD', async () => {
 
   describe('Categories : CRUD', () => {
     let categoryNodeID: string | null = '';
-
-    // =========================================================
-    // Fetch WS Key
-    // =========================================================
+    
     describe('Fetch the Webservice Key', () => {
       it('should login in BO', async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'loginBO', baseContext);
@@ -102,10 +99,7 @@ describe('WS - Categories : CRUD', async () => {
         expect(wsKey).to.not.have.lengthOf(0);
       });
     });
-
-    // =========================================================
-    // Schema : Blank
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Schema : Blank`, () => {
       let apiResponse: APIResponse;
       let xmlResponse: string;
@@ -157,10 +151,7 @@ describe('WS - Categories : CRUD', async () => {
         }
       });
     });
-
-    // =========================================================
-    // Schema : Synopsis
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Schema : Synopsis`, () => {
       let apiResponse: APIResponse;
       let xmlResponse: string;
@@ -204,21 +195,16 @@ describe('WS - Categories : CRUD', async () => {
           const nodeAttributes: NamedNodeMap = node.attributes;
 
           if (nodeAttributes.length > 0) {
-            // Vérifier le dernier attribut seulement si le nœud en a
             expect(nodeAttributes[nodeAttributes.length - 1].nodeName)
               .to.be.oneOf(['format', 'readOnly', 'read_only', 'notFilterable', 'required']);
           }
-
-          // Vérifier que le nœud est vide
+          
           const isEmptyNode = utilsXML.isEmpty(node);
           expect(isEmptyNode, `The node ${node.nodeName} is not empty`).to.eq(true);
         }
       });
     });
-
-    // =========================================================
-    // GET - Get the list of categories
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Method : GET`, () => {
       let apiResponse: APIResponse;
       let xmlResponse: string;
@@ -274,10 +260,7 @@ describe('WS - Categories : CRUD', async () => {
         }
       });
     });
-
-    // =========================================================
-    // POST - Create category
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Method : POST`, () => {
       describe(`Endpoint : ${CategoryWS.endpoint} - Method : POST - Add Category`, () => {
         let apiResponse: APIResponse;
@@ -350,8 +333,7 @@ describe('WS - Categories : CRUD', async () => {
 
         it('should check each node attribute', async function () {
           await testContext.addContextItem(this, 'testIdentifier', 'requestGetIDCheckAll', baseContext);
-
-          // Champs calculés automatiquement par PrestaShop → ignorer
+          
           const ignoredFields: string[] = [
             'level_depth',
             'nb_products_recursive',
@@ -437,7 +419,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s name EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryName1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryNameEN2', baseContext);
 
           const xmlValueNameEn = categoryXml.getAttributeLangValue(xmlCreate, 'name', '1');
           const valueNameEn = await boCategoriesCreatePage.getValue(page, 'name');
@@ -453,7 +435,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta title EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaTitle', baseContext);
 
           const xmlValueMetaTitleEn = categoryXml.getAttributeLangValue(xmlCreate, 'meta_title', '1');
           const valueMetaTitleEn = await boCategoriesCreatePage.getValue(page, 'metaTitle');
@@ -461,7 +443,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta description EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescriptionEN', baseContext);
 
           const xmlValueMetaDescEn = categoryXml.getAttributeLangValue(xmlCreate, 'meta_description', '1');
           const valueMetaDescEn = await boCategoriesCreatePage.getValue(page, 'metaDescription');
@@ -469,7 +451,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s active', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryActive1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryActive2', baseContext);
 
           const xmlValueActive = categoryXml.getAttributeValue(xmlCreate, 'active');
           const valueActive = await boCategoriesCreatePage.getValue(page, 'active');
@@ -477,7 +459,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s name FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryName1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryNameFR1', baseContext);
 
           const xmlValueNameFr = categoryXml.getAttributeLangValue(xmlCreate, 'name', '2');
           const valueNameFr = await boCategoriesCreatePage.getValue(page, 'name', 'fr');
@@ -485,7 +467,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s description FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription2', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescriptionFR2', baseContext);
 
           const xmlValueDescEn = categoryXml.getAttributeLangValue(xmlCreate, 'description', '2');
           const valueDescEn = await boCategoriesCreatePage.getValue(page, 'description', 'fr');
@@ -493,7 +475,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta title FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription2', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaTitleFR2', baseContext);
 
           const xmlValueMetaTitleEn = categoryXml.getAttributeLangValue(xmlCreate, 'meta_title', '2');
           const valueMetaTitleEn = await boCategoriesCreatePage.getValue(page, 'metaTitle', 'fr');
@@ -501,7 +483,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta description FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescriptionFR', baseContext);
 
           const xmlValueMetaDescEn = categoryXml.getAttributeLangValue(xmlCreate, 'meta_description', '2');
           const valueMetaDescEn = await boCategoriesCreatePage.getValue(page, 'metaDescription', 'fr');
@@ -509,7 +491,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should go to \'Categories\' page', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage2', baseContext);
 
           await boCategoriesCreatePage.clickOnBreadCrumbLink(page, 'categories');
 
@@ -525,10 +507,7 @@ describe('WS - Categories : CRUD', async () => {
         });
       });
     });
-
-    // =========================================================
-    // PUT - Update category
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Method : PUT`, () => {
       describe(`Endpoint : ${CategoryWS.endpoint} - Method : PUT - Update Category`, () => {
         let apiResponse: APIResponse;
@@ -579,7 +558,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check each node id, name', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'requestGetIDCheckAll', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'requestGetIDCheckAll2', baseContext);
 
           const ignoredFields: string[] = [
             'level_depth',
@@ -596,8 +575,7 @@ describe('WS - Categories : CRUD', async () => {
 
           for (let o: number = 0; o < categoriesNodes.length; o++) {
             const oNode: Element = categoriesNodes[o];
-
-            // Ignorer les champs calculés
+            
             if (!ignoredFields.includes(oNode.nodeName)) {
               if (oNode.nodeName === 'id') {
                 expect(oNode.textContent).to.be.eq(categoryNodeID as string);
@@ -628,7 +606,7 @@ describe('WS - Categories : CRUD', async () => {
 
       describe(`Endpoint : ${CategoryWS.endpoint} - Method : PUT - Check On BO`, () => {
         it('should go to \'Catalog > Categories\' page', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage3', baseContext);
 
           await boCategoriesCreatePage.clickOnBreadCrumbLink(page, 'categories');
 
@@ -656,7 +634,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s name EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryName1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryNameEN1', baseContext);
 
           const xmlValueNameEn = categoryXml.getAttributeLangValue(xmlUpdate, 'name', '1');
           const valueNameEn = await boCategoriesCreatePage.getValue(page, 'name');
@@ -664,7 +642,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s description EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescriptionEN1', baseContext);
 
           const xmlValueDescEn = categoryXml.getAttributeLangValue(xmlUpdate, 'description', '1');
           const valueDescEn = await boCategoriesCreatePage.getValue(page, 'description');
@@ -672,7 +650,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta title EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaTitleEN', baseContext);
 
           const xmlValueMetaTitleEn = categoryXml.getAttributeLangValue(xmlUpdate, 'meta_title', '1');
           const valueMetaTitleEn = await boCategoriesCreatePage.getValue(page, 'metaTitle');
@@ -680,7 +658,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta description EN', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaTitleEN2', baseContext);
 
           const xmlValueMetaDescEn = categoryXml.getAttributeLangValue(xmlUpdate, 'meta_description', '1');
           const valueMetaDescEn = await boCategoriesCreatePage.getValue(page, 'metaDescription');
@@ -696,7 +674,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s name FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryName1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryNameFR2', baseContext);
 
           const xmlValueNameFr = categoryXml.getAttributeLangValue(xmlUpdate, 'name', '2');
           const valueNameFr = await boCategoriesCreatePage.getValue(page, 'name', 'fr');
@@ -704,7 +682,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s description FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription2', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescriptionFR3', baseContext);
 
           const xmlValueDescEn = categoryXml.getAttributeLangValue(xmlUpdate, 'description', '2');
           const valueDescEn = await boCategoriesCreatePage.getValue(page, 'description', 'fr');
@@ -712,7 +690,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta title FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription2', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaTitleFR3', baseContext);
 
           const xmlValueMetaTitleEn = categoryXml.getAttributeLangValue(xmlUpdate, 'meta_title', '2');
           const valueMetaTitleEn = await boCategoriesCreatePage.getValue(page, 'metaTitle', 'fr');
@@ -720,7 +698,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should check category\'s meta description FR', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryDescription1', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'checkCategoryMetaDescriptionFR', baseContext);
 
           const xmlValueMetaDescEn = categoryXml.getAttributeLangValue(xmlUpdate, 'meta_description', '2');
           const valueMetaDescEn = await boCategoriesCreatePage.getValue(page, 'metaDescription', 'fr');
@@ -728,7 +706,7 @@ describe('WS - Categories : CRUD', async () => {
         });
 
         it('should go to \'Categories\' page', async function () {
-          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage', baseContext);
+          await testContext.addContextItem(this, 'testIdentifier', 'goToCategoriesPage3', baseContext);
 
           await boCategoriesCreatePage.clickOnBreadCrumbLink(page, 'categories');
 
@@ -744,10 +722,7 @@ describe('WS - Categories : CRUD', async () => {
         });
       });
     });
-
-    // =========================================================
-    // DELETE - Delete category
-    // =========================================================
+    
     describe(`Endpoint : ${CategoryWS.endpoint} - Method : DELETE`, () => {
       it(`should request the endpoint ${CategoryWS.endpoint}/{id} with method DELETE`, async function () {
         await testContext.addContextItem(this, 'testIdentifier', 'requestEndpointCategoriesMethodDelete', baseContext);
