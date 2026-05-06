@@ -99,6 +99,7 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierRangesFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ZoneFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CustomerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\CustomerGroupFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CartFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CartRuleFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CategoryFeatureContext
@@ -112,6 +113,7 @@ default:
         - Tests\Integration\Behaviour\Features\Context\CountryFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CurrencyFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CustomerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\CustomerManagerFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CartFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\OrderFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\ProductFeatureContext
@@ -275,6 +277,7 @@ default:
         - Tests\Integration\Behaviour\Features\Context\CountryFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CurrencyFeatureContext
         - Tests\Integration\Behaviour\Features\Context\CustomerFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\CustomerManagerFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Carrier\CarrierRangesFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\CartFeatureContext

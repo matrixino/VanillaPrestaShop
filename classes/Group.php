@@ -3,6 +3,9 @@
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
+use PrestaShop\PrestaShop\Adapter\CartRule\CartRuleDisablerService;
+use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+
 class GroupCore extends ObjectModel
 {
     public $id;
@@ -209,6 +212,16 @@ class GroupCore extends ObjectModel
         }
 
         if (parent::delete()) {
+            // Delegate to the disabler service so the legacy AdminGroupsController delete flow
+            // gets the same behavior as the CQRS DeleteCustomerGroupHandler. Must run before
+            // the cart_rule_group cleanup below, since the service uses those rows to find
+            // single-group cart rules.
+            $container = SymfonyContainer::getInstance();
+            if (null !== $container) {
+                $container->get(CartRuleDisablerService::class)
+                    ->disableCartRulesThatHadOnlyGroup((int) $this->id);
+            }
+
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'cart_rule_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'customer_group` WHERE `id_group` = ' . (int) $this->id);
             Db::getInstance()->execute('DELETE FROM `' . _DB_PREFIX_ . 'category_group` WHERE `id_group` = ' . (int) $this->id);
