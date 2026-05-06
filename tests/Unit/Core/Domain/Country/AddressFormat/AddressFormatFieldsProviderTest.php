@@ -14,32 +14,36 @@ use PrestaShop\PrestaShop\Core\Domain\Address\Query\GetRequiredFieldsForAddress;
 use PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat\AddressFormatFieldsProvider;
 use RuntimeException;
 
-/**
- * @group address-format
- */
 class AddressFormatFieldsProviderTest extends TestCase
 {
+    public function testGetPickerClassesReturnsExpectedOrderedList(): void
+    {
+        $provider = new AddressFormatFieldsProvider($this->fakeQueryBus([]));
+
+        $this->assertSame(
+            ['Address', 'Country', 'State', 'Customer', 'Warehouse'],
+            $provider->getPickerClasses()
+        );
+    }
+
     public function testGetFieldsForKnownClassReturnsHardcodedList(): void
     {
         $provider = new AddressFormatFieldsProvider($this->fakeQueryBus([]));
 
-        $address = $provider->getFieldsForClass('Address');
-        $this->assertContains('firstname', $address);
-        $this->assertContains('lastname', $address);
-        $this->assertContains('address1', $address);
-        $this->assertContains('city', $address);
-        $this->assertContains('phone_mobile', $address);
-        $this->assertContains('dni', $address);
-
+        $this->assertSame(
+            ['firstname', 'lastname', 'company', 'vat_number', 'address1', 'address2', 'postcode', 'city', 'other', 'phone', 'phone_mobile', 'dni'],
+            $provider->getFieldsForClass('Address')
+        );
         $this->assertSame(['name', 'iso_code'], $provider->getFieldsForClass('Country'));
         $this->assertSame(['name', 'iso_code'], $provider->getFieldsForClass('State'));
-
-        $customer = $provider->getFieldsForClass('Customer');
-        $this->assertContains('firstname', $customer);
-        $this->assertContains('email', $customer);
-
-        $warehouse = $provider->getFieldsForClass('Warehouse');
-        $this->assertContains('reference', $warehouse);
+        $this->assertSame(
+            ['firstname', 'lastname', 'company', 'vat_number', 'email', 'birthday', 'website', 'siret'],
+            $provider->getFieldsForClass('Customer')
+        );
+        $this->assertSame(
+            ['name', 'reference', 'management_type'],
+            $provider->getFieldsForClass('Warehouse')
+        );
     }
 
     public function testGetFieldsForUnknownClassReturnsEmptyList(): void
@@ -57,17 +61,10 @@ class AddressFormatFieldsProviderTest extends TestCase
             $this->fakeQueryBus(['phone_mobile', 'company'])
         );
 
-        $required = $provider->getRequiredFields();
-
-        // static defaults are always present
-        $this->assertContains('firstname', $required);
-        $this->assertContains('lastname', $required);
-        $this->assertContains('address1', $required);
-        $this->assertContains('city', $required);
-        $this->assertContains('Country:name', $required);
-        // DB-managed entries are appended
-        $this->assertContains('phone_mobile', $required);
-        $this->assertContains('company', $required);
+        $this->assertSame(
+            ['firstname', 'lastname', 'address1', 'city', 'Country:name', 'phone_mobile', 'company'],
+            $provider->getRequiredFields()
+        );
     }
 
     public function testGetRequiredFieldsDeduplicatesOverlappingEntries(): void
@@ -78,10 +75,10 @@ class AddressFormatFieldsProviderTest extends TestCase
             $this->fakeQueryBus(['firstname', 'phone_mobile'])
         );
 
-        $required = $provider->getRequiredFields();
-        $occurrences = array_count_values($required);
-        $this->assertSame(1, $occurrences['firstname'] ?? 0);
-        $this->assertSame(1, $occurrences['phone_mobile'] ?? 0);
+        $this->assertSame(
+            ['firstname', 'lastname', 'address1', 'city', 'Country:name', 'phone_mobile'],
+            $provider->getRequiredFields()
+        );
     }
 
     public function testGetRequiredFieldsWithEmptyDbListReturnsOnlyStaticDefaults(): void

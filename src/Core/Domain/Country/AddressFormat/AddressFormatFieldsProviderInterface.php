@@ -16,6 +16,16 @@ namespace PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat;
 interface AddressFormatFieldsProviderInterface
 {
     /**
+     * Returns the ordered list of object class names the picker exposes
+     * (e.g. ['Address', 'Country', 'State', 'Customer', 'Warehouse']). This is the
+     * single source of truth: the form type uses it to build the picker columns
+     * and the validator uses it to reject prefixed tokens that target any other class.
+     *
+     * @return list<string>
+     */
+    public function getPickerClasses(): array;
+
+    /**
      * @param string $className One of the picker's object names
      *
      * @return list<string>

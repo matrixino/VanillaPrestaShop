@@ -15,8 +15,6 @@ use PrestaShop\PrestaShop\Core\Domain\Country\AddressFormat\AddressFormatFieldsP
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @group address-format
- *
  * Unit-tests the pure Core checker against an in-memory fields provider and a
  * no-op translator — no PrestaShop bootstrap, no legacy ObjectModel reflection.
  */
@@ -27,6 +25,11 @@ class AddressFormatCheckerTest extends TestCase
     protected function setUp(): void
     {
         $fieldsProvider = new class() implements AddressFormatFieldsProviderInterface {
+            public function getPickerClasses(): array
+            {
+                return ['Address', 'Country', 'State', 'Customer', 'Warehouse'];
+            }
+
             public function getFieldsForClass(string $className): array
             {
                 return [

@@ -72,12 +72,12 @@ Feature: country management
       | shopAssociation       | 1                                                                  |
 
   Scenario: editing a country with an invalid address format is rejected
-    When I try to edit country "test" with the following address format:
+    When I edit country "test" with following properties:
       | address_format | only_garbage_here |
     Then I should get an "InvalidAddressFormat" error
 
   Scenario: editing a country with an address format missing a required field is rejected
-    When I try to edit country "test" with the following address format:
+    When I edit country "test" with following properties:
       | address_format | lastname\naddress1\ncity\nCountry:name |
     Then I should get an "InvalidAddressFormat" error
 

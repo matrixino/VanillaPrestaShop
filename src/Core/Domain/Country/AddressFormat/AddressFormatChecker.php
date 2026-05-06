@@ -32,13 +32,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 final class AddressFormatChecker implements AddressFormatCheckerInterface
 {
     /**
-     * Picker classes the merchant can build prefixed tokens from. Anything
-     * outside this list is rejected — that's how we replace the legacy
-     * `forbiddenClassList` (Manufacturer/Supplier) without enumerating it.
-     */
-    private const PICKER_OBJECTS = ['Address', 'Country', 'State', 'Customer', 'Warehouse'];
-
-    /**
      * Mirrors the legacy AddressFormat::_CLEANING_REGEX_ — splits a line on
      * any character that isn't a word char, colon, or underscore.
      */
@@ -61,9 +54,10 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
         foreach (explode("\n", $format) as $line) {
             foreach ($this->extractTokens($line) as $token) {
                 if (in_array($token, $usedTokens, true)) {
-                    $errors[] = $this->trans(
+                    $errors[] = $this->translator->trans(
                         'This key has already been used: %key%.',
-                        ['%key%' => $token]
+                        ['%key%' => $token],
+                        self::TRANSLATION_DOMAIN
                     );
                     continue;
                 }
@@ -77,9 +71,10 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
         }
 
         foreach ($this->findMissingRequiredFields($placedKeys) as $missing) {
-            $errors[] = $this->trans(
+            $errors[] = $this->translator->trans(
                 'The %field% field is required.',
-                ['%field%' => $missing]
+                ['%field%' => $missing],
+                self::TRANSLATION_DOMAIN
             );
         }
 
@@ -107,9 +102,10 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
         if (str_contains($token, ':')) {
             $parts = explode(':', $token);
             if (2 !== count($parts) || '' === $parts[0] || '' === $parts[1]) {
-                $errors[] = $this->trans(
+                $errors[] = $this->translator->trans(
                     'Syntax error with this pattern: %pattern%.',
-                    ['%pattern%' => $token]
+                    ['%pattern%' => $token],
+                    self::TRANSLATION_DOMAIN
                 );
 
                 return null;
@@ -117,18 +113,20 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
             $class = ucfirst($parts[0]);
             $field = strtolower($parts[1]);
 
-            if (!in_array($class, self::PICKER_OBJECTS, true)) {
-                $errors[] = $this->trans(
+            if (!in_array($class, $this->fieldsProvider->getPickerClasses(), true)) {
+                $errors[] = $this->translator->trans(
                     'This object is not allowed: %name%.',
-                    ['%name%' => $class]
+                    ['%name%' => $class],
+                    self::TRANSLATION_DOMAIN
                 );
 
                 return null;
             }
             if (!in_array($field, $this->fieldsProvider->getFieldsForClass($class), true)) {
-                $errors[] = $this->trans(
+                $errors[] = $this->translator->trans(
                     'The field %field% does not exist on %class%.',
-                    ['%field%' => $field, '%class%' => $class]
+                    ['%field%' => $field, '%class%' => $class],
+                    self::TRANSLATION_DOMAIN
                 );
 
                 return null;
@@ -140,9 +138,10 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
         // Bare token: must be an Address field.
         $field = strtolower($token);
         if (!in_array($field, $this->fieldsProvider->getFieldsForClass('Address'), true)) {
-            $errors[] = $this->trans(
+            $errors[] = $this->translator->trans(
                 'This field is not a valid address property: %name%.',
-                ['%name%' => $token]
+                ['%name%' => $token],
+                self::TRANSLATION_DOMAIN
             );
 
             return null;
@@ -168,13 +167,5 @@ final class AddressFormatChecker implements AddressFormatCheckerInterface
         }
 
         return $missing;
-    }
-
-    /**
-     * @param array<string, string> $params
-     */
-    private function trans(string $message, array $params = []): string
-    {
-        return $this->translator->trans($message, $params, self::TRANSLATION_DOMAIN);
     }
 }

@@ -85,6 +85,11 @@ final class AddressFormatFieldsProvider implements AddressFormatFieldsProviderIn
     {
     }
 
+    public function getPickerClasses(): array
+    {
+        return array_keys(self::FIELDS_BY_CLASS);
+    }
+
     public function getFieldsForClass(string $className): array
     {
         return self::FIELDS_BY_CLASS[$className] ?? [];

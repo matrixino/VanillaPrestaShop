@@ -89,7 +89,6 @@ twig:
   exception_controller: null
   form_themes:
     - '@PrestaShop/Admin/TwigTemplateForm/bootstrap_4_horizontal_layout.html.twig'
-    - '@PrestaShop/Admin/TwigTemplateForm/address_format_builder.html.twig'
   paths:
     '%admin_page%/TwigTemplateForm': Twig
     '%admin_page%/Common': Common

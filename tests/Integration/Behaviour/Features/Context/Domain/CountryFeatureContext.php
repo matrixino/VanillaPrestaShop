@@ -191,22 +191,6 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
-     * @When I try to edit country :countryReference with the following address format:
-     */
-    public function tryEditCountryAddressFormat(string $countryReference, TableNode $table): void
-    {
-        $data = $this->localizeByRows($table);
-        $command = new EditCountryCommand(SharedStorage::getStorage()->get($countryReference));
-        $command->setAddressFormat($this->unescapeFormat((string) $data['address_format']));
-
-        try {
-            $this->getCommandBus()->handle($command);
-        } catch (CountryException $e) {
-            $this->setLastException($e);
-        }
-    }
-
-    /**
      * @Then I should get an :exceptionShortName error
      */
     public function assertCountryDomainError(string $exceptionShortName): void

@@ -40,8 +40,12 @@ class AddressFormatType extends AbstractType
      */
     public const DEFAULT_LAYOUT = "firstname lastname\ncompany\nvat_number\naddress1\naddress2\npostcode city\nCountry:name\nphone";
 
-    /** @var string[] Objects the picker exposes, in display order. */
-    private const PICKER_OBJECTS = ['Address', 'Country', 'State', 'Customer', 'Warehouse'];
+    /**
+     * Form theme path — applied via the form_theme option (see PrestaShopBundle's
+     * FormThemeExtension) so the widget block stays scoped to this type instead of
+     * being registered globally in app/config/config.yml.
+     */
+    private const FORM_THEME = '@PrestaShop/Admin/Improve/International/Country/FormTheme/address_format_builder.html.twig';
 
     public function __construct(
         private readonly TranslatorInterface $translator,
@@ -74,6 +78,7 @@ class AddressFormatType extends AbstractType
                 'compound' => false,
                 'empty_data' => '',
                 'attr' => [],
+                'form_theme' => self::FORM_THEME,
                 'available_objects' => null,
                 'required_fields' => null,
                 'default_format' => self::DEFAULT_LAYOUT,
@@ -114,7 +119,7 @@ class AddressFormatType extends AbstractType
     private function buildAvailableObjects(): array
     {
         $objects = [];
-        foreach (self::PICKER_OBJECTS as $className) {
+        foreach ($this->fieldsProvider->getPickerClasses() as $className) {
             $objects[$className] = $this->fieldsProvider->getFieldsForClass($className);
         }
 
@@ -144,7 +149,7 @@ class AddressFormatType extends AbstractType
                 'email' => 'john@example.com',
                 'website' => 'acme.com',
                 'vat_number' => 'FR12345678901',
-                'siret' => '',
+                'siret' => '123 456 789 12345',
                 'birthday' => '1985-04-12',
             ],
             'Warehouse' => [
@@ -153,7 +158,7 @@ class AddressFormatType extends AbstractType
                 'management_type' => 'FIFO',
             ],
             'Country' => ['name' => 'France', 'iso_code' => 'FR', 'call_prefix' => '33'],
-            'State' => ['name' => '', 'iso_code' => ''],
+            'State' => ['name' => 'Île de France', 'iso_code' => 'FR-IDF'],
             'Address' => [
                 // Address has firstname/lastname/company/vat_number as public properties
                 // (the legacy Address ObjectModel exposes them) — bare tokens like
@@ -168,8 +173,8 @@ class AddressFormatType extends AbstractType
                 'city' => 'Paris',
                 'phone' => '0102030405',
                 'phone_mobile' => '+33 6 12 34 56 78',
-                'dni' => '',
-                'other' => '',
+                'dni' => '12345678A',
+                'other' => '3rd floor',
             ],
         ];
     }
@@ -185,34 +190,32 @@ class AddressFormatType extends AbstractType
      */
     private function buildTranslations(): array
     {
-        $t = fn (string $message, array $params, string $domain): string => $this->translator->trans($message, $params, $domain);
-
         return [
-            'mode.visual' => $t('Visual editor', [], 'Admin.International.Feature'),
-            'mode.raw' => $t('Raw template', [], 'Admin.International.Feature'),
-            'reset.button' => $t('Reset', [], 'Admin.Actions'),
-            'reset.default' => $t('Default for this country', [], 'Admin.International.Feature'),
-            'reset.lastSaved' => $t('Last saved format', [], 'Admin.International.Feature'),
-            'reset.clear' => $t('Clear format', [], 'Admin.International.Feature'),
-            'reset.confirm' => $t('Are you sure you want to clear this address format?', [], 'Admin.International.Notification'),
-            'banner.missingOne' => $t('1 required field missing:', [], 'Admin.International.Feature'),
-            'banner.missingMany' => $t('{count} required fields missing:', [], 'Admin.International.Feature'),
-            'banner.allPresent' => $t('All required fields are present.', [], 'Admin.International.Feature'),
-            'banner.insertAll' => $t('Insert all missing', [], 'Admin.International.Feature'),
-            'lines.empty' => $t('Drop fields here, or click + below', [], 'Admin.International.Feature'),
-            'lines.add' => $t('Add line', [], 'Admin.International.Feature'),
-            'lines.remove' => $t('Remove line', [], 'Admin.International.Feature'),
-            'lines.removeChip' => $t('Remove field', [], 'Admin.International.Feature'),
-            'lines.dragHint' => $t('Drag to reorder line', [], 'Admin.International.Feature'),
-            'picker.title' => $t('Available fields', [], 'Admin.International.Feature'),
-            'picker.search' => $t('Search across all objects…', [], 'Admin.International.Feature'),
-            'picker.noMatch' => $t('No fields match your search.', [], 'Admin.International.Feature'),
-            'picker.required' => $t('Required field', [], 'Admin.International.Feature'),
-            'picker.alreadyAdded' => $t('Already in the format', [], 'Admin.International.Feature'),
-            'picker.requiredFooter' => $t('Required fields — managed in [link]Customers › Addresses[/link]', [], 'Admin.International.Feature'),
-            'preview.title' => $t('Live preview · Sample customer', [], 'Admin.International.Feature'),
-            'preview.empty' => $t('Empty format — drag fields in to see the preview.', [], 'Admin.International.Feature'),
-            'raw.help' => $t('Edit the raw template directly. Each line maps to one address line; spaces join placeholders.', [], 'Admin.International.Feature'),
+            'mode.visual' => $this->translator->trans('Visual editor', [], 'Admin.International.Feature'),
+            'mode.raw' => $this->translator->trans('Raw template', [], 'Admin.International.Feature'),
+            'reset.button' => $this->translator->trans('Reset', [], 'Admin.Actions'),
+            'reset.default' => $this->translator->trans('Default for this country', [], 'Admin.International.Feature'),
+            'reset.lastSaved' => $this->translator->trans('Last saved format', [], 'Admin.International.Feature'),
+            'reset.clear' => $this->translator->trans('Clear format', [], 'Admin.International.Feature'),
+            'reset.confirm' => $this->translator->trans('Are you sure you want to clear this address format?', [], 'Admin.International.Notification'),
+            'banner.missingOne' => $this->translator->trans('1 required field missing:', [], 'Admin.International.Feature'),
+            'banner.missingMany' => $this->translator->trans('{count} required fields missing:', [], 'Admin.International.Feature'),
+            'banner.allPresent' => $this->translator->trans('All required fields are present.', [], 'Admin.International.Feature'),
+            'banner.insertAll' => $this->translator->trans('Insert all missing', [], 'Admin.International.Feature'),
+            'lines.empty' => $this->translator->trans('Drop fields here, or click + below', [], 'Admin.International.Feature'),
+            'lines.add' => $this->translator->trans('Add line', [], 'Admin.International.Feature'),
+            'lines.remove' => $this->translator->trans('Remove line', [], 'Admin.International.Feature'),
+            'lines.removeChip' => $this->translator->trans('Remove field', [], 'Admin.International.Feature'),
+            'lines.dragHint' => $this->translator->trans('Drag to reorder line', [], 'Admin.International.Feature'),
+            'picker.title' => $this->translator->trans('Available fields', [], 'Admin.International.Feature'),
+            'picker.search' => $this->translator->trans('Search across all objects…', [], 'Admin.International.Feature'),
+            'picker.noMatch' => $this->translator->trans('No fields match your search.', [], 'Admin.International.Feature'),
+            'picker.required' => $this->translator->trans('Required field', [], 'Admin.International.Feature'),
+            'picker.alreadyAdded' => $this->translator->trans('Already in the format', [], 'Admin.International.Feature'),
+            'picker.requiredFooter' => $this->translator->trans('Required fields — managed in [link]Customers › Addresses[/link]', [], 'Admin.International.Feature'),
+            'preview.title' => $this->translator->trans('Live preview · Sample customer', [], 'Admin.International.Feature'),
+            'preview.empty' => $this->translator->trans('Empty format — drag fields in to see the preview.', [], 'Admin.International.Feature'),
+            'raw.help' => $this->translator->trans('Edit the raw template directly. Each line maps to one address line; spaces join placeholders.', [], 'Admin.International.Feature'),
         ];
     }
 }
