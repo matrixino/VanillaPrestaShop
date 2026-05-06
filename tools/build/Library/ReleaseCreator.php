@@ -128,7 +128,7 @@ class ReleaseCreator
         '\.claude.*',
         '\.cursor.*',
         '\.windsurf.*',
-        '\.github.*',
+        '\.github/copilot-instructions\.md$',
     ];
 
     /**
