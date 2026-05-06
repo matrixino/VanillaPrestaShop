@@ -209,7 +209,7 @@ class AddressFormatType extends AbstractType
             'picker.noMatch' => $t('No fields match your search.', [], 'Admin.International.Feature'),
             'picker.required' => $t('Required field', [], 'Admin.International.Feature'),
             'picker.alreadyAdded' => $t('Already in the format', [], 'Admin.International.Feature'),
-            'picker.requiredFooter' => $t('* Required field — managed in [link]Customers › Addresses[/link]', [], 'Admin.International.Feature'),
+            'picker.requiredFooter' => $t('Required fields — managed in [link]Customers › Addresses[/link]', [], 'Admin.International.Feature'),
             'preview.title' => $t('Live preview · Sample customer', [], 'Admin.International.Feature'),
             'preview.empty' => $t('Empty format — drag fields in to see the preview.', [], 'Admin.International.Feature'),
             'raw.help' => $t('Edit the raw template directly. Each line maps to one address line; spaces join placeholders.', [], 'Admin.International.Feature'),

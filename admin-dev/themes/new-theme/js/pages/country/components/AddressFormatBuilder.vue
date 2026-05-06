@@ -156,26 +156,53 @@
                   v-if="line.length === 0"
                   class="address-format-builder__line-empty"
                 >{{ $t('lines.empty') }}</span>
-                <span
+                <template
                   v-for="(token, chipIndex) in line"
                   :key="`chip-${lineIndex}-${chipIndex}-${token.raw}`"
-                  class="tag address-format-builder__chip"
-                  draggable="true"
-                  @dragstart="onChipDragStart(lineIndex, chipIndex, $event)"
-                  @dragend="onChipDragEnd"
                 >
-                  <span class="address-format-builder__chip-key">{{ token.object }}</span>
-                  <span class="address-format-builder__chip-sep">:</span>
-                  <span class="address-format-builder__chip-value">{{ token.field }}</span>
-                  <button
-                    type="button"
-                    class="address-format-builder__chip-close"
-                    :aria-label="$t('lines.removeChip')"
-                    @click.stop.prevent="removeToken(lineIndex, chipIndex)"
+                  <span
+                    v-if="chipDropTarget
+                      && chipDropTarget.lineIndex === lineIndex
+                      && chipDropTarget.chipIndex === chipIndex
+                      && chipDropTarget.before"
+                    class="address-format-builder__chip-drop-indicator"
+                    aria-hidden="true"
+                  />
+                  <span
+                    class="tag address-format-builder__chip"
+                    :class="{
+                      'is-dragging': dragSource && dragSource.kind === 'chip'
+                        && dragSource.lineIndex === lineIndex && dragSource.chipIndex === chipIndex,
+                      'is-selected': selectedChip
+                        && selectedChip.lineIndex === lineIndex && selectedChip.chipIndex === chipIndex,
+                    }"
+                    draggable="true"
+                    @click.stop="toggleSelectChip(lineIndex, chipIndex)"
+                    @dragstart="onChipDragStart(lineIndex, chipIndex, $event)"
+                    @dragend="onChipDragEnd"
+                    @dragover="onChipDragOver(lineIndex, chipIndex, $event)"
                   >
-                    <i class="material-icons">close</i>
-                  </button>
-                </span>
+                    <span class="address-format-builder__chip-key">{{ token.object }}</span>
+                    <span class="address-format-builder__chip-sep">:</span>
+                    <span class="address-format-builder__chip-value">{{ token.field }}</span>
+                    <button
+                      type="button"
+                      class="address-format-builder__chip-close"
+                      :aria-label="$t('lines.removeChip')"
+                      @click.stop.prevent="removeToken(lineIndex, chipIndex)"
+                    >
+                      <i class="material-icons">close</i>
+                    </button>
+                  </span>
+                  <span
+                    v-if="chipDropTarget
+                      && chipDropTarget.lineIndex === lineIndex
+                      && chipDropTarget.chipIndex === chipIndex
+                      && !chipDropTarget.before"
+                    class="address-format-builder__chip-drop-indicator"
+                    aria-hidden="true"
+                  />
+                </template>
               </div>
               <button
                 type="button"
@@ -361,6 +388,17 @@
     before: boolean;
   }
 
+  interface ChipDropTarget {
+    lineIndex: number;
+    chipIndex: number;
+    before: boolean;
+  }
+
+  interface SelectedChip {
+    lineIndex: number;
+    chipIndex: number;
+  }
+
   interface State {
     mode: Mode;
     lines: Line[];
@@ -368,10 +406,12 @@
     activeTab: string;
     searchQuery: string;
     selectedLine: number;
+    selectedChip: SelectedChip | null;
     dragSource: DragSource;
     dragOverLine: number;
     draggingLine: number;
     lineDropTarget: LineDropTarget | null;
+    chipDropTarget: ChipDropTarget | null;
   }
 
   const PICKER_OBJECTS = ['Address', 'Country', 'State', 'Customer', 'Warehouse'];
@@ -416,10 +456,12 @@
         activeTab: 'Address',
         searchQuery: '',
         selectedLine: -1,
+        selectedChip: null,
         dragSource: null,
         dragOverLine: -1,
         draggingLine: -1,
         lineDropTarget: null,
+        chipDropTarget: null,
       };
     },
     computed: {
@@ -542,6 +584,14 @@
       },
       toggleSelectLine(lineIndex: number): void {
         this.selectedLine = this.selectedLine === lineIndex ? -1 : lineIndex;
+        // Selecting a row clears any chip selection — only one selection at a time.
+        this.selectedChip = null;
+      },
+      toggleSelectChip(lineIndex: number, chipIndex: number): void {
+        const isSame = this.selectedChip
+          && this.selectedChip.lineIndex === lineIndex
+          && this.selectedChip.chipIndex === chipIndex;
+        this.selectedChip = isSame ? null : {lineIndex, chipIndex};
       },
       /**
        * Document-level click listener: clear the selection whenever the click
@@ -571,12 +621,25 @@
         if (this.selectedLine !== -1) {
           this.selectedLine = -1;
         }
+        if (this.selectedChip !== null) {
+          this.selectedChip = null;
+        }
       },
       insertAllMissing(): void {
         [...this.missingFields].forEach((field) => this.insertField(field));
       },
       removeToken(lineIndex: number, chipIndex: number): void {
         this.lines[lineIndex].splice(chipIndex, 1);
+        if (this.selectedChip && this.selectedChip.lineIndex === lineIndex) {
+          if (this.selectedChip.chipIndex === chipIndex) {
+            this.selectedChip = null;
+          } else if (this.selectedChip.chipIndex > chipIndex) {
+            this.selectedChip = {
+              lineIndex,
+              chipIndex: this.selectedChip.chipIndex - 1,
+            };
+          }
+        }
       },
       removeLine(lineIndex: number): void {
         this.lines.splice(lineIndex, 1);
@@ -587,6 +650,14 @@
           this.selectedLine = -1;
         } else if (this.selectedLine > lineIndex) {
           this.selectedLine -= 1;
+        }
+        if (this.selectedChip && this.selectedChip.lineIndex === lineIndex) {
+          this.selectedChip = null;
+        } else if (this.selectedChip && this.selectedChip.lineIndex > lineIndex) {
+          this.selectedChip = {
+            lineIndex: this.selectedChip.lineIndex - 1,
+            chipIndex: this.selectedChip.chipIndex,
+          };
         }
       },
       addLine(): void {
@@ -600,15 +671,31 @@
         const [moved] = this.lines.splice(from, 1);
         this.lines.splice(Math.max(0, Math.min(this.lines.length, adjusted)), 0, moved);
       },
-      moveChip(fromLine: number, fromChip: number, toLine: number): void {
-        if (fromLine === toLine) {
-          return;
-        }
+      /**
+       * Move a chip to a target line at a specific insertion index.
+       * When `toChip` is null the chip is appended to the end of the destination line.
+       * Same-line moves are special-cased so the index doesn't shift after splice.
+       */
+      moveChip(fromLine: number, fromChip: number, toLine: number, toChip: number | null = null): void {
         if (!this.lines[fromLine] || !this.lines[toLine]) {
           return;
         }
+        if (fromLine === toLine) {
+          if (toChip === null || toChip === fromChip || toChip === fromChip + 1) {
+            return;
+          }
+          const [token] = this.lines[fromLine].splice(fromChip, 1);
+          const adjusted = toChip > fromChip ? toChip - 1 : toChip;
+          this.lines[fromLine].splice(adjusted, 0, token);
+          return;
+        }
         const [token] = this.lines[fromLine].splice(fromChip, 1);
-        this.lines[toLine].push(token);
+
+        if (toChip === null) {
+          this.lines[toLine].push(token);
+        } else {
+          this.lines[toLine].splice(toChip, 0, token);
+        }
       },
       resetTo(format: string): void {
         this.lines = parseFormat(format);
@@ -649,10 +736,27 @@
           ev.dataTransfer.effectAllowed = 'move';
         }
         this.dragSource = {kind: 'chip', lineIndex, chipIndex};
+        // The chip is about to land somewhere else — drop the persistent selection
+        // so it doesn't reference a stale (line, index) pair after the drop.
+        this.selectedChip = null;
       },
       onChipDragEnd(): void {
         this.dragSource = null;
         this.dragOverLine = -1;
+        this.chipDropTarget = null;
+      },
+      /**
+       * Compute whether the cursor is on the left or right half of the hovered chip
+       * so the insertion indicator (and the eventual drop) lands at the right index.
+       */
+      onChipDragOver(lineIndex: number, chipIndex: number, ev: DragEvent): void {
+        if (!ev.dataTransfer?.types.includes('application/prestashop-address-format-chip')) {
+          return;
+        }
+        ev.preventDefault();
+        const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+        const before = (ev.clientX - rect.left) < rect.width / 2;
+        this.chipDropTarget = {lineIndex, chipIndex, before};
       },
       onLineDragStart(lineIndex: number, ev: DragEvent): void {
         ev.dataTransfer?.setData(
@@ -727,7 +831,16 @@
           }
         } else if (chipData) {
           const {lineIndex: fromLine, chipIndex} = JSON.parse(chipData) as {lineIndex: number, chipIndex: number};
-          this.moveChip(fromLine, chipIndex, lineIndex);
+          // If the cursor was on a specific chip in the destination line, use that
+          // index (with `before` to land left or right of it). Otherwise append.
+          let toChip: number | null = null;
+
+          if (this.chipDropTarget && this.chipDropTarget.lineIndex === lineIndex) {
+            toChip = this.chipDropTarget.before
+              ? this.chipDropTarget.chipIndex
+              : this.chipDropTarget.chipIndex + 1;
+          }
+          this.moveChip(fromLine, chipIndex, lineIndex, toChip);
         } else if (lineData) {
           const fromLine = parseInt(lineData, 10);
           // Use the cursor-derived target so dragging upward lands above the target row.
@@ -740,6 +853,7 @@
         this.dragSource = null;
         this.draggingLine = -1;
         this.lineDropTarget = null;
+        this.chipDropTarget = null;
       },
       onGripKeydown(lineIndex: number, ev: KeyboardEvent): void {
         if (ev.key === 'ArrowUp') {
@@ -843,10 +957,19 @@
       align-self: stretch;
       padding: 0.5rem 3px;
       margin: -0.5rem 0;
+      transition: color 120ms ease;
 
-      &:focus {
-        outline: 2px solid #25b9d7;
-        outline-offset: 2px;
+      // Suppress the default focus outline (browsers add one because the grip
+      // is tabindex="0" for keyboard reorder) and instead colour the icon
+      // cyan on hover/focus so the affordance is visible without a hard border.
+      &:focus,
+      &:focus-visible {
+        outline: none;
+      }
+
+      &:hover,
+      &:focus-visible {
+        color: #25b9d7;
       }
 
       i {
@@ -887,6 +1010,29 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
       font-size: 0.8125rem;
       cursor: grab;
+
+      // Highlight the chip's border in cyan both when it's clicked-to-select
+      // and while it's being dragged, so the user always sees which chip is
+      // their current focus. Dragging also dims it via opacity.
+      &.is-selected,
+      &.is-dragging {
+        border-color: #25b9d7;
+      }
+
+      &.is-dragging {
+        opacity: 0.4;
+      }
+    }
+
+    // Thin vertical bar shown between chips while a chip is being dragged inside
+    // a line, previewing the future insertion point.
+    &__chip-drop-indicator {
+      display: inline-block;
+      width: 2px;
+      align-self: stretch;
+      background-color: #25b9d7;
+      border-radius: 1px;
+      pointer-events: none;
     }
 
     &__chip-key {
