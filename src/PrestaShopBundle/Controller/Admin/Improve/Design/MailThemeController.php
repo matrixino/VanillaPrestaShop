@@ -14,6 +14,8 @@ use PrestaShop\PrestaShop\Core\Domain\MailTemplate\Command\GenerateThemeMailTemp
 use PrestaShop\PrestaShop\Core\Exception\CoreException;
 use PrestaShop\PrestaShop\Core\Exception\FileNotFoundException;
 use PrestaShop\PrestaShop\Core\Exception\InvalidArgumentException;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
+use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
 use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Language\LanguageRepositoryInterface;
 use PrestaShop\PrestaShop\Core\MailTemplate\FolderThemeCatalog;
@@ -344,7 +346,8 @@ class MailThemeController extends PrestaShopAdminController
     public function translateBodyAction(
         Request $request,
         #[Autowire(service: 'prestashop.service.translation')]
-        TranslationService $translationService
+        TranslationService $translationService,
+        FeatureFlagStateCheckerInterface $featureFlagStateChecker
     ): RedirectResponse {
         $translateMailsBodyForm = $this->createForm(TranslateMailsBodyType::class);
         $translateMailsBodyForm->handleRequest($request);
@@ -365,6 +368,12 @@ class MailThemeController extends PrestaShopAdminController
         $translateData = $translateMailsBodyForm->getData();
         $language = $translateData['language'];
         $locale = $translationService->langToLocale($language);
+
+        if ($featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_EMAIL_BODY_TRANSLATION)) {
+            return $this->redirectToRoute('admin_email_body_translation_index', [
+                'locale' => $language,
+            ]);
+        }
 
         return $this->redirectToRoute('admin_international_translation_overview', [
             'lang' => $language,
