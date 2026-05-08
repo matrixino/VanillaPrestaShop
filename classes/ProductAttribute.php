@@ -383,7 +383,6 @@ class ProductAttributeCore extends ObjectModel
      * @return int $position Position
      *
      * @deprecated Since 9.2, use ProductAttribute::getHighestPosition() instead.
-     *
      */
     public static function getHigherPosition($idAttributeGroup)
     {
@@ -407,10 +406,15 @@ class ProductAttributeCore extends ObjectModel
 
     /**
      * Get the highest attribute position from a group attribute
-     *
      */
     public static function getHighestPosition(int $idAttributeGroup): int
     {
-        return self::getHigherPosition($idAttributeGroup);
+        $sql = 'SELECT MAX(`position`)
+                FROM `' . _DB_PREFIX_ . 'attribute`
+                WHERE id_attribute_group = ' . (int) $idAttributeGroup;
+
+        $position = Db::getInstance()->getValue($sql);
+
+        return (is_numeric($position)) ? (int) $position : -1;
     }
 }
