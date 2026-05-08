@@ -382,9 +382,20 @@ class ProductAttributeCore extends ObjectModel
      *
      * @return int $position Position
      *
+     * @deprecated Since 9.2, use ProductAttribute::getHighestPosition() instead.
+     *
      */
     public static function getHigherPosition($idAttributeGroup)
     {
+        @trigger_error(
+            sprintf(
+                '%s is deprecated since version 9.2. Use %s instead.',
+                __METHOD__,
+                self::class . '::getHighestPosition()'
+            ),
+            E_USER_DEPRECATED
+        );
+
         $sql = 'SELECT MAX(`position`)
                 FROM `' . _DB_PREFIX_ . 'attribute`
                 WHERE id_attribute_group = ' . (int) $idAttributeGroup;
