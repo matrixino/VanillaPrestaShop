@@ -402,7 +402,7 @@ class ProductAttributeCore extends ObjectModel
      * @return int $position Position
      *
      */
-    public static function getHighestPosition($idAttributeGroup)
+    public static function getHighestPosition(int $idAttributeGroup): int
     {
         return self::getHigherPosition($idAttributeGroup);
     }
