@@ -204,6 +204,10 @@ class ModuleCommand extends Command
                     if (isset($rows[$name]) || isset($installed[$name])) {
                         continue;
                     }
+                    // A directory only counts as a module if it contains a {name}/{name}.php class file.
+                    if (!is_file($dir->getPathname() . '/' . $name . '.php')) {
+                        continue;
+                    }
                     $rows[$name] = [$name, '-', 'Not installed'];
                 }
             }
