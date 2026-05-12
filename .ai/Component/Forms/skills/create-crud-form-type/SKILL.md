@@ -1,18 +1,21 @@
 ---
-name: create-form-type
+name: create-crud-form-type
 description: >
-  Create the Symfony form type for an entity's add/edit form. Covers standard field
-  types, translatable fields, money fields, file uploads, and choice providers.
-  For multi-tab layout with NavigationTabType, see create-form-tab-layout.
-  Trigger: "create form type for {Domain}".
+  Create the Symfony form type for a CRUD (identifiable) entity's add/edit form.
+  Covers standard field types, translatable fields, money fields, file uploads,
+  and choice providers. For multi-tab layout with NavigationTabType, see
+  create-form-tab-layout. For settings/configuration forms, see create-settings-form.
+  Trigger: "create CRUD form type for {Domain}".
 needs: [create-cqrs-commands, create-cqrs-queries]
-produces: "{Domain}Type.php + choice providers — Symfony form structure for add/edit"
+produces: "{Domain}Type.php + choice providers — Symfony form structure for CRUD add/edit"
 subagent: optional
 ---
 
-# create-form-type
+# create-crud-form-type
 
-Read `@.ai/Component/Forms/CONTEXT.md` for form conventions (base classes, data flow, service registration).
+> **Scope:** this skill builds the FormType for a **CRUD (identifiable) form** — an entity with an ID, a grid listing, and an `Add`/`Edit` CQRS command. For a **settings form** (options block, `ps_configuration` rows), use [`create-settings-form`](../create-settings-form/SKILL.md) instead. Settings FormTypes are flat, have no `getParent()`, no `_id` field, and no entity binding.
+
+Read `@.ai/Component/Forms/CONTEXT.md` for form conventions (base classes, data flow, service registration, settings-vs-CRUD decision tree).
 
 ## 1. Root form type
 
@@ -85,3 +88,4 @@ Conventions (base classes, file uploads, choice providers, NavigationTabType) ar
 
 - Add Symfony validation constraints directly on form fields (`NotBlank`, `Length`, `Regex`)
 - For multi-tab layout, use the `create-form-tab-layout` skill instead
+- If the page persists into `ps_configuration` (and not into an entity table), this is NOT a CRUD form — switch to [`create-settings-form`](../create-settings-form/SKILL.md)

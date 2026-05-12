@@ -1,18 +1,22 @@
 ---
-name: create-form-data-handling
+name: create-crud-form-data-handling
 description: >
-  Create the form data flow layer: DataProvider (loads entity data for edit form),
-  DataHandler (dispatches commands on create/update), error handling, and service
-  registration. This bridges the form layer with the CQRS layer. Read
-  Component/Forms/CONTEXT.md for conventions. Trigger: "create form data handling for {Domain}".
-needs: [create-cqrs-commands, create-cqrs-queries, create-form-type]
+  Create the CRUD form data flow layer: DataProvider (loads entity data for edit
+  form), DataHandler (dispatches commands on create/update), error handling, and
+  service registration. This bridges the form layer with the CQRS layer. For
+  settings/configuration forms (a single FormDataProvider over ps_configuration,
+  no DataHandler), use create-settings-form. Trigger: "create CRUD form data
+  handling for {Domain}".
+needs: [create-cqrs-commands, create-cqrs-queries, create-crud-form-type]
 produces: "{Domain}FormDataProvider + {Domain}FormDataHandler + DI registration"
 subagent: optional
 ---
 
-# create-form-data-handling
+# create-crud-form-data-handling
 
-Read `@.ai/Component/Forms/CONTEXT.md` for form conventions (IdentifiableObject pattern, service registration).
+> **Scope:** this skill is for **CRUD (identifiable) forms** — entity add/edit pages backed by CQRS commands. Settings forms do NOT have a DataHandler — they use a single `FormDataProvider` over a `DataConfiguration`. Use [`create-settings-form`](../create-settings-form/SKILL.md) for that pattern.
+
+Read `@.ai/Component/Forms/CONTEXT.md` for form conventions (IdentifiableObject pattern, service registration, settings-vs-CRUD decision tree).
 
 ## 1. DataProvider
 

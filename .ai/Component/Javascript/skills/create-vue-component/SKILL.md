@@ -6,7 +6,7 @@ description: >
   components. Vue is only needed when a section requires rich interactivity that
   standard form types cannot provide (e.g. combination listing, dynamic range
   tables). Trigger: "add Vue component for {Domain}".
-needs: [create-ts-entry-point, create-form-type]
+needs: [create-ts-entry-point, create-crud-form-type]
 produces: "Vue 3 SFC + initialization function mounted on a specific DOM section"
 conditional: "only for sections with complex UX requiring rich interactivity"
 ---

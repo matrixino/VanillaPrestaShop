@@ -5,7 +5,7 @@ description: >
   specific pattern for complex forms with many fields organized by tabs — NOT the
   default form layout. Most forms do not need tabs. Trigger: "create tab layout
   for {Domain} form", "add tabs to {Domain} form".
-needs: [create-form-type]
+needs: [create-crud-form-type]
 produces: "NavigationTabType-based tab structure with sub-form types per tab"
 conditional: "only for complex entities with many fields requiring tab organization"
 ---
