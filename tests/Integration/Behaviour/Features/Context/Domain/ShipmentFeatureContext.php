@@ -13,7 +13,6 @@ use Behat\Gherkin\Node\TableNode;
 use Exception;
 use Order;
 use OrderDetail;
-use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
 use PHPUnit\Framework\Assert;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\CreateShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\DeleteProductFromShipment;
