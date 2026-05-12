@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Adapter\Carrier\ShippingCost\Calculator;
 
+use Currency;
 use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Carrier\ShippingCost\Calculator\CurrencyConversionCalculator;
@@ -51,7 +52,7 @@ class CurrencyConversionCalculatorTest extends TestCase
         $initialCost = new DecimalNumber('10.00');
         $context->setCost($initialCost);
 
-        $currency = $this->createMock(\Currency::class);
+        $currency = $this->createMock(Currency::class);
         $this->currencyRepository->method('get')->with(new CurrencyId(1))->willReturn($currency);
 
         $convertedAmount = 12.50;

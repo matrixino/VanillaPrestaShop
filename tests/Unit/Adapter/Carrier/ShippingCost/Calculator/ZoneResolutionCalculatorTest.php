@@ -43,7 +43,7 @@ class ZoneResolutionCalculatorTest extends TestCase
     public function testItResolvesFromAddressRepository(): void
     {
         $context = $this->createContext(10); // Address ID 10
-        
+
         $this->addressRepository->method('getZoneId')
             ->with(new AddressId(10))
             ->willReturn(3);
@@ -56,7 +56,7 @@ class ZoneResolutionCalculatorTest extends TestCase
     {
         $context = $this->createContext(null); // No Address ID
         // Assuming default country zone ID is 2
-        
+
         $this->addressRepository->expects($this->never())->method('getZoneId');
 
         $this->calculator->compute($context);

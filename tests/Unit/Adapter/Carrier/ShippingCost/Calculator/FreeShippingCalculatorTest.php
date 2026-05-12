@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Adapter\Carrier\ShippingCost\Calculator;
 
+use Currency;
 use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Carrier\ShippingCost\Calculator\FreeShippingCalculator;
@@ -61,7 +62,7 @@ class FreeShippingCalculatorTest extends TestCase
         $criteria = new FreeShippingCriteria(new DecimalNumber('40'), null);
         $this->criteriaProvider->method('getCriteria')->willReturn($criteria);
 
-        $currency = $this->createMock(\Currency::class);
+        $currency = $this->createMock(Currency::class);
         $this->currencyRepository->method('get')->with(new CurrencyId(1))->willReturn($currency);
         $this->tools->method('convertPrice')->willReturn(40.0);
 

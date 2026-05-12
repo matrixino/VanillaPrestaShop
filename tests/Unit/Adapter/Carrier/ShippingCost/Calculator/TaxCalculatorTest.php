@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Adapter\Carrier\ShippingCost\Calculator;
 
+use Currency;
 use PHPUnit\Framework\TestCase;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Carrier\ShippingCost\Calculator\TaxCalculator;
@@ -48,7 +49,7 @@ class TaxCalculatorTest extends TestCase
         $context = $this->createContext(1);
         $context->setFreeShipping(true);
 
-        $currency = $this->createMock(\Currency::class);
+        $currency = $this->createMock(Currency::class);
         $currency->precision = 2;
         $this->currencyRepository->method('get')->willReturn($currency);
 
@@ -62,8 +63,8 @@ class TaxCalculatorTest extends TestCase
     {
         $context = $this->createContext(1);
         $context->setCost(new DecimalNumber('10.00'));
-        
-        $currency = $this->createMock(\Currency::class);
+
+        $currency = $this->createMock(Currency::class);
         $currency->precision = 2;
         $this->currencyRepository->method('get')->willReturn($currency);
 
@@ -72,6 +73,7 @@ class TaxCalculatorTest extends TestCase
                 'PS_TAX' => true,
                 'PS_ATCP_SHIPWRAP' => false,
             ];
+
             return $map[$key] ?? null;
         });
         $this->taxRateProvider->method('getTaxRate')->willReturn(20.0); // 20% tax
