@@ -14,12 +14,14 @@ use PrestaShop\PrestaShop\Adapter\Carrier\Repository\CarrierRepository;
 use PrestaShop\PrestaShop\Core\Domain\Address\ValueObject\AddressId;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\Provider\ShippingTaxRateProviderInterface;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
+use Psr\Log\LoggerInterface;
 
 class ShippingTaxRateProvider implements ShippingTaxRateProviderInterface
 {
     public function __construct(
         private readonly CarrierRepository $carrierRepository,
         private readonly AddressRepository $addressRepository,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -30,7 +32,12 @@ class ShippingTaxRateProvider implements ShippingTaxRateProviderInterface
             $address = $this->addressRepository->get(new AddressId($addressId));
 
             return (float) $carrier->getTaxesRate($address);
-        } catch (Exception) {
+        } catch (Exception $e) {
+            $this->logger->error(
+                sprintf('Failed to retrieve tax rate for carrier %d and address %d: %s', $carrierId, $addressId, $e->getMessage()),
+                ['exception' => $e]
+            );
+
             return 0.0;
         }
     }

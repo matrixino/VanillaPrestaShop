@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace PrestaShop\PrestaShop\Adapter\Carrier\ShippingCost\Provider;
 
 use Carrier;
-use Exception;
 use PrestaShop\Decimal\DecimalNumber;
 use PrestaShop\PrestaShop\Adapter\Carrier\Repository\CarrierRepository;
+use PrestaShop\PrestaShop\Core\Domain\Carrier\Exception\CarrierNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\Provider\CarrierDataProviderInterface;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\Provider\CarrierShippingData;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\CarrierId;
@@ -27,11 +27,11 @@ class CarrierDataProvider implements CarrierDataProviderInterface
     {
         try {
             $carrier = $this->carrierRepository->get(new CarrierId($carrierId));
-        } catch (Exception) {
+        } catch (CarrierNotFoundException) {
             return null;
         }
 
-        $shippingMethod = (int) $carrier->getShippingMethod();
+        $shippingMethod = $carrier->getShippingMethod();
 
         return new CarrierShippingData(
             $carrier->id,
@@ -49,11 +49,7 @@ class CarrierDataProvider implements CarrierDataProviderInterface
         int $zoneId,
         int $currencyId,
     ): ?DecimalNumber {
-        try {
-            $carrier = $this->carrierRepository->get(new CarrierId($carrierData->getCarrierId()));
-        } catch (Exception) {
-            return null;
-        }
+        $carrier = $this->carrierRepository->get(new CarrierId($carrierData->getCarrierId()));
 
         $weightFloat = (float) (string) $totalWeight;
         $orderTotalFloat = (float) (string) $orderTotal;

@@ -21,8 +21,10 @@ class WeightCalculator implements ShippingCostCalculatorInterface
 
         $totalWeight = new DecimalNumber('0');
         foreach ($context->getPhysicalProducts() as $product) {
-            $weight = new DecimalNumber((string) ($product['weight_attribute'] ?? $product['weight'] ?? 0));
-            $quantity = new DecimalNumber((string) $product['quantity']);
+            $rawWeight = $product['weight_attribute'] ?? $product['weight'] ?? 0;
+            $rawQuantity = $product['quantity'] ?? 0;
+            $weight = new DecimalNumber(is_numeric($rawWeight) ? (string) $rawWeight : '0');
+            $quantity = new DecimalNumber(is_numeric($rawQuantity) ? (string) $rawQuantity : '0');
             $totalWeight = $totalWeight->plus($weight->times($quantity));
         }
 
