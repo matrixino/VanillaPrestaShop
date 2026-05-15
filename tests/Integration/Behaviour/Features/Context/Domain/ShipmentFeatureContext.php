@@ -86,6 +86,8 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
             new GetOrderShipments($orderId)
         );
 
+        usort($shipments, fn ($a, $b) => $a->getId() <=> $b->getId());
+
         if (count($shipments) === 0) {
             $msg = 'Order [' . $orderId . '] has no shipments';
             throw new RuntimeException($msg);
@@ -102,9 +104,9 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
                 throw new RuntimeException('Shipment [' . $shipment->getId() . '] does not belong to order [' . $orderId . ']');
             }
 
-            Assert::assertEquals($shipment->getTrackingNumber(), $shipmentData['tracking_number']);
-            Assert::assertEquals($shipment->getCarrierSummary()->getId(), $carrierId, 'Wrong carrier ID for ' . $carrierReference);
-            Assert::assertEquals($shipment->getAddressId(), $addressId);
+            Assert::assertEquals($shipmentData['tracking_number'], $shipment->getTrackingNumber(), 'Tracking number mismatch');
+            Assert::assertEquals($carrierId, $shipment->getCarrierSummary()->getId(), 'Wrong carrier ID for ' . $carrierReference);
+            Assert::assertEquals($addressId, $shipment->getAddressId(), 'Address ID mismatch');
             Assert::assertEqualsWithDelta((float) $shipmentData['shipping_cost_tax_excl'], (float) (string) $shipment->getShippingCostTaxExcluded(), 0.001, 'Wrong shipping cost tax excluded for ' . $carrierReference);
             Assert::assertEqualsWithDelta((float) $shipmentData['shipping_cost_tax_incl'], (float) (string) $shipment->getShippingCostTaxIncluded(), 0.001, 'Wrong shipping cost tax included for ' . $carrierReference);
             SharedStorage::getStorage()->set($shipmentData['shipment'], $shipment->getId());
