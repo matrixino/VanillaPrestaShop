@@ -135,7 +135,7 @@ class ProductAttributeCore extends ObjectModel
     public function add($autoDate = true, $nullValues = false)
     {
         if ($this->position <= 0) {
-            $this->position = static::getHigherPosition($this->id_attribute_group) + 1;
+            $this->position = static::getHighestPosition($this->id_attribute_group) + 1;
         }
 
         $return = parent::add($autoDate, $nullValues);
