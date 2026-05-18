@@ -44,10 +44,10 @@ final class UpdateProductInOrderHandler extends AbstractOrderCommandHandler impl
         private OrderProductQuantityUpdater $orderProductQuantityUpdater,
         private OrderDetailUpdater $orderDetailUpdater,
         private ContextStateManager $contextStateManager,
-        private ?ShipmentProductQuantityUpdater $shipmentProductQuantityUpdater = null,
-        private ?FeatureFlagStateCheckerInterface $featureflagStateCheckerInterface = null,
-        private ?ShipmentShippingCostUpdater $shipmentShippingCostUpdater = null,
-        private ?AdapterConfiguration $configuration = null,
+        private ShipmentProductQuantityUpdater $shipmentProductQuantityUpdater,
+        private FeatureFlagStateCheckerInterface $featureflagStateCheckerInterface,
+        private ShipmentShippingCostUpdater $shipmentShippingCostUpdater,
+        private AdapterConfiguration $configuration,
     ) {
     }
 
@@ -89,7 +89,7 @@ final class UpdateProductInOrderHandler extends AbstractOrderCommandHandler impl
                 (int) $orderDetail->id_customization
             );
 
-            if ($this->featureflagStateCheckerInterface !== null && $this->featureflagStateCheckerInterface->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT) && !empty($command->getShipmentsQuantities())) {
+            if ($this->featureflagStateCheckerInterface->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT) && !empty($command->getShipmentsQuantities())) {
                 $totalProductQuantity = array_sum(array_column($command->getShipmentsQuantities(), 'quantity'));
 
                 // Update invoice, quantity and amounts
@@ -97,10 +97,12 @@ final class UpdateProductInOrderHandler extends AbstractOrderCommandHandler impl
 
                 $this->shipmentProductQuantityUpdater->updateShipmentQuantity($command->getOrderDetailId(), $command->getShipmentsQuantities());
 
-                if ($this->shipmentShippingCostUpdater !== null && $this->configuration !== null && $this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING')) {
+                if ($this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING')) {
                     $this->shipmentShippingCostUpdater->recalculateForOrder((int) $order->id);
                 }
-            } else {
+            }
+
+            if (!$this->featureflagStateCheckerInterface->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT)) {
                 // Update invoice, quantity and amounts
                 $order = $this->orderProductQuantityUpdater->update($order, $orderDetail, $command->getQuantity(), $orderInvoice);
             }

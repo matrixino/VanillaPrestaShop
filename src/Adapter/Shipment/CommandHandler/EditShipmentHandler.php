@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Adapter\Shipment\CommandHandler;
 
+use PrestaShop\PrestaShop\Adapter\Configuration as AdapterConfiguration;
+use PrestaShop\PrestaShop\Adapter\Shipment\ShipmentShippingCostUpdater;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\EditShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\CommandHandler\EditShipmentHandlerInterface;
@@ -27,6 +29,8 @@ class EditShipmentHandler implements EditShipmentHandlerInterface
     public function __construct(
         private readonly ShipmentRepository $shipmentRepository,
         private TranslatorInterface $translator,
+        private ShipmentShippingCostUpdater $shipmentShippingCostUpdater,
+        private AdapterConfiguration $configuration,
     ) {
     }
 
@@ -72,6 +76,10 @@ class EditShipmentHandler implements EditShipmentHandlerInterface
 
         try {
             $this->shipmentRepository->save($shipment);
+
+            if ($this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING')) {
+                $this->shipmentShippingCostUpdater->recalculateForOrder($shipment->getOrderId());
+            }
         } catch (Throwable $e) {
             throw new CannotSaveShipmentException(
                 $this->translator->trans(
