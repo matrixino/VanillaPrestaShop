@@ -13,6 +13,7 @@ use PrestaShop\PrestaShop\Core\Domain\Country\Command\BulkToggleCountriesStatusC
 use PrestaShop\PrestaShop\Core\Domain\Country\Command\BulkUpdateCountryZoneCommand;
 use PrestaShop\PrestaShop\Core\Domain\Country\Command\DeleteCountryCommand;
 use PrestaShop\PrestaShop\Core\Domain\Country\Command\ToggleCountryStatusCommand;
+use PrestaShop\PrestaShop\Core\Domain\Country\Exception\BulkCountryException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CannotEditCountryException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CannotToggleCountryStatusException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryConstraintException;
@@ -315,6 +316,11 @@ class CountryController extends PrestaShopAdminController
     protected function getErrorMessages(Exception $e): array
     {
         return [
+            BulkCountryException::class => $this->trans(
+                'An error occurred when updating the status for one or several countries.',
+                [],
+                'Admin.International.Feature'
+            ),
             CountryException::class => $this->trans(
                 'An unexpected error occurred.',
                 [],

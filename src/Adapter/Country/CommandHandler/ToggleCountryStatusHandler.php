@@ -12,9 +12,11 @@ use PrestaShop\PrestaShop\Adapter\Country\Repository\CountryRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Country\Command\ToggleCountryStatusCommand;
 use PrestaShop\PrestaShop\Core\Domain\Country\CommandHandler\ToggleCountryStatusHandlerInterface;
+use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CannotEditCountryException;
+use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CannotToggleCountryStatusException;
 
 #[AsCommandHandler]
-class ToggleCountryStatusHandler implements ToggleCountryStatusHandlerInterface
+final class ToggleCountryStatusHandler implements ToggleCountryStatusHandlerInterface
 {
     public function __construct(
         private readonly CountryRepository $countryRepository
@@ -26,6 +28,14 @@ class ToggleCountryStatusHandler implements ToggleCountryStatusHandlerInterface
         $country = $this->countryRepository->get($command->getCountryId());
         $country->active = !$country->active;
 
-        $this->countryRepository->update($country);
+        try {
+            $this->countryRepository->update($country);
+        } catch (CannotEditCountryException $e) {
+            throw new CannotToggleCountryStatusException(
+                sprintf('Failed to toggle status for country with id "%d"', $command->getCountryId()->getValue()),
+                0,
+                $e
+            );
+        }
     }
 }
