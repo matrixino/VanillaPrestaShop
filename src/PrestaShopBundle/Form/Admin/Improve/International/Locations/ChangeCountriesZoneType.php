@@ -16,7 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class ChangeCountriesZoneType extends AbstractType
+final class ChangeCountriesZoneType extends AbstractType
 {
     public function __construct(private readonly ConfigurableFormChoiceProviderInterface $zoneChoiceProvider)
     {

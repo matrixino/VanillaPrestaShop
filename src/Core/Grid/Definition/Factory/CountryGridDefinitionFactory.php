@@ -30,7 +30,7 @@ use PrestaShopBundle\Form\Admin\Type\SearchAndResetType;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class CountryGridDefinitionFactory extends AbstractGridDefinitionFactory
+final class CountryGridDefinitionFactory extends AbstractGridDefinitionFactory
 {
     use BulkDeleteActionTrait;
     use DeleteActionTrait;

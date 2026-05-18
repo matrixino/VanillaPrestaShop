@@ -14,17 +14,12 @@ use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 /**
  * Updates zone for given countries.
  */
-class BulkUpdateCountryZoneCommand
+final class BulkUpdateCountryZoneCommand
 {
-    /**
-     * @var array<int, CountryId>
-     */
-    private $countryIds = [];
+    /** @var array<int, CountryId> */
+    private array $countryIds = [];
 
-    /**
-     * @var int
-     */
-    private $newZoneId;
+    private int $newZoneId;
 
     /**
      * @param int[] $countryIds

@@ -13,17 +13,12 @@ use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 /**
  * Toggles countries status on bulk action.
  */
-class BulkToggleCountriesStatusCommand
+final class BulkToggleCountriesStatusCommand
 {
-    /**
-     * @var bool
-     */
-    private $expectedStatus;
+    private bool $expectedStatus;
 
-    /**
-     * @var array<int, CountryId>
-     */
-    private $countryIds = [];
+    /** @var array<int, CountryId> */
+    private array $countryIds = [];
 
     /**
      * @param array<int, int> $countryIds

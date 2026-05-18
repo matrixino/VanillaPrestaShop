@@ -8,6 +8,6 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\Country\Exception;
 
-class CannotToggleCountryStatusException extends CountryException
+final class CannotToggleCountryStatusException extends CountryException
 {
 }

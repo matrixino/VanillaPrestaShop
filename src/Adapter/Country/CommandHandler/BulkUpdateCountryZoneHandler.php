@@ -43,10 +43,10 @@ final class BulkUpdateCountryZoneHandler extends AbstractBulkCommandHandler impl
      */
     protected function handleSingleAction(mixed $id, mixed $command): void
     {
-        $countryId = $id->getValue();
-        $zoneId = $command->getNewZoneId();
+        $country = $this->countryRepository->get($id);
+        $country->id_zone = $command->getNewZoneId();
 
-        $this->countryRepository->affectCountriesToZone([$countryId], $zoneId);
+        $this->countryRepository->update($country);
     }
 
     /**

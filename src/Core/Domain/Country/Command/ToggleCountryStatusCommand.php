@@ -13,12 +13,9 @@ use PrestaShop\PrestaShop\Core\Domain\Country\ValueObject\CountryId;
 /**
  * Toggles country status.
  */
-class ToggleCountryStatusCommand
+final class ToggleCountryStatusCommand
 {
-    /**
-     * @var CountryId
-     */
-    private $countryId;
+    private CountryId $countryId;
 
     public function __construct(int $countryId)
     {

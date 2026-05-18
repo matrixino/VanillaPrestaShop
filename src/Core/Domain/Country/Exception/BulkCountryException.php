@@ -11,7 +11,7 @@ namespace PrestaShop\PrestaShop\Core\Domain\Country\Exception;
 use PrestaShop\PrestaShop\Core\Domain\Exception\BulkCommandExceptionInterface;
 use Throwable;
 
-class BulkCountryException extends CountryException implements BulkCommandExceptionInterface
+final class BulkCountryException extends CountryException implements BulkCommandExceptionInterface
 {
     public const FAILED_BULK_UPDATE_STATUS = 1;
     public const FAILED_BULK_UPDATE_ZONE = 2;

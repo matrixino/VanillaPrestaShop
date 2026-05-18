@@ -285,6 +285,8 @@ class CountryController extends PrestaShopAdminController
             );
 
             $this->addFlash('success', $this->trans('Successful update', [], 'Admin.Notifications.Success'));
+        } catch (CountryException $e) {
+            $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
         }
@@ -316,11 +318,18 @@ class CountryController extends PrestaShopAdminController
     protected function getErrorMessages(Exception $e): array
     {
         return [
-            BulkCountryException::class => $this->trans(
-                'An error occurred when updating the status for one or several countries.',
-                [],
-                'Admin.International.Feature'
-            ),
+            BulkCountryException::class => [
+                BulkCountryException::FAILED_BULK_UPDATE_STATUS => $this->trans(
+                    'An error occurred when updating the status for one or several countries.',
+                    [],
+                    'Admin.International.Feature'
+                ),
+                BulkCountryException::FAILED_BULK_UPDATE_ZONE => $this->trans(
+                    'An error occurred when updating the zone for one or several countries.',
+                    [],
+                    'Admin.International.Feature'
+                ),
+            ],
             CountryException::class => $this->trans(
                 'An unexpected error occurred.',
                 [],
