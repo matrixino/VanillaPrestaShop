@@ -33,6 +33,7 @@ class AddQuickAccessHandler implements AddQuickAccessHandlerInterface
         }
 
         $quickAccess = new QuickAccess();
+        // @phpstan-ignore-next-line (ObjectModel multilingual field accepts array at runtime)
         $quickAccess->name = $command->getLocalizedNames();
         $quickAccess->link = $command->getLink();
         $quickAccess->new_window = $command->isNewWindow();

@@ -100,7 +100,7 @@ final class QuickAccessGridDefinitionFactory extends AbstractGridDefinitionFacto
             );
     }
 
-    public function getFilters(): FilterCollection
+    public function getFilters()
     {
         return (new FilterCollection())
             ->add(
@@ -142,7 +142,7 @@ final class QuickAccessGridDefinitionFactory extends AbstractGridDefinitionFacto
             );
     }
 
-    protected function getGridActions(): GridActionCollection
+    protected function getGridActions()
     {
         return (new GridActionCollection())
             ->add(
@@ -162,7 +162,7 @@ final class QuickAccessGridDefinitionFactory extends AbstractGridDefinitionFacto
             );
     }
 
-    protected function getBulkActions(): BulkActionCollection
+    protected function getBulkActions()
     {
         return (new BulkActionCollection())
             ->add($this->buildBulkDeleteAction('admin_quick_accesses_bulk_delete'));

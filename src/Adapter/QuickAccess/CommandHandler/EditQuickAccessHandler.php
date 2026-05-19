@@ -25,6 +25,7 @@ class EditQuickAccessHandler implements EditQuickAccessHandlerInterface
         $quickAccess = $this->repository->get($command->getQuickAccessId());
 
         if (null !== $command->getLocalizedNames()) {
+            // @phpstan-ignore-next-line (ObjectModel multilingual field accepts array at runtime)
             $quickAccess->name = $command->getLocalizedNames();
         }
 

@@ -24,7 +24,7 @@ class QuickAccessType extends TranslatorAwareType
     {
         $builder
             ->add('name', TranslatableType::class, [
-                'label' => $this->trans('Name', [], 'Admin.Global'),
+                'label' => $this->trans('Name', 'Admin.Global'),
                 'constraints' => [
                     new DefaultLanguage(),
                 ],
@@ -34,55 +34,53 @@ class QuickAccessType extends TranslatorAwareType
                             'max' => 32,
                             'maxMessage' => $this->trans(
                                 'This field cannot be longer than %limit% characters',
-                                ['%limit%' => 32],
-                                'Admin.Notifications.Error'
+                                'Admin.Notifications.Error',
+                                ['%limit%' => 32]
                             ),
                         ]),
                         new NotBlank([
                             'message' => $this->trans(
                                 'The %s field is required.',
-                                [sprintf('"%s"', $this->trans('Name', [], 'Admin.Global'))],
-                                'Admin.Notifications.Error'
+                                'Admin.Notifications.Error',
+                                [sprintf('"%s"', $this->trans('Name', 'Admin.Global'))]
                             ),
                         ]),
                     ],
                 ],
             ])
             ->add('link', TextType::class, [
-                'label' => $this->trans('URL', [], 'Admin.Global'),
+                'label' => $this->trans('URL', 'Admin.Global'),
                 'help' => $this->trans(
                     'The URL must start with "index.php" (e.g. index.php?controller=AdminProducts).',
-                    [],
                     'Admin.Advparameters.Help'
                 ),
                 'constraints' => [
                     new NotBlank([
                         'message' => $this->trans(
                             'The %s field is required.',
-                            [sprintf('"%s"', $this->trans('URL', [], 'Admin.Global'))],
-                            'Admin.Notifications.Error'
+                            'Admin.Notifications.Error',
+                            [sprintf('"%s"', $this->trans('URL', 'Admin.Global'))]
                         ),
                     ]),
                     new Length([
                         'max' => 255,
                         'maxMessage' => $this->trans(
                             'This field cannot be longer than %limit% characters',
-                            ['%limit%' => 255],
-                            'Admin.Notifications.Error'
+                            'Admin.Notifications.Error',
+                            ['%limit%' => 255]
                         ),
                     ]),
                     new Regex([
                         'pattern' => '/^index\.php/',
                         'message' => $this->trans(
                             'The URL must point to a back office page (must start with "index.php").',
-                            [],
                             'Admin.Advparameters.Notification'
                         ),
                     ]),
                 ],
             ])
             ->add('new_window', SwitchType::class, [
-                'label' => $this->trans('Open in new tab', [], 'Admin.Navigation.Header'),
+                'label' => $this->trans('Open in new tab', 'Admin.Navigation.Header'),
                 'required' => false,
             ]);
     }
