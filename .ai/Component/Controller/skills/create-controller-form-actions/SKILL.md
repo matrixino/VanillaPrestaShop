@@ -1,18 +1,23 @@
 ---
 name: create-controller-form-actions
 description: >
-  Create the form page actions in the admin controller: create (add) and edit,
-  plus any entity-specific actions. Uses FormBuilder/FormHandler pattern — never
-  builds commands directly. Trigger: "create form actions for {Domain}",
-  "create add/edit for {Domain}".
-needs: [create-cqrs-commands, create-cqrs-queries, create-form-type, create-form-data-handling]
-produces: "createAction, editAction, and entity-specific actions in {Domain}Controller.php"
+  Create form page actions in the admin controller. Covers both patterns: CRUD
+  (create/edit via FormBuilder + FormHandler pair) and settings (index + save
+  via the base FormHandler). Never builds commands directly. Trigger: "create
+  form actions for {Domain}", "create add/edit for {Domain}", "create settings
+  save action for {Page}".
+needs: [create-cqrs-commands, create-cqrs-queries, create-crud-form-type, create-crud-form-data-handling, create-settings-form]
+produces: "createAction, editAction, and entity-specific actions in {Domain}Controller.php (CRUD); index/save actions for settings blocks"
 ---
 
 # create-controller-form-actions
 
 Read `@.ai/Component/Controller/CONTEXT.md` for controller conventions (base class, DI, security attributes, error mapping).
-Read `@.ai/Component/Forms/CONTEXT.md` for form patterns (FormBuilder, FormHandler, FormDataProvider, FormDataHandler).
+Read `@.ai/Component/Forms/CONTEXT.md` for the settings-vs-CRUD decision tree. Then, depending on which branch this controller serves, load only the relevant pattern detail:
+- CRUD action → `@.ai/Component/Forms/CRUD.md` (FormBuilder + FormHandler pair, IdentifiableObject base classes)
+- Settings action → `@.ai/Component/Forms/SETTINGS.md` (base `Handler`, hooks, allowed exception)
+
+> **Two patterns:** CRUD entity forms inject the `FormBuilder` + IdentifiableObject `FormHandler` pair (sections 1–3 below). Settings forms inject the base `Handler` once (section 4 below). For the full settings-form stack (DataConfiguration + FormDataProvider + FormType + 4 YAML entries), the umbrella [`create-settings-form`](../../../Forms/skills/create-settings-form/SKILL.md) skill covers everything.
 
 ## 1. Create action
 
@@ -86,6 +91,67 @@ public function deleteCoverImageAction(int ${domain}Id): RedirectResponse
 ```
 
 The FormBuilder/FormHandler pair is required for the create/edit form lifecycle — not for every controller action.
+
+## 4. Settings form action
+
+For a **settings form** (options block writing into `ps_configuration`), the controller injects the base `Handler` once and calls `getForm()` / `save()` directly. There is no FormBuilder; there is no FormDataHandler. Both interfaces share the short name `FormHandlerInterface`, so use an `as` alias to disambiguate:
+
+```php
+use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface as ConfigurationFormHandlerInterface;
+use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface; // unaliased — CRUD on this page
+```
+
+Index action — render the form alongside the rest of the page:
+
+```php
+#[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
+public function indexAction(
+    Request $request,
+    #[Autowire(service: 'prestashop.admin.{domain}.{name}.form_handler')]
+    ConfigurationFormHandlerInterface $optionsFormHandler,
+): Response {
+    return $this->render('@PrestaShop/Admin/.../index.html.twig', [
+        'optionsForm' => $optionsFormHandler->getForm()->createView(),
+        // … grid, toolbar buttons, etc.
+    ]);
+}
+```
+
+Save action — POST handler:
+
+```php
+#[DemoRestricted(redirectRoute: 'admin_{page}_index')]
+#[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_{page}_index')]
+public function saveOptionsAction(
+    Request $request,
+    #[Autowire(service: 'prestashop.admin.{domain}.{name}.form_handler')]
+    ConfigurationFormHandlerInterface $optionsFormHandler,
+): Response {
+    $form = $optionsFormHandler->getForm();
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $errors = $optionsFormHandler->save($form->getData());
+
+        if (0 === count($errors)) {
+            $this->addFlash('success', $this->trans('Update successful', [], 'Admin.Notifications.Success'));
+
+            return $this->redirectToRoute('admin_{page}_index');
+        }
+
+        $this->addFlashErrors($errors);
+    }
+
+    return $this->redirectToRoute('admin_{page}_index');
+}
+```
+
+Key differences from CRUD form actions:
+
+- Single handler injection (not a FormBuilder + FormHandler pair).
+- `$formHandler->save($form->getData())` returns an **array of error messages** (empty = success) — no `Result` object, no `getIdentifiableObjectId()`.
+- Index action passes the form view alongside other page data (grid, etc.); save action only redirects.
+- Reference: `CountryController::indexAction()` and `CountryController::saveOptionsAction()` (PR #41406).
 
 ## Rules
 
