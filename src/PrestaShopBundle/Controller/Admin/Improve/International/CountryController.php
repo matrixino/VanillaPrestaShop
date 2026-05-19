@@ -17,6 +17,7 @@ use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryNotFoundException
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\DeleteCountryException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Query\GetCountryForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Country\QueryResult\CountryForEditing;
+use PrestaShop\PrestaShop\Core\Form\FormHandlerInterface as ConfigurationFormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilderInterface;
 use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterface;
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
@@ -47,16 +48,48 @@ class CountryController extends PrestaShopAdminController
         Request $request,
         CountryFilters $filters,
         #[Autowire(service: 'prestashop.core.grid.factory.country')]
-        GridFactoryInterface $countryGridFactory
+        GridFactoryInterface $countryGridFactory,
+        #[Autowire(service: 'prestashop.admin.country.options.form_handler')]
+        ConfigurationFormHandlerInterface $countryOptionsFormHandler
     ): Response {
         $countryGrid = $countryGridFactory->getGrid($filters);
+        $countryOptionsForm = $countryOptionsFormHandler->getForm();
 
         return $this->render('@PrestaShop/Admin/Improve/International/Country/index.html.twig', [
             'help_link' => $this->generateSidebarLink($request->attributes->get('_legacy_controller')),
             'countryGrid' => $this->presentGrid($countryGrid),
+            'countryOptionsForm' => $countryOptionsForm->createView(),
             'enableSidebar' => true,
             'layoutHeaderToolbarBtn' => $this->getCountryToolbarButtons(),
         ]);
+    }
+
+    /**
+     * Persists the "Country options" block configuration.
+     */
+    #[DemoRestricted(redirectRoute: 'admin_countries_index')]
+    #[AdminSecurity("is_granted('update', request.get('_legacy_controller')) && is_granted('create', request.get('_legacy_controller')) && is_granted('delete', request.get('_legacy_controller'))", redirectRoute: 'admin_countries_index', message: 'You do not have permission to edit this.')]
+    public function saveOptionsAction(
+        Request $request,
+        #[Autowire(service: 'prestashop.admin.country.options.form_handler')]
+        ConfigurationFormHandlerInterface $countryOptionsFormHandler
+    ): Response {
+        $form = $countryOptionsFormHandler->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $saveErrors = $countryOptionsFormHandler->save($form->getData());
+
+            if (0 === count($saveErrors)) {
+                $this->addFlash('success', $this->trans('Update successful', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_countries_index');
+            }
+
+            $this->addFlashErrors($saveErrors);
+        }
+
+        return $this->redirectToRoute('admin_countries_index');
     }
 
     /**
