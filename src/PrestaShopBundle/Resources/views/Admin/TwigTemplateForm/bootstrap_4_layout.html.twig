@@ -713,12 +713,12 @@
     {% set attr = attr|merge({
       class: (attr.class|default('') ~ ' custom-file-input')|trim,
       'data-multiple-files-text': '%count% file(s)'|trans({}, 'Admin.Global'),
-      'data-locale': get_context_iso_code()
+      'data-locale': get_context_iso_code(),
     }) -%}
 
     {% if attr.disabled is defined and attr.disabled %}
       {% set attr = attr|merge({
-        class: attr.class ~ ' disabled'
+        class: attr.class ~ ' disabled',
       }) %}
     {% endif %}
 
@@ -766,7 +766,7 @@
 {% block text_with_recommended_length_widget %}
   {% set attr = attr|merge({
     'data-recommended-length-counter': '#' ~ id ~ '_recommended_length_counter',
-    class: 'js-recommended-length-input'
+    class: 'js-recommended-length-input',
   }) -%}
 
   {% if input_type == 'textarea' %}
