@@ -7,3 +7,6 @@ services:
     autoconfigure: true
     arguments:
       - "@=service('prestashop.adapter.legacy.context').getContext().language.id"
+
+  PrestaShop\PrestaShop\Adapter\CartRule\CartRuleDisablerService:
+    autowire: true

@@ -1555,10 +1555,10 @@ class FrontControllerCore extends Controller
             ];
             foreach ($p as $page_name) {
                 $index = str_replace('-', '_', $page_name);
-                $pages[$index] = $this->context->link->getPageLink($page_name);
+                $pages[$index] = $this->getPageLinkForTemplate($page_name);
             }
             $pages['brands'] = $pages['manufacturer'];
-            $pages['register'] = $this->context->link->getPageLink('registration');
+            $pages['register'] = $pages['registration'];
             $pages['order_login'] = $this->context->link->getPageLink('order', null, null, ['login' => '1']);
             $urls['pages'] = $pages;
 
@@ -1575,6 +1575,30 @@ class FrontControllerCore extends Controller
         }
 
         return $this->urls;
+    }
+
+    /**
+     * Provides customer URLs with a validated back parameter so templates do not inject it themselves.
+     *
+     * @param string $pageName
+     *
+     * @return string
+     */
+    protected function getPageLinkForTemplate(string $pageName): string
+    {
+        $params = [];
+        if (
+            in_array($pageName, ['authentication', 'registration', 'password'], true)
+            && ($back = Tools::getValue('back', ''))
+            && is_string($back)
+            && Tools::urlBelongsToShop($back)
+        ) {
+            $params['back'] = $back;
+        }
+
+        return empty($params)
+            ? $this->context->link->getPageLink($pageName)
+            : $this->context->link->getPageLink($pageName, null, null, $params);
     }
 
     /**

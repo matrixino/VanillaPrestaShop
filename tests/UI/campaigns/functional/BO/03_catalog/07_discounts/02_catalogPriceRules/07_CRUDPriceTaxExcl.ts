@@ -213,10 +213,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD Price (tax excl.
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+            dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
           ).toFixed(2),
         ),
         expect(productDetail.discountAmount).to.equal(`-€${catalogPriceRuleData.reduction.toFixed(2)}`),

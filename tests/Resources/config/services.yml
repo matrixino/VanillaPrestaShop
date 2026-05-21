@@ -110,10 +110,17 @@ services:
         $connection: '@doctrine.dbal.default_connection'
         $dbPrefix: '%database_prefix%'
 
-    # We need this one public to fetch data for behat tests
+    # We need these public to fetch data for behat tests
     PrestaShop\PrestaShop\Adapter\Discount\Repository\DiscountRepository:
       public: true
       autowire: true
       arguments:
         $connection: '@doctrine.dbal.default_connection'
+        $dbPrefix: '%database_prefix%'
+
+    PrestaShop\PrestaShop\Adapter\Discount\Update\DiscountConditionsUpdater:
+      public: true
+      autowire: true
+      autoconfigure: true
+      arguments:
         $dbPrefix: '%database_prefix%'

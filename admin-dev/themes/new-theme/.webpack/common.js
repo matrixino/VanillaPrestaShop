@@ -86,6 +86,8 @@ module.exports = {
     discount: './js/pages/discount',
     discount_form: './js/pages/discount/form',
     email: './js/pages/email',
+    email_body_translation: './js/pages/email-body-translation',
+    email_body_translation_form: './js/pages/email-body-translation/form',
     employee: './js/pages/employee/index',
     employee_form: './js/pages/employee/form',
     error: './js/pages/error',

@@ -168,6 +168,24 @@ A skill exists to help: use the `create-skill` skill.
 2. Create a symlink in `.claude/skills/` pointing to the skill directory (for Claude Code auto-discovery).
 3. Add a `## Skills` entry to the corresponding `CONTEXT.md`: root `.ai/CONTEXT.md` for cross-cutting skills, or the relevant component/domain `CONTEXT.md` for scoped ones. This table is the agnostic discovery mechanism for all non-Claude tools.
 
+### Adding a module-owned skill
+
+Modules can ship their own AI skills under `<module>/.claude/skills/{skill-name}/SKILL.md` or `<module>/.ai/skills/{skill-name}/SKILL.md`. The skill is owned and maintained by the module, not by this repository — but to be auto-discoverable from the project root it has to be exposed via a chained symlink, because Claude Code does NOT walk into nested `.claude/` directories.
+
+1. **Decide which component the skill belongs to.** This is a human judgment call — the component should be the natural architectural fit (e.g. an API resource skill belongs under `Component/AdminAPI/`). Don't auto-pick.
+2. **Curate the component association** with a single symlink:
+   ```bash
+   ln -s ../../../../modules/<module>/<dotdir>/skills/<skill-name> \
+     .ai/Component/{Name}/skills/<skill-name>
+   ```
+   `<dotdir>` is `.claude` or `.ai` depending on where the module hosts the skill.
+3. **Run the index generator** — `bash .ai/bin/generate-ai-index.sh`. It uses `find -L` so it follows the component-level symlink into the module, then auto-creates the standard `.claude/skills/<skill-name> -> ../../.ai/Component/{Name}/skills/<skill-name>` like every other skill.
+4. **Add a `## Skills` row** to the component's `CONTEXT.md` marking the skill as module-owned, with a link back to this section.
+
+The chain (`.claude/skills/<name>` → `.ai/Component/{N}/skills/<name>` → module skill dir) resolves whenever the module is present — composer-installed, freshly cloned, or locally symlinked — and dangles harmlessly otherwise.
+
+The index generator also runs `discover_module_skills` to scan `modules/*/.claude/skills/` and `modules/*/.ai/skills/`, listing any module skill that has no component association yet. Contributors see those as suggestions; nothing is auto-attached.
+
 ### Updating existing context
 
 Edit the relevant `CONTEXT.md` directly. Pointer files at the repo root should never need modification — they only contain references.

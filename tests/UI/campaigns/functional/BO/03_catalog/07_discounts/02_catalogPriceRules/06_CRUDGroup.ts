@@ -157,7 +157,7 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
       const finalPrice = await foHummingbirdProductPage.getProductInformation(page);
       expect(finalPrice.price.toFixed(2)).to.equal(
         (
-          dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+          dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
         ).toFixed(2),
       );
     });
@@ -176,10 +176,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+            dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
           ).toFixed(2),
         ),
         expect(productDetail.discountAmount).to.equal(`-€${catalogPriceRuleData.reduction.toFixed(2)}`),
@@ -225,10 +225,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price
+            dataProducts.demo_6.combinations[0].priceTI
           ).toFixed(2),
         ),
       ]);
@@ -279,7 +279,7 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
       const finalPrice = await foHummingbirdProductPage.getProductInformation(page);
       expect(finalPrice.price.toFixed(2)).to.equal(
         (
-          dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+          dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
         ).toFixed(2),
       );
     });
@@ -298,10 +298,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+            dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
           ).toFixed(2),
         ),
         expect(productDetail.discountAmount).to.equal(`-€${catalogPriceRuleData.reduction.toFixed(2)}`),
@@ -347,10 +347,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+            dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
           ).toFixed(2),
         ),
         expect(productDetail.discountAmount).to.equal(`-€${catalogPriceRuleData.reduction.toFixed(2)}`),
@@ -372,10 +372,10 @@ describe('BO - Catalog - Discounts - Catalog price Rules : CRUD group', async ()
 
       const productDetail = await foHummingbirdCartPage.getProductDetail(page, 1);
       await Promise.all([
-        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].price),
+        expect(productDetail.regularPrice).to.equal(dataProducts.demo_6.combinations[0].priceTI),
         expect(productDetail.price.toFixed(2)).to.equal(
           (
-            dataProducts.demo_6.combinations[0].price - catalogPriceRuleData.reduction
+            dataProducts.demo_6.combinations[0].priceTI - catalogPriceRuleData.reduction
           ).toFixed(2),
         ),
         expect(productDetail.discountAmount).to.equal(`-€${catalogPriceRuleData.reduction.toFixed(2)}`),

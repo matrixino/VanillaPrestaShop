@@ -82,14 +82,15 @@ Behat tests (create-behat-context, write-behat-scenarios) — GATE: all green
 ╠══════════════════════════════════════════════════════════════════════════╣
 ║   Listing slice                       Form slice                           ║
 ║   ─────────────                       ──────────                           ║
-║   create-grid-definition              create-form-type                     ║
-║   create-grid-query-builder           create-form-tab-layout (cond.)       ║
-║   create-position-column (cond.)      create-form-data-handling            ║
-║   create-controller-listing           create-controller-form-actions       ║
-║   create-admin-routing (listing)      create-admin-routing (form)          ║
-║   create-twig-index-template          create-twig-form-template            ║
-║   create-ts-entry-point (listing)     create-ts-entry-point (form)         ║
-║   init-grid-extensions                init-js-components                   ║
+║   create-grid-definition              CRUD: create-crud-form-type          ║
+║   create-grid-query-builder                 create-form-tab-layout (cond.) ║
+║   create-position-column (cond.)            create-crud-form-data-handling ║
+║   create-controller-listing           Settings: create-settings-form       ║
+║   create-admin-routing (listing)      create-controller-form-actions       ║
+║   create-twig-index-template          create-admin-routing (form)          ║
+║   create-ts-entry-point (listing)     create-twig-form-template            ║
+║   init-grid-extensions                create-ts-entry-point (form)         ║
+║                                       init-js-components                   ║
 ║                                       create-vue-component (exception)     ║
 ╚══════════════════════════════════════════════════════════════════════════╝
                                     |

@@ -53,3 +53,12 @@ admin_countries_delete:
       id_country: countryId
   requirements:
     countryId: \d+
+
+admin_countries_save_options:
+  path: /options
+  methods: [ POST ]
+  defaults:
+    _controller: 'PrestaShopBundle\Controller\Admin\Improve\International\CountryController::saveOptionsAction'
+    _legacy_controller: AdminCountries
+    _legacy_link: AdminCountries:submitOptionscountry
+    _legacy_feature_flag: country

@@ -40,6 +40,11 @@ services:
     parent: PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory
     public: true
 
+  prestashop.core.grid.definition.factory.email_body_template:
+    class: 'PrestaShop\PrestaShop\Core\Grid\Definition\Factory\EmailBodyTemplateDefinitionFactory'
+    parent: PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory
+    public: true
+
   prestashop.core.grid.definition.factory.webservice_key:
     class: 'PrestaShop\PrestaShop\Core\Grid\Definition\Factory\WebserviceKeyDefinitionFactory'
     parent: PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory

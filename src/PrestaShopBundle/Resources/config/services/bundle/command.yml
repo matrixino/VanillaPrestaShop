@@ -42,6 +42,11 @@ services:
     tags:
       - 'console.command'
 
+  PrestaShopBundle\Command\ModuleListCommand:
+    autowire: true
+    tags:
+      - 'console.command'
+
   PrestaShopBundle\Command\DebugCommand:
     arguments:
       - '@prestashop.core.command_bus'

@@ -1303,7 +1303,8 @@ class OrderController extends PrestaShopAdminController
         int $orderDetailId,
         Request $request,
         #[Autowire(service: 'prestashop.core.form.identifiable_object.builder.cancel_product_form_builder')] FormBuilderInterface $formBuilder,
-        CurrencyDataProvider $currencyDataProvider
+        CurrencyDataProvider $currencyDataProvider,
+        FeatureFlagStateCheckerInterface $featureFlagStateChecker,
     ): Response {
         try {
             $data = json_decode($request->getContent(), true);
@@ -1352,6 +1353,7 @@ class OrderController extends PrestaShopAdminController
             'orderForViewing' => $orderForViewing,
             'product' => $product,
             'orderHasShipment' => $this->orderHasShipment($orderId),
+            'isImprovedShipmentFeatureFlagEnabled' => $featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT),
         ]);
     }
 
@@ -1852,7 +1854,7 @@ class OrderController extends PrestaShopAdminController
         int $orderId,
         #[Autowire(service: 'prestashop.core.form.identifiable_object.builder.cancel_product_form_builder')] FormBuilderInterface $formBuilder,
         CurrencyDataProvider $currencyDataProvider,
-        FeatureFlagStateCheckerInterface $featureFlagStateChecker
+        FeatureFlagStateCheckerInterface $featureFlagStateChecker,
     ): Response {
         /** @var OrderForViewing $orderForViewing */
         $orderForViewing = $this->dispatchQuery(new GetOrderForViewing($orderId, QuerySorting::DESC));
