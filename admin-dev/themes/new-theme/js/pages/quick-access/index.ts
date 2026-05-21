@@ -30,6 +30,7 @@ $(() => {
     if (settings.url && String(settings.url).includes('toggle-new-window')) {
       try {
         const response = JSON.parse(xhr.responseText);
+
         if (response.status) {
           setTimeout(() => window.location.reload(), 1500);
         }

@@ -68,6 +68,7 @@ admin_quick_accesses_ajax:
   defaults:
     _controller: 'PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters\QuickAccessController::ajaxQuickLinkAction'
     _legacy_controller: AdminQuickAccesses
+    _legacy_link: AdminQuickAccesses:GetUrl
     _legacy_feature_flag: quick_access
 
 admin_quick_accesses_toggle_new_window:
