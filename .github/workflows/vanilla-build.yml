@@ -46,7 +46,7 @@ jobs:
             php: 7.4
 
     env:
-      PHP_VERSION: ${{ matrix.php }}'
+      PHP_VERSION: ${{ matrix.php }}
       NODE_VERSION: ${{ matrix.node }}
       RELEASE_DIR: '/tmp/ps-release'
       GH_TAG: ${{ matrix.TAG }}
