@@ -385,12 +385,6 @@ class CountryController extends PrestaShopAdminController
      */
     private function getBulkCountriesFromRequest(Request $request): array
     {
-        $countryIds = $request->request->all('country_bulk');
-
-        foreach ($countryIds as $index => $countryId) {
-            $countryIds[$index] = (int) $countryId;
-        }
-
-        return $countryIds;
+        return array_map('intval', $request->request->all('country_bulk'));
     }
 }

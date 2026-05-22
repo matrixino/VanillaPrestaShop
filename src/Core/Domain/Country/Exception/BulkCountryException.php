@@ -17,23 +17,17 @@ final class BulkCountryException extends CountryException implements BulkCommand
     public const FAILED_BULK_UPDATE_ZONE = 2;
 
     /**
-     * @var Throwable[]
-     */
-    private array $exceptions;
-
-    /**
      * @param Throwable[] $exceptions
      * @param string $message
      * @param int $code
      * @param Throwable|null $previous
      */
     public function __construct(
-        array $exceptions,
+        private readonly array $exceptions,
         string $message = 'Errors occurred during country bulk action',
         int $code = 0,
         ?Throwable $previous = null
     ) {
-        $this->exceptions = $exceptions;
         parent::__construct($message, $code, $previous);
     }
 

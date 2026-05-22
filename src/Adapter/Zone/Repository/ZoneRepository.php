@@ -17,7 +17,7 @@ use Zone;
 /**
  * Provides methods to access data storage of Zone
  */
-class ZoneRepository extends AbstractObjectModelRepository
+final class ZoneRepository extends AbstractObjectModelRepository
 {
     public function __construct(
         private readonly Connection $connection,
