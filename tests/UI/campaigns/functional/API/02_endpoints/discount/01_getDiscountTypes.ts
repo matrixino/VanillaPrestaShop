@@ -24,6 +24,7 @@ describe('API : GET /admin-api/discounts/types', async () => {
   let page: Page;
   let accessToken: string;
   let jsonResponse: any;
+  const clientScope: string = 'discount_read';
 
   before(async function () {
     browserContext = await utilsPlaywright.createBrowserContext(this.browser);
@@ -42,7 +43,7 @@ describe('API : GET /admin-api/discounts/types', async () => {
   describe('API : Fetch the access token', async () => {
     it('should request the endpoint /access_token', async function () {
       await testContext.addContextItem(this, 'testIdentifier', 'requestOauth2Token', baseContext);
-      accessToken = await requestAccessToken('discount_read');
+      accessToken = await requestAccessToken(clientScope);
     });
   });
 
