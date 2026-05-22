@@ -48,7 +48,7 @@
         '[1]': '<span class="badge badge-primary rounded">',
         '[/1]': '</span>',
         '[2]': '<span class="badge badge-success rounded">',
-        '[/2]': '</span>'
+        '[/2]': '</span>',
       }, 'Admin.Orderscustomers.Feature')|raw_purified }}
     {% else %}
       {{ 'No order validated for the moment. By default, an order is considered validated when its payment is accepted.'|trans({}, 'Admin.Orderscustomers.Feature') }}
@@ -57,7 +57,7 @@
     <p class="text-muted">
       {{ 'Customer since: %s'|trans(
         {'%s': customerThreadView.customerInformation.customerSinceDate},
-        'Admin.Orderscustomers.Feature'
+        'Admin.Orderscustomers.Feature',
       ) }}
     </p>
   </div>
