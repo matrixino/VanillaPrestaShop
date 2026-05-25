@@ -138,6 +138,11 @@ export class ConfirmModal extends Modal implements ConfirmModalType {
     this.modal = new ConfirmModalContainer(params);
     this.modal.confirmButton.addEventListener('click', params.confirmCallback);
     super.initContainer(params);
+    // ConfirmModal is always shown immediately on construction.
+    // Previously this was a side-effect of Bootstrap 4 defaulting show:true in .modal(options);
+    // since modal.ts now passes show:false (to avoid a Bootstrap 3 race condition on legacy pages),
+    // we call show() explicitly here so all callers keep the expected auto-show behaviour.
+    this.show();
   }
 }
 
