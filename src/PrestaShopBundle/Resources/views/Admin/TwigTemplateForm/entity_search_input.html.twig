@@ -139,7 +139,7 @@
   {%- set attr = attr|merge({
     class: (attr.class|default('') ~ ' media entity-item')|trim,
     'data-customer-active': form.active.vars.value,
-    'data-customer-guest': form.is_guest.vars.value
+    'data-customer-guest': form.is_guest.vars.value,
   }) -%}
   <li {{ block('widget_container_attributes') }}>
     <span class="customer-guest-badge badge badge-pill badge-secondary">{{ 'Guest'|trans({}, 'Admin.Shopparameters.Feature') }}</span>
