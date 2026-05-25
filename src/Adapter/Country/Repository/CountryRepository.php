@@ -21,16 +21,11 @@ use PrestaShop\PrestaShop\Core\Repository\AbstractObjectModelRepository;
 /**
  * Provides methods to access data storage of Country
  */
-class CountryRepository extends AbstractObjectModelRepository
+final class CountryRepository extends AbstractObjectModelRepository implements CountryRepositoryInterface
 {
-    /**
-     * @var CountryValidator
-     */
-    private $countryValidator;
-
-    public function __construct(CountryValidator $countryValidator)
-    {
-        $this->countryValidator = $countryValidator;
+    public function __construct(
+        private readonly CountryValidator $countryValidator,
+    ) {
     }
 
     /**
