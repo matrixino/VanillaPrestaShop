@@ -8,11 +8,11 @@
  * @see https://uikit.prestashop.com/?path=/story/components-badge--info
  */
 .badge-soft-info {
-  background-color: var(--cdk-blue-100);
-  color: var(--cdk-primary-800);
-  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
   font-size: var(--cdk-size-14);
   font-weight: 500;
   line-height: 1.25rem;
-  padding: 0.25rem 0.75rem;
+  color: var(--cdk-primary-800);
+  background-color: var(--cdk-blue-100);
+  border-radius: 1rem;
 }
