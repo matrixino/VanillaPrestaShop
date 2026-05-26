@@ -74,6 +74,7 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         $command = new UpdateDiscountCommand($id);
 
         $command->setLocalizedNames($data['information']['names']);
+        $command->setActive((bool) $data['information']['active']);
 
         $this->fillCommandFromData($command, $data);
 

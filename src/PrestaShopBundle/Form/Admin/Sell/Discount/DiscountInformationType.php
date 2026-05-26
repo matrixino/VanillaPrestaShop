@@ -10,6 +10,7 @@ use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\TypedRegex;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShopBundle\Form\Admin\Type\CardType;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\TextPreviewType;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use PrestaShopBundle\Form\Admin\Type\TranslatorAwareType;
@@ -25,6 +26,10 @@ class DiscountInformationType extends TranslatorAwareType
     {
         $discountType = $options['discount_type'];
         $builder
+            ->add('active', SwitchType::class, [
+                'label' => $this->trans('Status', 'Admin.Global'),
+                'required' => false,
+            ])
             ->add('discount_type', TextPreviewType::class, [
                 'data' => $discountType,
                 'label' => $this->trans('Discount Type', 'Admin.Catalog.Feature'),
