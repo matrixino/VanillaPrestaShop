@@ -1,0 +1,18 @@
+{#
+ # For the full copyright and license information, please view the
+ # docs/licenses/LICENSE.txt file that was distributed with this source code.
+ #}
+
+{% block text_preview_widget %}
+  {{- block('form_widget_simple') -}}
+  {{- block('form_help') -}}
+  <span class="label text-preview {{ preview_class }}">
+    <span class="text-preview-value">
+      {% if form.vars.allow_html %}
+        {{ value|raw }}
+      {% else %}
+        {{ value|raw_purified }}
+      {% endif %}
+    </span>
+  </span>
+{% endblock %}
