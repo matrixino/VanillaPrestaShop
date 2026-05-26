@@ -61,6 +61,7 @@ class LegacyLinkLinterCommand extends Command
         'admin_currencies_update_live_exchange_rates',
         'admin_customer_threads_filter',
         'admin_discounts_reset_grid',
+        'admin_discounts_search_gift_products',
         'admin_employees_get_tabs',
         'admin_feature_get_feature_values',
         'admin_import_data_configuration_index',
