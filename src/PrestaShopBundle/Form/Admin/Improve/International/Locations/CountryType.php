@@ -11,7 +11,6 @@ namespace PrestaShopBundle\Form\Admin\Improve\International\Locations;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
 use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\TypedRegex;
 use PrestaShop\PrestaShop\Core\Form\ConfigurableFormChoiceProviderInterface;
-use PrestaShopBundle\Form\Admin\Improve\International\Locations\AddressFormatType;
 use PrestaShopBundle\Form\Admin\Type\CurrencyChoiceType;
 use PrestaShopBundle\Form\Admin\Type\ShopChoiceTreeType;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;

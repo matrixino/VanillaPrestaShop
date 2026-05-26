@@ -1,5 +1,6 @@
-#./vendor/bin/behat -c tests/Integration/Behaviour/behat.yml -s country
+#./vendor/bin/behat -c tests/Integration/Behaviour/behat.yml -s country --tags country-management
 @restore-all-tables-before-feature
+@country-management
 Feature: country management
   As an employee
   I must be able to add, edit and delete country
@@ -9,6 +10,7 @@ Feature: country management
     And language "language2" with locale "fr-FR" exists
     When I add new country "test" with following properties:
       | name[en-US]                | testName                                         |
+      | name[fr-FR]                | testNameFr                                       |
       | iso_code                   | TE                                               |
       | call_prefix                | 123                                              |
       | default_currency           | 1                                                |
@@ -22,27 +24,27 @@ Feature: country management
       | display_tax_label          | true                                             |
       | shop_association           | 1                                                |
     Then the country "test" should have the following properties:
-      | localizedNames[en-US] | testName                                         |
-      | localizedNames[fr-FR] | testName                                         |
-      | isoCode               | TE                                               |
-      | callPrefix            | 123                                              |
-      | defaultCurrency       | 1                                                |
-      | zone                  | 1                                                |
-      | needZipCode           | true                                             |
-      | zipCodeFormat         | 1 NL                                             |
-      | addressFormat         | firstname lastname\naddress1\ncity\nCountry:name |
-      | enabled               | true                                             |
-      | containsStates        | false                                            |
-      | needIdNumber          | false                                            |
-      | displayTaxLabel       | true                                             |
-      | shopAssociation       | 1                                                |
+      | name[en-US]                | testName                                         |
+      | name[fr-FR]                | testNameFr                                       |
+      | iso_code                   | TE                                               |
+      | call_prefix                | 123                                              |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | 1 NL                                             |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | true                                             |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
 
   Scenario: edit country
     Given language "language1" with locale "en-US" exists
     And language "language2" with locale "fr-FR" exists
     When I edit country "test" with following properties:
-      | name[en-US]                | editName1                                                          |
-      | name[fr-FR]                | editName2                                                          |
+      | name[en-US]                | editName                                                           |
+      | name[fr-FR]                | editNameFr                                                         |
       | iso_code                   | TA                                                                 |
       | call_prefix                | 1234                                                               |
       | default_currency           | 2                                                                  |
@@ -56,20 +58,20 @@ Feature: country management
       | display_tax_label          | false                                                              |
       | shop_association           | 1                                                                  |
     Then the country "test" should have the following properties:
-      | localizedNames[en-US] | editName1                                                          |
-      | localizedNames[fr-FR] | editName2                                                          |
-      | isoCode               | TA                                                                 |
-      | callPrefix            | 1234                                                               |
-      | defaultCurrency       | 2                                                                  |
-      | zone                  | 2                                                                  |
-      | needZipCode           | false                                                              |
-      | zipCodeFormat         | 1 NLL                                                              |
-      | addressFormat         | firstname lastname\ncompany\naddress1\npostcode city\nCountry:name |
-      | enabled               | false                                                              |
-      | containsStates        | true                                                               |
-      | needIdNumber          | true                                                               |
-      | displayTaxLabel       | false                                                              |
-      | shopAssociation       | 1                                                                  |
+      | name[en-US]                | editName                                                           |
+      | name[fr-FR]                | editNameFr                                                         |
+      | iso_code                   | TA                                                                 |
+      | call_prefix                | 1234                                                               |
+      | default_currency           | 2                                                                  |
+      | zone                       | 2                                                                  |
+      | need_zip_code              | false                                                              |
+      | zip_code_format            | 1 NLL                                                              |
+      | address_format             | firstname lastname\ncompany\naddress1\npostcode city\nCountry:name |
+      | is_enabled                 | false                                                              |
+      | contains_states            | true                                                               |
+      | need_identification_number | true                                                               |
+      | display_tax_label          | false                                                              |
+      | shop_association           | 1                                                                  |
 
   Scenario: editing a country with an invalid address format is rejected
     When I edit country "test" with following properties:

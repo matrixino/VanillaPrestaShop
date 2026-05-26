@@ -338,22 +338,23 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
         /** @var CountryForEditing $result */
         $result = $queryBus->handle(new GetCountryForEditing($countryId));
 
-        Assert::assertEquals($expectedData['localizedNames'], $result->getLocalizedNames());
-        Assert::assertEquals($expectedData['isoCode'], $result->getIsoCode());
-        Assert::assertEquals($expectedData['callPrefix'], $result->getCallPrefix());
-        Assert::assertEquals($expectedData['defaultCurrency'], $result->getDefaultCurrency());
-        Assert::assertEquals($expectedData['zone'], $result->getZone());
-        Assert::assertEquals($expectedData['needZipCode'], $result->isNeedZipCode());
-        Assert::assertEquals($expectedData['zipCodeFormat'], $result->getZipCodeFormat()->getValue());
-        Assert::assertEquals($expectedData['enabled'], $result->isEnabled());
-        Assert::assertEquals($expectedData['containsStates'], $result->isContainsStates());
-        Assert::assertEquals($expectedData['needIdNumber'], $result->isNeedIdNumber());
-        Assert::assertEquals($expectedData['displayTaxLabel'], $result->isDisplayTaxLabel());
-        Assert::assertEquals([$expectedData['shopAssociation']], $result->getShopAssociation());
-        if (array_key_exists('addressFormat', $expectedData)) {
+        Assert::assertEquals($expectedData['name'], $result->getLocalizedNames(), 'unexpected name');
+        Assert::assertEquals($expectedData['iso_code'], $result->getIsoCode(), 'unexpected iso_code');
+        Assert::assertEquals($expectedData['call_prefix'], $result->getCallPrefix(), 'unexpected call_prefix');
+        Assert::assertEquals($expectedData['default_currency'], $result->getDefaultCurrency(), 'unexpected default_currency');
+        Assert::assertEquals($expectedData['zone'], $result->getZone(), 'unexpected zone');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['need_zip_code']), $result->isNeedZipCode(), 'unexpected need_zip_code');
+        Assert::assertEquals($expectedData['zip_code_format'], $result->getZipCodeFormat()->getValue(), 'unexpected zip_code_format');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['is_enabled']), $result->isEnabled(), 'unexpected enabled');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['contains_states']), $result->isContainsStates(), 'unexpected contains_states');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['need_identification_number']), $result->isNeedIdNumber(), 'unexpected need_identification_number');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['display_tax_label']), $result->isDisplayTaxLabel(), 'unexpected display_tax_label');
+        Assert::assertEquals([$expectedData['shop_association']], $result->getShopAssociation(), 'unexpected shop_association');
+        if (array_key_exists('address_format', $expectedData)) {
             Assert::assertEquals(
-                $this->unescapeFormat((string) $expectedData['addressFormat']),
-                $result->getAddressFormat()
+                $this->unescapeFormat((string) $expectedData['address_format']),
+                $result->getAddressFormat(),
+                'unexpected address_format'
             );
         }
     }

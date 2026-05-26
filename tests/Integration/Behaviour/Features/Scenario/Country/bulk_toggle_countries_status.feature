@@ -9,33 +9,33 @@ Feature: Bulk toggle countries status
   Scenario: Bulk enable and disable countries
     Given language "language1" with locale "en-US" exists
     And I add new country "bulk_country_1" with following properties:
-      | name[en-US]                | Bulk Country 1  |
-      | iso_code                   | QA              |
-      | call_prefix                | 21              |
-      | default_currency           | 1               |
-      | zone                       | 1               |
-      | need_zip_code              | true            |
-      | zip_code_format            | NNNNN           |
-      | address_format             | not implemented |
-      | is_enabled                 | false           |
-      | contains_states            | false           |
-      | need_identification_number | false           |
-      | display_tax_label          | true            |
-      | shop_association           | 1               |
+      | name[en-US]                | Bulk Country 1                                   |
+      | iso_code                   | QA                                               |
+      | call_prefix                | 21                                               |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | NNNNN                                            |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | false                                            |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
     And I add new country "bulk_country_2" with following properties:
-      | name[en-US]                | Bulk Country 2  |
-      | iso_code                   | QB              |
-      | call_prefix                | 22              |
-      | default_currency           | 1               |
-      | zone                       | 1               |
-      | need_zip_code              | true            |
-      | zip_code_format            | NNNNN           |
-      | address_format             | not implemented |
-      | is_enabled                 | false           |
-      | contains_states            | false           |
-      | need_identification_number | false           |
-      | display_tax_label          | true            |
-      | shop_association           | 1               |
+      | name[en-US]                | Bulk Country 2                                   |
+      | iso_code                   | QB                                               |
+      | call_prefix                | 22                                               |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | NNNNN                                            |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | false                                            |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
     When I bulk enable countries "bulk_country_1, bulk_country_2"
     Then country "bulk_country_1" should be enabled
     And country "bulk_country_2" should be enabled
@@ -55,19 +55,19 @@ Feature: Bulk toggle countries status
   Scenario: Bulk toggle should continue on partial failure and aggregate errors
     Given language "language1" with locale "en-US" exists
     And I add new country "bulk_partial_country" with following properties:
-      | name[en-US]                | Bulk Partial    |
-      | iso_code                   | QC              |
-      | call_prefix                | 31              |
-      | default_currency           | 1               |
-      | zone                       | 1               |
-      | need_zip_code              | true            |
-      | zip_code_format            | NNNNN           |
-      | address_format             | not implemented |
-      | is_enabled                 | false           |
-      | contains_states            | false           |
-      | need_identification_number | false           |
-      | display_tax_label          | true            |
-      | shop_association           | 1               |
+      | name[en-US]                | Bulk Partial                                     |
+      | iso_code                   | QC                                               |
+      | call_prefix                | 31                                               |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | NNNNN                                            |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | false                                            |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
     And country "bulk_partial_missing" does not exist
     When I bulk enable countries "bulk_partial_country, bulk_partial_missing"
     Then I should get a bulk country exception containing 1 errors
