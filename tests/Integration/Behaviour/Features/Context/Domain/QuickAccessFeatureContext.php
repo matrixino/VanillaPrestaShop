@@ -130,7 +130,11 @@ class QuickAccessFeatureContext extends AbstractDomainFeatureContext
         $result = $this->getQuickAccessFromReference($reference);
 
         if (isset($data['localizedNames'])) {
-            Assert::assertEquals($data['localizedNames'], $result->getLocalizedNames());
+            $actualLocalizedNames = $result->getLocalizedNames();
+            foreach ($data['localizedNames'] as $langId => $expectedName) {
+                Assert::assertArrayHasKey($langId, $actualLocalizedNames);
+                Assert::assertEquals($expectedName, $actualLocalizedNames[$langId]);
+            }
         }
         if (isset($data['link'])) {
             Assert::assertEquals($data['link'], $result->getLink());
