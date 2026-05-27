@@ -127,7 +127,7 @@
               <li>
                 <a id="quick-remove-link"
                    href="#"
-                   class="js-quick-link"
+                   class="ajax-quick-link js-quick-link"
                    data-method="remove"
                    data-quicklink-id="{$matchQuickLink|intval}"
                    data-post-link="{$quick_access_ajax_delete_url|escape:'html':'UTF-8'}"
@@ -143,7 +143,7 @@
               <li>
                 <a id="quick-add-link"
                    href="#"
-                   class="js-quick-link"
+                   class="ajax-quick-link js-quick-link"
                    data-method="add"
                    data-url="{$link->getQuickLink($smarty.server.REQUEST_URI)|escape:'html':'UTF-8'}"
                    data-post-link="{$quick_access_ajax_add_url|escape:'html':'UTF-8'}"

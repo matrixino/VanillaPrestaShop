@@ -10,6 +10,7 @@ namespace PrestaShop\PrestaShop\Core\Grid\Query;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use PrestaShop\PrestaShop\Core\Context\LanguageContext;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 
 /**
@@ -19,17 +20,15 @@ use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 class QuickAccessQueryBuilder extends AbstractDoctrineQueryBuilder
 {
     private DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator;
-    private int $contextLangId;
 
     public function __construct(
         Connection $connection,
         string $dbPrefix,
         DoctrineSearchCriteriaApplicatorInterface $searchCriteriaApplicator,
-        int $contextLangId
+        private readonly LanguageContext $languageContext
     ) {
         parent::__construct($connection, $dbPrefix);
         $this->searchCriteriaApplicator = $searchCriteriaApplicator;
-        $this->contextLangId = $contextLangId;
     }
 
     public function getSearchQueryBuilder(SearchCriteriaInterface $searchCriteria): QueryBuilder
@@ -60,7 +59,7 @@ class QuickAccessQueryBuilder extends AbstractDoctrineQueryBuilder
                 'ql',
                 'q.id_quick_access = ql.id_quick_access AND ql.id_lang = :contextLangId'
             )
-            ->setParameter('contextLangId', $this->contextLangId);
+            ->setParameter('contextLangId', $this->languageContext->getId());
 
         $this->applyFilters($qb, $searchCriteria);
 

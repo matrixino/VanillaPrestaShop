@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\Domain\QuickAccess\QueryResult;
 
-use PrestaShop\PrestaShop\Core\Domain\QuickAccess\ValueObject\QuickAccessId;
-
 /**
  * Immutable DTO carrying quick access data for the edit form.
  * All properties use scalar types (int, string, bool, array) — no VOs — per CQRS QueryResult convention.
@@ -18,14 +16,14 @@ class EditableQuickAccess
 {
     /** @param array<int, string> $localizedNames Lang-ID-keyed name translations */
     public function __construct(
-        private readonly QuickAccessId $quickAccessId,
+        private readonly int $quickAccessId,
         private readonly array $localizedNames,
         private readonly string $link,
         private readonly bool $newWindow,
     ) {
     }
 
-    public function getQuickAccessId(): QuickAccessId
+    public function getQuickAccessId(): int
     {
         return $this->quickAccessId;
     }
