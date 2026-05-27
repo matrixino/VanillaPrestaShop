@@ -53,20 +53,19 @@ class CarrierDataProvider implements CarrierDataProviderInterface
 
         $weightFloat = (float) (string) $totalWeight;
         $orderTotalFloat = (float) (string) $orderTotal;
+        $isWeightMethod = $carrierData->getShippingMethod() === Carrier::SHIPPING_METHOD_WEIGHT;
 
         if ($carrierData->getRangeBehavior()) {
-            if ($carrierData->getShippingMethod() === Carrier::SHIPPING_METHOD_WEIGHT) {
-                if (Carrier::checkDeliveryPriceByWeight($carrier->id, $weightFloat, $zoneId) === false) {
-                    return new DecimalNumber('0');
-                }
-            } elseif ($carrierData->getShippingMethod() === Carrier::SHIPPING_METHOD_PRICE) {
-                if (Carrier::checkDeliveryPriceByPrice($carrier->id, $orderTotalFloat, $zoneId, $currencyId) === false) {
-                    return new DecimalNumber('0');
-                }
+            $isInRange = $isWeightMethod
+                ? Carrier::checkDeliveryPriceByWeight($carrier->id, $weightFloat, $zoneId)
+                : Carrier::checkDeliveryPriceByPrice($carrier->id, $orderTotalFloat, $zoneId, $currencyId);
+
+            if ($isInRange === false) {
+                return null;
             }
         }
 
-        $cost = $carrierData->getShippingMethod() === Carrier::SHIPPING_METHOD_WEIGHT
+        $cost = $isWeightMethod
             ? $carrier->getDeliveryPriceByWeight($weightFloat, $zoneId)
             : $carrier->getDeliveryPriceByPrice($orderTotalFloat, $zoneId, $currencyId);
 

@@ -16,6 +16,8 @@ use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsCommandHandler;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\Calculator\ShippingCostCalculatorInterface;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\ShippingCostPrice;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\ShippingCalculationRequest;
+use PrestaShop\PrestaShop\Core\Domain\Order\Exception\CannotFindProductInOrderException;
+use PrestaShop\PrestaShop\Core\Domain\Order\Exception\OrderException;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Command\CreateShipment;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\CommandHandler\CreateShipmentHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Shipment\Exception\ShipmentException;
@@ -47,35 +49,39 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
 
             if ($this->configuration->get('PS_ORDER_RECALCULATE_SHIPPING')) {
                 $product = $this->findOrderProduct($order->getProductsDetail(), $productId);
-                if ($product !== null) {
-                    $request = new ShippingCalculationRequest(
-                        products: [
-                            [
-                                'id_product' => $productId,
-                                'id_product_attribute' => (int) ($product['product_attribute_id'] ?? 0),
-                                'quantity' => $command->getQuantity(),
-                                'weight' => (float) ($product['product_weight'] ?? 0),
-                                'weight_attribute' => null,
-                                'is_virtual' => (bool) ($product['is_virtual'] ?? false),
-                                'additional_shipping_cost' => (float) ($product['additional_shipping_cost'] ?? 0),
-                                'price_wt' => (float) ($product['unit_price_tax_incl'] ?? 0),
-                            ],
-                        ],
-                        carrierId: $carrierId,
-                        zoneId: null,
-                        addressId: $addressId,
-                        countryZoneId: 0,
-                        currencyId: (int) $order->id_currency,
-                        customerId: (int) $order->id_customer,
-                        orderTotal: (float) $order->total_products,
+                if ($product === null) {
+                    throw new CannotFindProductInOrderException(
+                        sprintf('Product with id %d not found in order %d', $productId, (int) $order->id)
                     );
+                }
 
-                    $context = ShippingCostPrice::createFromRequest($request);
-                    $this->shippingCostCalculator->compute($context);
-                    if ($context->getTaxExcluded() !== null && $context->getTaxIncluded() !== null) {
-                        $shippingCostTaxExcluded = (float) (string) $context->getTaxExcluded();
-                        $shippingCostTaxIncluded = (float) (string) $context->getTaxIncluded();
-                    }
+                $request = new ShippingCalculationRequest(
+                    products: [
+                        [
+                            'id_product' => $productId,
+                            'id_product_attribute' => (int) ($product['product_attribute_id'] ?? 0),
+                            'quantity' => $command->getQuantity(),
+                            'weight' => (float) ($product['product_weight'] ?? 0),
+                            'weight_attribute' => null,
+                            'is_virtual' => (bool) ($product['is_virtual'] ?? false),
+                            'additional_shipping_cost' => (float) ($product['additional_shipping_cost'] ?? 0),
+                            'price_wt' => (float) ($product['unit_price_tax_incl'] ?? 0),
+                        ],
+                    ],
+                    carrierId: $carrierId,
+                    zoneId: null,
+                    addressId: $addressId,
+                    countryZoneId: 0,
+                    currencyId: (int) $order->id_currency,
+                    customerId: (int) $order->id_customer,
+                    orderTotal: (float) $order->total_products,
+                );
+
+                $context = ShippingCostPrice::createFromRequest($request);
+                $this->shippingCostCalculator->compute($context);
+                if ($context->getTaxExcluded() !== null && $context->getTaxIncluded() !== null) {
+                    $shippingCostTaxExcluded = (float) (string) $context->getTaxExcluded();
+                    $shippingCostTaxIncluded = (float) (string) $context->getTaxIncluded();
                 }
             }
 
@@ -98,6 +104,9 @@ class CreateShipmentHandler implements CreateShipmentHandlerInterface
 
             return $shipmentId;
         } catch (Exception $e) {
+            if ($e instanceof ShipmentException || $e instanceof OrderException) {
+                throw $e;
+            }
             throw new ShipmentException('Failed to create shipment', $e->getCode(), $e);
         }
     }

@@ -28,6 +28,18 @@ final class ShippingCostPrice implements ShippingCostPriceInterface
     private ?DecimalNumber $taxIncluded = null;
     private ?int $precision = null;
 
+    /**
+     * @param array<array{
+     *     id_product: int,
+     *     id_product_attribute: int,
+     *     quantity: int,
+     *     weight: float,
+     *     weight_attribute: float|null,
+     *     is_virtual: bool,
+     *     additional_shipping_cost: float,
+     *     price_wt: float
+     * }> $physicalProducts
+     */
     private function __construct(
         private readonly array $physicalProducts,
         private readonly int $carrierId,
@@ -62,6 +74,18 @@ final class ShippingCostPrice implements ShippingCostPriceInterface
         return $ctx;
     }
 
+    /**
+     * @return array<array{
+     *     id_product: int,
+     *     id_product_attribute: int,
+     *     quantity: int,
+     *     weight: float,
+     *     weight_attribute: float|null,
+     *     is_virtual: bool,
+     *     additional_shipping_cost: float,
+     *     price_wt: float
+     * }>
+     */
     public function getPhysicalProducts(): array
     {
         return $this->physicalProducts;

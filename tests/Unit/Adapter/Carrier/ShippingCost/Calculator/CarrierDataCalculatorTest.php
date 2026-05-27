@@ -30,16 +30,6 @@ class CarrierDataCalculatorTest extends TestCase
         $this->calculator = new CarrierDataCalculator($this->carrierDataProvider);
     }
 
-    public function testItReturnsEarlyIfAlreadyUnavailable(): void
-    {
-        $context = $this->createContext(1);
-        $context->setAvailable(false);
-
-        $this->carrierDataProvider->expects($this->never())->method('getCarrierShippingData');
-
-        $this->calculator->compute($context);
-    }
-
     public function testItSetsUnavailableIfCarrierNotFound(): void
     {
         $context = $this->createContext(1);

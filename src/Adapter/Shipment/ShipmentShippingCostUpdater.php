@@ -13,6 +13,7 @@ use PrestaShop\PrestaShop\Adapter\Order\Repository\OrderRepository;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\Calculator\ShippingCostCalculatorInterface;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ShippingCost\ShippingCostPrice;
 use PrestaShop\PrestaShop\Core\Domain\Carrier\ValueObject\ShippingCalculationRequest;
+use PrestaShop\PrestaShop\Core\Domain\Order\Exception\CannotFindProductInOrderException;
 use PrestaShop\PrestaShop\Core\Domain\Order\ValueObject\OrderId;
 use PrestaShopBundle\Entity\Repository\ShipmentRepository;
 use PrestaShopBundle\Entity\Shipment;
@@ -53,7 +54,9 @@ class ShipmentShippingCostUpdater
         foreach ($shipment->getProducts() as $shipmentProduct) {
             $product = $this->findOrderProductByDetailId($productsDetail, $shipmentProduct->getOrderDetailId());
             if ($product === null) {
-                continue;
+                throw new CannotFindProductInOrderException(
+                    sprintf('Product with order detail id %d not found in order %d', $shipmentProduct->getOrderDetailId(), (int) $order->id)
+                );
             }
 
             $quantity = $shipmentProduct->getQuantity();
