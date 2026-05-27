@@ -42,16 +42,16 @@
             {{ renderhook('displayAdminGridTableBefore', {
                 grid: grid,
                 legacy_controller: app.request.attributes.get('_legacy_controller'),
-                controller: app.request.attributes.get('_controller')
+                controller: app.request.attributes.get('_controller'),
               })
             }}
 
             {{ form_start(grid.filter_form, {
               attr: {
                 id: grid.id ~ '_filter_form',
-                class: 'table-responsive'
+                class: 'table-responsive',
               },
-              action: path('admin_tax_rules_search', {taxRulesGroupId: taxRulesGroupId})
+              action: path('admin_tax_rules_search', {taxRulesGroupId: taxRulesGroupId}),
             }) }}
 
             <table class="grid-table js-grid-table table {% if is_ordering_column(grid) %}grid-ordering-column{% endif %} {% if grid.attributes.is_empty_state %}border-0{% endif %}"
@@ -96,7 +96,7 @@
             {{ renderhook('displayAdminGridTableAfter', {
                   grid: grid,
                   legacy_controller: app.request.attributes.get('_legacy_controller'),
-                  controller: app.request.attributes.get('_controller')
+                  controller: app.request.attributes.get('_controller'),
                 })
             }}
           {% endblock %}
