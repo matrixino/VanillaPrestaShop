@@ -30,6 +30,10 @@
            data-post-link="{{ this.ajaxDeleteUrl }}"
            data-prompt-text="{{ 'Please name this shortcut:'|trans({}, 'Admin.Navigation.Header') }}"
            data-link="{{ this.activeQuickAccess.name }}"
+           data-confirm-title="{{ 'Remove from Quick Access'|trans({}, 'Admin.Navigation.Header') }}"
+           data-confirm-message="{{ 'Are you sure you want to remove "%name%" from Quick Access?'|trans({"%name%": this.activeQuickAccess.name}, 'Admin.Navigation.Header') }}"
+           data-confirm-button-label="{{ 'Remove'|trans({}, 'Admin.Actions') }}"
+           data-close-button-label="{{ 'Cancel'|trans({}, 'Admin.Actions') }}"
         >
           <i class="material-icons">remove_circle_outline</i>
           {{ 'Remove from Quick Access'|trans({}, 'Admin.Navigation.Header') }}

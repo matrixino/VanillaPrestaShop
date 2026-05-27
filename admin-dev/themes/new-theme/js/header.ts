@@ -3,6 +3,7 @@
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
 import refreshNotifications from '@js/notifications';
+import ConfirmModal from '@components/modal';
 
 const {$} = window;
 
@@ -32,62 +33,82 @@ export default class Header {
         name = prompt(text, link);
       }
 
-      if ((method === 'add' && name) || method === 'remove') {
-        const postLink = $link.data('post-link');
-        const quickLinkId = $link.data('quicklink-id');
-        const url = $link.data('url');
-        const icon = $link.data('icon');
+      if (method === 'remove') {
+        new ConfirmModal(
+          {
+            id: 'quick-access-remove-confirm-modal',
+            confirmTitle: $link.data('confirm-title'),
+            confirmMessage: $link.data('confirm-message'),
+            confirmButtonLabel: $link.data('confirm-button-label'),
+            closeButtonLabel: $link.data('close-button-label'),
+            confirmButtonClass: 'btn-danger',
+          },
+          () => this.doQuickLinkAction($link, method, null),
+        );
 
-        $.ajax({
-          type: 'POST',
-          headers: {
-            'cache-control': 'no-cache',
-          },
-          async: true,
-          url: postLink,
-          data: {
-            method,
-            url,
-            name,
-            icon,
-            id_quick_access: quickLinkId,
-          },
-          dataType: 'json',
-          success: (data) => {
-            if (typeof data.has_errors !== 'undefined' && data.has_errors) {
-              $.each(data, (index) => {
-                if (typeof data[index] === 'string') {
-                  $.growl.error({
-                    title: '',
-                    message: data[index],
-                  });
-                }
-              });
-            } else if (Array.isArray(data)) {
-              let quicklinkList = '';
-              data.forEach((item) => {
-                const classAttr = item.class ? ` ${item.class}` : '';
-                const activeClass = item.active ? ' active' : '';
-                const target = item.new_window ? ' target="_blank"' : '';
-                quicklinkList += `<a class="dropdown-item quick-row-link${classAttr}${activeClass}" href="${item.link}"${target} data-item="${item.name}">${item.name}</a>`;
-              });
-              const $menu = $('#quick-access-container .dropdown-menu');
-              $menu.find('.dropdown-divider').prevAll('a.quick-row-link').remove();
-              $menu.prepend(quicklinkList);
-              $link.remove();
-              window.showSuccessMessage(window.update_success_msg);
-            }
-          },
-          error: (xhr, textStatus) => {
-            $.growl.error({
-              title: 'Quick access error',
-              message: textStatus === 'parsererror'
-                ? `Server returned non-JSON (status ${xhr.status})`
-                : `${xhr.status} ${xhr.statusText}`,
-            });
-          },
-        });
+        return;
       }
+
+      if (method === 'add' && name) {
+        this.doQuickLinkAction($link, method, name);
+      }
+    });
+  }
+
+  private doQuickLinkAction($link: JQuery, method: string, name: string | null): void {
+    const postLink = $link.data('post-link');
+    const quickLinkId = $link.data('quicklink-id');
+    const url = $link.data('url');
+    const icon = $link.data('icon');
+
+    $.ajax({
+      type: 'POST',
+      headers: {
+        'cache-control': 'no-cache',
+      },
+      async: true,
+      url: postLink,
+      data: {
+        method,
+        url,
+        name,
+        icon,
+        id_quick_access: quickLinkId,
+      },
+      dataType: 'json',
+      success: (data) => {
+        if (typeof data.has_errors !== 'undefined' && data.has_errors) {
+          $.each(data, (index) => {
+            if (typeof data[index] === 'string') {
+              $.growl.error({
+                title: '',
+                message: data[index],
+              });
+            }
+          });
+        } else if (Array.isArray(data)) {
+          let quicklinkList = '';
+          data.forEach((item) => {
+            const classAttr = item.class ? ` ${item.class}` : '';
+            const activeClass = item.active ? ' active' : '';
+            const target = item.new_window ? ' target="_blank"' : '';
+            quicklinkList += `<a class="dropdown-item quick-row-link${classAttr}${activeClass}" href="${item.link}"${target} data-item="${item.name}">${item.name}</a>`;
+          });
+          const $menu = $('#quick-access-container .dropdown-menu');
+          $menu.find('.dropdown-divider').prevAll('a.quick-row-link').remove();
+          $menu.prepend(quicklinkList);
+          $link.remove();
+          window.showSuccessMessage(window.update_success_msg);
+        }
+      },
+      error: (xhr, textStatus) => {
+        $.growl.error({
+          title: 'Quick access error',
+          message: textStatus === 'parsererror'
+            ? `Server returned non-JSON (status ${xhr.status})`
+            : `${xhr.status} ${xhr.statusText}`,
+        });
+      },
     });
   }
 

@@ -136,7 +136,7 @@
                    data-link=""
                 >
                   <i class="material-icons">remove_circle</i>
-                  {l|escape s='Remove from QuickAccess' d='Admin.Navigation.Header'}
+                  {l|escape s='Remove from Quick Access' d='Admin.Navigation.Header'}
                 </a>
               </li>
             {else}
