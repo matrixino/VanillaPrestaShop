@@ -238,7 +238,9 @@ $(() => {
             let quicklinkList = '';
             $.each(data, (index, item) => {
               if (typeof item.name !== 'undefined') {
-                quicklinkList += `<li><a href="${item.link}">${item.name}</a></li>`;
+                const activeClass = item.active ? ' active' : '';
+                const classAttr = item.class ? ` class="${item.class}"` : '';
+                quicklinkList += `<li class="quick-row-link${activeClass}"><a${classAttr} href="${item.link}" data-item="${item.name}">${item.name}</a></li>`;
               }
             });
             if (quicklinkList) {
