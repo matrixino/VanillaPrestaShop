@@ -132,10 +132,19 @@ class QuickAccess
         return $this->legacyContext->getContext()->link->getAdminLink('AdminQuickAccesses');
     }
 
-    public function getAjaxUrl(): string
+    public function getAjaxAddUrl(): string
     {
         return $this->router->generate(
-            'admin_quick_accesses_ajax',
+            'admin_quick_accesses_ajax_add',
+            ['_token' => $this->userTokenManager->getSymfonyToken()],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+    }
+
+    public function getAjaxDeleteUrl(): string
+    {
+        return $this->router->generate(
+            'admin_quick_accesses_ajax_delete',
             ['_token' => $this->userTokenManager->getSymfonyToken()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );

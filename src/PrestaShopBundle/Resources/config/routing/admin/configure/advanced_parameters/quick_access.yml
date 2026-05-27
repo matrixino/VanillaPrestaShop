@@ -62,13 +62,20 @@ admin_quick_accesses_edit:
   requirements:
     quickAccessId: \d+
 
-admin_quick_accesses_ajax:
-  path: /ajax
+admin_quick_accesses_ajax_add:
+  path: /ajax/add
   methods: POST
   defaults:
-    _controller: 'PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters\QuickAccessController::ajaxQuickLinkAction'
+    _controller: 'PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters\QuickAccessController::ajaxAddQuickLinkAction'
     _legacy_controller: AdminQuickAccesses
-    _legacy_link: AdminQuickAccesses:GetUrl
+    _legacy_feature_flag: quick_access
+
+admin_quick_accesses_ajax_delete:
+  path: /ajax/delete
+  methods: POST
+  defaults:
+    _controller: 'PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters\QuickAccessController::ajaxDeleteQuickLinkAction'
+    _legacy_controller: AdminQuickAccesses
     _legacy_feature_flag: quick_access
 
 admin_quick_accesses_toggle_new_window:

@@ -27,7 +27,7 @@
            data-rand="{{ random(1, 200) }}"
            data-icon="{{ this.currentPageIcon }}"
            data-url="{{ this.activeQuickAccess.link }}"
-           data-post-link="{{ this.ajaxUrl }}"
+           data-post-link="{{ this.ajaxDeleteUrl }}"
            data-prompt-text="{{ 'Please name this shortcut:'|trans({}, 'Admin.Navigation.Header') }}"
            data-link="{{ this.activeQuickAccess.name }}"
         >
@@ -42,7 +42,7 @@
            data-method="add"
            data-icon="{{ this.currentPageIcon }}"
            data-url="{{ this.currentPageQuickAccessLink }}"
-           data-post-link="{{ this.ajaxUrl }}"
+           data-post-link="{{ this.ajaxAddUrl }}"
            data-prompt-text="{{ 'Please name this shortcut:'|trans({}, 'Admin.Navigation.Header') }}"
            data-link="{{ this.currentPageTitle }}"
         >

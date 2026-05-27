@@ -2002,20 +2002,28 @@ class AdminControllerCore extends Controller
 
         // Quick access
         $quick_access = [];
-        $quick_access_ajax_url = $this->context->link->getAdminLink('AdminQuickAccesses', true, [], ['action' => 'GetUrl', 'ajax' => 1]);
+        $legacyAjaxUrl = $this->context->link->getAdminLink('AdminQuickAccesses', true, [], ['action' => 'GetUrl', 'ajax' => 1]);
+        $quick_access_ajax_add_url = $legacyAjaxUrl;
+        $quick_access_ajax_delete_url = $legacyAjaxUrl;
         if ((int) $this->context->employee->id) {
             $quick_access = QuickAccess::getQuickAccessesWithToken($this->context->language->id, (int) $this->context->employee->id);
             /** @var FeatureFlagStateCheckerInterface $featureFlagChecker */
             $featureFlagChecker = $this->get(FeatureFlagStateCheckerInterface::class);
             if ($featureFlagChecker->isEnabled('quick_access')) {
                 try {
-                    $quick_access_ajax_url = $this->context->link->getAdminLink(
+                    $token = $this->get(UserTokenManager::class)->getSymfonyToken();
+                    $quick_access_ajax_add_url = $this->context->link->getAdminLink(
                         'AdminQuickAccesses',
                         false,
-                        ['route' => 'admin_quick_accesses_ajax', '_token' => $this->get(UserTokenManager::class)->getSymfonyToken()]
+                        ['route' => 'admin_quick_accesses_ajax_add', '_token' => $token]
+                    );
+                    $quick_access_ajax_delete_url = $this->context->link->getAdminLink(
+                        'AdminQuickAccesses',
+                        false,
+                        ['route' => 'admin_quick_accesses_ajax_delete', '_token' => $token]
                     );
                 } catch (Exception $e) {
-                    // keep legacy fallback URL
+                    // keep legacy fallback URLs
                 }
             }
         }
@@ -2048,7 +2056,8 @@ class AdminControllerCore extends Controller
                 'search_type' => Tools::getValue('bo_search_type'),
                 'bo_query' => Tools::safeOutput(Tools::getValue('bo_query')),
                 'quick_access' => empty($quick_access) ? [] : $quick_access,
-                'quick_access_ajax_url' => $quick_access_ajax_url,
+                'quick_access_ajax_add_url' => $quick_access_ajax_add_url,
+                'quick_access_ajax_delete_url' => $quick_access_ajax_delete_url,
                 'multi_shop' => Shop::isFeatureActive(),
                 'shop_list' => $helperShop->getRenderedShopList(),
                 'current_shop_name' => $helperShop->getCurrentShopName(),

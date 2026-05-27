@@ -174,34 +174,35 @@ class QuickAccessController extends PrestaShopAdminController
 
     #[DemoRestricted(redirectRoute: 'admin_quick_accesses_index')]
     #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
-    public function ajaxQuickLinkAction(
+    public function ajaxAddQuickLinkAction(
         Request $request,
         LanguageContext $languageContext,
     ): JsonResponse {
-        $method = $request->request->getString('method');
+        try {
+            $this->dispatchCommand(new AddQuickAccessCommand(
+                [$languageContext->getId() => $request->request->getString('name')],
+                $request->request->getString('url'),
+                false,
+            ));
+        } catch (QuickAccessException $e) {
+            return new JsonResponse([
+                'has_errors' => true,
+                0 => $this->getErrorMessageForException($e, $this->getErrorMessages()),
+            ]);
+        }
 
-        if ($method === 'add') {
-            try {
-                $this->dispatchCommand(new AddQuickAccessCommand(
-                    [$languageContext->getId() => $request->request->getString('name')],
-                    $request->request->getString('url'),
-                    false,
-                ));
-            } catch (QuickAccessException $e) {
-                return new JsonResponse([
-                    'has_errors' => true,
-                    0 => $this->getErrorMessageForException($e, $this->getErrorMessages()),
-                ]);
-            }
-        } elseif ($method === 'remove') {
-            try {
-                $this->dispatchCommand(new DeleteQuickAccessCommand($request->request->getInt('id_quick_access')));
-            } catch (QuickAccessException $e) {
-                return new JsonResponse([
-                    'has_errors' => true,
-                    0 => $this->getErrorMessageForException($e, $this->getErrorMessages()),
-                ]);
-            }
+        return new JsonResponse(['success' => true]);
+    }
+
+    public function ajaxDeleteQuickLinkAction(Request $request): JsonResponse
+    {
+        try {
+            $this->dispatchCommand(new DeleteQuickAccessCommand($request->request->getInt('id_quick_access')));
+        } catch (QuickAccessException $e) {
+            return new JsonResponse([
+                'has_errors' => true,
+                0 => $this->getErrorMessageForException($e, $this->getErrorMessages()),
+            ]);
         }
 
         return new JsonResponse(['success' => true]);
