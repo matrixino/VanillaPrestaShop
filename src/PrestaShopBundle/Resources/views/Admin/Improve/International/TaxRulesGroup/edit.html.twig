@@ -8,7 +8,7 @@
   {{ include('@PrestaShop/Admin/Improve/International/TaxRulesGroup/Blocks/form.html.twig', {taxRulesGroupForm: taxRulesGroupForm}) }}
 
   {% block tax_rules_list_panel %}
-    {{ include('@PrestaShop/Admin/Common/Grid/grid_panel.html.twig', {grid: taxRuleGrid}) }}
+    {% include '@PrestaShop/Admin/Improve/International/TaxRulesGroup/Blocks/tax_rule_grid_panel.html.twig' with {grid: taxRuleGrid, taxRulesGroupId: taxRulesGroupId} %}
   {% endblock %}
 {% endblock %}
 
