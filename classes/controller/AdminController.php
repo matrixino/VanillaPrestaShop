@@ -2011,16 +2011,15 @@ class AdminControllerCore extends Controller
             $featureFlagChecker = $this->get(FeatureFlagStateCheckerInterface::class);
             if ($featureFlagChecker->isEnabled('quick_access')) {
                 try {
-                    $token = $this->get(UserTokenManager::class)->getSymfonyToken();
                     $quick_access_ajax_add_url = $this->context->link->getAdminLink(
                         'AdminQuickAccesses',
-                        false,
-                        ['route' => 'admin_quick_accesses_ajax_add', '_token' => $token]
+                        true,
+                        ['route' => 'admin_quick_accesses_ajax_add']
                     );
                     $quick_access_ajax_delete_url = $this->context->link->getAdminLink(
                         'AdminQuickAccesses',
-                        false,
-                        ['route' => 'admin_quick_accesses_ajax_delete', '_token' => $token]
+                        true,
+                        ['route' => 'admin_quick_accesses_ajax_delete']
                     );
                 } catch (Exception $e) {
                     // keep legacy fallback URLs
