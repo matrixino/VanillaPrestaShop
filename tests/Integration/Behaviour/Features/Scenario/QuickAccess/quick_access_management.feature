@@ -24,21 +24,27 @@ Feature: Quick access management
   Scenario: Add a quick access with new_window set to false
     When I add a quick access "qa_catalog" with the following properties:
       | localizedNames[en-US] | Catalog                      |
+      | localizedNames[fr-FR] | Catalogue                    |
       | link                  | index.php?controller=catalog |
       | new_window            | false                        |
     Then quick access "qa_catalog" should have the following properties:
+      | localizedNames[en-US] | Catalog                      |
+      | localizedNames[fr-FR] | Catalogue                    |
       | link                  | index.php?controller=catalog |
       | new_window            | false                        |
 
   Scenario: Edit a quick access - change name
     Given I add a quick access "qa_edit" with the following properties:
       | localizedNames[en-US] | Original name              |
+      | localizedNames[fr-FR] | Nom original               |
       | link                  | index.php?controller=edit  |
       | new_window            | false                      |
     When I edit quick access "qa_edit" with the following properties:
-      | localizedNames[en-US] | Updated name |
+      | localizedNames[en-US] | Updated name    |
+      | localizedNames[fr-FR] | Nom mis à jour  |
     Then quick access "qa_edit" should have the following properties:
       | localizedNames[en-US] | Updated name              |
+      | localizedNames[fr-FR] | Nom mis à jour            |
       | link                  | index.php?controller=edit |
       | new_window            | false                     |
 
@@ -59,6 +65,7 @@ Feature: Quick access management
   Scenario: Toggle new_window flag
     Given I add a quick access "qa_toggle" with the following properties:
       | localizedNames[en-US] | Toggle test                  |
+      | localizedNames[fr-FR] | Test de bascule              |
       | link                  | index.php?controller=toggle  |
       | new_window            | false                        |
     When I toggle the new_window flag for quick access "qa_toggle"
@@ -71,6 +78,7 @@ Feature: Quick access management
   Scenario: Delete a quick access
     Given I add a quick access "qa_delete" with the following properties:
       | localizedNames[en-US] | Delete me                    |
+      | localizedNames[fr-FR] | Supprimer moi                |
       | link                  | index.php?controller=delete  |
       | new_window            | false                        |
     When I delete quick access "qa_delete"
@@ -79,14 +87,17 @@ Feature: Quick access management
   Scenario: Bulk delete quick accesses
     Given I add a quick access "qa_bulk1" with the following properties:
       | localizedNames[en-US] | Bulk One                     |
+      | localizedNames[fr-FR] | Lot Un                       |
       | link                  | index.php?controller=bulk1   |
       | new_window            | false                        |
     And I add a quick access "qa_bulk2" with the following properties:
       | localizedNames[en-US] | Bulk Two                     |
+      | localizedNames[fr-FR] | Lot Deux                     |
       | link                  | index.php?controller=bulk2   |
       | new_window            | false                        |
     And I add a quick access "qa_bulk3" with the following properties:
       | localizedNames[en-US] | Bulk Three                   |
+      | localizedNames[fr-FR] | Lot Trois                    |
       | link                  | index.php?controller=bulk3   |
       | new_window            | false                        |
     When I bulk delete quick accesses "qa_bulk1,qa_bulk2"
@@ -97,10 +108,12 @@ Feature: Quick access management
   Scenario: Cannot add quick access with duplicate link
     Given I add a quick access "qa_dup" with the following properties:
       | localizedNames[en-US] | Duplicate test               |
+      | localizedNames[fr-FR] | Test dupliqué                |
       | link                  | index.php?controller=dup     |
       | new_window            | false                        |
     When I add a quick access "qa_dup2" with the following properties:
       | localizedNames[en-US] | Duplicate test 2             |
+      | localizedNames[fr-FR] | Test dupliqué 2              |
       | link                  | index.php?controller=dup     |
       | new_window            | false                        |
     Then I should get error that quick access link already exists
