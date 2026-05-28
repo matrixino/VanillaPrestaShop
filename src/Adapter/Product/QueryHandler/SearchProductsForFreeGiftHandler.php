@@ -14,6 +14,7 @@ use PrestaShop\PrestaShop\Adapter\Product\Image\ProductImagePathFactory;
 use PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\CommandBus\Attributes\AsQueryHandler;
 use PrestaShop\PrestaShop\Core\Domain\Product\Image\ValueObject\ImageId;
+use PrestaShop\PrestaShop\Core\Domain\Product\ProductCustomizabilitySettings;
 use PrestaShop\PrestaShop\Core\Domain\Product\Query\SearchProductsForFreeGift;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryHandler\SearchProductsForFreeGiftHandlerInterface;
 use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductForFreeGift;
@@ -87,7 +88,7 @@ class SearchProductsForFreeGiftHandler implements SearchProductsForFreeGiftHandl
             return [true, $this->translator->trans('This product requires a minimum quantity greater than 1.', [], 'Admin.Catalog.Notification')];
         }
 
-        if ((int) ($product['customizable'] ?? 0) > 0) {
+        if ((int) ($product['customizable'] ?? 0) === ProductCustomizabilitySettings::REQUIRES_CUSTOMIZATION) {
             return [true, $this->translator->trans('This product has required customization fields.', [], 'Admin.Catalog.Notification')];
         }
 

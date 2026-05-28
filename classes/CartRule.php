@@ -8,6 +8,7 @@ use PrestaShop\PrestaShop\Adapter\ContainerFinder;
 use PrestaShop\PrestaShop\Adapter\Discount\Application\DiscountApplicationService;
 use PrestaShop\PrestaShop\Core\Domain\Discount\DiscountSettings;
 use PrestaShop\PrestaShop\Core\Domain\Discount\ValueObject\DiscountType;
+use PrestaShop\PrestaShop\Core\Domain\Product\ProductCustomizabilitySettings;
 use PrestaShop\PrestaShop\Core\Domain\Product\Stock\ValueObject\OutOfStockType;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagStateCheckerInterface;
@@ -938,7 +939,7 @@ class CartRuleCore extends ObjectModel
                 return (!$display_error) ? false : $this->trans('The gift product does not meet the minimum quantity.', [], 'Shop.Notifications.Error');
             }
 
-            if ((int) $giftProduct->customizable & 2) {
+            if ((int) $giftProduct->customizable === ProductCustomizabilitySettings::REQUIRES_CUSTOMIZATION) {
                 return (!$display_error) ? false : $this->trans('You cannot have a customizable gift.', [], 'Shop.Notifications.Error');
             }
 
