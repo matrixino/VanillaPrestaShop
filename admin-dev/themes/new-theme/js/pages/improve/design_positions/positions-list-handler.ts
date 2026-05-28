@@ -239,6 +239,7 @@ class PositionsListHandler {
 
     // Update "Transplant module" button (only present on the positions list page)
     const transplantModuleRawHref = this.$transplantModuleButton.prop('href');
+
     if (transplantModuleRawHref) {
       const transplantModuleHref = new URL(transplantModuleRawHref);
       transplantModuleHref.searchParams.set('show_modules', $moduleId);
