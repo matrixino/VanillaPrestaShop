@@ -28,7 +28,7 @@
           {# Compute custom exceptions: those present in the form data but absent from the known choice lists. #}
           {% set knownExceptions = exceptionChoices.core|merge(exceptionChoices.admin_modules)|merge(exceptionChoices.front_modules) %}
           {% set customExceptions = selectedExceptions|default([])|filter(value => value not in knownExceptions) %}
-          <select size="25" multiple class="form-control" name="hook_module[exception_selected][]" data-exception-list="true">
+          <select size="10" multiple class="form-control scroll-300" name="hook_module[exception_selected][]" data-exception-list="true">
             <optgroup label="{{ '___________ CUSTOM ___________'|trans({}, 'Admin.Design.Feature') }}" data-exception-group="custom">
               {% for value in customExceptions %}
                 <option value="{{ value }}" selected>{{ value }}</option>

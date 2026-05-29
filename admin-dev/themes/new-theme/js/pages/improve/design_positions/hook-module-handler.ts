@@ -28,6 +28,14 @@ export default class HookModuleHandler {
 
   private readonly registeredLabel: string | undefined;
 
+  // Shared select2 config so both selectors match the rest of the BO
+  // (bootstrap4 theme) and always expose the search box, even for short lists.
+  private readonly select2Options = {
+    theme: 'bootstrap4',
+    minimumResultsForSearch: 0,
+    width: '100%',
+  };
+
   constructor() {
     const form = document.querySelector<HTMLFormElement>('[data-hook-url]');
 
@@ -47,7 +55,7 @@ export default class HookModuleHandler {
 
     // Enhance both selects with select2 (search helper). The hook select keeps
     // its initial disabled state until a module is chosen.
-    $(this.moduleSelector).select2();
+    $(this.moduleSelector).select2(this.select2Options);
     this.refreshHookSelect2();
 
     // select2 emits a jQuery "change" event, which a native addEventListener
@@ -195,6 +203,6 @@ export default class HookModuleHandler {
     if ($hookSelector.hasClass('select2-hidden-accessible')) {
       $hookSelector.select2('destroy');
     }
-    $hookSelector.select2();
+    $hookSelector.select2(this.select2Options);
   }
 }
