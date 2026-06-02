@@ -146,20 +146,21 @@ abstract class AppKernel extends Kernel
         }
 
         $activeModules = $this->getModuleRepository()->getActiveModules();
+        $servicesFilesList = [
+            'services.php',
+            sprintf('services-%d.%d.yml', Version::MAJOR_VERSION, Version::MINOR_VERSION),
+            sprintf('services-%d.yml', Version::MAJOR_VERSION),
+            'services.yml',
+        ];
+
         // We only load services of active modules (not simply installed)
         foreach ($activeModules as $activeModulePath) {
             $modulePath = _PS_MODULE_DIR_ . $activeModulePath;
 
-            $servicesFilesList = [
-                sprintf('services-%d.%d.yml', Version::MAJOR_VERSION, Version::MINOR_VERSION),
-                sprintf('services-%d.yml', Version::MAJOR_VERSION),
-                'services.yml',
-            ];
-
             foreach ($servicesFilesList as $servicesFile) {
                 $fullPath = sprintf('%s/config/%s', $modulePath, $servicesFile);
 
-                if (file_exists($fullPath) && is_file($fullPath)) {
+                if (is_file($fullPath)) {
                     $loader->load($fullPath);
                     // Prevent loading less specific services files if one was found
                     break;
@@ -169,7 +170,7 @@ abstract class AppKernel extends Kernel
             foreach ($servicesFilesList as $servicesFile) {
                 $fullPath = sprintf('%s/config/admin/%s', $modulePath, $servicesFile);
 
-                if (file_exists($fullPath) && is_file($fullPath)) {
+                if (is_file($fullPath)) {
                     $loader->load($fullPath);
                     // Prevent loading less specific services files if one was found
                     break;
@@ -181,7 +182,7 @@ abstract class AppKernel extends Kernel
             foreach ($servicesFilesList as $servicesFile) {
                 $fullPath = sprintf('%s/config/front/%s', $modulePath, $servicesFile);
 
-                if (file_exists($fullPath) && is_file($fullPath)) {
+                if (is_file($fullPath)) {
                     $loader->load($fullPath);
                     // Prevent loading less specific services files if one was found
                     break;

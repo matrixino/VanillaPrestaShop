@@ -8,6 +8,7 @@ namespace PrestaShopBundle\DependencyInjection\Compiler;
 
 use PrestaShop\PrestaShop\Core\Version;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -43,28 +44,28 @@ class LoadServicesFromModulesPass implements CompilerPassInterface
     {
         $installedModules = $container->getParameter('prestashop.installed_modules');
         $moduleDir = $container->getParameter('prestashop.module_dir');
+        $servicesFilesList = [
+            'services.php',
+            sprintf('services-%d.%d.yml', Version::MAJOR_VERSION, Version::MINOR_VERSION),
+            sprintf('services-%d.yml', Version::MAJOR_VERSION),
+            'services.yml',
+        ];
 
         foreach ($installedModules as $moduleName) {
             $modulePath = $moduleDir . $moduleName;
             $moduleConfigPath = $modulePath . $this->configPath;
-
-            $servicesFilesList = [
-                sprintf('services-%d.%d.yml', Version::MAJOR_VERSION, Version::MINOR_VERSION),
-                sprintf('services-%d.yml', Version::MAJOR_VERSION),
-                'services.yml',
-            ];
+            $fileLocator = new FileLocator($moduleConfigPath);
+            $resolver = new LoaderResolver([
+                new PhpFileLoader($container, $fileLocator),
+                new XmlFileLoader($container, $fileLocator),
+                new YamlFileLoader($container, $fileLocator),
+            ]);
+            $loader = new DelegatingLoader($resolver);
 
             foreach ($servicesFilesList as $servicesFile) {
-                if (!file_exists($moduleConfigPath . $servicesFile)) {
+                if (!is_file($moduleConfigPath . $servicesFile)) {
                     continue;
                 }
-
-                $fileLocator = new FileLocator($moduleConfigPath);
-                $loader = new YamlFileLoader($container, $fileLocator);
-                $loader->setResolver(new LoaderResolver([
-                    new PhpFileLoader($container, $fileLocator),
-                    new XmlFileLoader($container, $fileLocator),
-                ]));
 
                 $loader->load($servicesFile);
                 // Prevent loading less specific services files if one was found
