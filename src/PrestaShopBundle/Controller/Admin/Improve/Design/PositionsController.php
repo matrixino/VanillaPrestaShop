@@ -501,6 +501,7 @@ class PositionsController extends PrestaShopAdminController
                     $entries[] = sprintf('module-%s-%s', $module, $controller);
                 }
             }
+            sort($entries);
 
             return $entries;
         };

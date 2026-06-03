@@ -105,8 +105,12 @@ export default class HookModuleHandler {
     const currentValue = this.hookSelector.value;
     this.clearHookSelector();
 
-    const available = hooks.filter((hook) => !hook.registered);
-    const registered = hooks.filter((hook) => hook.registered);
+    // Sort by technical name (case-insensitive) so each group is alphabetical,
+    // matching the order the option label leads with.
+    const byName = (a: HookableInfo, b: HookableInfo): number => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'});
+
+    const available = hooks.filter((hook) => !hook.registered).sort(byName);
+    const registered = hooks.filter((hook) => hook.registered).sort(byName);
 
     const buildOption = (hook: HookableInfo): HTMLOptionElement => {
       const option = document.createElement('option');
