@@ -286,9 +286,13 @@ class DiscountFormDataHandler implements FormDataHandlerInterface
         // Delivery conditions
         if ($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS]['children_selector'] === DeliveryConditionsType::CARRIERS) {
             $command->setCarrierIds($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS][DeliveryConditionsType::CARRIERS]);
-        }
-        if ($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS]['children_selector'] === DeliveryConditionsType::COUNTRY) {
+            $command->setCountryIds([]);
+        } elseif ($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS]['children_selector'] === DeliveryConditionsType::COUNTRY) {
             $command->setCountryIds($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS][DeliveryConditionsType::COUNTRY]);
+            $command->setCarrierIds([]);
+        } elseif ($data['conditions'][DiscountConditionsType::DELIVERY_CONDITIONS]['children_selector'] === DeliveryConditionsType::NONE) {
+            $command->setCarrierIds([]);
+            $command->setCountryIds([]);
         }
     }
 
