@@ -173,8 +173,6 @@ class CountryController extends PrestaShopAdminController
             }
         } catch (Exception $e) {
             $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages($e)));
-
-            return $this->redirectToRoute('admin_countries_index');
         }
 
         return $this->render('@PrestaShop/Admin/Improve/International/Country/edit.html.twig', [

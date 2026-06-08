@@ -19,6 +19,7 @@ import initEmailFields from './email-idn';
 // Must be set after static imports (which are hoisted) but before any dynamic import()
 // is triggered at runtime, so webpack resolves chunk URLs correctly.
 // Do not move this line above the import declarations.
+// eslint-disable-next-line camelcase, no-undef
 __webpack_public_path__ = window.prestashop.core_js_public_path;
 
 window.$ = $;

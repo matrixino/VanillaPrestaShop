@@ -74,7 +74,7 @@ Feature: Retrieving shipment for orders
     Then the order "bo_order1" should have the following shipments:
       | shipment     | carrier         | tracking_number | address | shipping_cost_tax_excl | shipping_cost_tax_incl |
       | shipment1    | default_carrier |                 | US      |                    7.0 |                   7.42 |
-      | new_shipment | default_carrier |                 | US      |                    0.0 |                    0.0 |
+      | new_shipment | default_carrier |                 | US      |                    7.0 |                   7.42 |
 
   Scenario: Retrieve shipment for viewing
     Given the order "bo_order1" should have the following shipments:

@@ -1,5 +1,12 @@
 default:
   suites:
+    hook-module:
+      paths:
+        - "%paths.base%/Features/Scenario/Hook"
+      contexts:
+        - Tests\Integration\Behaviour\Features\Context\CommonFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\ModuleFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Hook\HookModuleFeatureContext
     contact:
       paths:
         - "%paths.base%/Features/Scenario/Contact"
@@ -28,6 +35,7 @@ default:
       contexts:
         - Tests\Integration\Behaviour\Features\Context\CommonFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\TaxRulesGroupFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\TaxRuleFeatureContext
         - Tests\Integration\Behaviour\Features\Transform\StringToBoolTransformContext
     title:
       paths:
@@ -36,6 +44,13 @@ default:
         - Tests\Integration\Behaviour\Features\Context\CommonFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\TitleFeatureContext
         - Tests\Integration\Behaviour\Features\Context\TitleFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\LanguageFeatureContext
+    quick_access:
+      paths:
+        - "%paths.base%/Features/Scenario/QuickAccess"
+      contexts:
+        - Tests\Integration\Behaviour\Features\Context\CommonFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\QuickAccessFeatureContext
         - Tests\Integration\Behaviour\Features\Context\LanguageFeatureContext
     store:
       paths:
@@ -301,7 +316,9 @@ default:
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\Combination\UpdateCombinationFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\Combination\UpdateCombinationStockFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\CommonProductFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\DeleteProductFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateCategoriesFeatureContext
+        - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateCustomizationFieldsFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateProductFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateStatusFeatureContext
         - Tests\Integration\Behaviour\Features\Context\Domain\Product\UpdateStockFeatureContext

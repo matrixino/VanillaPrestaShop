@@ -169,7 +169,7 @@ services:
     class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
     factory: [ '@prestashop.core.form.builder.form_builder_factory', 'create' ]
     arguments:
-      - 'PrestaShopBundle\Form\Admin\Sell\CustomerService\MerchandiseReturn\OrderReturnType'
+      - 'PrestaShopBundle\Form\Admin\Sell\CustomerService\OrderReturn\OrderReturnType'
       - '@prestashop.core.form.identifiable_object.data_provider.order_return_form_data_provider'
 
   prestashop.core.form.identifiable_object.builder.catalog_price_rule_form_builder:
@@ -316,6 +316,13 @@ services:
       - 'PrestaShopBundle\Form\Admin\Improve\International\Tax\TaxRulesGroupType'
       - '@PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\TaxRulesGroupFormDataProvider'
 
+  prestashop.core.form.identifiable_object.builder.tax_rule_form_builder:
+    class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+    factory: [ '@prestashop.core.form.builder.form_builder_factory', 'create' ]
+    arguments:
+      - 'PrestaShopBundle\Form\Admin\Improve\International\Tax\TaxRuleType'
+      - '@PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\TaxRuleFormDataProvider'
+
   prestashop.core.form.identifiable_object.builder.discount_form_builder:
     class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
     factory: [ '@prestashop.core.form.builder.form_builder_factory', 'create' ]
@@ -400,3 +407,10 @@ services:
     arguments:
       - 'PrestaShopBundle\Form\Admin\Sell\Order\EditProductRowType'
       - '@PrestaShop\PrestaShop\Core\Form\IdentifiableObject\DataProvider\EditProductFormDataProvider'
+
+  prestashop.core.form.identifiable_object.builder.quick_access_form_builder:
+    class: 'PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Builder\FormBuilder'
+    factory: [ '@prestashop.core.form.builder.form_builder_factory', 'create' ]
+    arguments:
+      - 'PrestaShopBundle\Form\Admin\Configure\AdvancedParameters\QuickAccess\QuickAccessType'
+      - '@prestashop.core.form.identifiable_object.data_provider.quick_access_form_data_provider'

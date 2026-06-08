@@ -19,6 +19,10 @@ class AdminQuickAccessesControllerCore extends AdminController
         $this->addRowAction('edit');
         $this->addRowAction('delete');
 
+        // list_content.tpl uses $tr.link as the row onclick URL when present; quick access links
+        // have no token so row-click would redirect to security/compromised. Use Edit action instead.
+        $this->list_no_link = true;
+
         parent::__construct();
 
         if (!Tools::getValue('realedit')) {

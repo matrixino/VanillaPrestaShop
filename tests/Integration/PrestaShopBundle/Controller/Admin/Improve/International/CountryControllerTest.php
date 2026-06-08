@@ -8,9 +8,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\PrestaShopBundle\Controller\Admin\Improve\International;
 
-use AddressFormat;
-use Cache;
-use Country;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\Integration\Core\Form\IdentifiableObject\Handler\FormHandlerChecker;
 use Tests\Integration\PrestaShopBundle\Controller\FormGridControllerTestCase;
@@ -35,15 +32,10 @@ class CountryControllerTest extends FormGridControllerTestCase
     {
         $this->client->disableReboot();
 
-        // todo: uncomment and use it when address format PR is merged
-        //        $addressFormat = 'firstname lastname
-        //            company
-        //            vat_number
-        //            address1
-        //            address2
-        //            postcode city
-        //            Country:name
-        //            phone';
+        // Address format must contain every required field (firstname, lastname,
+        // address1, city, Country:name) — both the Symfony form constraint and the
+        // CQRS handler reject formats missing any of them.
+        $addressFormat = "firstname lastname\naddress1\ncity\nCountry:name";
         $isoCode = 'AA';
         $zipCodeFormat = '1NL';
 
@@ -56,7 +48,7 @@ class CountryControllerTest extends FormGridControllerTestCase
             'country[zone]' => 1,
             'country[need_zip_code]' => '1',
             'country[zip_code_format]' => $zipCodeFormat,
-            'country[address_format]' => '', // todo: add when address format logic is added
+            'country[address_format]' => $addressFormat,
             'country[is_enabled]' => 1,
             'country[contains_states]' => 0,
             'country[need_identification_number]' => 0,
@@ -86,14 +78,9 @@ class CountryControllerTest extends FormGridControllerTestCase
     {
         $this->client->disableReboot();
 
-        // this is the default format that is taken when opening country form, if you try to add spaces the test will fail.
-        $addressFormat = 'firstname lastname
-company
-address1 address2
-city, State:name postcode
-Country:name
-phone';
-        // todo: change addressFormat and test if it was correctly changed when address format PR is merged. Now it only takes default value
+        // Use a different format than testCreate so the assertion proves the edit
+        // round-trips. All required fields are present.
+        $addressFormat = "firstname lastname\ncompany\naddress1\npostcode city\nCountry:name";
         $isoCode = 'BB';
         $zipCodeFormat = '2NL';
 
@@ -106,7 +93,7 @@ phone';
             'country[zone]' => 1,
             'country[need_zip_code]' => '1',
             'country[zip_code_format]' => $zipCodeFormat,
-            'country[address_format]' => '', // todo: add address format when logic is added
+            'country[address_format]' => $addressFormat,
             'country[is_enabled]' => 1,
             'country[contains_states]' => 0,
             'country[need_identification_number]' => 0,
@@ -114,11 +101,9 @@ phone';
         ];
         $this->editEntityFromPage(['countryId' => $countryId], $formData);
 
-        // todo: check this part with cache more deeply when address format logic is done.
-        // need to clear cache because prestashop caches address format and without clear it sees the one before update
-        //        Cache::clear();
-
-        // Then check that it was correctly updated
+        // Then check that it was correctly updated.
+        // Note: the AddressFormat::getFormatDB static cache is invalidated by the
+        // Add/Edit handlers via Cache::clean, so the read here returns the new value.
         $this->assertFormValuesFromPage(
             ['countryId' => $countryId],
             $formData

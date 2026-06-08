@@ -99,4 +99,26 @@ class CartRuleDisablerService
 
         return $result;
     }
+
+    /**
+     * Disables all active free gift discounts that use the given product as their gift.
+     * Called when a product becomes ineligible as a free gift (minimum quantity changed,
+     * required customization added) or when the product is deleted.
+     */
+    public function disableCartRulesThatUsedProductAsGift(int $productId): void
+    {
+        if (!$this->featureFlagStateChecker->isEnabled(FeatureFlagSettings::FEATURE_FLAG_DISCOUNT)) {
+            return;
+        }
+
+        $cartRules = new PrestaShopCollection(CartRule::class);
+        $cartRules->where('gift_product', '=', $productId);
+        $cartRules->where('active', '=', 1);
+
+        foreach ($cartRules as $cartRule) {
+            /* @var CartRule $cartRule */
+            $cartRule->active = false;
+            $cartRule->update();
+        }
+    }
 }

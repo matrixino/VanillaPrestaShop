@@ -230,6 +230,15 @@ class GroupCore extends ObjectModel
 
             $this->truncateModulesRestrictions($this->id);
 
+            // Delete specific prices associated to this group
+            if (!$this->truncateSpecificPrices()) {
+                return false;
+            }
+            // Delete specific price rules associated to this group
+            if (!$this->truncateSpecificPriceRules()) {
+                return false;
+            }
+
             // Add default group (id 3) to customers without groups
             Db::getInstance()->execute('INSERT INTO `' . _DB_PREFIX_ . 'customer_group` (
 				SELECT c.id_customer, ' . (int) Configuration::get('PS_CUSTOMER_GROUP') . ' FROM `' . _DB_PREFIX_ . 'customer` c
@@ -437,5 +446,37 @@ class GroupCore extends ObjectModel
 				ON (g.`id_group` = gl.`id_group`)
 			WHERE `name` = \'' . pSQL($query) . '\'
 		');
+    }
+
+    /**
+     * Delete all specific prices associated to this group.
+     *
+     * @return bool
+     */
+    public function truncateSpecificPrices(): bool
+    {
+        if (empty($this->id)) {
+            return false;
+        }
+
+        return Db::getInstance()->delete('specific_price', 'id_group = ' . (int) $this->id);
+    }
+
+    /**
+     * Delete all specific price rules associated to this group.
+     *
+     * @return bool
+     */
+    public function truncateSpecificPriceRules(): bool
+    {
+        if (empty($this->id)) {
+            return false;
+        }
+
+        $result_price_rule = Db::getInstance()->delete('specific_price_rule', 'id_group = ' . (int) $this->id);
+        $result_price_rule_condition_group = Db::getInstance()->delete('specific_price_rule_condition_group', 'id_specific_price_rule NOT IN (SELECT id_specific_price_rule FROM `' . _DB_PREFIX_ . 'specific_price_rule`)');
+        $result_price_rule_condition = Db::getInstance()->delete('specific_price_rule_condition', 'id_specific_price_rule_condition_group NOT IN (SELECT id_specific_price_rule_condition_group FROM `' . _DB_PREFIX_ . 'specific_price_rule_condition_group`)');
+
+        return $result_price_rule && $result_price_rule_condition_group && $result_price_rule_condition;
     }
 }

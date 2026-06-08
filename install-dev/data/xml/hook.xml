@@ -5673,5 +5673,15 @@
       <title>Override weight that determines free shipping</title>
       <description>Allows modules to override the free shipping weight and return their custom value, for example to specify it by zone or other criteria.</description>
     </hook>
+    <hook id="displayModalContent">
+      <name>displayModalContent</name>
+      <title/>
+      <description/>
+    </hook>
+    <hook id="actionPresentCartProduct">
+      <name>actionPresentCartProduct</name>
+      <title/>
+      <description/>
+    </hook>
   </entities>
 </entity_hook>

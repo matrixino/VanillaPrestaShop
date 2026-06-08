@@ -59,6 +59,14 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
     }
 
     /**
+     * @Then I should get an error that the gift product has a minimum quantity greater than 1
+     */
+    public function assertGiftProductMinimumQuantity(): void
+    {
+        $this->assertLastErrorIs(DiscountConstraintException::class, DiscountConstraintException::INVALID_GIFT_PRODUCT_MINIMUM_QUANTITY);
+    }
+
+    /**
      * @Then I should get an error that the discount code is already used
      */
     public function assertDiscountCodeAlreadyUsed(): void
@@ -837,9 +845,41 @@ class DiscountFeatureContext extends AbstractDomainFeatureContext
      */
     public function bulkUpdateDiscountsStatus(bool $enable, string $discountReferences)
     {
-        $this->getCommandBus()->handle(
-            new BulkUpdateDiscountsStatusCommand($this->referencesToIds($discountReferences), $enable)
-        );
+        try {
+            $this->getCommandBus()->handle(
+                new BulkUpdateDiscountsStatusCommand($this->referencesToIds($discountReferences), $enable)
+            );
+        } catch (DiscountException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When /^I enable discount "(.+)"$/
+     */
+    public function enableDiscount(string $discountReference): void
+    {
+        try {
+            $command = new UpdateDiscountCommand($this->referenceToId($discountReference));
+            $command->setActive(true);
+            $this->getCommandBus()->handle($command);
+        } catch (DiscountException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @When /^I disable discount "(.+)"$/
+     */
+    public function disableDiscount(string $discountReference): void
+    {
+        try {
+            $command = new UpdateDiscountCommand($this->referenceToId($discountReference));
+            $command->setActive(false);
+            $this->getCommandBus()->handle($command);
+        } catch (DiscountException $e) {
+            $this->setLastException($e);
+        }
     }
 
     /**

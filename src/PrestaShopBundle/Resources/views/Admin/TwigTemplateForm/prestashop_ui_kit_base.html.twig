@@ -975,12 +975,12 @@
     {% set attr = attr|merge({
       class: (attr.class|default('') ~ ' custom-file-input')|trim,
       'data-multiple-files-text': '%count% file(s)'|trans({}, 'Admin.Global'),
-      'data-locale': get_context_iso_code()
+      'data-locale': get_context_iso_code(),
     }) -%}
 
     {% if attr.disabled is defined and attr.disabled %}
       {% set attr = attr|merge({
-        class: attr.class ~ ' disabled'
+        class: attr.class ~ ' disabled',
       }) %}
     {% endif %}
     {{- block('form_widget_simple') -}}
@@ -1038,7 +1038,7 @@
 {% block text_with_recommended_length_widget %}
   {% set attr = attr|merge({
     'data-recommended-length-counter': '#' ~ id ~ '_recommended_length_counter',
-    class: 'js-recommended-length-input'
+    class: 'js-recommended-length-input',
   }) -%}
 
   {% if input_type == 'textarea' %}
@@ -1547,7 +1547,7 @@
   {%- set attr = attr|merge({
     class: (attr.class|default('') ~ ' form-group btn-collection btn-toolbar')|trim,
     role: 'group',
-    style: 'justify-content: ' ~ justify_content
+    style: 'justify-content: ' ~ justify_content,
   }) -%}
   <div {{ block('widget_attributes') }}>
     {% for group, buttons in button_groups %}
@@ -1580,7 +1580,7 @@
             {% for button in remainingButtons %}
               {% set action = attribute(form, button) %}
               {{ form_widget(action, {attr: {
-                class: 'dropdown-item ' ~ action.vars.attr.class|default('')|trim
+                class: 'dropdown-item ' ~ action.vars.attr.class|default('')|trim,
               }}) }}
             {% endfor %}
           </div>

@@ -9,19 +9,19 @@ Feature: Toggle country status
   Scenario: Toggle one country status
     Given language "language1" with locale "en-US" exists
     When I add new country "toggle_country" with following properties:
-      | name[en-US]                | Toggle Country  |
-      | iso_code                   | QW              |
-      | call_prefix                | 11              |
-      | default_currency           | 1               |
-      | zone                       | 1               |
-      | need_zip_code              | true            |
-      | zip_code_format            | NNNNN           |
-      | address_format             | not implemented |
-      | is_enabled                 | true            |
-      | contains_states            | false           |
-      | need_identification_number | false           |
-      | display_tax_label          | true            |
-      | shop_association           | 1               |
+      | name[en-US]                | Toggle Country                                   |
+      | iso_code                   | QW                                               |
+      | call_prefix                | 11                                               |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | NNNNN                                            |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | true                                             |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
     And I toggle country status "toggle_country"
     Then country "toggle_country" should be disabled
 
@@ -38,19 +38,19 @@ Feature: Toggle country status
   Scenario: Toggle country status twice returns to original state
     Given language "language1" with locale "en-US" exists
     And I add new country "roundtrip_country" with following properties:
-      | name[en-US]                | Roundtrip Country |
-      | iso_code                   | QV                |
-      | call_prefix                | 71                |
-      | default_currency           | 1                 |
-      | zone                       | 1                 |
-      | need_zip_code              | true              |
-      | zip_code_format            | NNNNN             |
-      | address_format             | not implemented   |
-      | is_enabled                 | true              |
-      | contains_states            | false             |
-      | need_identification_number | false             |
-      | display_tax_label          | true              |
-      | shop_association           | 1                 |
+      | name[en-US]                | Roundtrip Country                                |
+      | iso_code                   | QV                                               |
+      | call_prefix                | 71                                               |
+      | default_currency           | 1                                                |
+      | zone                       | 1                                                |
+      | need_zip_code              | true                                             |
+      | zip_code_format            | NNNNN                                            |
+      | address_format             | firstname lastname\naddress1\ncity\nCountry:name |
+      | is_enabled                 | true                                             |
+      | contains_states            | false                                            |
+      | need_identification_number | false                                            |
+      | display_tax_label          | true                                             |
+      | shop_association           | 1                                                |
     When I toggle country status "roundtrip_country"
     Then country "roundtrip_country" should be disabled
     When I toggle country status "roundtrip_country"

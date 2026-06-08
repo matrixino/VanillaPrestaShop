@@ -19,6 +19,7 @@ use PrestaShop\PrestaShop\Core\Domain\Country\Exception\BulkCountryException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Exception\CountryNotFoundException;
+use PrestaShop\PrestaShop\Core\Domain\Country\Exception\InvalidAddressFormatException;
 use PrestaShop\PrestaShop\Core\Domain\Country\Query\GetCountryForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Country\QueryResult\CountryForEditing;
 use PrestaShop\PrestaShop\Core\Domain\Zone\Exception\ZoneNotFoundException;
@@ -109,7 +110,7 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
                 (int) $data['zone'],
                 PrimitiveUtils::castStringBooleanIntoBoolean($data['need_zip_code']),
                 $data['zip_code_format'],
-                (string) $data['address_format'],
+                $this->unescapeFormat((string) $data['address_format']),
                 PrimitiveUtils::castStringBooleanIntoBoolean($data['is_enabled']),
                 PrimitiveUtils::castStringBooleanIntoBoolean($data['contains_states']),
                 PrimitiveUtils::castStringBooleanIntoBoolean($data['need_identification_number']),
@@ -163,7 +164,7 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
         }
 
         if (isset($data['address_format'])) {
-            $command->setAddressFormat($data['address_format']);
+            $command->setAddressFormat($this->unescapeFormat($data['address_format']));
         }
 
         if (isset($data['is_enabled'])) {
@@ -182,7 +183,36 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
             $command->setDisplayTaxLabel(PrimitiveUtils::castStringBooleanIntoBoolean($data['display_tax_label']));
         }
 
-        $this->getCommandBus()->handle($command);
+        try {
+            $this->getCommandBus()->handle($command);
+        } catch (CountryException $e) {
+            $this->setLastException($e);
+        }
+    }
+
+    /**
+     * @Then I should get an :exceptionShortName error
+     */
+    public function assertCountryDomainError(string $exceptionShortName): void
+    {
+        $map = [
+            'InvalidAddressFormat' => InvalidAddressFormatException::class,
+        ];
+
+        if (!isset($map[$exceptionShortName])) {
+            throw new RuntimeException(sprintf('Unknown country error short name "%s"', $exceptionShortName));
+        }
+
+        $this->assertLastErrorIs($map[$exceptionShortName]);
+    }
+
+    /**
+     * Behat tables strip backslash escapes in cell values, so the feature file uses
+     * the literal `\n` two-character sequence instead of a newline. Convert back here.
+     */
+    private function unescapeFormat(string $format): string
+    {
+        return str_replace('\\n', "\n", $format);
     }
 
     /**
@@ -308,18 +338,25 @@ class CountryFeatureContext extends AbstractDomainFeatureContext
         /** @var CountryForEditing $result */
         $result = $queryBus->handle(new GetCountryForEditing($countryId));
 
-        Assert::assertEquals($expectedData['localizedNames'], $result->getLocalizedNames());
-        Assert::assertEquals($expectedData['isoCode'], $result->getIsoCode());
-        Assert::assertEquals($expectedData['callPrefix'], $result->getCallPrefix());
-        Assert::assertEquals($expectedData['defaultCurrency'], $result->getDefaultCurrency());
-        Assert::assertEquals($expectedData['zone'], $result->getZone());
-        Assert::assertEquals($expectedData['needZipCode'], $result->isNeedZipCode());
-        Assert::assertEquals($expectedData['zipCodeFormat'], $result->getZipCodeFormat()->getValue());
-        Assert::assertEquals($expectedData['enabled'], $result->isEnabled());
-        Assert::assertEquals($expectedData['containsStates'], $result->isContainsStates());
-        Assert::assertEquals($expectedData['needIdNumber'], $result->isNeedIdNumber());
-        Assert::assertEquals($expectedData['displayTaxLabel'], $result->isDisplayTaxLabel());
-        Assert::assertEquals([$expectedData['shopAssociation']], $result->getShopAssociation());
+        Assert::assertEquals($expectedData['name'], $result->getLocalizedNames(), 'unexpected name');
+        Assert::assertEquals($expectedData['iso_code'], $result->getIsoCode(), 'unexpected iso_code');
+        Assert::assertEquals($expectedData['call_prefix'], $result->getCallPrefix(), 'unexpected call_prefix');
+        Assert::assertEquals($expectedData['default_currency'], $result->getDefaultCurrency(), 'unexpected default_currency');
+        Assert::assertEquals($expectedData['zone'], $result->getZone(), 'unexpected zone');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['need_zip_code']), $result->isNeedZipCode(), 'unexpected need_zip_code');
+        Assert::assertEquals($expectedData['zip_code_format'], $result->getZipCodeFormat()->getValue(), 'unexpected zip_code_format');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['is_enabled']), $result->isEnabled(), 'unexpected enabled');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['contains_states']), $result->isContainsStates(), 'unexpected contains_states');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['need_identification_number']), $result->isNeedIdNumber(), 'unexpected need_identification_number');
+        Assert::assertEquals(PrimitiveUtils::castStringBooleanIntoBoolean($expectedData['display_tax_label']), $result->isDisplayTaxLabel(), 'unexpected display_tax_label');
+        Assert::assertEquals([$expectedData['shop_association']], $result->getShopAssociation(), 'unexpected shop_association');
+        if (array_key_exists('address_format', $expectedData)) {
+            Assert::assertEquals(
+                $this->unescapeFormat((string) $expectedData['address_format']),
+                $result->getAddressFormat(),
+                'unexpected address_format'
+            );
+        }
     }
 
     private function formatCountryDataIfNeeded(array $data)

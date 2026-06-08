@@ -56,6 +56,8 @@ services:
     resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Configure/AdvancedParameters/*"
   PrestaShopBundle\Form\Admin\Improve\International\Localization\:
     resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Improve/International/Localization/*"
+  PrestaShopBundle\Form\Admin\Improve\International\Locations\:
+    resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Improve/International/Locations/*"
   PrestaShopBundle\Form\Admin\Configure\ShopParameters\:
     resource: "%kernel.project_dir%/src/PrestaShopBundle/Form/Admin/Configure/ShopParameters/*"
   PrestaShopBundle\Form\Admin\Login\:
@@ -401,7 +403,7 @@ services:
       - '@prestashop.core.form.choice_provider.customer_service_order_messages_name'
       - '@prestashop.core.form.choice_provider.customer_service_order_messages'
 
-  PrestaShopBundle\Form\Admin\Sell\CustomerService\MerchandiseReturn\OrderReturnType:
+  PrestaShopBundle\Form\Admin\Sell\CustomerService\OrderReturn\OrderReturnType:
     arguments:
       $stateChoices: '@=service("prestashop.adapter.form.choice_provider.order_return_state").getChoices()'
 
@@ -574,7 +576,7 @@ services:
 
   PrestaShopBundle\Form\Admin\Improve\International\Locations\CountryOptionsType:
 
-  PrestaShopBundle\Form\Admin\Sell\CustomerService\MerchandiseReturn\MerchandiseReturnOptionsType:
+  PrestaShopBundle\Form\Admin\Sell\CustomerService\OrderReturn\OrderReturnOptionsType:
 
   PrestaShopBundle\Form\Admin\Type\CarrierChoiceType:
     arguments:
@@ -631,6 +633,13 @@ services:
       $permissionChoices: '@=service("prestashop.core.form.choice_provider.permissions_choice_provider").getChoices()'
 
   PrestaShopBundle\Form\Admin\Improve\International\Tax\TaxRulesGroupType:
+
+  PrestaShopBundle\Form\Admin\Improve\International\Tax\TaxRuleType:
+    arguments:
+      $taxByIdChoiceProvider: '@PrestaShop\PrestaShop\Core\Form\ChoiceProvider\TaxByIdChoiceProvider'
+      $connection: '@doctrine.dbal.default_connection'
+      $dbPrefix: '%database_prefix%'
+
   PrestaShopBundle\Form\Admin\Type\FeatureChoiceType:
     arguments:
       $featureChoiceProvider: '@PrestaShop\PrestaShop\Adapter\Form\ChoiceProvider\FeaturesChoiceProvider'
@@ -711,6 +720,8 @@ services:
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\DeleteImageTypeType: ~
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\ImageSettingsType: ~
   PrestaShopBundle\Form\Admin\Improve\Design\ImageSettings\RegenerateThumbnailsType: ~
+
+  PrestaShopBundle\Form\Admin\Improve\Design\HookModuleType: ~
 
   PrestaShopBundle\Form\Admin\Sell\Order\Shipment\MergeShipmentType:
     arguments:

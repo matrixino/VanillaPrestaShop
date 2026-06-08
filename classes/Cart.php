@@ -1428,6 +1428,15 @@ class CartCore extends ObjectModel
             }
         }
 
+        // If the cart rule offers a gift product, verify it exists before inserting into cart_cart_rule
+        $giftProduct = null;
+        if ((int) $cartRule->gift_product) {
+            $giftProduct = new Product((int) $cartRule->gift_product);
+            if (!Validate::isLoadedObject($giftProduct)) {
+                return false;
+            }
+        }
+
         // Add the cart rule to the cart
         if (!Db::getInstance()->insert('cart_cart_rule', [
             'id_cart_rule' => (int) $id_cart_rule,
@@ -1447,7 +1456,8 @@ class CartCore extends ObjectModel
         Cache::clean('Cart::getOrderedCartRulesIds_' . $this->id . '-' . CartRule::FILTER_ACTION_GIFT . '-ids');
         Cache::clean('getContextualValue_*');
 
-        if ((int) $cartRule->gift_product) {
+        // Add the gift product to the cart
+        if ($giftProduct !== null) {
             $this->updateQty(
                 1,
                 $cartRule->gift_product,

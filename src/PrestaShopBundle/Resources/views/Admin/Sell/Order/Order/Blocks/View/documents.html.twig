@@ -95,7 +95,7 @@
           <td colspan="5">
             <form action="{{ path('admin_orders_update_invoice_note', {
               orderId: orderForViewing.id,
-              orderInvoiceId: document.id
+              orderInvoiceId: document.id,
             }) }}" method="post">
               <div class="input-group">
                 <input type="text" class="form-control invoice-note" name="invoice_note" value="{{ document.note }}">

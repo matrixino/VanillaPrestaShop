@@ -86,6 +86,8 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
             new GetOrderShipments($orderId)
         );
 
+        usort($shipments, fn ($a, $b) => $a->getId() <=> $b->getId());
+
         if (count($shipments) === 0) {
             $msg = 'Order [' . $orderId . '] has no shipments';
             throw new RuntimeException($msg);
@@ -102,11 +104,11 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
                 throw new RuntimeException('Shipment [' . $shipment->getId() . '] does not belong to order [' . $orderId . ']');
             }
 
-            Assert::assertEquals($shipment->getTrackingNumber(), $shipmentData['tracking_number']);
-            Assert::assertEquals($shipment->getCarrierSummary()->getId(), $carrierId, 'Wrong carrier ID for ' . $carrierReference);
-            Assert::assertEquals($shipment->getAddressId(), $addressId);
-            Assert::assertEquals($shipment->getShippingCostTaxExcluded(), $shipmentData['shipping_cost_tax_excl'], 'Wrong shipping cast tax excluded for ' . $carrierReference);
-            Assert::assertEquals($shipment->getShippingCostTaxIncluded(), $shipmentData['shipping_cost_tax_incl'], 'Wrong shipping cast tax included for ' . $carrierReference);
+            Assert::assertEquals($shipmentData['tracking_number'], $shipment->getTrackingNumber(), 'Tracking number mismatch');
+            Assert::assertEquals($carrierId, $shipment->getCarrierSummary()->getId(), 'Wrong carrier ID for ' . $carrierReference);
+            Assert::assertEquals($addressId, $shipment->getAddressId(), 'Address ID mismatch');
+            Assert::assertEqualsWithDelta((float) $shipmentData['shipping_cost_tax_excl'], (float) (string) $shipment->getShippingCostTaxExcluded(), 0.001, 'Wrong shipping cost tax excluded for ' . $carrierReference);
+            Assert::assertEqualsWithDelta((float) $shipmentData['shipping_cost_tax_incl'], (float) (string) $shipment->getShippingCostTaxIncluded(), 0.001, 'Wrong shipping cost tax included for ' . $carrierReference);
             SharedStorage::getStorage()->set($shipmentData['shipment'], $shipment->getId());
         }
     }
@@ -374,6 +376,34 @@ class ShipmentFeatureContext extends AbstractDomainFeatureContext
                     $expected['shipment'],
                     $shipment->getQuantity()
                 )
+            );
+        }
+    }
+
+    /**
+     * @Then order :orderReference should have the following shipping totals:
+     */
+    public function assertOrderShippingTotals(string $orderReference, TableNode $table): void
+    {
+        $data = $table->getRowsHash();
+        $orderId = $this->referenceToId($orderReference);
+        $order = new Order($orderId);
+
+        if (isset($data['total_shipping_tax_excl'])) {
+            Assert::assertEqualsWithDelta(
+                (float) $data['total_shipping_tax_excl'],
+                (float) $order->total_shipping_tax_excl,
+                0.001,
+                sprintf('Expected total_shipping_tax_excl %.4f, got %.4f', $data['total_shipping_tax_excl'], $order->total_shipping_tax_excl)
+            );
+        }
+
+        if (isset($data['total_shipping_tax_incl'])) {
+            Assert::assertEqualsWithDelta(
+                (float) $data['total_shipping_tax_incl'],
+                (float) $order->total_shipping_tax_incl,
+                0.001,
+                sprintf('Expected total_shipping_tax_incl %.4f, got %.4f', $data['total_shipping_tax_incl'], $order->total_shipping_tax_incl)
             );
         }
     }

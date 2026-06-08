@@ -125,15 +125,32 @@
             <li class="divider"></li>
             {if isset($matchQuickLink)}
               <li>
-                <a id="quick-remove-link" href="javascript:void(0);" class="ajax-quick-link" data-method="remove"
-                  data-quicklink-id="{$matchQuickLink|intval}">
+                <a id="quick-remove-link"
+                   href="#"
+                   class="ajax-quick-link js-quick-link"
+                   data-method="remove"
+                   data-quicklink-id="{$matchQuickLink|intval}"
+                   data-post-link="{$quick_access_ajax_delete_url|escape:'html':'UTF-8'}"
+                   data-url=""
+                   data-prompt-text="{l s='Please name this shortcut:' d='Admin.Navigation.Header'}"
+                   data-link=""
+                >
                   <i class="material-icons">remove_circle</i>
-                  {l|escape s='Remove from QuickAccess' d='Admin.Navigation.Header'}
+                  {l|escape s='Remove from Quick Access' d='Admin.Navigation.Header'}
                 </a>
               </li>
             {else}
               <li>
-                <a id="quick-add-link" href="javascript:void(0);" class="ajax-quick-link" data-method="add">
+                <a id="quick-add-link"
+                   href="#"
+                   class="ajax-quick-link js-quick-link"
+                   data-method="add"
+                   data-url="{$link->getQuickLink($smarty.server.REQUEST_URI)|escape:'html':'UTF-8'}"
+                   data-post-link="{$quick_access_ajax_add_url|escape:'html':'UTF-8'}"
+                   data-prompt-text="{l s='Please name this shortcut:' d='Admin.Navigation.Header'}"
+                   data-link="{$quick_access_current_link_short_name|escape:'html':'UTF-8'|truncate:32}"
+                   data-icon="{$quick_access_current_link_icon|escape:'html':'UTF-8'}"
+                >
                   <i class="material-icons">add_circle</i>
                   {l|escape s='Add current page to QuickAccess' d='Admin.Navigation.Header'}
                 </a>
@@ -148,56 +165,6 @@
           </ul>
         </div>
       </div>
-      {$quick_access_current_link_name = " - "|explode:$quick_access_current_link_name}
-      <script>
-        $(function() {
-          $('.ajax-quick-link').on('click', function(e){
-            e.preventDefault();
-
-            var method = $(this).data('method');
-
-            if(method == 'add')
-              var name = prompt('{l|escape s='Please name this shortcut:' js=1 d='Admin.Navigation.Header'}', '{$quick_access_current_link_name.0|escape:"javascript"|truncate:32}}');
-
-            if(method == 'add' && name || method == 'remove')
-            {
-              $.ajax({
-                type: 'POST',
-                headers: { "cache-control": "no-cache" },
-                async: false,
-                url: "{$link->getAdminLink('AdminQuickAccesses', true, [], ['action' => 'GetUrl', 'rand' => (1|rand:200), 'ajax' => 1])}" + "&method=" + method + ( $(this).data('quicklink-id') ? "&id_quick_access=" + $(this).data('quicklink-id') : ""),
-                data: {
-                  "url": "{$link->getQuickLink($smarty.server['REQUEST_URI']|escape:'javascript')}",
-                  "name": name,
-                  "icon": "{$quick_access_current_link_icon|escape:'javascript'}"
-                },
-                dataType: "json",
-                success: function(data) {
-                  var quicklink_list ='';
-                  $.each(data, function(index,value){
-                    if (typeof data[index]['name'] !== 'undefined')
-                      quicklink_list += '<li><a href="' + data[index]['link'] + '">' + data[index]['name'] + '</a></li>';
-                  });
-
-                  if (typeof data['has_errors'] !== 'undefined' && data['has_errors'])
-                    $.each(data, function(index, value)
-                      {
-                        if (typeof data[index] == 'string')
-                          $.growl.error({ title: "", message: data[index]});
-                    });
-                  else if (quicklink_list)
-                  {
-                    $('#header_quick ul.dropdown-menu .divider').prevAll().remove();
-                    $('#header_quick ul.dropdown-menu').prepend(quicklink_list);
-                    $(e.target).remove();
-                    showSuccessMessage(update_success_msg);
-                  }
-                }
-              });
-            }
-          });
-        });
-      </script>
 
       {* Search *}
       {include file="search_form.tpl" show_clear_btn=1}

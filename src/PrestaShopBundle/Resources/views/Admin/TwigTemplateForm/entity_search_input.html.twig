@@ -16,7 +16,7 @@
     'data-data-limit': limit,
     'data-min-length': min_length,
     'data-allow-delete': form.vars.allow_delete ? 1 : 0,
-    'data-suggestion-field': form.vars.suggestion_field
+    'data-suggestion-field': form.vars.suggestion_field,
   }) -%}
   {%- set attr = attr|merge({class: (attr.class|default('') ~ ' entity-search-widget')|trim}) -%}
 
@@ -29,7 +29,7 @@
           class: (search_attr.class|default('') ~ ' entity-search-input form-control')|trim,
           autocomplete: 'off',
           placeholder: placeholder,
-          type: 'text'
+          type: 'text',
         }) -%}
         {%- set id = form.vars.id ~ '_search_input' -%}
         <input {{ block('widget_container_attributes') }} />
@@ -139,7 +139,7 @@
   {%- set attr = attr|merge({
     class: (attr.class|default('') ~ ' media entity-item')|trim,
     'data-customer-active': form.active.vars.value,
-    'data-customer-guest': form.is_guest.vars.value
+    'data-customer-guest': form.is_guest.vars.value,
   }) -%}
   <li {{ block('widget_container_attributes') }}>
     <span class="customer-guest-badge badge badge-pill badge-secondary">{{ 'Guest'|trans({}, 'Admin.Shopparameters.Feature') }}</span>
