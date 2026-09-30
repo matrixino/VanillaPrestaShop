@@ -12,7 +12,9 @@ namespace PrestaShopBundle\Controller\Admin\Configure\AdvancedParameters;
 use Exception;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Command\BulkDeleteExtraPropertyDefinitionCommand;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Command\DeleteExtraPropertyDefinitionCommand;
+use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Command\UpdateExtraPropertyDefinitionCommand;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Exception\BulkExtraPropertyException;
+use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Exception\ExtraPropertyConstraintException;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Exception\ExtraPropertyDefinitionNotFoundException;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Exception\ExtraPropertyRegistrationFailureException;
 use PrestaShop\PrestaShop\Core\Domain\ExtraProperty\Exception\ProtectedModuleExtraPropertyDefinitionException;
@@ -25,6 +27,7 @@ use PrestaShop\PrestaShop\Core\Form\IdentifiableObject\Handler\FormHandlerInterf
 use PrestaShop\PrestaShop\Core\Grid\GridFactoryInterface;
 use PrestaShop\PrestaShop\Core\Search\Filters\ExtraPropertyDefinitionFilters;
 use PrestaShopBundle\Controller\Admin\PrestaShopAdminController;
+use PrestaShopBundle\Form\Admin\Configure\AdvancedParameters\ExtraPropertyDefinition\ExtraPropertyDefinitionShopsType;
 use PrestaShopBundle\Security\Attribute\AdminSecurity;
 use PrestaShopBundle\Security\Attribute\DemoRestricted;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -51,7 +54,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      *
      * @return Response
      */
-    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('read', 'AdminExtraPropertyDefinitions')")]
     public function indexAction(
         ExtraPropertyDefinitionFilters $filters,
         #[Autowire(service: 'prestashop.core.grid.factory.extra_property_definition')]
@@ -80,7 +83,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      *
      * @return Response|RedirectResponse
      */
-    #[AdminSecurity("is_granted('create', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('create', 'AdminExtraPropertyDefinitions')")]
     public function createAction(
         Request $request,
         #[Autowire(service: 'prestashop.core.form.builder.extra_property_definition_form_builder')]
@@ -128,7 +131,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * Always responds 200: an unknown or un-introspectable form yields {"available": false}
      * and the UI falls back to a free-text path input.
      */
-    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))")]
+    #[AdminSecurity("is_granted('read', 'AdminExtraPropertyDefinitions')")]
     public function formFieldsAction(string $formId, FormFieldTreeProvider $treeProvider): JsonResponse
     {
         $fields = $treeProvider->getTree($formId);
@@ -155,7 +158,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      *
      * @return Response|RedirectResponse
      */
-    #[AdminSecurity("is_granted('update', request.get('_legacy_controller'))", redirectRoute: 'admin_extra_property_definitions_index')]
+    #[AdminSecurity("is_granted('update', 'AdminExtraPropertyDefinitions')", redirectRoute: 'admin_extra_property_definitions_index')]
     public function editAction(
         int $extraPropertyDefinitionId,
         Request $request,
@@ -215,17 +218,22 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * Displays a module-owned extra property definition in read-only mode.
      *
      * Reuses the same form builder/type as createAction()/editAction() purely for display: no
-     * FormHandlerInterface is involved and the request is never bound to the form, since nothing
-     * here is ever submitted.
+     * FormHandlerInterface is involved and the request is never bound to that form.
+     *
+     * One exception to read-only: the shop association — the single field the Update command
+     * accepts on module-owned definitions — is editable through a small standalone form
+     * (multistore only), submitted back to this action (POST).
      *
      * @param int $extraPropertyDefinitionId
+     * @param Request $request
      * @param FormBuilderInterface $formBuilder
      *
      * @return Response|RedirectResponse
      */
-    #[AdminSecurity("is_granted('read', request.get('_legacy_controller'))", redirectRoute: 'admin_extra_property_definitions_index')]
+    #[AdminSecurity("is_granted('read', 'AdminExtraPropertyDefinitions')", redirectRoute: 'admin_extra_property_definitions_index')]
     public function viewAction(
         int $extraPropertyDefinitionId,
+        Request $request,
         #[Autowire(service: 'prestashop.core.form.builder.extra_property_definition_form_builder')]
         FormBuilderInterface $formBuilder,
     ): Response|RedirectResponse {
@@ -240,10 +248,42 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
             return $this->redirectToRoute('admin_extra_property_definitions_index');
         }
 
+        $shopAssociationForm = null;
+        if ($this->getShopContext()->isMultiShopUsed()) {
+            // No FormDataProvider/FormDataHandler pair for this single field: the current
+            // value comes from the loaded definition form and the command is dispatched
+            // directly, exceptionally.
+            $moduleName = (string) $form->get('field_definition')->get('module_name')->getData();
+            $shopAssociationForm = $this->createForm(
+                ExtraPropertyDefinitionShopsType::class,
+                ['shop_association' => (array) $form->get('visibility')->get('shop_association')->getData()],
+                ['module_name' => '' !== $moduleName ? $moduleName : null]
+            );
+            $shopAssociationForm->handleRequest($request);
+
+            if ($shopAssociationForm->isSubmitted() && $shopAssociationForm->isValid()) {
+                try {
+                    // Empty selection = revert to the fallback (module's stores / all stores).
+                    $shopIds = array_map('intval', (array) $shopAssociationForm->get('shop_association')->getData());
+                    $this->dispatchCommand(
+                        (new UpdateExtraPropertyDefinitionCommand($extraPropertyDefinitionId))->setAssociatedShopIds($shopIds)
+                    );
+                    $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+
+                    return $this->redirectToRoute('admin_extra_property_definitions_view', [
+                        'extraPropertyDefinitionId' => $extraPropertyDefinitionId,
+                    ]);
+                } catch (Exception $e) {
+                    $this->addFlash('error', $this->getErrorMessageForException($e, $this->getErrorMessages()));
+                }
+            }
+        }
+
         return $this->render(
             '@PrestaShop/Admin/Configure/AdvancedParameters/ExtraPropertyDefinition/view.html.twig',
             [
                 'extraPropertyDefinitionForm' => $form->createView(),
+                'shopAssociationForm' => $shopAssociationForm?->createView(),
                 'layoutTitle' => $this->trans(
                     'Viewing extra property "%name%"',
                     ['%name%' => $form->get('field_definition')->get('property_name')->getData()],
@@ -263,7 +303,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * @return RedirectResponse
      */
     #[DemoRestricted(redirectRoute: 'admin_extra_property_definitions_index')]
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', 'AdminExtraPropertyDefinitions')", message: 'You do not have permission to delete this.')]
     public function deleteAction(int $extraPropertyDefinitionId): RedirectResponse
     {
         return $this->doDelete($extraPropertyDefinitionId, false);
@@ -277,7 +317,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * @return RedirectResponse
      */
     #[DemoRestricted(redirectRoute: 'admin_extra_property_definitions_index')]
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', 'AdminExtraPropertyDefinitions')", message: 'You do not have permission to delete this.')]
     public function deleteDropColumnAction(int $extraPropertyDefinitionId): RedirectResponse
     {
         return $this->doDelete($extraPropertyDefinitionId, true);
@@ -309,7 +349,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * @return RedirectResponse
      */
     #[DemoRestricted(redirectRoute: 'admin_extra_property_definitions_index')]
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', 'AdminExtraPropertyDefinitions')", message: 'You do not have permission to delete this.')]
     public function bulkDeleteAction(Request $request): RedirectResponse
     {
         return $this->doBulkDelete($request, false);
@@ -323,7 +363,7 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
      * @return RedirectResponse
      */
     #[DemoRestricted(redirectRoute: 'admin_extra_property_definitions_index')]
-    #[AdminSecurity("is_granted('delete', request.get('_legacy_controller'))", message: 'You do not have permission to delete this.')]
+    #[AdminSecurity("is_granted('delete', 'AdminExtraPropertyDefinitions')", message: 'You do not have permission to delete this.')]
     public function bulkDeleteDropColumnAction(Request $request): RedirectResponse
     {
         return $this->doBulkDelete($request, true);
@@ -441,8 +481,35 @@ class ExtraPropertyDefinitionController extends PrestaShopAdminController
                     [],
                     'Admin.Advparameters.Notification'
                 ),
+                ExtraPropertyRegistrationFailureException::INVALID_CONSTRAINTS => $this->trans(
+                    'The validation constraints could not be saved: they contain a constraint, an option or a value that is not supported. Use only the constraints and options offered by the validation builder.',
+                    [],
+                    'Admin.Advparameters.Notification'
+                ),
+                ExtraPropertyRegistrationFailureException::UNKNOWN_SHOP => $this->trans(
+                    'The store association contains a store that does not exist. Refresh the page and try again.',
+                    [],
+                    'Admin.Advparameters.Notification'
+                ),
+                ExtraPropertyRegistrationFailureException::STORAGE_CONFLICT => $this->trans(
+                    'Another extra property already stores its values in the same database column. Use the same entity name as the existing property, or a different property name.',
+                    [],
+                    'Admin.Advparameters.Notification'
+                ),
+                ExtraPropertyRegistrationFailureException::INVALID_DEFAULT_VALUE => $this->trans(
+                    'The default value does not match the field type (or is not one of the allowed choice values).',
+                    [],
+                    'Admin.Advparameters.Notification'
+                ),
             ],
             InvalidExtraPropertyDefinitionException::class => $this->trans(
+                'The submitted extra property definition is invalid. Check the form values and try again.',
+                [],
+                'Admin.Advparameters.Notification'
+            ),
+            // The Validation card validates every row before the command is built, so this is a
+            // safety net for programmatic or hook-mutated submissions.
+            ExtraPropertyConstraintException::class => $this->trans(
                 'The submitted extra property definition is invalid. Check the form values and try again.',
                 [],
                 'Admin.Advparameters.Notification'

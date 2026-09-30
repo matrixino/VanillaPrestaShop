@@ -181,7 +181,7 @@ class GetFileControllerCore extends FrontController
                     if (!Validate::isLoadedObject($order)) {
                         $this->displayCustomError('Invalid key.');
                     }
-                    if ($order->secure_key != Tools::getValue('secure_key')) {
+                    if (!hash_equals((string) $order->secure_key, (string) Tools::getValue('secure_key'))) {
                         $this->displayCustomError('Invalid key.');
                     }
                 } else {
@@ -291,7 +291,7 @@ class GetFileControllerCore extends FrontController
             @finfo_close($finfo);
         } elseif (function_exists('mime_content_type')) {
             $mimeType = @mime_content_type($file);
-        } elseif (function_exists('exec')) {
+        } elseif (function_exists('exec') && function_exists('escapeshellarg')) {
             $mimeType = trim(@exec('file -b --mime-type ' . escapeshellarg($file)));
             if (!$mimeType) {
                 $mimeType = trim(@exec('file --mime ' . escapeshellarg($file)));

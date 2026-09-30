@@ -251,7 +251,7 @@ abstract class PaymentModuleCore extends Module
             throw new PrestaShopException($error);
         }
 
-        if ($secure_key !== false && $secure_key != $this->context->cart->secure_key) {
+        if ($secure_key !== false && !hash_equals((string) $this->context->cart->secure_key, (string) $secure_key)) {
             PrestaShopLogger::addLog('PaymentModule::validateOrder - Secure key does not match', 3, null, 'Cart', (int) $id_cart, true);
             throw new PrestaShopException('Error processing order. Secure key does not match.');
         }
@@ -659,7 +659,7 @@ abstract class PaymentModuleCore extends Module
                 $orderLanguage = new Language((int) $order->id_lang);
 
                 // Join PDF invoice
-                if ((int) Configuration::get('PS_INVOICE') && $order_status->invoice && $order->invoice_number) {
+                if ((int) Configuration::get('PS_INVOICE') && $order_status->pdf_invoice && $order->invoice_number) {
                     $currentLanguage = $this->context->language;
                     $this->context->language = $orderLanguage;
                     $this->context->getTranslator()->setLocale($orderLanguage->locale);

@@ -17,7 +17,7 @@ use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertySqlIndex;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyType;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Form\AssociationRowPresenter;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Form\ConstraintRowPresenter;
-use PrestaShop\PrestaShop\Core\ExtraProperty\Validation\ExtraPropertyConstraintMapper;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyValueCaster;
 
 /**
  * Provides form data for the extra property definition create / edit form.
@@ -53,17 +53,22 @@ final class ExtraPropertyDefinitionFormDataProvider implements FormDataProviderI
                 'entity_name' => $definition->getEntityName(),
                 'property_name' => $definition->getPropertyName(),
                 'module_name' => $definition->getModuleName(),
-                'type' => $definition->getFieldType()->value,
-                'scope' => $definition->getFieldScope()->value,
+                'type' => $definition->getType()->value,
+                'scope' => $definition->getScope()->value,
                 'sql_index' => $definition->getSqlIndex()->value,
                 'nullable' => $definition->isNullable(),
                 'size' => $definition->getSize(),
-                'default_value' => $definition->getDefaultValue(),
+                // The BO field is a TextType: stringify with the shared canonical mapping
+                // (BOOL false → '0', never the empty string a naive cast would produce).
+                'default_value' => ExtraPropertyValueCaster::castDefaultValueForDb($definition->getType(), $definition->getDefaultValue()),
                 'enum_values' => null !== $definition->getEnumValues() ? implode("\n", $definition->getEnumValues()) : null,
             ],
             'visibility' => [
                 'display_front' => $definition->isDisplayFront(),
                 'required' => $definition->isRequired(),
+                // Null (no explicit restriction) renders as an empty selection: the field's
+                // help text explains the fallback ("all stores" / the module's stores).
+                'shop_association' => $definition->getAssociatedShopIds() ?? [],
             ],
             'labels' => [
                 'label_wording' => $definition->getLabelWording(),
@@ -72,7 +77,7 @@ final class ExtraPropertyDefinitionFormDataProvider implements FormDataProviderI
                 'description_domain' => $definition->getDescriptionDomain(),
             ],
             'validation' => [
-                'constraints' => ConstraintRowPresenter::rows(ExtraPropertyConstraintMapper::toNames($definition->getConstraints())),
+                'constraints' => ConstraintRowPresenter::rows($definition->getConstraints()),
             ],
             'advanced' => [
                 'form_type' => $definition->getFormType(),
@@ -101,6 +106,9 @@ final class ExtraPropertyDefinitionFormDataProvider implements FormDataProviderI
             'visibility' => [
                 'display_front' => false,
                 'required' => false,
+                // Deliberately empty (= no restriction), NOT the context shop ids: a new
+                // definition must not be silently restricted to the creating context.
+                'shop_association' => [],
             ],
         ];
     }

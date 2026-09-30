@@ -274,22 +274,48 @@ class ContextCore
     }
 
     /**
-     * Returns a ShopConstraint for the current FO shop context.
+     * Returns a ShopConstraint for the current legacy shop context.
      *
-     * In front-office, a context is always associated with one specific shop.
-     * Useful as a typed alternative to passing $this->shop->id as a raw integer.
+     * Mirrors Shop::getContext(): in the back office the multistore header can select a
+     * shop group or all shops, and this constraint reflects that selection. In front
+     * office the context is always one specific shop, so the single-shop constraint is
+     * returned there — a typed alternative to passing $this->shop->id as a raw integer.
      */
     public function getShopConstraint(): ShopConstraint
     {
+        if (Shop::getContext() === Shop::CONTEXT_ALL) {
+            return ShopConstraint::allShops();
+        }
+
+        // Shop::setContext(CONTEXT_GROUP, null) is legal and leaves the context group id
+        // at 0, which ShopGroupId rejects: only build a group constraint from a real id
+        // so this getter never throws.
+        if (Shop::getContext() === Shop::CONTEXT_GROUP && (int) Shop::getContextShopGroupID() > 0) {
+            return ShopConstraint::shopGroup((int) Shop::getContextShopGroupID());
+        }
+
         return ShopConstraint::shop((int) $this->shop->id);
     }
 
     /**
-     * Returns true when the current request is a front-office one.
+     * Returns true when the current execution is a front-office one — or cannot be proven
+     * NOT to be one.
      *
-     * Based on the context controller type ('front'/'modulefront'). When the controller
-     * is not (yet) available, falls back to the _PS_FRONT_DIR_ constant, which is only
-     * defined by the FO entry point.
+     * Based on the context controller type ('front'/'modulefront') when a legacy controller
+     * exists. Without one, only a POSITIVELY identified non-front execution is exempt: the
+     * back-office and Admin API applications declare their app id (_PS_APP_ID_) in their
+     * front controller, and the CLI has no HTTP request. Any other entry point — a module's
+     * standalone script requiring config.inc.php, the legacy webservice dispatcher, a cron —
+     * is treated as front office. That is the fail-closed default a confidentiality gate
+     * needs: a field hidden from the front office must never leak because a script was not
+     * dispatched by index.php.
+     *
+     * Deliberate asymmetry: the Admin API is exempted but the legacy webservice
+     * (webservice/dispatcher.php, which defines _PS_API_IN_USE_ and no app id) is not, although
+     * it is an authenticated admin surface too. The webservice never exposes extra properties
+     * itself, so failing closed there only affects module code reading $object->extra_properties
+     * during a webservice request — a behaviour change from 9.1 that belongs in the migration
+     * notes. Exempting it would mean also accepting defined('_PS_API_IN_USE_') below.
      *
      * Used to decide whether extra properties must be filtered on displayFront
      * (see ExtraPropertiesBag::createForEntity()).
@@ -299,10 +325,21 @@ class ContextCore
     public static function isFrontOfficeContext(): bool
     {
         $controllerType = static::getContext()->controller->controller_type ?? null;
+        if (null !== $controllerType) {
+            return in_array($controllerType, ['front', 'modulefront'], true);
+        }
 
-        return null !== $controllerType
-            ? in_array($controllerType, ['front', 'modulefront'], true)
-            : defined('_PS_FRONT_DIR_');
+        if (PHP_SAPI === 'cli') {
+            return false;
+        }
+
+        // AdminKernel::APP_ID and AdminAPIKernel::APP_ID, compared as literals so this gate
+        // never depends on autoloading a kernel class from a legacy entry point.
+        if (defined('_PS_APP_ID_') && in_array(_PS_APP_ID_, ['admin', 'admin-api'], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

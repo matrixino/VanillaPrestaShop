@@ -115,7 +115,7 @@ final class CartQueryBuilder extends AbstractDoctrineQueryBuilder
             ->createQueryBuilder()
             ->select('DISTINCT co.`id_guest`')
             ->from($this->dbPrefix . 'connections', 'co')
-            ->where('TIME_TO_SEC(TIMEDIFF(\'' . pSQL(date('Y-m-d H:i:00', time())) . '\', `date_add`)) < ' . self::CUSTOMER_ONLINE_TIME);
+            ->where('co.`date_add` > DATE_SUB(\'' . pSQL(date('Y-m-d H:i:00', time())) . '\', INTERVAL ' . self::CUSTOMER_ONLINE_TIME . ' SECOND)');
 
         $qb = $this->connection
             ->createQueryBuilder()
@@ -241,6 +241,8 @@ final class CartQueryBuilder extends AbstractDoctrineQueryBuilder
                 continue;
             }
 
+            // Last possible case
+            // @phpstan-ignore identical.alwaysTrue
             if ('customer_online' === $filterName) {
                 if ($filterValue) {
                     $qb->andWhere('co.id_guest > 0');
@@ -250,8 +252,7 @@ final class CartQueryBuilder extends AbstractDoctrineQueryBuilder
                 continue;
             }
 
-            $qb->andWhere('c.' . $filterName . ' = :' . $filterName);
-            $qb->setParameter($filterName, $filterValue);
+            // Unreachable. All possible values have been handled.
         }
     }
 }

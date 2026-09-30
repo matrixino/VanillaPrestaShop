@@ -40,6 +40,8 @@ use TaxRulesGroup;
 
 /**
  * Class ProductImportHandler is responsible for product import.
+ *
+ * @deprecated since 9.3, will be removed in the next major version - replaced by the import engine importers, see \PrestaShop\PrestaShop\Core\Import\Engine\EntityImporter\ProductImporter
  */
 final class ProductImportHandler extends AbstractImportHandler
 {
@@ -433,20 +435,18 @@ final class ProductImportHandler extends AbstractImportHandler
         }
         $productShops = explode($multipleValueSeparator, $product->shop);
 
-        if (is_array($productShops)) {
-            foreach ($productShops as $shop) {
-                if (!empty($shop)) {
-                    $shop = is_numeric($shop) ? $shop : Shop::getIdByName($shop);
+        foreach ($productShops as $shop) {
+            if (!empty($shop)) {
+                $shop = is_numeric($shop) ? $shop : Shop::getIdByName($shop);
 
-                    if (!in_array($shop, $this->allShopIds)) {
-                        $this->addEntityWarning(
-                            $this->translator->trans('Shop is not valid', [], 'Admin.Advparameters.Notification'),
-                            $productName,
-                            $product->id
-                        );
-                    } else {
-                        $product->id_shop_list[] = $shop;
-                    }
+                if (!in_array($shop, $this->allShopIds)) {
+                    $this->addEntityWarning(
+                        $this->translator->trans('Shop is not valid', [], 'Admin.Advparameters.Notification'),
+                        $productName,
+                        $product->id
+                    );
+                } else {
+                    $product->id_shop_list[] = $shop;
                 }
             }
         }
@@ -845,7 +845,8 @@ final class ProductImportHandler extends AbstractImportHandler
                     $entityFields,
                     'file_url'
                 );
-                $this->tools->copy($virtualProductFileUrl, $downloadDir . $productDownload->filename);
+                // Untrusted URL (import): use the SSRF-hardened download path.
+                $this->tools->copyFromUntrustedSource($virtualProductFileUrl, $downloadDir . $productDownload->filename);
                 $productDownload->id_product = (int) $product->id;
                 $productDownload->nb_downloadable = (int) $this->fetchDataValueByKey(
                     $dataRow,
@@ -877,7 +878,7 @@ final class ProductImportHandler extends AbstractImportHandler
      */
     private function saveProductSupplier(Product $product)
     {
-        if ($product->id && property_exists($product, 'supplier_reference')) {
+        if ($product->id) {
             $productSupplierId = (int) ProductSupplier::getIdByProductAndSupplier(
                 (int) $product->id,
                 0,

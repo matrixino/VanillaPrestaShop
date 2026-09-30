@@ -13,6 +13,7 @@ use PrestaShop\PrestaShop\Adapter\Feature\MultistoreFeature;
 use PrestaShop\PrestaShop\Core\Context\EmployeeContext;
 use PrestaShop\PrestaShop\Core\Context\ShopContextBuilder;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
+use PrestaShop\PrestaShop\Core\Shop\ShopListResolverInterface;
 use PrestaShopBundle\EventListener\Admin\Context\ShopContextSubscriber;
 use PrestaShopBundle\Routing\LegacyControllerConstants;
 use PrestaShopBundle\Security\Admin\TokenAttributes;
@@ -54,6 +55,7 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
             $this->mockSecurity(),
             $this->mockLegacyContext(),
             $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
         );
         $listener->initShopContext($event);
 
@@ -90,6 +92,7 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
             $this->mockSecurity($expectedShopConstraint),
             $this->mockLegacyContext(),
             $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
         );
         $listener->initShopContext($event);
 
@@ -119,12 +122,61 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
             $this->mockSecurity(),
             $this->mockLegacyContext(),
             $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
         );
         $listener->initShopContext($event);
 
         $expectedShopConstraint = ShopConstraint::allShops();
         $this->assertEquals(self::DEFAULT_SHOP_ID, $this->getPrivateField($shopContextBuilder, 'shopId'));
         $this->assertEquals($expectedShopConstraint, $this->getPrivateField($shopContextBuilder, 'shopConstraint'));
+        $this->assertEquals($expectedShopConstraint, $event->getRequest()->attributes->get('shopConstraint'));
+    }
+
+    /**
+     * The Admin API docs route (api_doc) maps to an invokable controller with no "Class::method"
+     * form. Resolving the shop context for it must not emit an "Undefined array key 1" warning,
+     * which fataled the API documentation when multistore was enabled. See #39468.
+     */
+    public function testMultiShopWithInvokableControllerRouteDoesNotFail(): void
+    {
+        $expectedShopConstraint = ShopConstraint::shop(1);
+        $event = $this->createRequestEvent(new Request());
+
+        $router = $this->createMock(RequestMatcherInterface::class);
+        $router->method('matchRequest')->willReturn(['_controller' => 'Some\\Invokable\\DocsAction']);
+
+        $shopContextBuilder = new ShopContextBuilder(
+            $this->mockShopRepository(1),
+            $this->mockContextStateManager(),
+            $this->mockMultistoreFeature(true),
+        );
+
+        $listener = new ShopContextSubscriber(
+            $shopContextBuilder,
+            $this->mockEmployeeContext(),
+            $this->mockConfiguration(['PS_SHOP_DEFAULT' => self::DEFAULT_SHOP_ID, 'PS_SSL_ENABLED' => self::PS_SSL_ENABLED]),
+            $this->mockMultistoreFeature(true),
+            $router,
+            $this->mockSecurity($expectedShopConstraint),
+            $this->mockLegacyContext(),
+            $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
+        );
+
+        $warnings = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$warnings): bool {
+            $warnings[] = $errstr;
+
+            return true;
+        }, E_WARNING);
+
+        try {
+            $listener->initShopContext($event);
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $warnings, 'Resolving the shop context for an invokable controller must not emit a PHP warning.');
         $this->assertEquals($expectedShopConstraint, $event->getRequest()->attributes->get('shopConstraint'));
     }
 
@@ -216,6 +268,7 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
             $security,
             $legacyContext,
             $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
         );
 
         // Check the initial state of the token attribute
@@ -492,6 +545,7 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
             $this->mockSecurity(),
             $this->mockLegacyContext(),
             $this->createMock(TranslatorInterface::class),
+            $this->mockShopListResolver(),
         );
 
         $event = new AuthenticationSuccessEvent($token);
@@ -533,6 +587,20 @@ class ShopContextSubscriberTest extends ContextEventListenerTestCase
         ;
 
         return $router;
+    }
+
+    /**
+     * Representative-shop stub: a single-shop constraint resolves to its own shop; any
+     * broader scope resolves to the default shop (assumed in scope in these fixtures).
+     */
+    private function mockShopListResolver(): ShopListResolverInterface|MockObject
+    {
+        $resolver = $this->createMock(ShopListResolverInterface::class);
+        $resolver->method('resolveRepresentativeShopId')->willReturnCallback(
+            static fn (ShopConstraint $shopConstraint): int => $shopConstraint->getShopId()?->getValue() ?? self::DEFAULT_SHOP_ID
+        );
+
+        return $resolver;
     }
 
     private function mockMultistoreFeature(bool $multiShopEnabled): MultistoreFeature|MockObject

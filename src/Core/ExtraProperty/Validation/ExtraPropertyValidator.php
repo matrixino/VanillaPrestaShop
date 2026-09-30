@@ -9,9 +9,12 @@ declare(strict_types=1);
 
 namespace PrestaShop\PrestaShop\Core\ExtraProperty\Validation;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinition;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionCollection;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyScope;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyType;
 use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -67,13 +70,144 @@ class ExtraPropertyValidator implements ExtraPropertyValidatorInterface
     }
 
     /**
+     * Whether a text controlled by a definition author (label/description wording, enum
+     * literals, choice labels, constraint messages) is safe to display to other employees:
+     * no "<", so it can never open a tag whatever the rendering sink does, and no control
+     * character other than tab/newline.
+     *
+     * The ONE rule for author-controlled display texts, enforced at construction of the
+     * value object — i.e. both when a definition is registered (write, refused with an
+     * error) and when it is hydrated from a registry row (read, the row is skipped and
+     * logged) — so a value written straight into the table cannot bypass it.
+     *
+     * Static (not part of the interface): called by the ExtraPropertyDefinition constructor
+     * and the constraint DSL parser, which cannot receive injected services.
+     */
+    public static function isSafeDisplayText(string $value): bool
+    {
+        return 1 !== preg_match('/[<\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value);
+    }
+
+    /**
+     * Whether a value is a well-formed PrestaShop translation domain: 2 or 3 dot-separated
+     * PascalCase segments ("Admin.Actions", "Modules.Demoextrafield.Admin"). Anything that
+     * could reach another subsystem is refused — the "+intl-icu" suffix (which would route
+     * the wording through the ICU formatter, where a malformed pattern throws on every
+     * render), path or separator characters, whitespace.
+     *
+     * Static (not part of the interface): called by the ExtraPropertyDefinition constructor.
+     */
+    public static function isTranslationDomain(string $value): bool
+    {
+        return 1 === preg_match('/^[A-Z][A-Za-z0-9_]*(?:\.[A-Z][A-Za-z0-9_]*){1,2}$/', $value);
+    }
+
+    /**
+     * Whether a value controlled by a definition author may be used as a link target: an
+     * absolute http(s) URL or a root-relative path. Attribute escaping does not neutralise a
+     * "javascript:" or "data:" scheme inside href, so the scheme is what is checked. Whitespace
+     * and quote characters are refused, and so is the backslash: browsers normalise "\" to "/"
+     * in URLs with a special scheme, so "/\evil.example" would navigate off-site exactly like the
+     * protocol-relative "//evil.example" this rule refuses.
+     *
+     * Static (not part of the interface): called by ExtraPropertyFormOptionsPolicy.
+     */
+    public static function isSafeUrl(string $value): bool
+    {
+        return 1 === preg_match('#^(?:https?://[^\s"\'<>\\\\]+|/(?![/\\\\])[^\s"\'<>\\\\]*)$#i', $value);
+    }
+
+    /**
+     * The single rule-set for "can this value be stored under the declared type" — shared
+     * by the registry (default values, ExtraPropertyRegistry::isDefaultValueCompatible())
+     * and by validateValue() (every regular write), so what is refused as a default is
+     * refused as a value and vice versa. Values may arrive as native scalars (module code,
+     * Admin API JSON) or as strings (BO form fields) — both spellings of a valid value are
+     * accepted, plus the runtime-only shapes (DateTimeInterface for DATE, an already
+     * decoded structure for JSON). Null and '' always pass: "no value" is the storage
+     * column's concern (nullability) or a declared constraint's (requiredness).
+     *
+     * Static (not part of the interface): also called by the registry, which validates
+     * defaults with its own dedicated exception.
+     */
+    public static function isValueCompatible(ExtraPropertyType $type, mixed $value, ?array $enumValues = null): bool
+    {
+        if (null === $value || '' === $value) {
+            return true;
+        }
+
+        return match ($type) {
+            ExtraPropertyType::INT => is_int($value)
+                || (is_string($value) && 1 === preg_match('/^-?\d+$/', $value)),
+            ExtraPropertyType::FLOAT => is_int($value) || is_float($value)
+                || (is_string($value) && is_numeric($value)),
+            ExtraPropertyType::BOOL => is_bool($value) || in_array($value, [0, 1, '0', '1'], true),
+            // Only literal datetimes: relative wordings ('tomorrow') are never interpreted,
+            // neither as defaults nor as stored values.
+            ExtraPropertyType::DATE => $value instanceof DateTimeInterface
+                || (is_string($value) && self::isLiteralDateTime($value)),
+            ExtraPropertyType::CHOICE => null === $enumValues
+                || (is_scalar($value) && in_array((string) $value, $enumValues, true)),
+            ExtraPropertyType::JSON => is_array($value)
+                || (is_string($value) && (null !== json_decode($value) || 'null' === trim($value))),
+            default => true,
+        };
+    }
+
+    /**
+     * A literal 'Y-m-d' or 'Y-m-d H:i:s' datetime. The round-trip format comparison also
+     * rejects impossible dates that createFromFormat() would silently roll over
+     * ('2026-02-31' parses as March 3rd).
+     */
+    protected static function isLiteralDateTime(string $value): bool
+    {
+        foreach (['Y-m-d H:i:s', 'Y-m-d'] as $format) {
+            $date = DateTimeImmutable::createFromFormat($format, $value);
+            if (false !== $date && $date->format($format) === $value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function validateValue(ExtraPropertyDefinition $definition, mixed $value): ConstraintViolationListInterface
     {
+        $declaredViolations = $this->validateDeclaredConstraints($definition, $value);
+        if (0 !== $declaredViolations->count()) {
+            return $declaredViolations;
+        }
+
+        // Implicit minimal type validation, applied even when no constraint is declared:
+        // the same isValueCompatible() rules the registry applies to default values, so a
+        // value that could not be a default is not storable either (no silent coercion —
+        // 'abc' on an INT used to be stored as 0, 'tomorrow' on a DATE was interpreted).
+        // Runs AFTER the declared constraints so their messages keep priority (a module's
+        // Assert\Type('bool') reports its own wording, not the generic type message).
+        return $this->validateTypeCompatibility($definition, $value);
+    }
+
+    /**
+     * Validates the value against the definition's DECLARED Symfony constraints only —
+     * the historical opt-in behaviour; validateValue() adds the implicit type safety net.
+     */
+    protected function validateDeclaredConstraints(ExtraPropertyDefinition $definition, mixed $value): ConstraintViolationListInterface
+    {
         $constraints = $definition->getConstraints() ?? [];
         if ([] === $constraints) {
             return new ConstraintViolationList();
+        }
+
+        // JSON values may legitimately arrive as decoded structures (API payloads, module
+        // code writing arrays): constraints like Assert\Json expect the ENCODED string —
+        // the storage form — so normalize that one case before validating. Other types are
+        // validated as submitted (a bool stays a bool for Assert\Type('bool'); the writer
+        // applies its own storage coercion after validation).
+        if (ExtraPropertyType::JSON === $definition->getType() && !is_string($value) && null !== $value) {
+            $value = json_encode($value);
         }
 
         // Edge case: an ObjectModel loaded WITH a langId exposes a LANG value as a single scalar (one language),
@@ -121,6 +255,27 @@ class ExtraPropertyValidator implements ExtraPropertyValidatorInterface
         }
 
         return $violations;
+    }
+
+    /**
+     * Applies isValueCompatible() to the submitted value, through its constraint form
+     * (ExtraPropertyTypeCompatibility — also the one the form builder modifier attaches to
+     * every extra field, so all write paths share message and rules). The LANG/SHOP array
+     * shape ([id_lang|locale => value] / [id_shop => value]) is checked leaf by leaf via
+     * Assert\All, each violation tagged with its "[<key>]" sub-path — except for JSON,
+     * whose array shape IS the (decoded) value. A scalar (COMMON/SHOP scalar, or the
+     * single-language value an ObjectModel loaded with a langId exposes) is checked
+     * directly.
+     */
+    protected function validateTypeCompatibility(ExtraPropertyDefinition $definition, mixed $value): ConstraintViolationListInterface
+    {
+        $typeCompatibility = new ExtraPropertyTypeCompatibility($definition->getType(), $definition->getEnumValues());
+
+        if (is_array($value) && ExtraPropertyType::JSON !== $definition->getType()) {
+            return $this->validator->validate($value, [new All([$typeCompatibility])]);
+        }
+
+        return $this->validator->validate($value, [$typeCompatibility]);
     }
 
     /**

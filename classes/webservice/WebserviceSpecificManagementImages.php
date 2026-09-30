@@ -995,7 +995,7 @@ class WebserviceSpecificManagementImagesCore implements WebserviceSpecificManage
 
                 break;
         }
-        imagedestroy($dest_image);
+
         if (!$imaged) {
             throw new WebserviceException(sprintf('Unable to write the image "%s".', str_replace(_PS_ROOT_DIR_, '[SHOP_ROOT_DIR]', $new_path)), [70, 500]);
         }
@@ -1054,7 +1054,7 @@ class WebserviceSpecificManagementImagesCore implements WebserviceSpecificManage
                     finfo_close($finfo);
                 } elseif (Tools::isCallable('mime_content_type')) {
                     $mime_type = mime_content_type($file['tmp_name']);
-                } elseif (Tools::isCallable('exec')) {
+                } elseif (Tools::isCallable('exec') && Tools::isCallable('escapeshellarg')) {
                     $mime_type = trim(exec('file -b --mime-type ' . escapeshellarg($file['tmp_name'])));
                 }
                 if (empty($mime_type) || $mime_type == 'regular file') {

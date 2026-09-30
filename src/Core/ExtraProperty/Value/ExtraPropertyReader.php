@@ -13,7 +13,10 @@ use Doctrine\DBAL\Connection;
 use PrestaShop\PrestaShop\Core\Domain\Shop\ValueObject\ShopConstraint;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionCollection;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepositoryInterface;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilterInterface;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyScope;
+use PrestaShop\PrestaShop\Core\Shop\ShopListResolverInterface;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -30,6 +33,9 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
         protected readonly ExtraPropertyDefinitionRepositoryInterface $repository,
         protected readonly Connection $connection,
         protected readonly string $prefix,
+        protected readonly ShopListResolverInterface $shopListResolver,
+        protected readonly ExtraPropertyDefinitionShopFilterInterface $definitionShopFilter,
+        protected readonly LoggerInterface $logger,
     ) {
     }
 
@@ -37,12 +43,11 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
      * {@inheritdoc}
      */
     public function getExtraProperties(
-        string $entityName,
+        string $tableName,
         string $primaryKeyName,
         int $entityId,
         ?int $langId,
         ShopConstraint $shopConstraint,
-        bool $isLangMultishop = false,
         ?ExtraPropertyDefinitionCollection $definitions = null,
     ): array {
         if ($entityId <= 0) {
@@ -50,12 +55,11 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
         }
 
         return $this->getMultipleExtraProperties(
-            $entityName,
+            $tableName,
             $primaryKeyName,
             [$entityId],
             $langId,
             $shopConstraint,
-            $isLangMultishop,
             $definitions,
         )[$entityId] ?? [];
     }
@@ -64,12 +68,11 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
      * {@inheritdoc}
      */
     public function getMultipleExtraProperties(
-        string $entityName,
+        string $tableName,
         string $primaryKeyName,
         array $entityIds,
         ?int $langId,
         ShopConstraint $shopConstraint,
-        bool $isLangMultishop = false,
         ?ExtraPropertyDefinitionCollection $definitions = null,
     ): array {
         $entityIds = array_values(array_unique(array_filter(
@@ -80,12 +83,19 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
             return [];
         }
 
-        $allDefinitions = $definitions ?? $this->repository->getAllDefinitions()->filterByEntity($entityName);
+        $allDefinitions = $definitions ?? $this->repository->getAllDefinitions()->filterByTableName($tableName);
+        // Shop availability is enforced here unconditionally — injected collections included:
+        // the filter is idempotent, and a definition not associated to the requested scope
+        // must never surface a value, whatever the caller forgot.
+        $allDefinitions = $this->definitionShopFilter->filterByShopConstraint($allDefinitions, $shopConstraint);
         if ($allDefinitions->isEmpty()) {
             return [];
         }
 
-        $shopId = $shopConstraint->isSingleShopContext() ? $shopConstraint->getShopId()->getValue() : null;
+        // Per-shop values are always read as a single scalar: a non-single constraint
+        // (shop group, all shops, collection) is resolved to its deterministic
+        // representative shop — fan-out writes keep the scope's shops uniform anyway.
+        $shopId = $this->shopListResolver->resolveRepresentativeShopId($shopConstraint);
 
         $propertiesByEntity = array_fill_keys($entityIds, []);
 
@@ -94,7 +104,7 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
             if ($scoped->isEmpty()) {
                 continue;
             }
-            foreach ($this->hydrateExtraPropertiesScope($primaryKeyName, $entityIds, $scope, $scoped, $langId, $shopId, $isLangMultishop) as $entityId => $propertiesByModule) {
+            foreach ($this->hydrateExtraPropertiesScope($primaryKeyName, $entityIds, $scope, $scoped, $langId, $shopId) as $entityId => $propertiesByModule) {
                 $propertiesByEntity[$entityId] = array_replace_recursive($propertiesByEntity[$entityId] ?? [], $propertiesByModule);
             }
         }
@@ -123,11 +133,13 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
         ExtraPropertyScope $fieldScope,
         ExtraPropertyDefinitionCollection $definitions,
         ?int $langId,
-        ?int $shopId,
-        bool $isLangMultishop,
+        int $shopId,
     ): array {
         $groupByLang = ExtraPropertyScope::LANG === $fieldScope && null === $langId;
         $extraTableName = $this->prefix . $definitions->first()->getExtraTableName();
+        // Whether this scope's table carries an id_shop column — schema-derived per entity:
+        // SHOP tables always do, LANG tables only for multilang-multishop entities.
+        $isMultiShop = $definitions->first()->isMultiShop();
 
         // Build a map from DB column name to [module_key, property_name, cast inputs] and the default per property.
         $columnToPropertyMap = [];
@@ -135,9 +147,19 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
         foreach ($definitions as $definition) {
             $propertyName = $definition->getPropertyName();
             $moduleName = $definition->getNormalizedModuleKey();
+            // A missing value row surfaces the definition's declared default — "default"
+            // means what you get until a value is stored, on every read surface (FO, BO
+            // entity form/grid, Admin API). Without a declared default: null, or false
+            // for a NOT NULL BOOL. LANG grouping stays [] (a single scalar default has
+            // no per-language meaning). JSON defaults are stored as strings — decode so
+            // the shape matches stored-value reads.
             $defaultsByModule[$moduleName][$propertyName] = $groupByLang
                 ? []
-                : ExtraPropertyValueCaster::castFromDb($definition->getType(), null, $definition->isNullable());
+                : ExtraPropertyValueCaster::castFromDb(
+                    $definition->getType(),
+                    ExtraPropertyValueCaster::castDefaultValueForDb($definition->getType(), $definition->getDefaultValue()),
+                    $definition->isNullable()
+                );
 
             $columnName = $definition->getStorageColumnName();
             $columnToPropertyMap[$columnName] = [
@@ -155,10 +177,7 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
         if (ExtraPropertyScope::LANG === $fieldScope && null !== $langId && $langId <= 0) {
             return $result;
         }
-        if (ExtraPropertyScope::SHOP === $fieldScope && null !== $shopId && $shopId <= 0) {
-            return $result;
-        }
-        if (ExtraPropertyScope::LANG === $fieldScope && $isLangMultishop && null !== $shopId && $shopId <= 0) {
+        if ($isMultiShop && $shopId <= 0) {
             return $result;
         }
 
@@ -182,11 +201,9 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
             } else {
                 $qb->andWhere('extra.id_lang = :langId')->setParameter('langId', $langId);
             }
-            if ($isLangMultishop && null !== $shopId) {
-                $qb->andWhere('extra.id_shop = :shopId')->setParameter('shopId', $shopId);
-            }
-        } elseif (ExtraPropertyScope::SHOP === $fieldScope && null !== $shopId) {
-            // Shop scope is always a single scalar value for the given shop constraint.
+        }
+        if ($isMultiShop) {
+            // Per-shop values are always a single scalar for the resolved shop.
             $qb->andWhere('extra.id_shop = :shopId')->setParameter('shopId', $shopId);
         }
 
@@ -194,7 +211,14 @@ class ExtraPropertyReader implements ExtraPropertyReaderInterface
 
         try {
             $rows = $qb->executeQuery()->fetchAllAssociative();
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            // Reads must never break the page that displays them (FO especially), but a
+            // failing query is a schema/definition bug: trace it instead of hiding it.
+            $this->logger->error(
+                sprintf('Extra property read failed on table %s: %s', $extraTableName, $e->getMessage()),
+                ['exception' => $e]
+            );
+
             return $result;
         }
 

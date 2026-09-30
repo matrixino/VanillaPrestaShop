@@ -11,11 +11,13 @@ PrestaShop is an open-source e-commerce platform built on Symfony. It follows a 
 
 ## Branching & Versioning
 
-PrestaShop follows [SemVer](https://semver.org/). Active branches merge upward: `9.1.x` → `develop`. Target the lowest applicable branch.
+PrestaShop follows [SemVer](https://semver.org/). Active branches merge upward: `9.2.x` → `develop`. Target the lowest applicable branch.
 
-- **`9.1.x`**: Current stable (patch releases). Bug fixes and minor improvements only — no new features.
-- **`develop`**: Next minor (9.2.0). New features and improvements go here. No breaking changes.
+- **`9.2.x`**: Next release (9.2.0). Bug fixes and improvements go here.
+- **`develop`**: Next minor (9.3.0). New features go here. No breaking changes.
 - **`8.2.x`**: LTS, security fixes only. Rarely modified.
+
+`9.1.x` was closed and deleted once 9.1.5 was finalised, so nothing targets it any more.
 
 Breaking changes are only allowed in major versions. See [ADR 0017](https://github.com/PrestaShop/adr/blob/master/0017-backward-compatibility-promise.md) for the backward compatibility promise. More architecture decisions at https://github.com/PrestaShop/adr.
 
@@ -41,8 +43,11 @@ Breaking changes are only allowed in major versions. See [ADR 0017](https://gith
 - No ObjectModel in new code — use Doctrine entities or CQRS commands
 - All services defined in YAML; no `new` in controllers
 - No `Db::getInstance()` in new code — use Doctrine repositories
+- New repository/DBAL queries use the QueryBuilder (never string-built SQL, whatever the surrounding file's historical style); single-row lookups add `setMaxResults(1)`. When the matched column has no unique constraint, prefer returning ALL matches (`fetchFirstColumn()` + `ORDER BY <pk> ASC`) so the caller can detect ambiguity instead of silently picking the oldest row
 - No business logic in controllers — delegate to Handlers
 - Catch specific domain exceptions, not generic `\Exception`
+- A UUID primary key column is named `<entity>_uuid` (e.g. `import_job_uuid`), stored as `char(36)` and human-readable — the `id_` prefix signals the integer convention and misleads on a UUID, and the hand-written install schema is read directly by developers
+- Keep comments and docblocks minimal: never restate what the code says, and prefer making the code self-explanatory. Comment only where real complexity remains, and then explain the *why* in as few words as possible
 - Run `php vendor/bin/php-cs-fixer fix` to apply coding style (config: `.php-cs-fixer.dist.php`)
 - Run `php vendor/bin/phpstan analyse` for static analysis (config: `phpstan.neon.dist`)
 
@@ -53,6 +58,7 @@ Breaking changes are only allowed in major versions. See [ADR 0017](https://gith
 - **Handlers** — implement logic; never call other handlers (compose at controller level)
 - Handler interfaces in `src/Core/Domain/{Domain}/CommandHandler|QueryHandler/`
 - Concrete implementations in `src/Adapter/{Domain}/CommandHandler|QueryHandler/`
+- An identity value object wrapping a UUID is named `<Entity>Uuid` (e.g. `ImportJobUuid`), never `<Entity>Id`: the `Id` names wrap an auto-increment key and validate "positive integer", a UUID is an externally generated token with a different rule and no ordering guarantee. The name carries through constructor parameters, getters, DTO fields and repository lookups
 
 ## Testing
 
@@ -73,7 +79,7 @@ Common slips unrelated to the feature itself — check before pushing:
 - **No IDE / local config files** (`.idea/`, editor settings) and no stray blank-line or missing-end-of-line changes.
 - **Keep lists alphabetically sorted** (interface members, imports where applicable, enum-like lists) — not all of this is caught by php-cs-fixer.
 - **Squash noise commits** (review fixups, reverts) so history stays readable.
-- **Target the lowest applicable branch** (`9.1.x` for bug fixes, `develop` for features) — see Branching & Versioning above.
+- **Target the lowest applicable branch** (`9.2.x` for bug fixes, `develop` for features) — see Branching & Versioning above.
 
 ## Skills
 

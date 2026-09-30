@@ -244,11 +244,13 @@ class CartCore extends ObjectModel
 
     public function resetProductRelatedStaticCache()
     {
-        if (isset(self::$_nbProducts[$this->id])) {
-            unset(self::$_nbProducts[$this->id]);
+        $cacheKey = (int) $this->id;
+
+        if (isset(self::$_nbProducts[$cacheKey])) {
+            unset(self::$_nbProducts[$cacheKey]);
         }
-        if (isset(self::$_totalWeight[$this->id])) {
-            unset(self::$_totalWeight[$this->id]);
+        if (isset(self::$_totalWeight[$cacheKey])) {
+            unset(self::$_totalWeight[$cacheKey]);
         }
         $this->_products = null;
         $this->_products_with_separated_gifts = null;
@@ -1381,8 +1383,8 @@ class CartCore extends ObjectModel
      */
     public static function getNbProducts($id)
     {
-        // Must be strictly compared to NULL, or else an empty cart will bypass the cache and add dozens of queries
-        if (isset(self::$_nbProducts[$id]) && self::$_nbProducts[$id] !== null) {
+        // Must be strictly compared to NULL (done by isset()), or else an empty cart will bypass the cache and add dozens of queries
+        if (isset(self::$_nbProducts[$id])) {
             return self::$_nbProducts[$id];
         }
 
@@ -2650,7 +2652,8 @@ class CartCore extends ObjectModel
                 // With PS_ATCP_SHIPWRAP, wrapping fee is by default tax included
                 // so nothing to do here.
             } else {
-                if (!isset($address[$this->id])) {
+                $cacheKey = (int) $this->id;
+                if (!isset($address[$cacheKey])) {
                     // If no address ID was provided, we use the cart tax address ID
                     if ($id_address === null) {
                         $id_address = (int) $this->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
@@ -2663,13 +2666,13 @@ class CartCore extends ObjectModel
                      * again, but without any address specified.
                      */
                     try {
-                        $address[$this->id] = Address::initialize($id_address);
+                        $address[$cacheKey] = Address::initialize($id_address);
                     } catch (Exception $e) {
-                        $address[$this->id] = Address::initialize();
+                        $address[$cacheKey] = Address::initialize();
                     }
                 }
 
-                $tax_manager = TaxManagerFactory::getManager($address[$this->id], (int) Configuration::get('PS_GIFT_WRAPPING_TAX_RULES_GROUP'));
+                $tax_manager = TaxManagerFactory::getManager($address[$cacheKey], (int) Configuration::get('PS_GIFT_WRAPPING_TAX_RULES_GROUP'));
                 $tax_calculator = $tax_manager->getTaxCalculator();
                 $wrapping_fees = $tax_calculator->addTaxes($wrapping_fees);
             }
@@ -2692,14 +2695,16 @@ class CartCore extends ObjectModel
      */
     public function getNbOfPackages()
     {
-        if (!isset(static::$cacheNbPackages[$this->id])) {
-            static::$cacheNbPackages[$this->id] = 0;
+        $cacheKey = (int) $this->id . '_' . (int) $this->id_address_delivery;
+
+        if (!isset(static::$cacheNbPackages[$cacheKey])) {
+            static::$cacheNbPackages[$cacheKey] = 0;
             foreach ($this->getPackageList() as $by_address) {
-                static::$cacheNbPackages[$this->id] += count($by_address);
+                static::$cacheNbPackages[$cacheKey] += count($by_address);
             }
         }
 
-        return static::$cacheNbPackages[$this->id];
+        return static::$cacheNbPackages[$cacheKey];
     }
 
     /**
@@ -2918,8 +2923,10 @@ class CartCore extends ObjectModel
      */
     public function getDeliveryOptionList(?Country $default_country = null, $flush = false)
     {
-        if (isset(static::$cacheDeliveryOptionList[$this->id]) && !$flush) {
-            return static::$cacheDeliveryOptionList[$this->id];
+        $cacheKey = (int) $this->id . '_' . (int) $this->id_address_delivery;
+
+        if (isset(static::$cacheDeliveryOptionList[$cacheKey]) && !$flush) {
+            return static::$cacheDeliveryOptionList[$cacheKey];
         }
 
         $delivery_option_list = [];
@@ -2974,9 +2981,7 @@ class CartCore extends ObjectModel
                  * We can't just use empty($package['carrier_list']) because it looks like [0 => 0] if there are no carriers.
                  */
                 if (count($package['carrier_list']) == 1 && current($package['carrier_list']) == 0) {
-                    $cache[$this->id] = [];
-
-                    return $cache[$this->id];
+                    return [];
                 }
 
                 $carriers_price[$id_address][$id_package] = [];
@@ -3223,9 +3228,9 @@ class CartCore extends ObjectModel
             ]
         );
 
-        static::$cacheDeliveryOptionList[$this->id] = $delivery_option_list;
+        static::$cacheDeliveryOptionList[$cacheKey] = $delivery_option_list;
 
-        return static::$cacheDeliveryOptionList[$this->id];
+        return static::$cacheDeliveryOptionList[$cacheKey];
     }
 
     /**
@@ -3704,6 +3709,19 @@ class CartCore extends ObjectModel
         // Order total in default currency without fees
         $order_total = $this->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING, $product_list, $id_carrier, false, $keepOrderPrices);
 
+        // When the improved_shipment feature is enabled and this call is scoped to a specific shipment,
+        // $order_total above is actually the value of the shipment contents: keep it as $shipment_total and recompute
+        // $order_total so it always reflects the whole order, as expected by the actionDeliveryPriceByPrice hook.
+        $shipment_total = null;
+        if (null !== $product_list) {
+            $containerFinder = new ContainerFinder(Context::getContext());
+            $featureFlagManager = $containerFinder->getContainer()->get(FeatureFlagStateCheckerInterface::class);
+            if ($featureFlagManager !== null && $featureFlagManager->isEnabled(FeatureFlagSettings::FEATURE_FLAG_IMPROVED_SHIPMENT)) {
+                $shipment_total = $order_total;
+                $order_total = $this->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING, null, $id_carrier, false, $keepOrderPrices);
+            }
+        }
+
         // Start with shipping cost at 0
         $shipping_cost = 0;
 
@@ -3795,7 +3813,7 @@ class CartCore extends ObjectModel
 
                     // If the carrier has price based shipping, remove the carrier if it does not have a compatible range
                     if ($shipping_method == Carrier::SHIPPING_METHOD_PRICE
-                        && Carrier::checkDeliveryPriceByPrice($row['id_carrier'], $order_total, (int) $id_zone, (int) $this->id_currency) === false) {
+                        && Carrier::checkDeliveryPriceByPrice($row['id_carrier'], $order_total, (int) $id_zone, (int) $this->id_currency, $shipment_total) === false) {
                         continue;
                     }
                 }
@@ -3804,7 +3822,7 @@ class CartCore extends ObjectModel
                 if ($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT) {
                     $shipping = $carrier->getDeliveryPriceByWeight($this->getTotalWeight($product_list), (int) $id_zone);
                 } else {
-                    $shipping = $carrier->getDeliveryPriceByPrice($order_total, (int) $id_zone, (int) $this->id_currency);
+                    $shipping = $carrier->getDeliveryPriceByPrice($order_total, (int) $id_zone, (int) $this->id_currency, $shipment_total);
                 }
 
                 // And if it's the first carrier we check OR it's cheaper, we use the ID
@@ -3957,21 +3975,21 @@ class CartCore extends ObjectModel
         if ($carrier->range_behavior == OutOfRangeBehavior::DISABLED) {
             if (($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT && Carrier::checkDeliveryPriceByWeight($carrier->id, $this->getTotalWeight(), (int) $id_zone) === false)
                 || (
-                    $shipping_method == Carrier::SHIPPING_METHOD_PRICE && Carrier::checkDeliveryPriceByPrice($carrier->id, $order_total, $id_zone, (int) $this->id_currency) === false
+                    $shipping_method == Carrier::SHIPPING_METHOD_PRICE && Carrier::checkDeliveryPriceByPrice($carrier->id, $order_total, $id_zone, (int) $this->id_currency, $shipment_total) === false
                 )) {
                 $shipping_cost += 0;
             } else {
                 if ($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT) {
                     $shipping_cost += $carrier->getDeliveryPriceByWeight($this->getTotalWeight($product_list), $id_zone);
                 } else { // by price
-                    $shipping_cost += $carrier->getDeliveryPriceByPrice($order_total, $id_zone, (int) $this->id_currency);
+                    $shipping_cost += $carrier->getDeliveryPriceByPrice($order_total, $id_zone, (int) $this->id_currency, $shipment_total);
                 }
             }
         } else {
             if ($shipping_method == Carrier::SHIPPING_METHOD_WEIGHT) {
                 $shipping_cost += $carrier->getDeliveryPriceByWeight($this->getTotalWeight($product_list), $id_zone);
             } else {
-                $shipping_cost += $carrier->getDeliveryPriceByPrice($order_total, $id_zone, (int) $this->id_currency);
+                $shipping_cost += $carrier->getDeliveryPriceByPrice($order_total, $id_zone, (int) $this->id_currency, $shipment_total);
             }
         }
 
@@ -4083,11 +4101,12 @@ class CartCore extends ObjectModel
         }
 
         // Otherwise, we return the total weight of the cart
-        if (!isset(self::$_totalWeight[$this->id])) {
-            $this->updateProductWeight($this->id);
+        $cacheKey = (int) $this->id;
+        if (!isset(self::$_totalWeight[$cacheKey])) {
+            $this->updateProductWeight($cacheKey);
         }
 
-        return self::$_totalWeight[(int) $this->id];
+        return self::$_totalWeight[$cacheKey];
     }
 
     /**
@@ -4347,17 +4366,18 @@ class CartCore extends ObjectModel
             return false;
         }
 
-        if (!isset(self::$_isVirtualCart[$this->id])) {
+        $cacheKey = (int) $this->id;
+        if (!isset(self::$_isVirtualCart[$cacheKey])) {
             if (!$this->hasProducts()) {
                 $isVirtual = false;
             } else {
                 $isVirtual = !$this->hasRealProducts();
             }
 
-            self::$_isVirtualCart[$this->id] = $isVirtual;
+            self::$_isVirtualCart[$cacheKey] = $isVirtual;
         }
 
-        return self::$_isVirtualCart[$this->id];
+        return self::$_isVirtualCart[$cacheKey];
     }
 
     /**

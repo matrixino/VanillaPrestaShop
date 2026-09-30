@@ -13,19 +13,26 @@ use PrestaShop\PrestaShop\Core\Context\LanguageContext;
 use PrestaShop\PrestaShop\Core\Context\ShopContext;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionCollection;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepositoryInterface;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilterInterface;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyScope;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyType;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyValueCaster;
 use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 /**
  * Adds JOIN/SELECT/FILTER clauses for extra properties in BO Symfony grids.
  *
  * Cardinality invariant: every LEFT JOIN added here covers the FULL primary key of its
- * extra table ({e}_extra: id_e; {e}_extra_lang: id_e + id_lang + id_shop; {e}_extra_shop:
+ * extra table ({e}_extra: id_e; {e}_extra_lang: id_e + id_lang, plus id_shop only on
+ * multilang-multishop entities whose base {e}_lang table carries it; {e}_extra_shop:
  * id_e + id_shop), so each join matches at most one row per existing grid row. Joins
  * enrich rows 1:1 and can never multiply them — pagination and COUNT stay correct without
- * any GROUP BY (which is forbidden in this service).
+ * any GROUP BY (which is forbidden in this service). Whether the extra lang table has an
+ * id_shop column is read from the definition (schema-derived isMultiShop()); referencing
+ * it on an entity like contact, whose lang table has no shop column, would be a hard SQL
+ * error.
  *
  * The shop pin of lang/shop joins is resolved per builder, in order: the base
  * {entity}_lang/{entity}_shop join alias when that builder has one, the builder's own
@@ -51,6 +58,8 @@ class ExtraPropertiesGridQueryBuilderModifier
         protected readonly string $dbPrefix,
         protected readonly LanguageContext $languageContext,
         protected readonly ShopContext $shopContext,
+        protected readonly ExtraPropertyDefinitionShopFilterInterface $definitionShopFilter,
+        protected readonly LoggerInterface $logger,
     ) {
     }
 
@@ -60,20 +69,29 @@ class ExtraPropertiesGridQueryBuilderModifier
         SearchCriteriaInterface $searchCriteria,
         string $gridId,
     ): void {
-        $definitions = $this->repository->getAllDefinitions()->filterByGrid($gridId);
+        $definitions = $this->getShopFilteredDefinitions($gridId);
         if ($definitions->isEmpty()) {
             return;
         }
 
-        $entityName = $definitions->first()->getEntityName();
+        $tableName = $definitions->first()->getTableName();
         $primaryKey = $definitions->first()->getPrimaryKeyName();
 
         // Resolve the main table alias in EACH builder: filters apply to both builders, so
         // when either one cannot take the joins the whole scope is skipped for both
         // (otherwise the count would diverge from the page).
-        $searchMainAlias = $this->resolveMainAlias($searchQueryBuilder, $gridId, $entityName);
-        $countMainAlias = $this->resolveMainAlias($countQueryBuilder, $gridId, $entityName);
+        $searchMainAlias = $this->resolveMainAlias($searchQueryBuilder, $gridId, $tableName);
+        $countMainAlias = $this->resolveMainAlias($countQueryBuilder, $gridId, $tableName);
         if (null === $searchMainAlias || null === $countMainAlias) {
+            // Typical cause: the grid paginates by id first, so its FROM clause holds a
+            // derived table instead of the entity table (e.g. the order grid) — the grid
+            // definition still declares the extra columns, which will render empty. See
+            // issue #42536 for proper id-first-pagination support.
+            $this->logger->warning(
+                'Extra property columns skipped on grid "{gridId}": the "{table}" entity table was not found in the FROM clause of the search or count query (derived-table pagination?). The declared columns will render empty and their filters are inoperative.',
+                ['gridId' => $gridId, 'table' => $tableName]
+            );
+
             return;
         }
 
@@ -84,8 +102,8 @@ class ExtraPropertiesGridQueryBuilderModifier
         ];
 
         $this->applyEntityScope($builders, $searchCriteria, $primaryKey, $definitions->filterByScope(ExtraPropertyScope::COMMON));
-        $this->applyLangScope($builders, $searchCriteria, $entityName, $primaryKey, $definitions->filterByScope(ExtraPropertyScope::LANG));
-        $this->applyShopScope($builders, $searchCriteria, $entityName, $primaryKey, $definitions->filterByScope(ExtraPropertyScope::SHOP));
+        $this->applyLangScope($builders, $searchCriteria, $tableName, $primaryKey, $definitions->filterByScope(ExtraPropertyScope::LANG));
+        $this->applyShopScope($builders, $searchCriteria, $tableName, $primaryKey, $definitions->filterByScope(ExtraPropertyScope::SHOP));
     }
 
     /**
@@ -103,7 +121,7 @@ class ExtraPropertiesGridQueryBuilderModifier
      */
     public function castExtraProperties(array $records, string $gridId): array
     {
-        $definitions = $this->repository->getAllDefinitions()->filterByGrid($gridId);
+        $definitions = $this->getShopFilteredDefinitions($gridId);
         if ($definitions->isEmpty()) {
             return $records;
         }
@@ -112,16 +130,39 @@ class ExtraPropertiesGridQueryBuilderModifier
             foreach ($definitions as $definition) {
                 $selectAlias = $definition->getFieldName();
                 if (array_key_exists($selectAlias, $record)) {
-                    $record[$selectAlias] = ExtraPropertyValueCaster::castFromDb(
+                    $value = ExtraPropertyValueCaster::castFromDb(
                         $definition->getType(),
                         $record[$selectAlias],
                         $definition->isNullable()
                     );
+                    // A LEFT-JOIN miss (no value row yet) shows the declared default, like
+                    // the reader; JSON structures are re-encoded — the grid cell renders text.
+                    if (null === $record[$selectAlias] && null !== $definition->getDefaultValue()) {
+                        $value = $definition->getDefaultValue();
+                    }
+                    if (ExtraPropertyType::JSON === $definition->getType() && is_array($value)) {
+                        $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    }
+                    $record[$selectAlias] = $value;
                 }
             }
         }
 
         return $records;
+    }
+
+    /**
+     * Grid definitions restricted to the current shop context — the shared lookup of
+     * apply(), castExtraProperties() and ExtraPropertiesGridDefinitionModifier, which MUST
+     * all stay in lockstep (same service, same constraint source): a column without its
+     * SELECT — or the reverse — breaks the grid.
+     */
+    protected function getShopFilteredDefinitions(string $gridId): ExtraPropertyDefinitionCollection
+    {
+        return $this->definitionShopFilter->filterByShopConstraint(
+            $this->repository->getAllDefinitions()->filterByGrid($gridId),
+            $this->shopContext->getShopConstraint()
+        );
     }
 
     /**
@@ -161,7 +202,7 @@ class ExtraPropertiesGridQueryBuilderModifier
     protected function applyLangScope(
         array $builders,
         SearchCriteriaInterface $criteria,
-        string $entityName,
+        string $tableName,
         string $primaryKey,
         ExtraPropertyDefinitionCollection $definitions,
     ): void {
@@ -170,13 +211,17 @@ class ExtraPropertiesGridQueryBuilderModifier
         }
 
         $extraTable = $this->dbPrefix . $definitions->first()->getExtraTableName();
-        $baseLangTable = $this->dbPrefix . $entityName . '_lang';
+        $baseLangTable = $this->dbPrefix . $tableName . '_lang';
+        // Schema-derived: {e}_extra_lang mirrors {e}_lang, which carries id_shop only on
+        // multilang-multishop entities. Referencing id_shop when the column does not exist
+        // would make the whole grid query fail.
+        $isMultiShop = $definitions->first()->isMultiShop();
 
         foreach ($builders as [$qb, $mainAlias]) {
             [$langAlias, $langJoinCondition] = $this->findJoinedTableAliasAndCondition($qb, $baseLangTable);
 
-            // PK-complete: {e}_extra_lang PK is (id_e, id_lang, id_shop) — all three are
-            // always pinned so the join can never multiply rows in multistore.
+            // PK-complete: the full {e}_extra_lang PK (id_e, id_lang, and id_shop when the
+            // table has it) is always pinned so the join can never multiply rows in multistore.
             $parameters = [];
             if (null !== $langAlias) {
                 $fromAlias = $langAlias;
@@ -184,11 +229,13 @@ class ExtraPropertiesGridQueryBuilderModifier
                     sprintf('%s.`%s` = %s.`%s`', self::EXTRA_LANG_ALIAS, $primaryKey, $langAlias, $primaryKey),
                     sprintf('%s.`id_lang` = %s.`id_lang`', self::EXTRA_LANG_ALIAS, $langAlias),
                 ];
-                if (null !== $langJoinCondition && $this->joinConditionMentionsShopId($langAlias, $langJoinCondition)) {
-                    $joinParts[] = sprintf('%s.`id_shop` = %s.`id_shop`', self::EXTRA_LANG_ALIAS, $langAlias);
-                } else {
-                    $joinParts[] = sprintf('%s.`id_shop` = :extraLangShopId', self::EXTRA_LANG_ALIAS);
-                    $parameters['extraLangShopId'] = $this->resolveShopId($qb);
+                if ($isMultiShop) {
+                    if (null !== $langJoinCondition && $this->joinConditionMentionsShopId($langAlias, $langJoinCondition)) {
+                        $joinParts[] = sprintf('%s.`id_shop` = %s.`id_shop`', self::EXTRA_LANG_ALIAS, $langAlias);
+                    } else {
+                        $joinParts[] = sprintf('%s.`id_shop` = :extraLangShopId', self::EXTRA_LANG_ALIAS);
+                        $parameters['extraLangShopId'] = $this->resolveShopId($qb);
+                    }
                 }
             } else {
                 // Fallback when no base lang join exists in this builder: context language.
@@ -196,10 +243,12 @@ class ExtraPropertiesGridQueryBuilderModifier
                 $joinParts = [
                     sprintf('%s.`%s` = %s.`%s`', self::EXTRA_LANG_ALIAS, $primaryKey, $mainAlias, $primaryKey),
                     sprintf('%s.`id_lang` = :extraLangId', self::EXTRA_LANG_ALIAS),
-                    sprintf('%s.`id_shop` = :extraLangShopId', self::EXTRA_LANG_ALIAS),
                 ];
                 $parameters['extraLangId'] = $this->languageContext->getId();
-                $parameters['extraLangShopId'] = $this->resolveShopId($qb);
+                if ($isMultiShop) {
+                    $joinParts[] = sprintf('%s.`id_shop` = :extraLangShopId', self::EXTRA_LANG_ALIAS);
+                    $parameters['extraLangShopId'] = $this->resolveShopId($qb);
+                }
             }
 
             $this->ensureLeftJoin($qb, $fromAlias, $extraTable, self::EXTRA_LANG_ALIAS, implode(' AND ', $joinParts), $parameters);
@@ -215,7 +264,7 @@ class ExtraPropertiesGridQueryBuilderModifier
     protected function applyShopScope(
         array $builders,
         SearchCriteriaInterface $criteria,
-        string $entityName,
+        string $tableName,
         string $primaryKey,
         ExtraPropertyDefinitionCollection $definitions,
     ): void {
@@ -224,7 +273,7 @@ class ExtraPropertiesGridQueryBuilderModifier
         }
 
         $extraTable = $this->dbPrefix . $definitions->first()->getExtraTableName();
-        $baseShopTable = $this->dbPrefix . $entityName . '_shop';
+        $baseShopTable = $this->dbPrefix . $tableName . '_shop';
 
         foreach ($builders as [$qb, $mainAlias]) {
             [$shopAlias] = $this->findJoinedTableAliasAndCondition($qb, $baseShopTable);
@@ -373,7 +422,7 @@ class ExtraPropertiesGridQueryBuilderModifier
         }
     }
 
-    protected function resolveMainAlias(QueryBuilder $qb, string $gridId, string $entityName): ?string
+    protected function resolveMainAlias(QueryBuilder $qb, string $gridId, string $tableName): ?string
     {
         $fromParts = $qb->getQueryPart('from');
         if (!is_array($fromParts)) {
@@ -382,7 +431,7 @@ class ExtraPropertiesGridQueryBuilderModifier
 
         $mainTables = array_values(array_unique([
             $this->dbPrefix . strtolower($gridId),
-            $this->dbPrefix . strtolower($entityName),
+            $this->dbPrefix . strtolower($tableName),
         ]));
         foreach ($fromParts as $from) {
             if (!is_array($from)) {

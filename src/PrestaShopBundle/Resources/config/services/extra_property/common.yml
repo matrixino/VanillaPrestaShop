@@ -14,10 +14,18 @@ services:
 
   # ─── Repository ──────────────────────────────────────────────────────────────
 
+  # The logger is taken through the core "logger" id, not through Psr\Log\LoggerInterface: module
+  # service files are merged into the Symfony containers and a module can redefine that interface id
+  # (ps_checkout does, with a factory that instantiates the module; its constructor calls $this->trans(),
+  # which needs the translator this repository is being built for -> circular reference). In the Symfony
+  # kernels "logger" is Monolog, which writes to var/logs and never touches the database. The hand-built
+  # legacy containers have no Monolog and alias "logger" to the legacy logger (ps_log) in
+  # config/services/common.yml.
   PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepository:
     arguments:
       $connection: '@doctrine.dbal.default_connection'
       $prefix: '%database_prefix%'
+      $logger: '@logger'
 
   # Note: the definition WRITER interface (ExtraPropertyDefinitionWriterInterface) is intentionally NOT aliased
   # here. Writing definitions (register/unregister) is a back-office-only concern, so the alias lives in
@@ -34,6 +42,24 @@ services:
 
   PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepositoryInterface:
     alias: 'PrestaShop\PrestaShop\Core\ExtraProperty\Definition\CachedExtraPropertyDefinitionRepository'
+    public: true
+
+  # ─── Shop filter (definition-level shop association) ────────────────────────
+
+  PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilter:
+    arguments:
+      $connection: '@doctrine.dbal.default_connection'
+      $prefix: '%database_prefix%'
+      $shopListResolver: '@PrestaShop\PrestaShop\Core\Shop\ShopListResolverInterface'
+      # Same pool as the cached repository: module state changes wipe var/cache/{env}
+      # entirely (ModuleManagementEvent → SymfonyCacheClearer), which covers its entries.
+      $definitionCache: '@prestashop.extra_property.definition.filesystem_cache'
+      # Explicit reference to the concrete adapter: the interface alias
+      # (core/configuration.yml) is not loaded in the FO legacy container.
+      $configuration: '@PrestaShop\PrestaShop\Adapter\Configuration'
+
+  PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilterInterface:
+    alias: 'PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilter'
     public: true
 
   # ─── Validation ──────────────────────────────────────────────────────────────
@@ -55,6 +81,9 @@ services:
       $repository: '@PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepositoryInterface'
       $connection: '@doctrine.dbal.default_connection'
       $prefix: '%database_prefix%'
+      $shopListResolver: '@PrestaShop\PrestaShop\Core\Shop\ShopListResolverInterface'
+      $definitionShopFilter: '@PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilterInterface'
+      $logger: '@logger'
 
   PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyReaderInterface:
     alias: 'PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyReader'
@@ -67,6 +96,8 @@ services:
       $connection: '@doctrine.dbal.default_connection'
       $prefix: '%database_prefix%'
       $definitionRepository: '@PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionRepositoryInterface'
+      $shopListResolver: '@PrestaShop\PrestaShop\Core\Shop\ShopListResolverInterface'
+      $definitionShopFilter: '@PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinitionShopFilterInterface'
 
   PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyWriterInterface:
     alias: 'PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyWriter'

@@ -21,7 +21,6 @@ use PrestaShop\PrestaShop\Core\ExtraProperty\Exception\InvalidExtraPropertyDefin
 use PrestaShop\PrestaShop\Core\ExtraProperty\Form\AssociationRowSerializer;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Form\ConstraintRowSerializer;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Form\EnumValuesParser;
-use PrestaShop\PrestaShop\Core\ExtraProperty\Validation\ExtraPropertyConstraintMapper;
 
 /**
  * Handles form data submission for extra property definitions.
@@ -70,25 +69,31 @@ class ExtraPropertyDefinitionFormDataHandler implements FormDataHandlerInterface
         $id = $this->commandBus->handle(new AddExtraPropertyDefinitionCommand(
             entityName: $fieldDefinition['entity_name'],
             propertyName: $fieldDefinition['property_name'],
-            fieldType: ExtraPropertyType::from($fieldDefinition['type']),
-            fieldScope: ExtraPropertyScope::from($fieldDefinition['scope']),
+            type: ExtraPropertyType::from($fieldDefinition['type']),
+            scope: ExtraPropertyScope::from($fieldDefinition['scope']),
             sqlIndex: ExtraPropertySqlIndex::from($fieldDefinition['sql_index']),
             displayFront: (bool) $visibility['display_front'],
             required: (bool) $visibility['required'],
             nullable: (bool) ($fieldDefinition['nullable'] ?? true),
             size: $fieldDefinition['size'] ?: null,
-            defaultValue: $fieldDefinition['default_value'] ?: null,
+            // Explicit empty-string check: '?:' would also drop a legitimate '0' default.
+            defaultValue: null !== $fieldDefinition['default_value'] && '' !== $fieldDefinition['default_value'] ? $fieldDefinition['default_value'] : null,
             enumValues: EnumValuesParser::parse($fieldDefinition['enum_values'] ?? null),
             labelWording: $labels['label_wording'] ?: null,
             labelDomain: $labels['label_domain'] ?: null,
             descriptionWording: $labels['description_wording'] ?: null,
             descriptionDomain: $labels['description_domain'] ?: null,
-            constraints: ExtraPropertyConstraintMapper::fromNames(ConstraintRowSerializer::serialize($validation['constraints'] ?? [])),
+            constraints: ConstraintRowSerializer::serialize($validation['constraints'] ?? []),
             formType: $advanced['form_type'] ?: null,
             formOptions: $this->parseJsonObject($advanced['form_options'] ?? null),
             associatedForms: AssociationRowSerializer::formEntries($advanced['associated_forms'] ?? []),
             associatedGrids: AssociationRowSerializer::gridEntries($advanced['associated_grids'] ?? []),
             associatedApis: AssociationRowSerializer::apiEntries($advanced['associated_apis'] ?? []),
+            // Absent key (multistore disabled → field not built) and empty selection both
+            // mean "no restriction" on creation.
+            associatedShopIds: !empty($visibility['shop_association'])
+                ? array_map('intval', $visibility['shop_association'])
+                : null,
         ));
 
         return $id->getValue();
@@ -117,7 +122,9 @@ class ExtraPropertyDefinitionFormDataHandler implements FormDataHandlerInterface
             ->setLabelDomain($labels['label_domain'] ?: null)
             ->setDescriptionWording($labels['description_wording'] ?: null)
             ->setDescriptionDomain($labels['description_domain'] ?: null)
-            ->setConstraints(ExtraPropertyConstraintMapper::fromNames(ConstraintRowSerializer::serialize($validation['constraints'] ?? [])))
+            // An empty builder (every row removed) must clear the stored constraints: '' is the
+            // command's explicit "no validation", null would leave them untouched.
+            ->setConstraints(ConstraintRowSerializer::serialize($validation['constraints'] ?? []) ?? '')
             ->setFormType($advanced['form_type'] ?: null)
             ->setFormOptions($this->parseJsonObject($advanced['form_options'] ?? null))
             ->setAssociatedForms(AssociationRowSerializer::formEntries($advanced['associated_forms'] ?? []))
@@ -131,6 +138,13 @@ class ExtraPropertyDefinitionFormDataHandler implements FormDataHandlerInterface
         $enumValues = EnumValuesParser::parse($fieldDefinition['enum_values'] ?? null);
         if (null !== $enumValues) {
             $command->setEnumValues($enumValues);
+        }
+
+        // Only when the field was actually built and submitted (multistore enabled): an
+        // absent key must leave the association untouched, never clear it. An empty
+        // selection IS meaningful — it reverts to the fallback (no restriction).
+        if (array_key_exists('shop_association', $visibility)) {
+            $command->setAssociatedShopIds(array_map('intval', (array) $visibility['shop_association']));
         }
 
         $this->commandBus->handle($command);

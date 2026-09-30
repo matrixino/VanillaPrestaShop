@@ -16,14 +16,13 @@ jobs:
         BRANCH:
           - develop
           - 9.2.x
-          - 9.1.x
     env:
       GH_BRANCH: ${{ matrix.BRANCH }}
       IGNORE_PRESTASHOP_PACKAGES: "prestashop/psgdpr prestashop/ps_apiresources"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ env.GH_BRANCH }}

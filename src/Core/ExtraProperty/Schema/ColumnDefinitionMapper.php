@@ -11,6 +11,7 @@ namespace PrestaShop\PrestaShop\Core\ExtraProperty\Schema;
 
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyDefinition;
 use PrestaShop\PrestaShop\Core\ExtraProperty\Definition\ExtraPropertyType;
+use PrestaShop\PrestaShop\Core\ExtraProperty\Value\ExtraPropertyValueCaster;
 
 /**
  * Maps an ExtraPropertyDefinition VO to a complete SQL column definition fragment.
@@ -39,8 +40,11 @@ class ColumnDefinitionMapper
 
         $parts = [$baseDefinition, $nullClause];
 
+        // TEXT-backed columns (HTML → TEXT, JSON → LONGTEXT) cannot carry a DDL DEFAULT
+        // clause in MySQL: their declared default lives in the registry only and is served
+        // at read time by the reader's default injection.
         $defaultValue = $options->getDefaultValue();
-        if (null !== $defaultValue) {
+        if (null !== $defaultValue && !in_array($options->getType(), [ExtraPropertyType::HTML, ExtraPropertyType::JSON], true)) {
             $parts[] = 'DEFAULT ' . self::quoteDefaultValue($options->getType(), $defaultValue);
         }
 
@@ -96,7 +100,7 @@ class ColumnDefinitionMapper
     }
 
     /**
-     * Builds an ENUM SQL definition from a list of allowed values, with proper single-quote escaping.
+     * Builds an ENUM SQL definition from a list of allowed values, with proper string-literal escaping.
      *
      * @param list<string> $enumValues
      *
@@ -105,11 +109,28 @@ class ColumnDefinitionMapper
     private static function buildEnumDefinition(array $enumValues): string
     {
         $quotedValues = array_map(
-            static fn (string $v): string => "'" . str_replace("'", "''", $v) . "'",
+            static fn (string $v): string => "'" . self::escapeStringLiteral($v) . "'",
             $enumValues
         );
 
         return 'ENUM(' . implode(',', $quotedValues) . ')';
+    }
+
+    /**
+     * Escapes a value for embedding inside a single-quoted MySQL string literal.
+     *
+     * Doubling the single quote is NOT enough: unless the session runs with
+     * NO_BACKSLASH_ESCAPES (not the default), MySQL treats the backslash as an escape
+     * character, so a value ending in "\" would escape the closing quote and let the
+     * following characters break out of the literal into executable SQL. The enum
+     * literals and the DEFAULT clause are built by string concatenation here (this mapper
+     * is static and has no DBAL connection to delegate quoting to), so every literal must
+     * neutralise the backslash as well as the quote. The backslash is escaped FIRST so it
+     * never doubles the escaping introduced for the quote.
+     */
+    private static function escapeStringLiteral(string $value): string
+    {
+        return str_replace(['\\', "'"], ['\\\\', "''"], $value);
     }
 
     /**
@@ -124,15 +145,19 @@ class ColumnDefinitionMapper
      */
     private static function quoteDefaultValue(ExtraPropertyType $type, mixed $defaultValue): string
     {
+        // The canonical stringification is shared with the registry row write and the
+        // live-schema comparison; only the SQL quoting is added here.
+        $stringValue = (string) ExtraPropertyValueCaster::castDefaultValueForDb($type, $defaultValue);
+
         return match ($type) {
             ExtraPropertyType::INT,
-            ExtraPropertyType::FLOAT => (string) $defaultValue,
-            ExtraPropertyType::BOOL => $defaultValue ? '1' : '0',
+            ExtraPropertyType::FLOAT,
+            ExtraPropertyType::BOOL => $stringValue,
             ExtraPropertyType::STRING,
             ExtraPropertyType::DATE,
             ExtraPropertyType::HTML,
             ExtraPropertyType::JSON,
-            ExtraPropertyType::CHOICE => "'" . str_replace("'", "''", (string) $defaultValue) . "'",
+            ExtraPropertyType::CHOICE => "'" . self::escapeStringLiteral($stringValue) . "'",
         };
     }
 }
