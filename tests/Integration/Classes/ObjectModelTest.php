@@ -88,7 +88,6 @@ class ObjectModelTest extends TestCase
     {
         $newObject = new TestableObjectModel();
         $transMethod = new ReflectionMethod($newObject, 'trans');
-        $transMethod->setAccessible(true);
         $trans = $transMethod->invoke($newObject, '<a href="test">%d Succesful deletion "%s"</a>', [10, '<b>stringTest</b>'], 'Admin.Notifications.Success');
         $this->assertEquals('<a href="test">10 Succesful deletion "<b>stringTest</b>"</a>', $trans);
 
@@ -132,6 +131,26 @@ class ObjectModelTest extends TestCase
 
         $secondLangObject = new TestableObjectModel($createdId, $this->secondLanguageId);
         $this->assertEquals($localizedNames[$this->secondLanguageId], $secondLangObject->name);
+    }
+
+    public function testAddPreservesZeroMultilangValue(): void
+    {
+        // Add an object containing an explicit zero in the non-default language
+        $localizedNames = [
+            $this->defaultLanguageId => '10',
+            $this->secondLanguageId => '0',
+        ];
+        $newObject = new TestableObjectModel();
+        $newObject->quantity = 1;
+        $newObject->enabled = true;
+        $newObject->name = $localizedNames;
+
+        $this->assertTrue((bool) $newObject->add());
+        $this->assertNotNull($newObject->id);
+
+        // Verify that persistence did not replace zero with the default language value
+        $savedObject = new TestableObjectModel((int) $newObject->id);
+        $this->assertSame($localizedNames, $savedObject->name);
     }
 
     /**

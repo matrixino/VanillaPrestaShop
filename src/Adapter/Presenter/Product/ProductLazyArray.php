@@ -39,6 +39,7 @@ use Validate;
 
 /**
  * @property string $availability_message
+ * @property string|null $availability_submessage
  */
 class ProductLazyArray extends AbstractLazyArray
 {
@@ -937,26 +938,7 @@ class ProductLazyArray extends AbstractLazyArray
             return false;
         }
 
-        if ($product['id_product_attribute']) {
-            // Displayed only if all combinations are out of stock (stock is <= 0)
-            $product = new Product((int) $product['id_product']);
-            if (empty($product->id)) {
-                return false;
-            }
-
-            foreach (
-                $product->getAttributesResume($this->language->getId()) as $combination
-            ) {
-                if ($combination['quantity'] > 0) {
-                    return false;
-                }
-            }
-        } elseif ($product['quantity'] > 0) {
-            // Displayed only if the product stock is <= 0
-            return false;
-        }
-
-        return true;
+        return ($product['quantity_all_versions'] ?? 0) <= 0 && $product['quantity'] <= 0;
     }
 
     /**
@@ -1513,7 +1495,7 @@ class ProductLazyArray extends AbstractLazyArray
                 $this->product[
                     'availability_submessage'
                 ] = $this->translator->trans(
-                    'Product available with different options',
+                    'Other product variations available',
                     [],
                     'Shop.Theme.Catalog'
                 );

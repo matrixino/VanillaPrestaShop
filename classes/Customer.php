@@ -242,7 +242,7 @@ class CustomerCore extends ObjectModel
         $this->last_passwd_gen = date('Y-m-d H:i:s', strtotime('-' . Configuration::get('PS_PASSWD_TIME_FRONT') . 'minutes'));
 
         // If subscribed to the newsletter, set the date of subscription to now, if not set
-        if ($this->newsletter && !Validate::isDate($this->newsletter_date_add)) {
+        if ($this->newsletter && !Validate::isDate((string) $this->newsletter_date_add)) {
             $this->newsletter_date_add = date('Y-m-d H:i:s');
         }
 
@@ -643,6 +643,8 @@ class CustomerCore extends ObjectModel
             self::$_customer_groups = [];
             self::$_defaultGroupId = [];
         }
+        Cache::clean('Address::getFirstCustomerAddressId_' . ($idCustomer === null ? '' : (int) $idCustomer . '-') . '*');
+        Cache::clean('Customer::getAddresses-' . ($idCustomer === null ? '' : (int) $idCustomer . '-') . '*');
         $key = (int) $idCustomer . '-' . (int) $idAddress;
         if (array_key_exists($key, self::$_customerHasAddress)) {
             unset(self::$_customerHasAddress[$key]);
@@ -1069,6 +1071,8 @@ class CustomerCore extends ObjectModel
      */
     public function cleanGroups()
     {
+        unset(self::$_customer_groups[(int) $this->id]);
+
         return Db::getInstance()->delete('customer_group', 'id_customer = ' . (int) $this->id);
     }
 
@@ -1084,6 +1088,7 @@ class CustomerCore extends ObjectModel
             $row = ['id_customer' => (int) $this->id, 'id_group' => (int) $group];
             Db::getInstance()->insert('customer_group', $row, false, true, Db::INSERT_IGNORE);
         }
+        unset(self::$_customer_groups[(int) $this->id]);
     }
 
     /**
@@ -1520,8 +1525,7 @@ class CustomerCore extends ObjectModel
      */
     public function stampResetPasswordToken()
     {
-        $salt = $this->id . '-' . $this->secure_key;
-        $this->reset_password_token = sha1(time() . $salt);
+        $this->reset_password_token = bin2hex(random_bytes(20));
         $validity = (int) Configuration::get('PS_PASSWD_RESET_VALIDITY') ?: 1440;
         $this->reset_password_validity = date('Y-m-d H:i:s', strtotime('+' . $validity . ' minutes'));
     }

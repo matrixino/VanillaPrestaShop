@@ -3,6 +3,7 @@
  * For the full copyright and license information, please view the
  * docs/licenses/LICENSE.txt file that was distributed with this source code.
  */
+use PrestaShop\PrestaShop\Adapter\Carrier\TrackingUrlFormatter;
 use PrestaShop\PrestaShop\Adapter\MailTemplate\MailPartialTemplateRenderer;
 use PrestaShop\PrestaShop\Adapter\StockManager as StockManagerAdapter;
 use PrestaShop\PrestaShop\Core\Stock\StockManager;
@@ -286,7 +287,7 @@ class OrderHistoryCore extends ObjectModel
                 $rest_paid = $invoice->getRestPaid();
                 if ($rest_paid > 0) {
                     $payment = new OrderPayment();
-                    $payment->order_reference = Tools::substr($order->reference, 0, 9);
+                    $payment->order_reference = $order->reference;
                     $payment->id_currency = $order->id_currency;
                     $payment->amount = $rest_paid;
                     $payment->payment_method = isset($payment_method) && $payment_method instanceof Module ? $payment_method->displayName : null;
@@ -386,7 +387,7 @@ class OrderHistoryCore extends ObjectModel
                 '{firstname}' => $result['firstname'],
                 '{id_order}' => (int) $this->id_order,
                 '{order_name}' => $order->getUniqReference(),
-                '{followup}' => str_replace('@', $order->getShippingNumber() ?? '', $carrierUrl),
+                '{followup}' => TrackingUrlFormatter::format($carrierUrl, $order->getShippingNumber(), $order),
                 '{shipping_number}' => $order->getShippingNumber(),
             ];
 

@@ -145,7 +145,7 @@ class CarrierCore extends ObjectModel
             'name' => ['type' => self::TYPE_STRING, 'validate' => 'isCarrierName', 'required' => true, 'size' => 64],
             'active' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool', 'required' => true],
             'is_free' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
-            'url' => ['type' => self::TYPE_STRING, 'validate' => 'isAbsoluteUrl', 'size' => 255],
+            'url' => ['type' => self::TYPE_STRING, 'validate' => 'isCarrierTrackingUrl', 'size' => 255],
             'shipping_handling' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
             'shipping_external' => ['type' => self::TYPE_BOOL],
             'range_behavior' => ['type' => self::TYPE_BOOL, 'validate' => 'isBool'],
@@ -282,6 +282,7 @@ class CarrierCore extends ObjectModel
 
             return Db::getInstance()->delete('cart_rule_carrier', 'id_carrier = ' . (int) $this->id)
                     && Db::getInstance()->delete('module_carrier', 'id_reference = ' . (int) $this->id_reference)
+                    && Db::getInstance()->delete('product_carrier', 'id_carrier_reference = ' . (int) $this->id_reference)
                     && $this->deleteTaxRulesGroup(Shop::getShops(true, null, true));
         }
     }

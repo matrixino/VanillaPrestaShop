@@ -1383,6 +1383,8 @@ class CartCore extends ObjectModel
      */
     public static function getNbProducts($id)
     {
+        $id = (int) $id;
+
         // Must be strictly compared to NULL (done by isset()), or else an empty cart will bypass the cache and add dozens of queries
         if (isset(self::$_nbProducts[$id])) {
             return self::$_nbProducts[$id];
@@ -1391,7 +1393,7 @@ class CartCore extends ObjectModel
         self::$_nbProducts[$id] = (int) Db::getInstance()->getValue(
             'SELECT SUM(`quantity`)
             FROM `' . _DB_PREFIX_ . 'cart_product`
-            WHERE `id_cart` = ' . (int) $id
+            WHERE `id_cart` = ' . $id
         );
 
         return self::$_nbProducts[$id];
@@ -1586,6 +1588,11 @@ class CartCore extends ObjectModel
      */
     public function getProductQuantity($idProduct, $idProductAttribute = 0, $idCustomization = 0, $idAddressDelivery = 0)
     {
+        // An unsaved cart has no product
+        if (!$this->id) {
+            return ['deep_quantity' => '0', 'quantity' => '0'];
+        }
+
         $defaultPackStockType = Configuration::get('PS_PACK_STOCK_TYPE');
         $packStockTypesAllowed = [
             Pack::STOCK_TYPE_PRODUCTS_ONLY,
