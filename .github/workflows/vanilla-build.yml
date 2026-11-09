@@ -19,16 +19,21 @@ jobs:
       fail-fast: false
       matrix:
         TAG:
+          - 9.2.1
           - 9.2.0
           - 9.1.5
           - 9.1.4
           - 9.0.3
+          - 8.2.9
           - 8.2.8
           - 8.2.7
           - 8.1.7
           - 8.0.5
           - 1.7.8.11
         include:
+          - TAG: 9.2.1
+            node: 20
+            php: 8.5
           - TAG: 9.2.0
             node: 20
             php: 8.5
@@ -41,6 +46,9 @@ jobs:
           - TAG: 9.0.3
             node: 20
             php: 8.4
+          - TAG: 8.2.9
+            node: 16
+            php: 8.1
           - TAG: 8.2.8
             node: 16
             php: 8.1
